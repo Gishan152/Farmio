@@ -1,0 +1,18 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: product-service
+  cloud:
+    config:
+      import-check:
+        enabled: false
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka

@@ -1,0 +1,9 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: product-service
+
+custom:
+  message: Hello from product service!

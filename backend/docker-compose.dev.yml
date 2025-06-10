@@ -1,0 +1,127 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4-management
+    ports:
+      - "5672:5672"    # AMQP port
+      - "15672:15672"  # Management UI
+    container_name: rabbitmq-farmio
+    networks:
+      - spring-net
+
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile.dev
+    container_name: eureka-server-farmio
+    depends_on:
+      - rabbitmq
+    ports:
+      - "8761:8761"
+    networks:
+      - spring-net
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./pom.xml
+          target: /app/pom.xml
+
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile.dev
+    container_name: product-service-test
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8081
+      - SPRING_APPLICATION_NAME=product-service
+    ports:
+      - "8081:8081"
+    networks:
+      - spring-net
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./pom.xml
+          target: /app/pom.xml
+
+  product-service2:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile.dev
+    container_name: product-service2-test
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8082
+      - SPRING_APPLICATION_NAME=product-service
+    ports:
+      - "8082:8082"
+    networks:
+      - spring-net
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./pom.xml
+          target: /app/pom.xml
+
+  test-service:
+    build:
+      context: ./test-service
+      dockerfile: Dockerfile.dev
+    container_name: test-service
+    depends_on:
+      - product-service
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8083
+      - SPRING_APPLICATION_NAME=test-service
+    ports:
+      - "8083:8083"
+    networks:
+      - spring-net
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./pom.xml
+          target: /app/pom.xml
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile.dev
+    container_name: api-gateway-farmio
+    depends_on:
+      - rabbitmq
+      - eureka-server
+      - product-service
+    ports:
+      - "8080:8080"
+    networks:
+      - spring-net
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./pom.xml
+          target: /app/pom.xml
+
+networks:
+  spring-net:
