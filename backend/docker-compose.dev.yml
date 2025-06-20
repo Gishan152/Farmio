@@ -10,8 +10,7 @@ services:
 
   eureka-server:
     build:
-      context: .
-#      context: ./eureka-server
+      context: ./
       dockerfile: ./eureka-server/Dockerfile.dev
     container_name: eureka-server-farmio
     depends_on:
@@ -20,19 +19,16 @@ services:
       - "8761:8761"
     networks:
       - spring-net
+    volumes:
+      - ./eureka-server:/app/service
     develop:
       watch:
-        - action: sync
-          path: ./src
-          target: /app/src
-        - action: sync
-          path: ./pom.xml
-          target: /app/pom.xml
+        - action: rebuild
+          path: ./eureka-server/target/*-SNAPSHOT.jar
 
   product-service:
     build:
-      context: .
-#      context: ./product-service
+      context: ./
       dockerfile: ./product-service/Dockerfile.dev
     container_name: product-service-test
     depends_on:
@@ -45,19 +41,17 @@ services:
       - "8081:8081"
     networks:
       - spring-net
+    volumes:
+      - ./product-service:/app/service
     develop:
       watch:
-        - action: sync
-          path: ./src
-          target: /app/src
-        - action: sync
-          path: ./pom.xml
-          target: /app/pom.xml
+        - action: rebuild
+          path: ./product-service/target/*-SNAPSHOT.jar
+
 
   product-service2:
     build:
-      context: .
-#      context: ./product-service
+      context: ./
       dockerfile: ./product-service/Dockerfile.dev
     container_name: product-service2-test
     depends_on:
@@ -70,19 +64,16 @@ services:
       - "8082:8082"
     networks:
       - spring-net
+    volumes:
+      - ./product-service:/app/service
     develop:
       watch:
-        - action: sync
-          path: ./src
-          target: /app/src
-        - action: sync
-          path: ./pom.xml
-          target: /app/pom.xml
+        - action: rebuild
+          path: ./product-service/target/*-SNAPSHOT.jar
 
   test-service:
     build:
-      context: .
-#      context: ./test-service
+      context: ./
       dockerfile: ./test-service/Dockerfile.dev
     container_name: test-service
     depends_on:
@@ -96,63 +87,58 @@ services:
       - "8083:8083"
     networks:
       - spring-net
+    volumes:
+      - ./test-service:/app/service
     develop:
       watch:
-        - action: sync
-          path: ./src
-          target: /app/src
-        - action: sync
-          path: ./pom.xml
-          target: /app/pom.xml
+        - action: rebuild
+          path: ./test-service/target/*-SNAPSHOT.jar
+
 
   auth-service:
     build:
-      context: .
-#      context: ./auth-service
+      context: ./
       dockerfile: ./auth-service/Dockerfile.dev
     container_name: auth-service
     depends_on:
       - eureka-server
       - rabbitmq
     environment:
-      - SERVER_PORT=8084
+      - SERVER_PORT=8085
       - SPRING_APPLICATION_NAME=auth-service
     ports:
-      - "8084:8084"
+      - "8085:8085"
     networks:
       - spring-net
+    volumes:
+      - ./auth-service:/app/service
     develop:
       watch:
-        - action: sync
-          path: ./src
-          target: /app/src
-        - action: sync
-          path: ./pom.xml
-          target: /app/pom.xml
+        - action: rebuild
+          path: ./auth-service/target/*-SNAPSHOT.jar
 
 
   api-gateway:
     build:
-      context: .
-#      context: ./api-gateway
+      context: ./
       dockerfile: ./api-gateway/Dockerfile.dev
     container_name: api-gateway-farmio
     depends_on:
       - rabbitmq
       - eureka-server
       - product-service
+      - auth-service
     ports:
       - "8080:8080"
     networks:
       - spring-net
+    volumes:
+      - ./api-gateway:/app/service
     develop:
       watch:
-        - action: sync
-          path: ./src
-          target: /app/src
-        - action: sync
-          path: ./pom.xml
-          target: /app/pom.xml
+        - action: rebuild
+          path: ./api-gateway/target/*-SNAPSHOT.jar
+
 
 networks:
   spring-net:

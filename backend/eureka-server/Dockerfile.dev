@@ -1,15 +1,19 @@
-FROM maven:3.9-eclipse-temurin-24
+FROM eclipse-temurin:24-jdk-noble
 
 WORKDIR /app
 
-# You're inside root now because context is "."
-COPY pom.xml .
-COPY .mvn .mvn
-COPY mvnw .
-COPY ./eureka-server/src ./eureka-server/src
-COPY ./eureka-server/pom.xml ./eureka-server/pom.xml
+COPY pom.xml /app
 
-WORKDIR /app/eureka-server
+# RUN ls -la /app         # Check wrapper files are here
 
-COPY docker-entrypoint.sh ./
-ENTRYPOINT ["sh", "./docker-entrypoint.sh"]
+WORKDIR /app/service
+
+# RUN /app/service/mvnw dependency:go-offline -B
+CMD ["bash", "-c", "/app/service/mvnw dependency:go-offline -B"]
+
+# No VOLUME here — using bind mount instead
+
+# EXPOSE 8080 5005
+
+ENTRYPOINT ["bash", "-c", "/app/service/mvnw org.springframework.boot:spring-boot-maven-plugin:run"]
+# CMD ["sh", "-c", "while true; do sleep 1; done"]

@@ -1,2 +1,0 @@
-WORKDIR /app/eureka-server
-CMD ["../mvnw", "spring-boot:run"]
