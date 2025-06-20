@@ -1,0 +1,15 @@
+FROM maven:3.9-eclipse-temurin-24
+
+WORKDIR /app
+
+# You're inside root now because context is "."
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
+COPY ./auth-service/src ./auth-service/src
+COPY ./auth-service/pom.xml ./auth-service/pom.xml
+
+WORKDIR /app/auth-service
+
+COPY docker-entrypoint.sh ./
+ENTRYPOINT ["sh", "./docker-entrypoint.sh"]

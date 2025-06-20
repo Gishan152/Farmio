@@ -1,0 +1,64 @@
+# Server
+server:
+  port: 8085
+
+# Database
+spring:
+  application:
+    name: auth-service
+ cloud:
+   config:
+     import-check:
+       enabled: false
+ rabbitmq:
+   host: rabbitmq
+   port: 5672
+
+#  datasource:
+#    url: jdbc:h2:mem:authdb
+#    driverClassName: org.h2.Driver
+#    username: sa
+#    password:
+#    h2:
+#      console:
+#        enabled: true
+#  jpa:
+#    database-platform: org.hibernate.dialect.H2Dialect
+#    open-in-view: false
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/userdb
+    username: postgres
+    password: farmio@1234
+    driver-class-name: org.postgresql.Driver
+    jpa:
+      hibernate:
+        ddl-auto: update
+      show-sql: true
+      properties:
+        hibernate:
+          format_sql: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    health:
+      show-components: always
+      show-details: always
+      db:
+        enabled: true
+  security:
+    enabled: false
+
+# JWT
+jwt:
+  secret: your256bitsecretyour256bitsecretyour256bitsecret # Generate using: openssl rand -base64 32
+  expiration: 86400000 # 24 hours
+
+eureka:
+ client:
+   service-url:
+     defaultZone: http://eureka-server:8761/eureka
+     register-with-eureka: true
+     fetch-registry: true

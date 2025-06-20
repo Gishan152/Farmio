@@ -26,6 +26,7 @@
 		<module>api-gateway</module>
 		<module>product-service</module>
 		<module>test-service</module>
+		<module>auth-service</module>
         <module>config-server</module>
     </modules>
 	<scm>
@@ -37,6 +38,9 @@
 	<properties>
 		<java.version>24</java.version>
 		<spring-cloud.version>2025.0.0-RC1</spring-cloud.version>
+		<maven.compiler.source>24</maven.compiler.source>
+		<maven.compiler.target>24</maven.compiler.target>
+		<lombok.version>1.18.38</lombok.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -50,12 +54,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -69,10 +67,17 @@
 <!--			<dependency>-->
 <!--				<groupId>org.springframework.boot</groupId>-->
 <!--				<artifactId>spring-boot-devtools</artifactId>-->
-<!--				<version>${spring-cloud.version}</version>-->
 <!--				<scope>runtime</scope>-->
 <!--				<optional>true</optional>-->
+<!--				<version>3.5.0</version>-->
 <!--			</dependency>-->
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok.version}</version>
+				<scope>provided</scope>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
@@ -81,6 +86,21 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+				<configuration>
+					<release>${java.version}</release>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

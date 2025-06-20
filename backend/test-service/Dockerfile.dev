@@ -1,6 +1,15 @@
-# Dockerfile.dev
-FROM maven:3.9.6-eclipse-temurin-21
+FROM maven:3.9-eclipse-temurin-24
+
 WORKDIR /app
-COPY . /test-service
-COPY ./pom.xml ./pom.xml
-CMD ["mvn", "spring-boot:run"]
+
+# You're inside root now because context is "."
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
+COPY ./test-service/src ./test-service/src
+COPY ./test-service/pom.xml ./test-service/pom.xml
+
+WORKDIR /app/test-service
+
+COPY docker-entrypoint.sh ./
+ENTRYPOINT ["sh", "./docker-entrypoint.sh"]

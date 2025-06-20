@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: api-gateway
+#  main:
+#    web-application-type=reactive:
 
   cloud:
     gateway:
@@ -12,8 +14,16 @@ spring:
           uri: lb://product-service
           predicates:
             - Path=/products/**
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
 
 eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka
+
+jwt:
+  secret: your256bitsecretyour256bitsecretyour256bitsecret # Generate using: openssl rand -base64 32
+  expiration: 86400000 # 24 hours

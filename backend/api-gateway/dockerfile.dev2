@@ -1,0 +1,2 @@
+WORKDIR /app/api-gateway
+CMD ["../mvnw", "spring-boot:run"]

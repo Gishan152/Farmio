@@ -1,0 +1,2 @@
+WORKDIR /app/auth-service
+CMD ["../mvnw", "spring-boot:run"]

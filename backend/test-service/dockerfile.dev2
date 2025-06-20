@@ -1,0 +1,2 @@
+WORKDIR /app/test-service
+CMD ["../mvnw", "spring-boot:run"]

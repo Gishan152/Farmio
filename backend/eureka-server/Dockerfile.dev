@@ -1,6 +1,15 @@
-# Dockerfile.dev
-FROM maven:3.9.6-eclipse-temurin-21
+FROM maven:3.9-eclipse-temurin-24
+
 WORKDIR /app
-COPY . /eureka-server
-COPY ./pom.xml ./pom.xml
-CMD ["mvn", "spring-boot:run"]
+
+# You're inside root now because context is "."
+COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
+COPY ./eureka-server/src ./eureka-server/src
+COPY ./eureka-server/pom.xml ./eureka-server/pom.xml
+
+WORKDIR /app/eureka-server
+
+COPY docker-entrypoint.sh ./
+ENTRYPOINT ["sh", "./docker-entrypoint.sh"]

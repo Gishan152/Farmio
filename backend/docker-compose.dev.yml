@@ -10,8 +10,9 @@ services:
 
   eureka-server:
     build:
-      context: ./eureka-server
-      dockerfile: Dockerfile.dev
+      context: .
+#      context: ./eureka-server
+      dockerfile: ./eureka-server/Dockerfile.dev
     container_name: eureka-server-farmio
     depends_on:
       - rabbitmq
@@ -30,8 +31,9 @@ services:
 
   product-service:
     build:
-      context: ./product-service
-      dockerfile: Dockerfile.dev
+      context: .
+#      context: ./product-service
+      dockerfile: ./product-service/Dockerfile.dev
     container_name: product-service-test
     depends_on:
       - eureka-server
@@ -54,8 +56,9 @@ services:
 
   product-service2:
     build:
-      context: ./product-service
-      dockerfile: Dockerfile.dev
+      context: .
+#      context: ./product-service
+      dockerfile: ./product-service/Dockerfile.dev
     container_name: product-service2-test
     depends_on:
       - eureka-server
@@ -78,8 +81,9 @@ services:
 
   test-service:
     build:
-      context: ./test-service
-      dockerfile: Dockerfile.dev
+      context: .
+#      context: ./test-service
+      dockerfile: ./test-service/Dockerfile.dev
     container_name: test-service
     depends_on:
       - product-service
@@ -101,10 +105,37 @@ services:
           path: ./pom.xml
           target: /app/pom.xml
 
+  auth-service:
+    build:
+      context: .
+#      context: ./auth-service
+      dockerfile: ./auth-service/Dockerfile.dev
+    container_name: auth-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8084
+      - SPRING_APPLICATION_NAME=auth-service
+    ports:
+      - "8084:8084"
+    networks:
+      - spring-net
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+        - action: sync
+          path: ./pom.xml
+          target: /app/pom.xml
+
+
   api-gateway:
     build:
-      context: ./api-gateway
-      dockerfile: Dockerfile.dev
+      context: .
+#      context: ./api-gateway
+      dockerfile: ./api-gateway/Dockerfile.dev
     container_name: api-gateway-farmio
     depends_on:
       - rabbitmq

@@ -65,6 +65,21 @@ services:
     networks:
       - spring-net
 
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: auth-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8085
+      - SPRING_APPLICATION_NAME=auth-service
+    ports:
+      - "8085:8085"
+    networks:
+      - spring-net
+
   api-gateway:
     build:
       context: ./api-gateway
@@ -73,6 +88,7 @@ services:
       - rabbitmq
       - eureka-server
       - product-service
+      - auth-service
     ports:
       - "8080:8080"
     networks:
