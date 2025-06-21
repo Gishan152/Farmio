@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    @apply bg-gray-50;
+  }
+
+  /* Custom focus styles for form elements */
+  input:focus, select:focus {
+    @apply outline-none ring-2 ring-farmio ring-opacity-50;
+  }
+
+  /* Global heading styles */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-gray-800;
+  }
+}
