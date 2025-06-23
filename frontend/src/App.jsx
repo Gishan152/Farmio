@@ -1,19 +1,11 @@
-import { useState } from 'react'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import WarehouseLayout from './layout/WarehouseLayout';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => (
+  <Router>
+    <WarehouseLayout />
+  </Router>
+);
 
-  return (
-    <>
-      <button onClick={() => setCount((count) => count + 1)}>
-        count is {count}
-      </button>
-      <p>
-        Edit <code>src/App.jsx</code> and save to test HMR
-      </p>
-    </>
-  )
-}
-
-export default App
+export default App;
