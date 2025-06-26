@@ -7,7 +7,7 @@ const SAMPLE_ACTIVE_BOOKINGS = [
     facilityId: 1,
     farmerName: "Sunil Bandara",
     contact: "077-888-9999",
-    cropType: "Rice",
+    cropType: "Pumpkin",
     quantity: 75,
     startDate: "2025-06-15",
     endDate: "2025-07-30",

@@ -47,15 +47,15 @@ const statusOptions = [
 ];
 
 const warehouseOwnerFacilities = [
-{
-  id: 1,
-  name: "Central Cold Storage",
-  address: "123 Industrial Park, Colombo",
-  storageType: "cold",
-  capacity: "5000 MT",
-  availabilityStatus: "open",
-  occupancyRate: 65,
-  monthlyRevenue: "Rs. 2,50,000",
+  {
+    id: 1,
+    name: "Central Cold Storage",
+    address: "123 Industrial Park, Colombo",
+    storageType: "cold",
+    capacity: "5000 MT",
+    availabilityStatus: "open",
+    occupancyRate: 65,
+    monthlyRevenue: "Rs. 2,50,000",
     bookings: 12,
     lastUpdated: "2 hours ago"
   },
@@ -138,22 +138,33 @@ const FacilitiesIndex = () => {
   );
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-green-50 flex">
       <Sidebar />
       
-      <main className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Facility Management Section */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <main className="flex-1 p-6 lg:p-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl lg:text-3xl font-bold text-green-900 flex items-center gap-2 mb-4">
+              <span className="text-3xl lg:text-4xl">🏭</span> Facility Management
+            </h1>
+            <p className="text-green-700 text-sm">Manage your warehouse facilities and storage infrastructure.</p>
+          </div>
+
+          {/* Main Content Card */}
+          <div className="bg-white rounded-2xl shadow border border-green-100 p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Facility Management</h2>
-                <p className="text-gray-600">Manage your warehouse facilities</p>
+                <h2 className="text-xl font-bold text-green-800">Storage Facilities</h2>
+                <p className="text-green-700 text-sm">Overview of your warehouse locations</p>
               </div>
               <button
                 onClick={() => openModal(null, 'add')}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-colors shadow-lg hover:shadow-xl flex items-center gap-2"
               >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
                 Add New Facility
               </button>
             </div>
@@ -169,12 +180,12 @@ const FacilitiesIndex = () => {
                   placeholder="Search facilities..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full pl-10 pr-4 py-3 border border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-green-50"
                 />
               </div>
               
               <select
-                className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="px-4 py-3 border border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-green-50"
                 value={filters.storageType}
                 onChange={e => setFilters(f => ({ ...f, storageType: e.target.value }))}
               >
@@ -184,7 +195,7 @@ const FacilitiesIndex = () => {
               </select>
 
               <select
-                className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="px-4 py-3 border border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-green-50"
                 value={filters.status}
                 onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
               >
@@ -198,16 +209,16 @@ const FacilitiesIndex = () => {
             <div className="space-y-4">
               {filteredFacilities.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No facilities found</h3>
-                  <p className="text-gray-600 mb-4">Start by adding your first warehouse facility</p>
+                  <h3 className="text-lg font-bold text-green-900 mb-2">No facilities found</h3>
+                  <p className="text-green-700 mb-4">Start by adding your first warehouse facility</p>
                   <button
                     onClick={() => openModal(null, 'add')}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium"
+                    className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-colors"
                   >
                     Add Facility
                   </button>
@@ -216,39 +227,49 @@ const FacilitiesIndex = () => {
                 filteredFacilities.map((facility) => (
                   <div
                     key={facility.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                    className="border border-green-200 rounded-xl p-6 hover:bg-green-50 transition-all duration-200 shadow-sm hover:shadow-md"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="p-3 bg-green-50 rounded-lg">
-                          <StorageTypeIcon type={facility.storageType} />
+                        <div className="p-3 bg-green-100 rounded-xl border border-green-200">
+                          <div className="text-green-600">
+                            <StorageTypeIcon type={facility.storageType} />
+                          </div>
                         </div>
                         
                         <div>
-                          <h3 className="font-semibold text-gray-900">{facility.name}</h3>
-                          <p className="text-sm text-gray-600 mb-2">{facility.address}</p>
+                          <h3 className="font-bold text-green-900 text-lg">{facility.name}</h3>
+                          <p className="text-sm text-green-700 mb-3 flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            </svg>
+                            {facility.address}
+                          </p>
                           
-                          <div className="flex items-center gap-4 text-sm">
-                            <span className="text-gray-600">
-                              <strong>Capacity:</strong> {facility.capacity}
-                            </span>
-                            <span className="text-gray-600">
-                              <strong>Occupancy:</strong> {facility.occupancyRate}%
-                            </span>
-                            <span className="text-gray-600">
-                              <strong>Revenue:</strong> {facility.monthlyRevenue}
-                            </span>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                            <div className="bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                              <span className="text-green-600 font-medium">Capacity:</span>
+                              <div className="font-bold text-green-900">{facility.capacity}</div>
+                            </div>
+                            <div className="bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                              <span className="text-green-600 font-medium">Occupancy:</span>
+                              <div className="font-bold text-green-900">{facility.occupancyRate}%</div>
+                            </div>
+                            <div className="bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                              <span className="text-green-600 font-medium">Revenue:</span>
+                              <div className="font-bold text-green-900">{facility.monthlyRevenue}</div>
+                            </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      <div className="flex items-center gap-3 ml-4">
+                        <span className={`px-4 py-2 rounded-full text-xs font-bold border ${
                           facility.availabilityStatus === 'open' 
-                            ? 'bg-green-100 text-green-800' 
+                            ? 'bg-green-100 text-green-800 border-green-300' 
                             : facility.availabilityStatus === 'closed'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                            ? 'bg-red-100 text-red-800 border-red-300'
+                            : 'bg-yellow-100 text-yellow-800 border-yellow-300'
                         }`}>
                           {facility.availabilityStatus === 'open' ? 'Available' : 
                            facility.availabilityStatus === 'closed' ? 'Full' : 'Maintenance'}
@@ -257,29 +278,29 @@ const FacilitiesIndex = () => {
                         <div className="flex gap-2">
                           <button
                             onClick={() => openModal(facility, 'view')}
-                            className="px-3 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+                            className="p-2 text-green-600 hover:text-green-700 hover:bg-green-100 rounded-lg transition-colors"
                             title="View Details"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
                           </button>
                           <button
                             onClick={() => openModal(facility, 'edit')}
-                            className="px-3 py-2 text-green-600 hover:text-green-700 transition-colors"
+                            className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
                             title="Edit Facility"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                           </button>
                           <button
                             onClick={() => openModal(facility, 'delete')}
-                            className="px-3 py-2 text-red-600 hover:text-red-700 transition-colors"
+                            className="p-2 text-red-600 hover:text-red-700 hover:bg-red-100 rounded-lg transition-colors"
                             title="Delete Facility"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                           </button>
@@ -296,8 +317,8 @@ const FacilitiesIndex = () => {
 
       {/* Modals */}
       {modalType && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {modalType === 'add' && (
               <AddFacilityModal onAdd={handleAdd} onCancel={closeModal} />
             )}

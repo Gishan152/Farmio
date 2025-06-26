@@ -1,9 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { NavLink } from "react-router-dom";
 
 const Sidebar = () => {
-  const [isWarehouseExpanded, setIsWarehouseExpanded] = useState(false);
-
   return (
     <aside className="bg-green-900 text-green-100 w-64 min-h-screen flex flex-col shadow-lg">
       <div className="p-6 flex-1">
@@ -19,39 +17,14 @@ const Sidebar = () => {
         {/* Navigation Menu */}
         <nav className="mb-8">
           <ul className="space-y-2">
-            <li>
-              <button
-                onClick={() => setIsWarehouseExpanded(!isWarehouseExpanded)}
-                className={`flex items-center justify-between w-full px-4 py-3 rounded-lg transition-all duration-200 ${
-                  isWarehouseExpanded ? "bg-green-800 text-white shadow" : "hover:bg-green-800 hover:text-white"
-                }`}
-              >
-                <div className="flex items-center">
-                  <span className="text-xl mr-3">🏬</span>
-                  <span className="font-medium">Warehouse</span>
-                </div>
-                <span className="text-xl">{isWarehouseExpanded ? "⬇️" : "➡️"}</span>
-              </button>
-              {isWarehouseExpanded && (
-                <ul className="ml-6 space-y-1 mt-1">
-                  <SidebarItem to="/warehouse/dashboard" icon="📊" label="Dashboard" />
-                  <SidebarItem to="/warehouse/facilities" icon="🏭" label="Facilities" />
-                  <SidebarItem to="/warehouse/bookings" icon="📅" label="Bookings" />
-                  <SidebarItem to="/warehouse/inventory" icon="📦" label="Inventory" />
-                  <SidebarItem to="/warehouse/pricing" icon="💰" label="Pricing" />
-                  <SidebarItem to="/warehouse/maintenance" icon="🔧" label="Maintenance" />
-                  <SidebarItem to="/warehouse/customers" icon="👥" label="Customers" />
-                  <SidebarItem to="/warehouse/finance" icon="📈" label="Finance" />
-                  <SidebarItem to="/warehouse/analytics" icon="📊" label="Analytics" />
-                </ul>
-              )}
-            </li>
-            <SidebarItem to="/farmers" icon="👨‍🌾" label="Farmers" />
-            <SidebarItem to="/transporters" icon="🚚" label="Transporters" />
-            <SidebarItem to="/buyers" icon="🛒" label="Buyers" />
-            <SidebarItem to="/waste-agents" icon="♻️" label="Waste Agents" />
-            <SidebarItem to="/support" icon="❓" label="Support" />
-            <SidebarItem to="/settings" icon="⚙️" label="Settings" />
+            <SidebarItem to="/warehouse/dashboard" icon="📊" label="Dashboard" />
+            <SidebarItem to="/warehouse/facilities" icon="🏭" label="Facilities" />
+            <SidebarItem to="/warehouse/bookings" icon="📅" label="Bookings" />
+            <SidebarItem to="/warehouse/inventory" icon="📦" label="Inventory" />                    
+            <SidebarItem to="/warehouse/customers" icon="👥" label="Customers" />
+            <SidebarItem to="/warehouse/service-providers" icon="🚛" label="Service Providers" />  
+            <SidebarItem to="/warehouse/pricing" icon="💳" label="Billing & Payments" />   
+            <SidebarItem to="/warehouse/analytics" icon="📈" label="Analytics" />                       
           </ul>
         </nav>
       </div>
