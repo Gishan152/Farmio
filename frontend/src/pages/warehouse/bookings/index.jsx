@@ -46,7 +46,7 @@ const BookingIndex = () => {
   };
 
   return (
-    <div className="min-h-screen bg-green-50 flex">
+    <div className="min-h-screen bg-white-50 flex">
       {/* Sidebar */}
       <Sidebar />
       

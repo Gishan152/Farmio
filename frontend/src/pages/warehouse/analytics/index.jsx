@@ -1,46 +1,46 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../../../components/warehouse/Sidebar';
 
+// Mock reports data
+const mockReportData = {
+    overview: {
+        totalRevenue: 125000,
+        totalItems: 1050,
+        averageStorage: 18,
+        turnoverRate: 85,
+        wastePercentage: 3.2,
+        customerSatisfaction: 4.6
+    },
+    inventory: {
+        totalReceived: 2450,
+        totalDispatched: 2080,
+        currentStock: 370,
+        perishableItems: 280,
+        nonPerishableItems: 90
+    },
+    financial: {
+        storageRevenue: 98000,
+        serviceCharges: 27000,
+        operatingCosts: 45000,
+        netProfit: 80000,
+        profitMargin: 64
+    },
+    trends: [
+        { month: 'Jun', received: 180, dispatched: 165, revenue: 18500 },
+        { month: 'Jul', received: 220, dispatched: 210, revenue: 22000 },
+        { month: 'Aug', received: 190, dispatched: 185, revenue: 19500 },
+        { month: 'Sep', received: 240, dispatched: 225, revenue: 24500 },
+        { month: 'Oct', received: 210, dispatched: 195, revenue: 21000 },
+        { month: 'Nov', received: 250, dispatched: 240, revenue: 25500 },
+        { month: 'Dec', received: 200, dispatched: 190, revenue: 20000 }
+    ]
+};
+
 const ReportsAnalytics = () => {
     const [loading, setLoading] = useState(true);
     const [reportData, setReportData] = useState({});
     const [selectedPeriod, setSelectedPeriod] = useState('30');
     const [selectedReport, setSelectedReport] = useState('overview');
-   
-    // Mock reports data
-    const mockReportData = {
-        overview: {
-            totalRevenue: 125000,
-            totalItems: 1050,
-            averageStorage: 18,
-            turnoverRate: 85,
-            wastePercentage: 3.2,
-            customerSatisfaction: 4.6
-        },
-        inventory: {
-            totalReceived: 2450,
-            totalDispatched: 2080,
-            currentStock: 370,
-            perishableItems: 280,
-            nonPerishableItems: 90
-        },
-        financial: {
-            storageRevenue: 98000,
-            serviceCharges: 27000,
-            operatingCosts: 45000,
-            netProfit: 80000,
-            profitMargin: 64
-        },
-        trends: [
-            { month: 'Jun', received: 180, dispatched: 165, revenue: 18500 },
-            { month: 'Jul', received: 220, dispatched: 210, revenue: 22000 },
-            { month: 'Aug', received: 190, dispatched: 185, revenue: 19500 },
-            { month: 'Sep', received: 240, dispatched: 225, revenue: 24500 },
-            { month: 'Oct', received: 210, dispatched: 195, revenue: 21000 },
-            { month: 'Nov', received: 250, dispatched: 240, revenue: 25500 },
-            { month: 'Dec', received: 200, dispatched: 190, revenue: 20000 }
-        ]
-    };
 
     useEffect(() => {
         const loadReportData = async () => {
@@ -84,7 +84,7 @@ const ReportsAnalytics = () => {
     }
 
     return (
-        <div className="flex min-h-screen bg-green-50">
+        <div className="flex min-h-screen bg-white-50">
             <Sidebar />
             <main className="flex-1 p-6 lg:p-8">
                 <div className="max-w-7xl mx-auto">

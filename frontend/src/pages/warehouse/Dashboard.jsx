@@ -37,7 +37,7 @@ const Dashboard = () => {
   const usedPercent = Math.round((usedCapacity / totalCapacity) * 100);
 
   return (
-    <div className="flex bg-green-50 min-h-screen">
+    <div className="flex bg-white-50 min-h-screen">
       <Sidebar />
       <main className="flex-1 p-6 lg:p-10">
         {/* Header */}
