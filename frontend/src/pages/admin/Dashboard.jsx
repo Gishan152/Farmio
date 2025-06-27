@@ -38,17 +38,17 @@ const AddIcon = () => (
 
 // Dummy data
 const recentOrders = [
-  { id: '0123', customer: 'John Smith', product: 'Organic Tomatoes', amount: '$24.99', status: 'Delivered', date: '2025-06-18' },
-  { id: '0124', customer: 'Emma Davis', product: 'Fresh Farm Milk', amount: '$35.50', status: 'Processing', date: '2025-06-19' },
-  { id: '0125', customer: 'Michael Johnson', product: 'Mixed Vegetables', amount: '$47.75', status: 'Shipped', date: '2025-06-20' },
-  { id: '0126', customer: 'Sarah Wilson', product: 'Organic Eggs', amount: '$18.25', status: 'Processing', date: '2025-06-21' },
+  { id: '0123', customer: 'Manju Perera', product: 'Organic Tomatoes', amount: 'LKR 4,998', status: 'Delivered', date: '2025-06-18' },
+  { id: '0124', customer: 'Iresha Gunasekara', product: 'Fresh Farm Milk', amount: 'LKR 7,100', status: 'Processing', date: '2025-06-19' },
+  { id: '0125', customer: 'Sunil Karunaratne', product: 'Mixed Vegetables', amount: 'LKR 9,550', status: 'Shipped', date: '2025-06-20' },
+  { id: '0126', customer: 'Shamila Jayasinghe', product: 'Organic Eggs', amount: 'LKR 3,650', status: 'Processing', date: '2025-06-21' },
 ];
 
 const topProducts = [
-  { name: 'Organic Tomatoes', sales: 1245, revenue: '$6,225.00', trend: 'up' },
-  { name: 'Fresh Farm Milk', sales: 986, revenue: '$4,930.00', trend: 'up' },
-  { name: 'Organic Eggs', sales: 879, revenue: '$2,637.00', trend: 'down' },
-  { name: 'Mixed Vegetables', sales: 734, revenue: '$3,670.00', trend: 'up' },
+  { name: 'Organic Tomatoes', sales: 1245, revenue: 'LKR 1,245,000', trend: 'up' },
+  { name: 'Fresh Farm Milk', sales: 986, revenue: 'LKR 986,000', trend: 'up' },
+  { name: 'Organic Eggs', sales: 879, revenue: 'LKR 527,400', trend: 'down' },
+  { name: 'Mixed Vegetables', sales: 734, revenue: 'LKR 734,000', trend: 'up' },
 ];
 
 const AdminDashboard = () => {
@@ -65,13 +65,7 @@ const AdminDashboard = () => {
   // Action buttons for the dashboard header
   const dashboardActions = (
     <>
-      <button 
-        className="flex items-center rounded-md py-2 px-3 bg-farmio text-white hover:bg-farmio-dark transition-colors"
-        onClick={() => console.log('Add new')}
-      >
-        <AddIcon />
-        <span className="ml-1">New Product</span>
-      </button>
+      {/* "Add New Product" button removed as requested */}
     </>
   );
 
@@ -142,7 +136,7 @@ const AdminDashboard = () => {
         />
         <StatCard 
           title="Revenue"
-          value="$28,459"
+          value="LKR 5,691,800"
           subtitle="This month"
           icon={<RevenueIcon />}
           color="purple"

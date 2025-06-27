@@ -8,12 +8,6 @@ const MenuIcon = () => (
   </svg>
 );
 
-const SearchIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-  </svg>
-);
-
 const DashboardLayout = ({ 
   children, 
   title, 
@@ -53,18 +47,9 @@ const DashboardLayout = ({
               </div>
             </div>
 
-            {/* Right side - Actions & search */}
+            {/* Right side - Actions */}
             <div className="flex items-center space-x-4">
-              <div className="relative hidden md:block">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="py-2 pl-10 pr-4 w-64 bg-gray-100 border border-transparent rounded-md focus:bg-white focus:border-dashboard-border focus:outline-none"
-                />
-                <div className="absolute left-3 top-2.5">
-                  <SearchIcon />
-                </div>
-              </div>
+              {/* Search bar removed as requested */}
               
               {/* Action buttons */}
               {actions && (

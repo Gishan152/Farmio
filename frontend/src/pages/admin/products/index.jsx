@@ -235,45 +235,45 @@ const ProductsManagement = () => {
 
   // Table columns
   const columns = [
-    { key: 'id', header: 'ID' },
+    { accessor: 'id', header: 'ID' },
     { 
-      key: 'name', 
+      accessor: 'name', 
       header: 'Product Name',
-      render: (value, row) => (
+      cell: (row) => (
         <div>
-          <div className="font-medium">{value}</div>
+          <div className="font-medium">{row.name}</div>
           <div className="text-xs text-dashboard-text-light">{row.category}</div>
         </div>
       )
     },
-    { key: 'farmer', header: 'Farmer' },
-    { key: 'price', header: 'Price' },
+    { accessor: 'farmer', header: 'Farmer' },
+    { accessor: 'price', header: 'Price' },
     { 
-      key: 'stockStatus', 
+      accessor: 'stockStatus', 
       header: 'Stock',
-      render: (value, row) => (
+      cell: (row) => (
         <span className={`px-2 py-1 text-xs rounded-full ${
-          value === 'In Stock' ? 'bg-green-100 text-green-800' : 
-          value === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' : 
+          row.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' : 
+          row.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' : 
           'bg-red-100 text-red-800'
         }`}>
-          {value} {value !== 'Out of Stock' && `(${row.stock} ${row.unit})`}
+          {row.stockStatus} {row.stockStatus !== 'Out of Stock' && `(${row.stock} ${row.unit})`}
         </span>
       )
     },
-    { key: 'certifications', header: 'Certifications' },
+    { accessor: 'certifications', header: 'Certifications' },
     { 
-      key: 'rating', 
+      accessor: 'rating', 
       header: 'Rating',
-      render: (value) => (
+      cell: (row) => (
         <div className="flex items-center">
-          <span>{value}</span>
+          <span>{row.rating}</span>
           <div className="ml-2 flex">
             {[...Array(5)].map((_, i) => (
               <svg 
                 key={i} 
                 xmlns="http://www.w3.org/2000/svg" 
-                className={`h-4 w-4 ${i < Math.floor(value) ? 'text-yellow-500' : 'text-gray-300'}`}
+                className={`h-4 w-4 ${i < Math.floor(row.rating) ? 'text-yellow-500' : 'text-gray-300'}`}
                 viewBox="0 0 20 20" 
                 fill="currentColor"
               >
@@ -284,11 +284,11 @@ const ProductsManagement = () => {
         </div>
       )
     },
-    { key: 'lastUpdated', header: 'Last Updated' },
+    { accessor: 'lastUpdated', header: 'Last Updated' },
     { 
-      key: 'actions', 
+      accessor: 'actions', 
       header: 'Actions',
-      render: (_, row) => (
+      cell: (row) => (
         <div className="flex space-x-2">
           <button className="text-blue-600 hover:text-blue-800">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

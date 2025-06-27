@@ -32,17 +32,17 @@ const CheckIcon = () => (
 
 // Dummy data
 const pendingOrders = [
-  { id: '0124', customer: 'Emma Davis', product: 'Fresh Farm Milk', amount: '$35.50', status: 'Processing', date: '2025-06-19' },
-  { id: '0126', customer: 'Sarah Wilson', product: 'Organic Eggs', amount: '$18.25', status: 'Processing', date: '2025-06-21' },
-  { id: '0128', customer: 'Robert Brown', product: 'Grass-Fed Beef', amount: '$89.99', status: 'Processing', date: '2025-06-21' },
-  { id: '0129', customer: 'Lisa Garcia', product: 'Seasonal Fruits', amount: '$32.50', status: 'Processing', date: '2025-06-21' },
+  { id: '0124', customer: 'Kumara Dissanayake', product: 'Fresh Farm Milk', amount: 'LKR 7,100', status: 'Processing', date: '2025-06-19' },
+  { id: '0126', customer: 'Fathima Nizam', product: 'Organic Eggs', amount: 'LKR 3,650', status: 'Processing', date: '2025-06-21' },
+  { id: '0128', customer: 'Senaka Jayawardene', product: 'Grass-Fed Beef', amount: 'LKR 17,999', status: 'Processing', date: '2025-06-21' },
+  { id: '0129', customer: 'Priyanthi Fernando', product: 'Seasonal Fruits', amount: 'LKR 6,500', status: 'Processing', date: '2025-06-21' },
 ];
 
 const recentInventoryUpdates = [
-  { product: 'Organic Tomatoes', action: 'Stock Update', quantity: '+50 kg', user: 'Jane Smith', timestamp: '2025-06-21 09:45 AM' },
-  { product: 'Fresh Farm Milk', action: 'Quality Check', quantity: '200 L', user: 'Mike Thomas', timestamp: '2025-06-21 08:30 AM' },
-  { product: 'Organic Eggs', action: 'Stock Update', quantity: '+120 units', user: 'Chris Wilson', timestamp: '2025-06-20 04:15 PM' },
-  { product: 'Mixed Vegetables', action: 'Price Update', quantity: '300 kg', user: 'Laura Johnson', timestamp: '2025-06-20 02:00 PM' },
+  { product: 'Organic Tomatoes', action: 'Stock Update', quantity: '+50 kg', user: 'Chaminda Perera', timestamp: '2025-06-21 09:45 AM' },
+  { product: 'Fresh Farm Milk', action: 'Quality Check', quantity: '200 L', user: 'Malith Gunathilaka', timestamp: '2025-06-21 08:30 AM' },
+  { product: 'Organic Eggs', action: 'Stock Update', quantity: '+120 units', user: 'Wasantha Silva', timestamp: '2025-06-20 04:15 PM' },
+  { product: 'Mixed Vegetables', action: 'Price Update', quantity: '300 kg', user: 'Kamala Vithanage', timestamp: '2025-06-20 02:00 PM' },
 ];
 
 const ModeratorDashboard = () => {
@@ -168,7 +168,7 @@ const ModeratorDashboard = () => {
             <div className="flex items-center">
               <input type="checkbox" id="task1" className="w-4 h-4 rounded text-farmio focus:ring-farmio-light" />
               <label htmlFor="task1" className="ml-3 text-dashboard-text-secondary">
-                Review new product submissions
+                Review Dambulla produce quality reports
               </label>
               <span className="ml-auto text-xs bg-pastel-yellow text-yellow-800 px-2 py-1 rounded-full">
                 High Priority
@@ -178,7 +178,7 @@ const ModeratorDashboard = () => {
             <div className="flex items-center">
               <input type="checkbox" id="task2" className="w-4 h-4 rounded text-farmio focus:ring-farmio-light" />
               <label htmlFor="task2" className="ml-3 text-dashboard-text-secondary">
-                Process pending orders
+                Process Colombo area pending orders
               </label>
               <span className="ml-auto text-xs bg-pastel-blue text-blue-800 px-2 py-1 rounded-full">
                 Medium Priority
@@ -188,21 +188,21 @@ const ModeratorDashboard = () => {
             <div className="flex items-center">
               <input type="checkbox" id="task3" className="w-4 h-4 rounded text-farmio focus:ring-farmio-light" />
               <label htmlFor="task3" className="ml-3 text-dashboard-text-secondary">
-                Update inventory quantities
+                Update Nuwara Eliya vegetable inventory
               </label>
             </div>
             
             <div className="flex items-center">
               <input type="checkbox" id="task4" className="w-4 h-4 rounded text-farmio focus:ring-farmio-light" />
               <label htmlFor="task4" className="ml-3 text-dashboard-text-secondary">
-                Respond to customer inquiries
+                Respond to customer inquiries from Kandy
               </label>
             </div>
             
             <div className="flex items-center">
               <input type="checkbox" id="task5" className="w-4 h-4 rounded text-farmio focus:ring-farmio-light" />
               <label htmlFor="task5" className="ml-3 text-dashboard-text-secondary">
-                Check quality reports
+                Review Jaffna onion supply reports
               </label>
             </div>
           </div>
