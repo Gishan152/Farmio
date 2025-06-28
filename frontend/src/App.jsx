@@ -10,6 +10,7 @@ import BuyerRegistration, { BuyerRegistrationAction, BuyerRegistrationLoader } f
 import WarehouseProviderRegistration, { WarehouseProviderRegistrationAction, WarehouseProviderRegistrationLoader } from './Pages/LoginRegister/WarehouseProviderRegistration';
 import TransportProviderRegistration, { TransportProviderRegistrationAction, TransportProviderRegistrationLoader } from './Pages/LoginRegister/TransportProviderRegistration';
 import WasteAgentRegistration, { WasteAgentRegistrationAction, WasteAgentRegistrationLoader } from './Pages/LoginRegister/WasteAgentRegistration';
+import ProductPage from './Pages/ProductsPage';
 
 
 let router = createBrowserRouter([
@@ -79,6 +80,10 @@ let router = createBrowserRouter([
 		children: [
 
 		]
+	},
+	{
+		path: "/products",
+		Component: ProductPage
 	}
 ]);
 
