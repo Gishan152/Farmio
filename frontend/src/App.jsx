@@ -11,23 +11,36 @@ import WarehouseProviderRegistration, { WarehouseProviderRegistrationAction, War
 import TransportProviderRegistration, { TransportProviderRegistrationAction, TransportProviderRegistrationLoader } from './Pages/LoginRegister/TransportProviderRegistration';
 import WasteAgentRegistration, { WasteAgentRegistrationAction, WasteAgentRegistrationLoader } from './Pages/LoginRegister/WasteAgentRegistration';
 import ProductPage from './Pages/ProductsPage';
+import BuyerLayout from './Pages/Buyer/BuyerLayout';
+import Crops from './Pages/Buyer/Sections/Crops';
+import Warehouses from './Pages/Buyer/Sections/Warehouses';
+import ReservedStorage, { reservedLoader } from './Pages/Buyer/Sections/ReservedStorage';
+import TransportProviders, { transportProvidersLoader } from './Pages/Buyer/Sections/TransportProviders';
+import TransportSchedules from './Pages/Buyer/Sections/TransportSchedules';
+import CropDetails, { cropDetailsLoader } from './Pages/Buyer/Sections/CropDetails';
+import WarehouseDetails, { warehouseDetailsLoader } from './Pages/Buyer/Sections/WarehouseDetails';
+import Saves from './Pages/Buyer/Sections/Saves';
+import OrderConfirmation from './Pages/Buyer/Sections/OrderConfirmation';
+import CropTransport from './Pages/Buyer/Sections/CropTransport';
+import Orders from './Pages/Buyer/Sections/Orders';
+import CreateTransportJob from './Pages/Buyer/Sections/CreateTransport';
 
 
 let router = createBrowserRouter([
-  // {
-  //   path: "/",
-  //   Component: Root,
-  //   children: [
-  //     {
-  //       path: "shows/:showId",
-  //       Component: Show,
-  //       loader: ({ request, params }) =>
-  //         fetch(`/api/show/${params.showId}.json`, {
-  //           signal: request.signal,
-  //         }),
-  //     },
-  //   ],
-  // },
+	// {
+	//   path: "/",
+	//   Component: Root,
+	//   children: [
+	//     {
+	//       path: "shows/:showId",
+	//       Component: Show,
+	//       loader: ({ request, params }) =>
+	//         fetch(`/api/show/${params.showId}.json`, {
+	//           signal: request.signal,
+	//         }),
+	//     },
+	//   ],
+	// },
 	{
 		index: true,
 		Component: LandingPage
@@ -84,7 +97,79 @@ let router = createBrowserRouter([
 	{
 		path: "/products",
 		Component: ProductPage
-	}
+	},
+	{
+		path: '/buyer',
+		Component: BuyerLayout,
+		children: [
+			{ 
+				index: true,
+				Component: Crops
+			},
+			{ 
+				path: 'crops',
+				Component: Crops
+			},
+			{
+				path: "crops/:cropId",
+				Component: CropDetails,
+				loader: cropDetailsLoader
+			},
+			{
+				path: "saves",
+				Component: Saves
+			},
+			{
+				path: "orders",
+				Component: Orders
+			},
+			{
+				path: "order-confirmation",
+				Component: OrderConfirmation
+			},
+			{
+				path: "transport-confirmation",
+				Component: CropTransport
+			},
+			{
+				path: 'warehouses',
+				children: [
+					{ 
+						path: 'all',
+						Component: Warehouses
+					},
+					{ 
+						path: 'reserved',
+						Component: ReservedStorage,
+						loader: reservedLoader
+					},
+					{
+						path: ":warehouseId",
+						Component: WarehouseDetails,
+						loader: warehouseDetailsLoader
+					}
+				],
+			},
+			{
+				path: 'transport',
+				children: [
+					{ 
+						path: 'providers',
+						Component: TransportProviders,
+						loader: transportProvidersLoader
+					},
+					{ 
+						path: 'create',
+						Component: CreateTransportJob,
+					},
+					{ 
+						path: 'schedules',
+						Component: TransportSchedules
+					},
+				],
+			},
+		],
+	},
 ]);
 
 

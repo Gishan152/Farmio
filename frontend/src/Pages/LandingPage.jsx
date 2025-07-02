@@ -14,7 +14,7 @@ const LandingPage = () => {
             />
 
             {/* Overlay for darkening */}
-            <div className="absolute inset-0 bg-white dark:bg-black opacity-90 dark:opacity-20" />
+            <div className="absolute inset-0 bg-white dark:bg-black opacity-70 dark:opacity-20" />
 
             {/* Content */}
             <div className="relative z-10 flex flex-col items-start justify-center h-full max-w-5xl mx-auto px-6 lg:px-12">
@@ -30,7 +30,7 @@ const LandingPage = () => {
                     <div className="space-x-4">
                         <ThemeToggle />
                         <Link to="/login" className="hover:underline">Log in</Link>
-                        <Link to="/register" className="px-4 py-2 bg-orange-600 rounded hover:bg-orange-500">
+                        <Link to="/register" className="px-4 py-2 bg-green-600 rounded hover:bg-green-500">
                             Get started
                         </Link>
                     </div>
@@ -45,7 +45,7 @@ const LandingPage = () => {
                         Run payments, extend net terms and automate collections compliance.
                     </p>
                     <div className="flex space-x-4">
-                        <Link to="/register" className="px-6 py-3 bg-orange-600 rounded-lg hover:bg-orange-500 transition">
+                        <Link to="/register" className="px-6 py-3 bg-green-600 rounded-lg hover:bg-green-500 transition">
                             Get started
                         </Link>
                         {/* <button className="px-6 py-3 border border-white rounded-lg hover:bg-white hover:text-gray-900 transition">
