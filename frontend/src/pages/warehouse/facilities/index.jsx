@@ -138,10 +138,14 @@ const FacilitiesIndex = () => {
   );
 
   return (
-    <div className="min-h-screen bg-white-50 flex">
-      <Sidebar />
-      
-      <main className="flex-1 p-6 lg:p-8">
+    <div className="min-h-screen bg-white-50">
+      {/* Fixed Sidebar */}
+      <div className="fixed top-0 left-0 h-screen w-64 z-30">
+        <Sidebar />
+      </div>
+
+      {/* Main Content with left margin */}
+      <main className="ml-64 p-6 lg:p-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-6">

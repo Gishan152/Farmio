@@ -46,17 +46,19 @@ const BookingIndex = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white-50 flex">
-      {/* Sidebar */}
-      <Sidebar />
+    <div className="min-h-screen bg-white-50">
+      {/* Fixed Sidebar */}
+      <div className="fixed top-0 left-0 h-screen w-64 z-30">
+        <Sidebar />
+      </div>
       
-      {/* Main Content */}
-      <div className="flex-1 p-6 lg:p-8">
+      {/* Main Content with left margin */}
+      <div className="ml-64 p-6 lg:p-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-2xl lg:text-3xl font-bold text-green-900 flex items-center gap-2 mb-4">
-              <span className="text-3xl lg:text-4xl">📅</span> Warehouse Booking Management
+              <span className="text-3xl lg:text-4xl">📅</span> Booking Management
             </h1>
             <p className="text-green-700 text-sm">Manage storage requests, active bookings, and facility availability.</p>
           </div>

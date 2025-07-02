@@ -132,11 +132,14 @@ const ServiceProvidersIndex = () => {
 
     if (loading) {
         return (
-            <div className="flex min-h-screen bg-green-50">
-                <Sidebar />
-                <div className="flex justify-center items-center flex-1">
+            <div className="min-h-screen bg-green-50 flex">
+                {/* Fixed Sidebar */}
+                <div className="fixed top-0 left-0 h-screen w-64 z-30">
+                    <Sidebar />
+                </div>
+                <div className="flex-1 ml-64 flex justify-center items-center">
                     <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx\auto mb-4"></div>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
                         <p className="text-green-700">Loading service providers...</p>
                     </div>
                 </div>
@@ -145,9 +148,13 @@ const ServiceProvidersIndex = () => {
     }
 
     return (
-        <div className="flex min-h-screen bg-white-50">
-            <Sidebar />
-            <main className="flex-1 p-6 lg:p-8">
+        <div className="min-h-screen bg-white-50">
+            {/* Fixed Sidebar */}
+            <div className="fixed top-0 left-0 h-screen w-64 z-30">
+                <Sidebar />
+            </div>
+            {/* Main Content with left margin */}
+            <main className="ml-64 p-6 lg:p-8">
                 <div className="max-w-6xl mx-auto">
                     {/* Header */}
                     <div className="mb-6">
