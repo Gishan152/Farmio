@@ -29,7 +29,7 @@ export default function CreateTransportJob() {
         e.preventDefault();
         if (!validate()) return;
         // TODO: call API to create job
-        toast.push('✅ Transport job created successfully!');
+        toast.push('Transport job created successfully!');
         // navigate('/transport/jobs');
     };
 
@@ -42,7 +42,6 @@ export default function CreateTransportJob() {
         <div className="max-w-lg mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
             <h1 className="text-2xl font-semibold mb-4 dark:text-gray-100">Create Transport Job</h1>
             <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Provider selector */}
                 <div>
                     <label className="block text-sm font-medium dark:text-gray-200">Provider</label>
                     <select
@@ -58,7 +57,6 @@ export default function CreateTransportJob() {
                     {errors.providerId && <p className="text-red-500 text-sm mt-1">{errors.providerId}</p>}
                 </div>
 
-                {/* Locations */}
                 <div>
                     <label className="block text-sm font-medium dark:text-gray-200">Pickup Location</label>
                     <input
@@ -83,7 +81,6 @@ export default function CreateTransportJob() {
                     {errors.dropoffLocation && <p className="text-red-500 text-sm mt-1">{errors.dropoffLocation}</p>}
                 </div>
 
-                {/* Date */}
                 <div>
                     <label className="block text-sm font-medium dark:text-gray-200">Pickup Date</label>
                     <input
@@ -96,7 +93,6 @@ export default function CreateTransportJob() {
                     {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
                 </div>
 
-                {/* Cargo & weight */}
                 <div>
                     <label className="block text-sm font-medium dark:text-gray-200">Cargo Description</label>
                     <input
