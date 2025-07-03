@@ -69,13 +69,14 @@ export default function Saves() {
                 <table className="w-full table-auto border-separate border-spacing-y-4">
                     <thead className="text-left text-gray-600">
                         <tr>
-                            <th></th><th>Product</th><th>Price</th><th>Quantity (Kg)</th><th>Total</th><th>Transpotation Required</th>
+                            {/* <th></th><th>Product</th><th>Price</th><th>Quantity (Kg)</th><th>Total</th><th>Transpotation Required</th> */}
+                            <th></th><th>Product</th><th>Price</th><th>Quantity (Kg)</th><th>Total</th>
                         </tr>
                     </thead>
                     <tbody>
                         {items.map(item => (
                             <tr key={item.id} className="bg-white dark:bg-gray-800 rounded-lg">
-                                <td><input type="checkbox" checked={item.checked} onChange={(e)=>handleItemCheck(e, item)} /></td>
+                                <td><input type="checkbox" checked={!item.unchecked} onChange={(e)=>handleItemCheck(e, item)} /></td>
                                 <td className="flex items-center space-x-4 p-4">
                                     <img src={item.imageUrl} alt="" className="w-20 h-20 object-cover rounded" />
                                     <div>
@@ -100,7 +101,7 @@ export default function Saves() {
                                     </div>
                                 </td>
                                 <td className="p-4 font-semibold">Rs. {(item.pricePerUnit * item.quantity).toFixed(2)}</td>
-                                <td><input type="checkbox" checked={item.transpotationRequired} onChange={()=>changeTransport(item.id)} /></td>
+                                {/* <td><input type="checkbox" checked={item.transpotationRequired} onChange={()=>changeTransport(item.id)} /></td> */}
                             </tr>
                         ))}
                     </tbody>

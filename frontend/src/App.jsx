@@ -24,6 +24,7 @@ import OrderConfirmation from './Pages/Buyer/Sections/OrderConfirmation';
 import CropTransport from './Pages/Buyer/Sections/CropTransport';
 import Orders from './Pages/Buyer/Sections/Orders';
 import CreateTransportJob from './Pages/Buyer/Sections/CreateTransport';
+import OrderDetails from './Pages/Buyer/Sections/OrderDetails';
 
 
 let router = createBrowserRouter([
@@ -122,6 +123,10 @@ let router = createBrowserRouter([
 			{
 				path: "orders",
 				Component: Orders
+			},
+			{
+				path: "orders/:orderId",
+				Component: OrderDetails
 			},
 			{
 				path: "order-confirmation",

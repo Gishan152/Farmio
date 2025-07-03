@@ -159,7 +159,7 @@ export default function Crops() {
                                     onClick={() => {
                                         handleRemove(crop)
                                     }}>
-                                    Remove from Cart
+                                    Remove from Saves
                                 </button> 
                                 :
                                 <button
@@ -168,7 +168,7 @@ export default function Crops() {
                                         setCrop(crop)
                                         setOpen(true)
                                     }}>
-                                    Add to Cart
+                                    Add to Saves
                                 </button>
                             }
                         </div>

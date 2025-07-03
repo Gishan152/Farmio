@@ -40,11 +40,12 @@ const OrderConfirmation = () => {
                 <table className="w-full table-auto border-separate border-spacing-y-4">
                     <thead className="text-left text-gray-600">
                         <tr>
-                            <th>Product</th><th>Price</th><th>Quantity (Kg)</th><th>Total</th><th>Transpotation Required</th>
+                            {/* <th>Product</th><th>Price</th><th>Quantity (Kg)</th><th>Total</th><th>Transpotation Required</th> */}
+                            <th>Product</th><th>Price</th><th>Quantity (Kg)</th><th>Total</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {items.filter(v=>v.checked).map(item => (
+                        {items.filter(v=>!v.unchecked).map(item => (
                             <tr key={item.id} className="bg-white dark:bg-gray-800 rounded-lg">
                                 <td className="flex items-center space-x-4 p-4">
                                     <img src={item.imageUrl} alt="" className="w-20 h-20 object-cover rounded" />
@@ -59,9 +60,9 @@ const OrderConfirmation = () => {
                                     <span className="px-2">{item.quantity}</span>
                                 </td>
                                 <td className="p-4 font-semibold">Rs. {(item.pricePerUnit * item.quantity).toFixed(2)}</td>
-                                <td>
+                                {/* <td>
                                     {item.transpotationRequired ? <CheckCircleIcon className="text-green-700 w-8 h-8" /> : <XMarkIcon className="text-red-700 w-8 h-8" />}
-                                </td>
+                                </td> */}
                             </tr>
                         ))}
                     </tbody>
@@ -78,7 +79,7 @@ const OrderConfirmation = () => {
                     {orderPlaced ?
                         <button
                             onClick={handlePayment}
-                            className="mt-4 w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                            className="mt-4 w-full py-3 bg-green-600 text-white rounded hover:bg-green-700 transition"
                         >
                             Make Payment
                         </button>
@@ -90,7 +91,7 @@ const OrderConfirmation = () => {
                                     setOrderPlaced(true)
                                 }, 2000)
                             }}
-                            className="mt-4 w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                            className="mt-4 w-full py-3 bg-green-600 text-white rounded hover:bg-green-700 transition"
                         >
                             Place Order
                         </button>
