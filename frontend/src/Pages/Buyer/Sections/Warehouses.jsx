@@ -83,7 +83,7 @@ export default function Warehouses() {
                                     </span>
                                 ))}
                             </div>
-                            <Link to={`../${w.id}`} className="block text-center mt-4 w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
+                            <Link to={`./${w.id}`} className="block text-center mt-4 w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
                                 View Details
                             </Link>
                         </div>

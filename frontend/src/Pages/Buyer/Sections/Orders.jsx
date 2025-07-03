@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { PlusIcon, MinusIcon, TrashIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import wheat from "../../../Assets/Buyer/Crops/wheat.webp";
 import { Link } from "react-router-dom";
@@ -41,12 +41,11 @@ export default function Orders() {
                             <div className="flex items-center gap-10">
                                 <Link to={`./${order.id}`} className="text-m font-medium">Order {order.id}</Link>
                                 <span className="text-m font-medium">{order.paymentStatus}</span>
-                                <span className="text-m font-medium">Rs. {order.total}</span>
-                                <span className="text-m font-medium">Completed</span>
+                                <span className="text-m font-medium">Rs. {order.items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0)}</span>
                             </div>
                             <div className="flex items-center gap-10">
-                                <button className="bg-green-500 hover:bg-green-300 text-white p-2 rounded-xl">Confirm Delivery</button>
-                                <button className="bg-green-500 hover:bg-green-300 text-white p-2 rounded-xl" onClick={() => openModalFor(order.id)}>Add transport</button>
+                                {/* <button className="bg-green-500 hover:bg-green-300 text-white p-2 rounded-xl">Confirm Delivery</button>
+                                <button className="bg-green-500 hover:bg-green-300 text-white p-2 rounded-xl" onClick={() => openModalFor(order.id)}>Add transport</button> */}
                                 <button
                                     onClick={() => toggleOrder(order.id)}
                                     className="p-4"
@@ -136,7 +135,7 @@ export default function Orders() {
                 >
                     CONTINUE SEARCHING
                 </Link>
-                <div className="mt-4 lg:mt-0 bg-white dark:bg-gray-800 p-6 rounded-lg shadow w-full lg:w-auto">
+                {/* <div className="mt-4 lg:mt-0 bg-white dark:bg-gray-800 p-6 rounded-lg shadow w-full lg:w-auto">
                     <p className="text-lg text-gray-600 dark:text-gray-300">
                         Sub Total:{" "}
                         <span className="font-semibold">Rs. {subtotal.toFixed(2)}</span>
@@ -150,7 +149,7 @@ export default function Orders() {
                     >
                         GO TO CHECKOUT
                     </Link>
-                </div>
+                </div> */}
             </div>
         </div >
     );

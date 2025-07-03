@@ -25,6 +25,8 @@ import CropTransport from './Pages/Buyer/Sections/CropTransport';
 import Orders from './Pages/Buyer/Sections/Orders';
 import CreateTransportJob from './Pages/Buyer/Sections/CreateTransport';
 import OrderDetails from './Pages/Buyer/Sections/OrderDetails';
+import Requirements from './Pages/Buyer/Sections/Requirements';
+import RequirementDetails from './Pages/Buyer/Sections/RequirementDetails';
 
 
 let router = createBrowserRouter([
@@ -137,6 +139,14 @@ let router = createBrowserRouter([
 				Component: CropTransport
 			},
 			{
+				path: "requirements",
+				Component: Requirements
+			},
+			{
+				path: "requirements/:requirementId",
+				Component: RequirementDetails
+			},
+			{
 				path: 'warehouses',
 				children: [
 					{ 
@@ -149,7 +159,7 @@ let router = createBrowserRouter([
 						loader: reservedLoader
 					},
 					{
-						path: ":warehouseId",
+						path: "all/:warehouseId",
 						Component: WarehouseDetails,
 						loader: warehouseDetailsLoader
 					}

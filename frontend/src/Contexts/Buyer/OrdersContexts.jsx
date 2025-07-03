@@ -35,7 +35,7 @@ const initialOrders = [
 	},
 	{
 		id: "ORD-1002",
-		paymentStatus: "Paid",
+		paymentStatus: "Pending",
 		total: 1250,
 		items: [
 			{
