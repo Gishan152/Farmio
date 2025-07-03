@@ -1,6 +1,76 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '../../../components/warehouse/Sidebar';
+
+const facilities = [
+    { id: 1, name: "Cold Storage Unit" },
+    { id: 2, name: "Dry Storage Unit" }
+];
+
+const mockInventoryItems = [
+    {
+        id: 1,
+        produceName: "Organic Tomatoes",
+        farmerName: "John Smith",
+        quantity: 150,
+        unit: "kg",
+        produceType: "vegetables",
+        status: "fresh",
+        storageDate: "2024-12-20",
+        expiryDate: "2025-01-05",
+        location: "Section A-1",
+        temperature: "4°C",
+        humidity: "85%",
+        facilityId: 1
+    },
+    {
+        id: 2,
+        produceName: "Fresh Apples",
+        farmerName: "Mary Johnson",
+        quantity: 200,
+        unit: "kg",
+        produceType: "fruits",
+        status: "fresh",
+        storageDate: "2024-12-18",
+        expiryDate: "2025-01-15",
+        location: "Section B-2",
+        temperature: "2°C",
+        humidity: "90%",
+        facilityId: 1
+    },    
+    {
+        id: 4,
+        produceName: "Fresh Lettuce",
+        farmerName: "Sarah Wilson",
+        quantity: 80,
+        unit: "kg",
+        produceType: "vegetables",
+        status: "near-expiry",
+        storageDate: "2024-12-22",
+        expiryDate: "2024-12-28",
+        location: "Section A-3",
+        temperature: "4°C",
+        humidity: "95%",
+        facilityId: 1
+    },
+    {
+        id: 5,
+        produceName: "Organic Carrots",
+        farmerName: "Mike Davis",
+        quantity: 120,
+        unit: "kg",
+        produceType: "vegetables",
+        status: "fresh",
+        storageDate: "2024-12-19",
+        expiryDate: "2025-01-10",
+        location: "Section A-2",
+        temperature: "4°C",
+        humidity: "90%",
+        facilityId: 1
+    }
+];
+
+const farmers = ["John Smith", "Mary Johnson", "David Brown", "Sarah Wilson", "Mike Davis"];
 
 const CurrentInventory = () => {
     const [inventoryItems, setInventoryItems] = useState([]);
@@ -12,109 +82,29 @@ const CurrentInventory = () => {
     });
     const [sortBy, setSortBy] = useState('storageDate');
     const navigate = useNavigate();
+    const location = useLocation();
 
-    // Mock inventory data
-    const mockInventoryItems = [
-        {
-            id: 1,
-            produceName: "Organic Tomatoes",
-            farmerName: "John Smith",
-            quantity: 150,
-            unit: "kg",
-            produceType: "vegetables",
-            status: "fresh",
-            storageDate: "2024-12-20",
-            expiryDate: "2025-01-05",
-            location: "Section A-1",
-            temperature: "4°C",
-            humidity: "85%"
-        },
-        {
-            id: 2,
-            produceName: "Fresh Apples",
-            farmerName: "Mary Johnson",
-            quantity: 200,
-            unit: "kg",
-            produceType: "fruits",
-            status: "fresh",
-            storageDate: "2024-12-18",
-            expiryDate: "2025-01-15",
-            location: "Section B-2",
-            temperature: "2°C",
-            humidity: "90%"
-        },
-        {
-            id: 3,
-            produceName: "Wheat Grain",
-            farmerName: "David Brown",
-            quantity: 500,
-            unit: "kg",
-            produceType: "grains",
-            status: "fresh",
-            storageDate: "2024-12-15",
-            expiryDate: "2025-06-15",
-            location: "Section C-1",
-            temperature: "18°C",
-            humidity: "60%"
-        },
-        {
-            id: 4,
-            produceName: "Fresh Lettuce",
-            farmerName: "Sarah Wilson",
-            quantity: 80,
-            unit: "kg",
-            produceType: "vegetables",
-            status: "near-expiry",
-            storageDate: "2024-12-22",
-            expiryDate: "2024-12-28",
-            location: "Section A-3",
-            temperature: "4°C",
-            humidity: "95%"
-        },
-        {
-            id: 5,
-            produceName: "Organic Carrots",
-            farmerName: "Mike Davis",
-            quantity: 120,
-            unit: "kg",
-            produceType: "vegetables",
-            status: "fresh",
-            storageDate: "2024-12-19",
-            expiryDate: "2025-01-10",
-            location: "Section A-2",
-            temperature: "4°C",
-            humidity: "90%"
-        }
-    ];
-
-    const farmers = ["John Smith", "Mary Johnson", "David Brown", "Sarah Wilson", "Mike Davis"];
+    // Get facility from query param
+    const params = new URLSearchParams(location.search);
+    const facilityId = Number(params.get('facility'));
+    const facility = facilities.find(f => f.id === facilityId);
 
     useEffect(() => {
-        const loadInventoryData = async () => {
-            try {
-                setInventoryItems(mockInventoryItems);
-                setLoading(false);
-            } catch (error) {
-                console.error("Error fetching inventory data:", error);
-                setInventoryItems(mockInventoryItems);
-                setLoading(false);
-            }
-        };
-
-        loadInventoryData();
+        setInventoryItems(mockInventoryItems);
+        setLoading(false);
     }, []);
 
     const handleFilterChange = (filterType, value) => {
         setFilters(prev => ({ ...prev, [filterType]: value }));
     };
 
-    const filteredItems = inventoryItems.filter(item => {
-        return (
-            (filters.farmer === '' || item.farmerName === filters.farmer) &&
-            (filters.produceType === '' || item.produceType === filters.produceType) &&
-            (filters.status === '' || item.status === filters.status)
-        );
-    });
+    // Filter by facility and user filters
+    const filteredItems = inventoryItems.filter(item =>
+        item.facilityId === facilityId &&
+        (filters.farmer === '' || item.farmerName === filters.farmer) &&
+        (filters.produceType === '' || item.produceType === filters.produceType) &&
+        (filters.status === '' || item.status === filters.status)
+    );
 
     const sortedItems = [...filteredItems].sort((a, b) => {
         switch (sortBy) {
@@ -131,22 +121,19 @@ const CurrentInventory = () => {
         }
     });
 
-    const handleExport = (format) => {
-        if (format === 'csv') {
-            const csvData = sortedItems.map(item => 
-                `"${item.produceName}","${item.farmerName}","${item.quantity}","${item.unit}","${item.produceType}","${item.status}","${item.storageDate}","${item.expiryDate}","${item.location}","${item.temperature}","${item.humidity}"`
-            ).join('\n');
-            const csvHeader = '"Product Name","Farmer","Quantity","Unit","Type","Status","Storage Date","Expiry Date","Location","Temperature","Humidity"\n';
-            const csvContent = csvHeader + csvData;
-            
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `inventory-report-${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-        }
+    const handleExport = () => {
+        const csvData = sortedItems.map(item =>
+            `"${item.produceName}","${item.farmerName}","${item.quantity}","${item.unit}","${item.produceType}","${item.status}","${item.storageDate}","${item.expiryDate}","${item.location}","${item.temperature}","${item.humidity}"`
+        ).join('\n');
+        const csvHeader = '"Product Name","Farmer","Quantity","Unit","Type","Status","Storage Date","Expiry Date","Location","Temperature","Humidity"\n';
+        const csvContent = csvHeader + csvData;
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `inventory-report-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
     };
 
     if (loading) {
@@ -163,6 +150,27 @@ const CurrentInventory = () => {
         );
     }
 
+    if (!facility) {
+        return (
+            <div className="flex min-h-screen bg-green-50">
+                <Sidebar />
+                <main className="flex-1 p-6 lg:p-8 flex flex-col items-center justify-center">
+                    <div className="bg-white p-8 rounded-xl shadow text-center">
+                        <div className="text-5xl mb-4">🏭</div>
+                        <h2 className="text-xl font-bold mb-2">No Facility Selected</h2>
+                        <p className="mb-4 text-gray-600">Please select a warehouse from the overview page.</p>
+                        <button
+                            onClick={() => navigate('/warehouse/inventory')}
+                            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+                        >
+                            Go to Inventory Overview
+                        </button>
+                    </div>
+                </main>
+            </div>
+        );
+    }
+
     return (
         <div className="flex min-h-screen bg-green-50">
             <Sidebar />
@@ -171,7 +179,7 @@ const CurrentInventory = () => {
                     {/* Header */}
                     <div className="mb-6">
                         <div className="flex items-center gap-4 mb-4">
-                            <button 
+                            <button
                                 onClick={() => navigate('/warehouse/inventory')}
                                 className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
                             >
@@ -182,15 +190,15 @@ const CurrentInventory = () => {
                             </button>
                         </div>
                         <h1 className="text-2xl lg:text-3xl font-bold text-green-900 flex items-center gap-2">
-                            <span className="text-3xl lg:text-4xl">📦</span> Current Inventory
+                            <span className="text-3xl lg:text-4xl">📦</span> {facility.name} - Current Inventory
                         </h1>
-                        <p className="text-green-700 mt-1 text-sm">View and manage all currently stored agricultural products across your facilities.</p>
-                    </div>                    
+                        <p className="text-green-700 mt-1 text-sm">View and manage all currently stored agricultural products in this warehouse.</p>
+                    </div>
 
                     {/* Filters and Controls */}
                     <div className="mb-8 bg-white p-6 rounded-lg shadow">
                         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                            <select 
+                            <select
                                 className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                                 value={filters.farmer}
                                 onChange={(e) => handleFilterChange('farmer', e.target.value)}
@@ -200,19 +208,18 @@ const CurrentInventory = () => {
                                     <option key={farmer} value={farmer}>{farmer}</option>
                                 ))}
                             </select>
-                            
-                            <select 
+
+                            <select
                                 className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                                 value={filters.produceType}
                                 onChange={(e) => handleFilterChange('produceType', e.target.value)}
                             >
                                 <option value="">All Produce Types</option>
                                 <option value="vegetables">Vegetables</option>
-                                <option value="fruits">Fruits</option>
-                                <option value="grains">Grains</option>
+                                <option value="fruits">Fruits</option>                                
                             </select>
 
-                            <select 
+                            <select
                                 className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                                 value={filters.status}
                                 onChange={(e) => handleFilterChange('status', e.target.value)}
@@ -222,7 +229,7 @@ const CurrentInventory = () => {
                                 <option value="near-expiry">Near Expiry</option>
                             </select>
 
-                            <select 
+                            <select
                                 className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
@@ -233,8 +240,8 @@ const CurrentInventory = () => {
                                 <option value="farmer">Sort by Farmer</option>
                             </select>
 
-                            <button 
-                                onClick={() => handleExport('csv')}
+                            <button
+                                onClick={handleExport}
                                 className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
                             >
                                 Export CSV
@@ -250,13 +257,13 @@ const CurrentInventory = () => {
                                     <h3 className="font-semibold text-lg text-gray-800">{item.produceName}</h3>
                                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                                         item.status === 'fresh' ? 'bg-green-100 text-green-800' :
-                                        item.status === 'near-expiry' ? 'bg-yellow-100 text-yellow-800' :
-                                        'bg-red-100 text-red-800'
+                                            item.status === 'near-expiry' ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-red-100 text-red-800'
                                     }`}>
                                         {item.status.replace('-', ' ').toUpperCase()}
                                     </span>
                                 </div>
-                                
+
                                 <div className="space-y-3 text-sm text-gray-600">
                                     <div className="flex justify-between">
                                         <span className="font-medium">Farmer:</span>

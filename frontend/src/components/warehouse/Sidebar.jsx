@@ -5,25 +5,22 @@ import {
   faChartBar,
   faIndustry,
   faCalendarAlt,
-  faBoxes,
-  faUsers,
-  faTruckMoving,
+  faBoxes,  
+  faTrashAlt,
   faCreditCard,
   faChartLine,
   faSignOutAlt,
   faUserCircle,
 } from "@fortawesome/free-solid-svg-icons";
-// Import your logo (SVG or PNG). Example below assumes SVG in /assets/logo.svg:
-// import logo from "../../assets/logo.svg"; // Adjust path as needed
+
 
 const navItems = [
   { to: "/warehouse/dashboard", icon: faChartBar, label: "Dashboard" },
   { to: "/warehouse/facilities", icon: faIndustry, label: "Facilities" },
   { to: "/warehouse/bookings", icon: faCalendarAlt, label: "Bookings" },
   { to: "/warehouse/inventory", icon: faBoxes, label: "Inventory" },
-  { to: "/warehouse/customers", icon: faUsers, label: "Customers" },
-  { to: "/warehouse/service-providers", icon: faTruckMoving, label: "Services" },
-  { to: "/warehouse/pricing", icon: faCreditCard, label: "Billing" },
+  { to: "/warehouse/service-providers", icon: faTrashAlt, label: "Services" },
+  { to: "/warehouse/pricing", icon: faCreditCard, label: "Payments" },
   { to: "/warehouse/analytics", icon: faChartLine, label: "Analytics" },
 ];
 

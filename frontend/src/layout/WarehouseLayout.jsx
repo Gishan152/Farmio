@@ -13,13 +13,8 @@ import CurrentInventory from '../pages/warehouse/inventory/currentInventory';
 import ProductCategories from '../pages/warehouse/inventory/productCategories';
 import Capacity from '../Pages/warehouse/inventory/capacity';
 import Pricing from '../Pages/warehouse/pricing/index';
-import SeasonalPricing from '../Pages/warehouse/pricing/seasonal';
-import CustomersIndex from '../pages/warehouse/customers/index';
-import FarmersPage from '../pages/warehouse/customers/FarmersPage';
-import BuyersPage from '../pages/warehouse/customers/BuyersPage';
-import ServiceProvidersIndex from '../pages/warehouse/serviceProviders/index';
-import TransportersPage from '../pages/warehouse/serviceProviders/transporters';
-import WasteManagementPage from '../pages/warehouse/serviceProviders/WasteManagementPage';
+import SeasonalPricing from '../Pages/warehouse/pricing/seasonal';;
+import ServiceProvidersIndex from '../pages/warehouse/ServiceProviders/index';
 import AnalyticsIndex from '../pages/warehouse/analytics/index';
 import Profile from '../Pages/warehouse/profile/index';
 import Settings from '../Pages/warehouse/settings/index';
@@ -45,13 +40,8 @@ const WarehouseLayout = () => {
                     <Route path="/warehouse/inventory/categories" element={<ProductCategories />} />                    
                     <Route path="/warehouse/inventory/capacity" element={<Capacity />} />
                     <Route path="/warehouse/pricing" element={<Pricing />} />
-                    <Route path="/warehouse/pricing/seasonal" element={<SeasonalPricing />} />
-                    <Route path="/warehouse/customers" element={<CustomersIndex />} />
-                    <Route path="/warehouse/customers/farmers" element={<FarmersPage />} />
-                    <Route path="/warehouse/customers/buyers" element={<BuyersPage />} />
-                    <Route path="/warehouse/service-providers" element={<ServiceProvidersIndex />} />
-                    <Route path="/warehouse/service-providers/transporters" element={<TransportersPage />} />
-                    <Route path="/warehouse/service-providers/waste-management" element={<WasteManagementPage />} />
+                    <Route path="/warehouse/pricing/seasonal" element={<SeasonalPricing />} />                    
+                    <Route path="/warehouse/service-providers" element={<ServiceProvidersIndex />} />                    
                     <Route path="/warehouse/analytics" element={<AnalyticsIndex />} />
                     <Route path="/warehouse/profile" element={<Profile />} />
                     <Route path="/warehouse/settings" element={<Settings />} />

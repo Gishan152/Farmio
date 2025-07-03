@@ -5,6 +5,7 @@ import Sidebar from '../../../components/warehouse/Sidebar';
 const CapacityManagement = () => {
     const [loading, setLoading] = useState(true);
     const [facilities, setFacilities] = useState([]);
+    const [selectedFacilityId, setSelectedFacilityId] = useState('all');
     const navigate = useNavigate();
 
     // Mock facilities data
@@ -59,12 +60,17 @@ const CapacityManagement = () => {
         loadCapacityData();
     }, []);
 
+    // Filtered facilities based on selection
+    const filteredFacilities = selectedFacilityId === 'all'
+        ? facilities
+        : facilities.filter(f => f.id === Number(selectedFacilityId));
+
     const getTotalCapacity = () => {
-        return facilities.reduce((sum, facility) => sum + facility.totalCapacity, 0);
+        return filteredFacilities.reduce((sum, facility) => sum + facility.totalCapacity, 0);
     };
 
     const getTotalUsed = () => {
-        return facilities.reduce((sum, facility) => sum + facility.usedCapacity, 0);
+        return filteredFacilities.reduce((sum, facility) => sum + facility.usedCapacity, 0);
     };
 
     const getUtilizationPercentage = (facility) => {
@@ -72,7 +78,9 @@ const CapacityManagement = () => {
     };
 
     const getOverallUtilization = () => {
-        return Math.round((getTotalUsed() / getTotalCapacity()) * 100);
+        const totalCapacity = getTotalCapacity();
+        if (totalCapacity === 0) return 0;
+        return Math.round((getTotalUsed() / totalCapacity) * 100);
     };
 
     if (loading) {
@@ -113,9 +121,26 @@ const CapacityManagement = () => {
                         <p className="text-green-700 mt-1 text-sm">Monitor storage capacity utilization and optimize space allocation across facilities.</p>
                     </div>
 
+                    {/* Facility Selector */}
+                    <div className="mb-6 flex items-center gap-4">
+                        <label className="font-medium text-green-900">Select Facility:</label>
+                        <select
+                            className="border border-green-300 rounded px-3 py-2"
+                            value={selectedFacilityId}
+                            onChange={e => setSelectedFacilityId(e.target.value)}
+                        >
+                            <option value="all">All Facilities</option>
+                            {facilities.map(facility => (
+                                <option key={facility.id} value={facility.id}>{facility.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
                     {/* Overall Capacity Overview */}
                     <div className="mb-8 bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-xl font-semibold text-gray-800 mb-6">Overall Capacity Overview</h2>
+                        <h2 className="text-xl font-semibold text-gray-800 mb-6">
+                            {selectedFacilityId === 'all' ? 'Overall Capacity Overview' : 'Facility Capacity Overview'}
+                        </h2>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div className="text-center">
                                 <div className="text-3xl font-bold text-green-600">{getTotalCapacity()} kg</div>
@@ -168,7 +193,7 @@ const CapacityManagement = () => {
 
                     {/* Facility Details */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {facilities.map(facility => {
+                        {filteredFacilities.map(facility => {
                             const utilization = getUtilizationPercentage(facility);
                             return (
                                 <div key={facility.id} className="bg-white p-6 rounded-lg shadow border hover:shadow-lg transition-shadow">
@@ -263,7 +288,7 @@ const CapacityManagement = () => {
                                 </div>
                             )}
                             
-                            {facilities.some(f => f.status === 'maintenance') && (
+                            {filteredFacilities.some(f => f.status === 'maintenance') && (
                                 <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                                     <h3 className="font-medium text-yellow-800">🔧 Maintenance Required</h3>
                                     <p className="text-yellow-700 text-sm mt-1">

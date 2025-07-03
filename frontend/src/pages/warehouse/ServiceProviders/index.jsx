@@ -1,139 +1,54 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../../components/warehouse/Sidebar';
 
 const ServiceProvidersIndex = () => {
     const [serviceProviders, setServiceProviders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
 
-    // Mock service providers data - only transporters and waste management
     const mockServiceProviders = [
-        // Transporters
-        {
-            id: 5,
-            name: "Priya Transport",
-            email: "priya@priyalogistics.com",
-            phone: "071-555-9999",
-            type: "transporter",
-            company: "Priya Logistics",
-            location: "Galle",
-            rating: 4.2,
-            totalServices: 8,
-            activeServices: 0,
-            completedServices: 8,
-            joinDate: "2024-06-20",
-            lastService: "2024-11-30",
-            totalEarnings: 35000,
-            status: "inactive",
-            verificationStatus: "verified",
-            notes: "Specialized in refrigerated transport",
-            availability: "Available weekdays",
-            vehicleTypes: ["Refrigerated Truck", "Dry Van"]
-        },
-        {
-            id: 6,
-            name: "Lanka Express Cargo",
-            email: "operations@lankaexpress.com",
-            phone: "077-333-4444",
-            type: "transporter",
-            company: "Lanka Express Cargo",
-            location: "Negombo",
-            rating: 4.4,
-            totalServices: 15,
-            activeServices: 3,
-            completedServices: 12,
-            joinDate: "2024-02-12",
-            lastService: "2024-12-19",
-            totalEarnings: 68000,
-            status: "active",
-            verificationStatus: "verified",
-            notes: "Reliable for long-distance transport",
-            availability: "24/7 service",
-            vehicleTypes: ["Container Truck", "Flatbed"]
-        },
-        // Waste Management Agents
         {
             id: 7,
             name: "Green Waste Solutions",
             email: "contact@greenwaste.lk",
             phone: "074-777-8888",
-            type: "waste_management",
             company: "Green Waste Solutions",
             location: "Colombo",
-            rating: 4.3,
-            totalServices: 6,
-            activeServices: 1,
-            completedServices: 5,
-            joinDate: "2024-08-15",
-            lastService: "2024-12-10",
-            totalEarnings: 28000,
             status: "active",
-            verificationStatus: "verified",
-            notes: "Eco-friendly waste disposal specialist",
-            availability: "Mon-Fri 8AM-6PM",
-            incentives: "Free pickup for bulk waste",
-            serviceTypes: ["Organic Waste", "Compost Production"]
+            image: "/Images/waste1.jpg",
+            description: "Eco-friendly waste collection and recycling for urban warehouses."
         },
         {
             id: 8,
             name: "Bio Compost Lanka",
             email: "info@biocompost.lk",
             phone: "076-666-7777",
-            type: "waste_management",
             company: "Bio Compost Lanka",
             location: "Gampaha",
-            rating: 4.1,
-            totalServices: 4,
-            activeServices: 0,
-            completedServices: 4,
-            joinDate: "2024-09-30",
-            lastService: "2024-11-25",
-            totalEarnings: 15000,
             status: "active",
-            verificationStatus: "pending",
-            notes: "Specializes in converting waste to fertilizer",
-            availability: "Weekends preferred",
-            incentives: "20% discount for regular clients",
-            serviceTypes: ["Waste to Fertilizer", "Biogas Production"]
+            image: "/Images/waste2.jpg",
+            description: "Specialists in composting and organic waste management."
+        },
+        {
+            id: 9,
+            name: "Ware Waste Agency",
+            email: "contact@warewaste.lk",
+            phone: "077-123-4567",
+            company: "Ware Waste Agency",
+            location: "Kurunegala",
+            status: "active",
+            image: "/Images/waste3.jpg",
+            description: "Comprehensive waste solutions for large-scale warehouse operations."
         }
     ];
 
     useEffect(() => {
-        const loadServiceProviders = async () => {
-            try {
-                setServiceProviders(mockServiceProviders);
-                setLoading(false);
-            } catch (error) {
-                console.error("Error fetching service providers:", error);
-                setServiceProviders(mockServiceProviders);
-                setLoading(false);
-            }
-        };
-
-        loadServiceProviders();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        setServiceProviders(mockServiceProviders);
+        setLoading(false);
     }, []);
-
-    const navigateToServiceType = (serviceType) => {
-        navigate(`/warehouse/service-providers/${serviceType}`);
-    };
-
-    // Get service provider type statistics
-    const getServiceStats = () => {
-        const stats = {
-            transporters: serviceProviders.filter(sp => sp.type === 'transporter').length,
-            wasteManagement: serviceProviders.filter(sp => sp.type === 'waste_management').length,
-        };
-        return stats;
-    };
-
-    const stats = getServiceStats();
 
     if (loading) {
         return (
             <div className="min-h-screen bg-green-50 flex">
-                {/* Fixed Sidebar */}
                 <div className="fixed top-0 left-0 h-screen w-64 z-30">
                     <Sidebar />
                 </div>
@@ -148,148 +63,75 @@ const ServiceProvidersIndex = () => {
     }
 
     return (
-        <div className="min-h-screen bg-white-50">
-            {/* Fixed Sidebar */}
+        <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100">
+            {/* Sidebar */}
             <div className="fixed top-0 left-0 h-screen w-64 z-30">
                 <Sidebar />
             </div>
-            {/* Main Content with left margin */}
-            <main className="ml-64 p-6 lg:p-8">
-                <div className="max-w-6xl mx-auto">
+            {/* Main Content */}
+            <main className="ml-64 p-6 lg:p-10">
+                <div className="max-w-5xl mx-auto">
                     {/* Header */}
-                    <div className="mb-6">
-                        <h1 className="text-2xl lg:text-3xl font-bold text-green-900 flex items-center gap-2">
-                            <span className="text-3xl lg:text-4xl">🌿</span> Service Providers
+                    <div className="mb-10">
+                        <h1 className="text-3xl font-bold text-green-900 flex items-center gap-2 mb-2">
+                            <span className="text-4xl">🌿</span> Waste Management Partners
                         </h1>
-                        <p className="text-green-700 mt-1">Collaborate with transport and waste management partners to streamline warehouse operations.</p>
+                        <p className="text-green-700 text-sm">Contact and manage your warehouse waste management providers.</p>
                     </div>
-
-                    {/* Overview Banner */}
-                    <div className="mb-8 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full transform translate-x-20 -translate-y-20"></div>
-                        <div className="relative z-10">
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                <div className="text-center">
-                                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2 hover:bg-white/30 transition-colors">
-                                        <span className="text-xl">🚚</span>
+                    {/* Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {serviceProviders.map((sp) => (
+                            <div
+                                key={sp.id}
+                                className="bg-white rounded-2xl border border-green-100 shadow hover:shadow-xl transition group flex flex-col md:flex-row items-stretch"
+                            >
+                                <div className="md:w-40 w-full flex-shrink-0 flex items-center justify-center p-6 bg-green-50 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none">
+                                    <img
+                                        src={sp.image}
+                                        alt={sp.name}
+                                        className="rounded-xl object-cover w-28 h-28 border border-gray-100 shadow-sm"
+                                    />
+                                </div>
+                                <div className="flex-1 flex flex-col justify-between p-6">
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-lg font-semibold text-green-900">{sp.name}</span>
+                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ml-2 ${sp.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                                                {sp.status.charAt(0).toUpperCase() + sp.status.slice(1)}
+                                            </span>
+                                        </div>
+                                        <div className="text-green-700 font-medium">{sp.company}</div>
+                                        <div className="text-sm text-gray-500 mb-2">{sp.location}</div>
+                                        <div className="text-sm text-gray-600 mb-3">{sp.description}</div>
                                     </div>
-                                    <h3 className="text-sm font-medium">Transport</h3>
-                                    <p className="text-green-100 text-xs">Reliable Logistics</p>
-                                </div>
-                                <div className="text-center">
-                                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2 hover:bg-white/30 transition-colors">
-                                        <span className="text-xl">♻️</span>
+                                    <div className="flex flex-col gap-2 mt-2">
+                                        <div className="flex items-center gap-2 text-sm text-gray-800">
+                                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                            </svg>
+                                            <span>{sp.phone}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-sm text-gray-800">
+                                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            </svg>
+                                            <span>{sp.email}</span>
+                                        </div>
+                                        <button
+                                            className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors shadow"
+                                            onClick={() => window.open(`mailto:${sp.email}`)}
+                                        >
+                                            Contact
+                                        </button>
                                     </div>
-                                    <h3 className="text-sm font-medium">Waste Management</h3>
-                                    <p className="text-green-100 text-xs">Eco Solutions</p>
-                                </div>
-                                <div className="text-center">
-                                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2 hover:bg-white/30 transition-colors">
-                                        <span className="text-xl">⭐</span>
-                                    </div>
-                                    <h3 className="text-sm font-medium">Ratings</h3>
-                                    <p className="text-green-100 text-xs">Quality Feedback</p>
-                                </div>
-                                <div className="text-center">
-                                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-2 hover:bg-white/30 transition-colors">
-                                        <span className="text-xl">📅</span>
-                                    </div>
-                                    <h3 className="text-sm font-medium">Scheduling</h3>
-                                    <p className="text-green-100 text-xs">Seamless Coordination</p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Service Provider Type Cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-5xl mx-auto">
-                        {/* Transporters Card */}
-                        <div 
-                            onClick={() => navigateToServiceType('transporters')}
-                            className="bg-white rounded-xl p-6 border border-green-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group"
-                        >
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="text-4xl">🚚</div>
-                                <div className="text-right">
-                                    <div className="text-2xl font-bold text-green-700">{stats.transporters}</div>
-                                    <div className="text-xs text-green-600">Available</div>
-                                </div>
+                        ))}
+                        {serviceProviders.length === 0 && (
+                            <div className="text-center text-gray-700 py-8 col-span-2">
+                                No waste management partners found.
                             </div>
-                            <h3 className="text-xl font-semibold text-green-900 mb-2">Transport Partners</h3>
-                            <p className="text-green-700 text-sm mb-4">
-                                Coordinate with logistics providers for efficient product delivery to and from your warehouse.
-                            </p>
-                            <div className="space-y-2 text-sm text-green-600 mb-4">
-                                <div className="flex justify-between">
-                                    <span>Total Services:</span>
-                                    <span className="font-medium">
-                                        {serviceProviders.filter(sp => sp.type === 'transporter').reduce((sum, sp) => sum + sp.totalServices, 0)}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Active Now:</span>
-                                    <span className="font-medium">
-                                        {serviceProviders.filter(sp => sp.type === 'transporter').reduce((sum, sp) => sum + sp.activeServices, 0)}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Avg Rating:</span>
-                                    <span className="font-medium">
-                                        {stats.transporters > 0 ? (serviceProviders.filter(sp => sp.type === 'transporter').reduce((sum, sp) => sum + sp.rating, 0) / stats.transporters).toFixed(1) : '0'} ⭐
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="text-green-700 group-hover:text-green-800 flex items-center text-sm font-medium">
-                                Manage Transport Partners
-                                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </div>
-                        </div>
-
-                        {/* Waste Management Card */}
-                        <div 
-                            onClick={() => navigateToServiceType('waste-management')}
-                            className="bg-white rounded-xl p-6 border border-green-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group"
-                        >
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="text-4xl">♻️</div>
-                                <div className="text-right">
-                                    <div className="text-2xl font-bold text-green-700">{stats.wasteManagement}</div>
-                                    <div className="text-xs text-green-600">Available</div>
-                                </div>
-                            </div>
-                            <h3 className="text-xl font-semibold text-green-900 mb-2">Waste Management</h3>
-                            <p className="text-green-700 text-sm mb-4">
-                                Partner with eco-friendly services to process agricultural waste and by-products.
-                            </p>
-                            <div className="space-y-2 text-sm text-green-600 mb-4">
-                                <div className="flex justify-between">
-                                    <span>Total Services:</span>
-                                    <span className="font-medium">
-                                        {serviceProviders.filter(sp => sp.type === 'waste_management').reduce((sum, sp) => sum + sp.totalServices, 0)}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Active Now:</span>
-                                    <span className="font-medium">
-                                        {serviceProviders.filter(sp => sp.type === 'waste_management').reduce((sum, sp) => sum + sp.activeServices, 0)}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Avg Rating:</span>
-                                    <span className="font-medium">
-                                        {stats.wasteManagement > 0 ? (serviceProviders.filter(sp => sp.type === 'waste_management').reduce((sum, sp) => sum + sp.rating, 0) / stats.wasteManagement).toFixed(1) : '0'} ⭐
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="text-green-700 group-hover:text-green-800 flex items-center text-sm font-medium">
-                                Manage Waste Partners
-                                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </main>
