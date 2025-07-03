@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../../components/warehouse/Sidebar';
+import PageHeader from '../../../components/warehouse/PageHeader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBoxOpen, faChartBar } from '@fortawesome/free-solid-svg-icons';
 
@@ -127,21 +128,31 @@ const InventoryIndex = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100">
-            <div className="fixed top-0 left-0 h-screen w-64 z-30">
+        <div className="min-h-screen bg-gradient-to-br from-white to-green-50">
+            {/* Sidebar */}
+            <div className="fixed top-0 left-0 h-screen w-60 z-30">
                 <Sidebar />
             </div>
-            <main className="ml-64 p-6 lg:p-10">
-                <div className="max-w-7xl mx-auto">
-                    <div className="mb-10">
-                        <h1 className="text-3xl lg:text-4xl font-extrabold text-green-900 flex items-center gap-3 mb-2 tracking-tight">
-                            <span className="text-3xl">🏭</span>
-                            Warehouse Inventory Overview
+            {/* Header */}
+            <div className="fixed top-0 left-60 right-0 z-20">
+                <PageHeader
+                title="Warehouse Inventory"
+                subtitle="Select a storage unit to manage its inventory and view detailed statistics."
+                user={{ name: "Kithmini", profilePic: "/alex.jpg" }}
+                />
+            </div>
+            {/* Main Content */}
+            <main className="lg:ml-60 pt-[72px] p-6 lg:p-10 transition-all duration-300">
+                <div className="max-w-7xl mx-auto mt-20">
+                    {/* <div className="mb-10">
+                        <h1 className="text-3xl font-bold text-green-900 flex items-center gap-2 relative group">
+                            <span className="text-3xl">📦</span>
+                            Warehouse Inventory 
                         </h1>
                         <p className="text-green-700 text-base">
                             Select a storage unit to manage its inventory and view detailed statistics for fruits and vegetables.
                         </p>
-                    </div>
+                    </div> */}
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
                         {facilities.map(facility => {
                             const stats = getFacilityStats(facility.id, inventoryData);
@@ -191,7 +202,7 @@ const InventoryIndex = () => {
                                             <span className="font-bold text-green-800">{stats.fruits} items</span>
                                         </div>
                                     </div>
-                                     <div className="flex flex-col sm:flex-row gap-3 mt-auto">
+                                    <div className="flex flex-col sm:flex-row gap-3 mt-auto">
                                         <button
                                             onClick={() => navigate(`/warehouse/inventory/current?facility=${facility.id}`)}
                                             className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2 shadow transition text-base sm:text-sm"

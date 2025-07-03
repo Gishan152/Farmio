@@ -3,6 +3,7 @@ import SimplePendingBookings from './pending';
 import SimpleActiveBookings from './active';
 import SimpleCalendar from './calendar';
 import Sidebar from '../../../components/warehouse/Sidebar';
+import PageHeader from '../../../components/warehouse/PageHeader';
 
 // Simplified facilities data
 const facilities = [
@@ -22,7 +23,7 @@ const facilities = [
   },
   {
     id: 3,
-    name: "Grain Storage",
+    name: "Dry Storage",
     storageType: "dry",
     capacity: 800,
     location: "Galle"
@@ -47,130 +48,101 @@ const BookingIndex = () => {
 
   return (
     <div className="min-h-screen bg-white-50">
-      {/* Fixed Sidebar */}
-      <div className="fixed top-0 left-0 h-screen w-64 z-30">
+      {/* Sidebar */}
+      <div className="fixed top-0 left-0 h-screen w-60 z-30">
         <Sidebar />
       </div>
-      
-      {/* Main Content with left margin */}
-      <div className="ml-64 p-6 lg:p-8">
+      {/* Header */}
+      <div className="fixed top-0 left-60 right-0 z-20">
+        <PageHeader
+          title="Warehouse Bookings"
+          subtitle="Manage storage requests, active bookings, and facility availability."
+          user={{ name: "Kithmini", profilePic: "/alex.jpg" }}
+        />
+      </div>
+      {/* Main Content */}
+      <main className="lg:ml-60 pt-[72px] p-4 sm:p-6 lg:p-8 transition-all duration-300 mt-20">
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-2xl lg:text-3xl font-bold text-green-900 flex items-center gap-2 mb-4">
-              <span className="text-3xl lg:text-4xl">📅</span> Booking Management
-            </h1>
-            <p className="text-green-700 text-sm">Manage storage requests, active bookings, and facility availability.</p>
-          </div>
-
-          {/* Facility Selection Card */}
-          <div className="bg-white rounded-2xl shadow border border-green-100 p-6 mb-6">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-green-100 rounded-xl">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-green-700 mb-1 block">Select Facility:</label>
-                  <select
-                    className="px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white text-green-900 font-medium"
-                    value={selectedFacility.id}
-                    onChange={e => setSelectedFacility(facilities.find(f => f.id === parseInt(e.target.value)))}
-                  >
-                    {facilities.map(facility => (
-                      <option key={facility.id} value={facility.id}>
-                        {facility.name} - {facility.location}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+          {/* Compact Filter & Tabs Section */}
+          <div className="bg-white rounded-2xl shadow border border-green-100 p-3 sm:p-4 mb-6 flex flex-col md:flex-row md:items-center gap-4">
+            {/* Facility Filter */}
+            <div className="flex items-center gap-3 flex-1">
+              <div className="p-2 bg-green-100 rounded-xl">
+                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
               </div>
-              
-              <div className="ml-auto bg-green-50 rounded-xl p-4 border border-green-200">
-                <div className="text-sm text-green-700">
-                  <div className="flex items-center gap-4">
-                    <span><strong>Capacity:</strong> {selectedFacility.capacity} MT</span>
-                    <span><strong>Type:</strong> <span className="capitalize">{selectedFacility.storageType}</span> Storage</span>
-                  </div>
-                </div>
-              </div>
+              <select
+                className="px-3 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white text-green-900 font-medium"
+                value={selectedFacility.id}
+                onChange={e => setSelectedFacility(facilities.find(f => f.id === parseInt(e.target.value)))}
+              >
+                {facilities.map(facility => (
+                  <option key={facility.id} value={facility.id}>
+                    {facility.name} - {facility.location}
+                  </option>
+                ))}
+              </select>
+              <span className="hidden sm:inline text-xs text-green-700 ml-2">
+                <strong>Capacity:</strong> {selectedFacility.capacity} MT, <strong>Type:</strong> <span className="capitalize">{selectedFacility.storageType}</span>
+              </span>
             </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="mb-6">
-            <div className="bg-white rounded-2xl shadow border border-green-100 overflow-hidden">
-              <div className="flex border-b border-green-100">
-                <button
-                  className={`flex-1 px-6 py-4 text-sm font-semibold transition-all duration-200 ${
-                    activeTab === 'pending' 
-                      ? 'bg-green-600 text-white' 
-                      : 'bg-white text-green-700 hover:bg-green-50'
-                  }`}
-                  onClick={() => setActiveTab('pending')}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    New Requests
-                  </div>
-                </button>
-                <button
-                  className={`flex-1 px-6 py-4 text-sm font-semibold transition-all duration-200 ${
-                    activeTab === 'active' 
-                      ? 'bg-green-600 text-white' 
-                      : 'bg-white text-green-700 hover:bg-green-50'
-                  }`}
-                  onClick={() => setActiveTab('active')}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Active Bookings
-                  </div>
-                </button>
-                <button
-                  className={`flex-1 px-6 py-4 text-sm font-semibold transition-all duration-200 ${
-                    activeTab === 'calendar' 
-                      ? 'bg-green-600 text-white' 
-                      : 'bg-white text-green-700 hover:bg-green-50'
-                  }`}
-                  onClick={() => setActiveTab('calendar')}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Calendar View
-                  </div>
-                </button>
-              </div>
+            {/* Tabs */}
+            <div className="flex gap-1 md:gap-2 flex-1 md:justify-end">
+              <button
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                  activeTab === 'pending'
+                    ? 'bg-green-600 text-white shadow'
+                    : 'bg-green-50 text-green-700 hover:bg-green-100'
+                }`}
+                onClick={() => setActiveTab('pending')}
+              >
+                New Requests
+              </button>
+              <button
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                  activeTab === 'active'
+                    ? 'bg-green-600 text-white shadow'
+                    : 'bg-green-50 text-green-700 hover:bg-green-100'
+                }`}
+                onClick={() => setActiveTab('active')}
+              >
+                Active Bookings
+              </button>
+              <button
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                  activeTab === 'calendar'
+                    ? 'bg-green-600 text-white shadow'
+                    : 'bg-green-50 text-green-700 hover:bg-green-100'
+                }`}
+                onClick={() => setActiveTab('calendar')}
+              >
+                Calendar View
+              </button>
             </div>
           </div>
 
           {/* Content */}
-          {activeTab === 'pending' && (
-            <SimplePendingBookings 
-              facilityId={selectedFacility.id} 
-              onViewDetails={openModal}
-            />
-          )}
-          {activeTab === 'active' && (
-            <SimpleActiveBookings 
-              facilityId={selectedFacility.id} 
-              onViewDetails={openModal}
-            />
-          )}
-          {activeTab === 'calendar' && (
-            <SimpleCalendar 
-              facilityId={selectedFacility.id} 
-              facilityName={selectedFacility.name}
-            />
-          )}
+          <div>
+            {activeTab === 'pending' && (
+              <SimplePendingBookings 
+                facilityId={selectedFacility.id} 
+                onViewDetails={openModal}
+              />
+            )}
+            {activeTab === 'active' && (
+              <SimpleActiveBookings 
+                facilityId={selectedFacility.id} 
+                onViewDetails={openModal}
+              />
+            )}
+            {activeTab === 'calendar' && (
+              <SimpleCalendar 
+                facilityId={selectedFacility.id} 
+                facilityName={selectedFacility.name}
+              />
+            )}
+          </div>
 
           {/* Modal for booking details */}
           {showModal && selectedBooking && (
@@ -242,7 +214,7 @@ const BookingIndex = () => {
             </div>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 };

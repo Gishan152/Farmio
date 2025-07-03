@@ -96,20 +96,21 @@ const Dashboard = () => {
         {isSidebarOpen ? '✕' : '☰'}
       </button>
 
-      <main className="lg:ml-60 p-6 sm:p-8 min-h-screen transition-all duration-300">
+      <main className="lg:ml-60 pt-[72px] p-6 sm:p-8 min-h-screen transition-all duration-300">
         {/* Header */}
         <Header
-          title="Warehouse Dashboard"
-          subtitle="Overview of warehouse operations and quick insights."
+          dashboard={true}
+          user={{ name: "Kithmini", profilePic: "/alex.jpg" }}
         />
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <SmallCard title="Facilities" value={stats.totalFacilities} icon="🏭" />
           <SmallCard title="Occupancy" value={`${usedPercent}%`} icon="📦" />
           <SmallCard title="Active Bookings" value={stats.bookings.active} icon="📅" />
           <SmallCard title="Pending Bookings" value={stats.bookings.pending} icon="⏳" />
         </div>
+
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useWebSocket from "../../../hooks/useWebSocket";
 import Sidebar from "../../../components/warehouse/Sidebar";
+import PageHeader from "../../../components/warehouse/PageHeader";
 import AddFacilityModal from "./add";
 import EditFacilityModal from "./edit";
 import DeleteFacilityModal from "./delete";
@@ -67,79 +68,66 @@ const StorageTypeIcon = ({ type }) => {
   return icons[type] || icons.dry;
 };
 
-const FacilitiesIndex = () => {
+const WarehousesIndex = () => {
   const navigate = useNavigate();
   const { notifications, clearNotification } = useWebSocket();
-  const [warehouses, setWarehouses] = useState(sampleWarehouses); // Use sample data initially
-  const [selectedFacility, setSelectedFacility] = useState(null);
+  const [warehouses, setWarehouses] = useState(sampleWarehouses);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [modalType, setModalType] = useState(null);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({ storageType: "", status: "" });
   const [isSingleWarehouse, setIsSingleWarehouse] = useState(sampleWarehouses.length === 1);
 
-  // Fetch warehouses from API (uncomment for real API)
-  // useEffect(() => {
-  //   const fetchWarehouses = async () => {
-  //     try {
-  //       const data = await api("GET", "/warehouses");
-  //       setWarehouses(data);
-  //       setIsSingleWarehouse(data.length === 1);
-  //     } catch (error) {
-  //       console.error("Error fetching warehouses:", error);
-  //     }
-  //   };
-  //   fetchWarehouses();
-  // }, []);
-
-  const openModal = (facility, type) => {
-    setSelectedFacility(facility);
+  const openModal = (warehouse, type) => {
+    setSelectedWarehouse(warehouse);
     setModalType(type);
   };
 
   const closeModal = () => {
-    setSelectedFacility(null);
+    setSelectedWarehouse(null);
     setModalType(null);
   };
 
-  const handleAdd = async (newFacility) => {
-    // For demo, just add to local state
+  const handleAdd = async (newWarehouse) => {
     setWarehouses((prev) => [
       ...prev,
-      { ...newFacility, id: Date.now(), lastUpdated: "Just now", occupancyRate: 0, bookings: 0 }
+      { ...newWarehouse, id: Date.now(), lastUpdated: "Just now", occupancyRate: 0, bookings: 0 }
     ]);
     setIsSingleWarehouse(warehouses.length + 1 === 1);
     closeModal();
   };
 
-  const handleEdit = async (updatedFacility) => {
+  const handleEdit = async (updatedWarehouse) => {
     setWarehouses((prev) =>
-      prev.map((f) => (f.id === updatedFacility.id ? { ...updatedFacility, lastUpdated: "Just now" } : f))
+      prev.map((w) => (w.id === updatedWarehouse.id ? { ...updatedWarehouse, lastUpdated: "Just now" } : w))
     );
     closeModal();
   };
 
   const handleDelete = async () => {
-    if (!selectedFacility) return;
-    setWarehouses((prev) => prev.filter((f) => f.id !== selectedFacility.id));
+    if (!selectedWarehouse) return;
+    setWarehouses((prev) => prev.filter((w) => w.id !== selectedWarehouse.id));
     setIsSingleWarehouse(warehouses.length - 1 === 1);
     closeModal();
   };
 
-  const filteredFacilities = warehouses.filter(
-    (f) =>
-      (f.name.toLowerCase().includes(search.toLowerCase()) ||
-        f.address.toLowerCase().includes(search.toLowerCase())) &&
-      (!filters.storageType || f.storageType === filters.storageType) &&
-      (!filters.status || f.availabilityStatus === filters.status)
+  const filteredWarehouses = warehouses.filter(
+    (w) =>
+      (w.name.toLowerCase().includes(search.toLowerCase()) ||
+        w.address.toLowerCase().includes(search.toLowerCase())) &&
+      (!filters.storageType || w.storageType === filters.storageType) &&
+      (!filters.status || w.availabilityStatus === filters.status)
   );
 
   return (
-    <div className="min-h-screen bg-white-50 flex">
-      {/* Sidebar */}
-      <Sidebar />
-      {/* Main Content */}
-      <main className="flex-1 p-6 lg:p-8">
-        <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-white-50">
+      {/* Sidebar (normal size, fixed) */}
+      <div className="fixed top-0 left-0 h-screen w-64 z-30">
+        <Sidebar />
+      </div>
+      {/* Main Content with left margin */}
+      <main className="ml-64 p-6 lg:p-8 mt-20">
+        <div className="max-w-7xl mx-auto">
           {/* Notifications */}
           {notifications.length > 0 && (
             <div className="mb-4">
@@ -162,21 +150,21 @@ const FacilitiesIndex = () => {
               ))}
             </div>
           )}
-          <div className="mb-6">
-            <h1 className="text-2xl lg:text-3xl font-bold text-green-900 flex items-center gap-2 mb-4">
-              <span className="text-3xl lg:text-4xl">🏭</span> Facility Management
-            </h1>
-            <p className="text-green-700 text-sm">Manage your warehouse facilities.</p>
-          </div>
-          <div className="bg-white rounded-2xl shadow border border-green-100 p-6">
+          {/* Header */}
+            <div className="fixed top-0 left-60 right-0 z-20">
+              <PageHeader
+                title="Warehouses"
+                subtitle="Manage your warehouses."
+                user={{ name: "Kithmini", profilePic: "/alex.jpg" }}
+              />
+            </div>
+          
+           <div className="bg-white rounded-2xl shadow border border-green-100 p-6">
             <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-green-800">Storage Facilities</h2>
-                <p className="text-green-700 text-sm">Overview of your warehouse locations</p>
-              </div>
+              <div /> 
               <button
                 onClick={() => openModal(null, "add")}
-                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-colors shadow-lg hover:shadow-xl flex items-center gap-2"
+                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-colors shadow-lg hover:shadow-xl flex items-center gap-2 ml-auto"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -192,7 +180,7 @@ const FacilitiesIndex = () => {
                   </svg>
                   <input
                     type="text"
-                    placeholder="Search facilities..."
+                    placeholder="Search warehouses..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 bg-green-50"
@@ -221,18 +209,13 @@ const FacilitiesIndex = () => {
             <div className="space-y-4">
               {warehouses.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-bold text-green-900 mb-2">No facilities found</h3>
-                  <p className="text-green-700 mb-4">Start by adding your first warehouse facility</p>
+                  <h3 className="text-lg font-bold text-green-900 mb-2">No warehouses found</h3>
+                  <p className="text-green-700 mb-4">Start by adding your first warehouse</p>
                   <button
                     onClick={() => openModal(null, "add")}
                     className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-colors"
                   >
-                    Add Facility
+                    Add Warehouse
                   </button>
                 </div>
               ) : isSingleWarehouse ? (
@@ -280,7 +263,7 @@ const FacilitiesIndex = () => {
                       </span>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => navigate(`/warehouse/facilities/${warehouses[0].id}`)}
+                          onClick={() => navigate(`/warehouse/warehouse/${warehouses[0].id}`)}
                           className="p-2 text-green-600 hover:text-green-700 hover:bg-green-100 rounded-lg transition-colors"
                           title="View Details"
                         >
@@ -292,7 +275,7 @@ const FacilitiesIndex = () => {
                         <button
                           onClick={() => openModal(warehouses[0], "edit")}
                           className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
-                          title="Edit Facility"
+                          title="Edit Warehouse"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -301,15 +284,15 @@ const FacilitiesIndex = () => {
                         <button
                           onClick={() => openModal(warehouses[0], "delete")}
                           className="p-2 text-red-600 hover:text-red-700 hover:bg-red-100 rounded-lg transition-colors"
-                          title="Delete Facility"
+                          title="Delete Warehouse"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
                         <button
-                          onClick={() => navigate(`/warehouse/payments/details/${warehouses[0].id}`)}
-                          className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
+                          onClick={() => navigate(`/warehouse/payment/details/${warehouses[0].id}`)}
+                          className="p-2 text-green-600 hover:text-green-700 hover:bg-green-100 rounded-lg transition-colors"
                           title="View Payments"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -321,36 +304,36 @@ const FacilitiesIndex = () => {
                   </div>
                 </div>
               ) : (
-                filteredFacilities.map((facility) => (
+                filteredWarehouses.map((warehouse) => (
                   <div
-                    key={facility.id}
+                    key={warehouse.id}
                     className="border border-green-200 rounded-xl p-6 hover:bg-green-50 transition-all duration-200 shadow-sm hover:shadow-md"
                   >
                     <div className="flex items-center justify-between flex-wrap gap-4">
                       <div className="flex items-center gap-4">
                         <div className="p-3 bg-green-100 rounded-xl border border-green-200">
-                          <StorageTypeIcon type={facility.storageType} />
+                          <StorageTypeIcon type={warehouse.storageType} />
                         </div>
                         <div>
-                          <h3 className="font-bold text-green-900 text-lg">{facility.name}</h3>
+                          <h3 className="font-bold text-green-900 text-lg">{warehouse.name}</h3>
                           <p className="text-sm text-green-700 mb-3 flex items-center gap-1">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             </svg>
-                            {facility.address}
+                            {warehouse.address}
                           </p>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                             <div className="bg-green-50 px-3 py-2 rounded-lg border border-green-200">
                               <span className="text-green-600 font-medium">Capacity:</span>
-                              <div className="font-bold text-green-900">{facility.capacity}</div>
+                              <div className="font-bold text-green-900">{warehouse.capacity}</div>
                             </div>
                             <div className="bg-green-50 px-3 py-2 rounded-lg border border-green-200">
                               <span className="text-green-600 font-medium">Occupancy:</span>
-                              <div className="font-bold text-green-900">{facility.occupancyRate}%</div>
+                              <div className="font-bold text-green-900">{warehouse.occupancyRate}%</div>
                             </div>
                             <div className="bg-green-50 px-3 py-2 rounded-lg border border-green-200">
                               <span className="text-green-600 font-medium">Bookings:</span>
-                              <div className="font-bold text-green-900">{facility.bookings}</div>
+                              <div className="font-bold text-green-900">{warehouse.bookings}</div>
                             </div>
                           </div>
                         </div>
@@ -358,18 +341,18 @@ const FacilitiesIndex = () => {
                       <div className="flex items-center gap-3 ml-4">
                         <span
                           className={`px-4 py-2 rounded-full text-xs font-bold border ${
-                            facility.availabilityStatus === "open"
+                            warehouse.availabilityStatus === "open"
                               ? "bg-green-100 text-green-800 border-green-300"
-                              : facility.availabilityStatus === "closed"
+                              : warehouse.availabilityStatus === "closed"
                               ? "bg-red-100 text-red-800 border-red-300"
                               : "bg-yellow-100 text-yellow-800 border-yellow-300"
                           }`}
                         >
-                          {facility.availabilityStatus === "open" ? "Available" : facility.availabilityStatus === "closed" ? "Full" : "Maintenance"}
+                          {warehouse.availabilityStatus === "open" ? "Available" : warehouse.availabilityStatus === "closed" ? "Full" : "Maintenance"}
                         </span>
                         <div className="flex gap-2">
                           <button
-                            onClick={() => navigate(`/warehouse/facilities/${facility.id}`)}
+                            onClick={() => navigate(`/warehouse/warehouse/${warehouse.id}`)}
                             className="p-2 text-green-600 hover:text-green-700 hover:bg-green-100 rounded-lg transition-colors"
                             title="View Details"
                           >
@@ -379,26 +362,26 @@ const FacilitiesIndex = () => {
                             </svg>
                           </button>
                           <button
-                            onClick={() => openModal(facility, "edit")}
+                            onClick={() => openModal(warehouse, "edit")}
                             className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
-                            title="Edit Facility"
+                            title="Edit Warehouse"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                           </button>
                           <button
-                            onClick={() => openModal(facility, "delete")}
+                            onClick={() => openModal(warehouse, "delete")}
                             className="p-2 text-red-600 hover:text-red-700 hover:bg-red-100 rounded-lg transition-colors"
-                            title="Delete Facility"
+                            title="Delete Warehouse"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                           </button>
                           <button
-                            onClick={() => navigate(`/warehouse/payments/details/${facility.id}`)}
-                            className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
+                            onClick={() => navigate(`/warehouse/payment/details/${warehouse.id}`)}
+                            className="p-2 text-green-600 hover:text-green-700 hover:bg-green-100 rounded-lg transition-colors"
                             title="View Payments"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -419,11 +402,11 @@ const FacilitiesIndex = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {modalType === "add" && <AddFacilityModal onAdd={handleAdd} onCancel={closeModal} />}
-            {modalType === "edit" && selectedFacility && (
-              <EditFacilityModal facility={selectedFacility} onSave={handleEdit} onCancel={closeModal} />
+            {modalType === "edit" && selectedWarehouse && (
+              <EditFacilityModal facility={selectedWarehouse} onSave={handleEdit} onCancel={closeModal} />
             )}
-            {modalType === "delete" && selectedFacility && (
-              <DeleteFacilityModal facility={selectedFacility} onDelete={handleDelete} onCancel={closeModal} />
+            {modalType === "delete" && selectedWarehouse && (
+              <DeleteFacilityModal facility={selectedWarehouse} onDelete={handleDelete} onCancel={closeModal} />
             )}
           </div>
         </div>
@@ -432,4 +415,4 @@ const FacilitiesIndex = () => {
   );
 };
 
-export default FacilitiesIndex;
+export default WarehousesIndex;

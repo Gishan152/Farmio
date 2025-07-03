@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../../components/warehouse/Sidebar";
 import EarlyRetrievalModal from "./earlyRetrievalModal";
 
@@ -28,7 +28,7 @@ const mockDetails = {
 };
 
 const WarehousePaymentDetails = () => {
-  const { id } = useParams(); // warehouse/payment id from route
+  // const { id } = useParams(); // warehouse/payment id from route
   const navigate = useNavigate();
   // In production, fetch payment details using id
   const details = mockDetails;

@@ -2,14 +2,17 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FaCog, FaLink, FaBell, FaSearch } from "react-icons/fa";
 
-const Header = ({ user }) => (
+const PageHeader = ({ title, subtitle }) => (
   <header
     className="fixed top-0 left-0 w-full z-30 flex items-center justify-between px-8 py-4 bg-white border-b transition-all duration-300
       lg:left-60 lg:w-[calc(100%-15rem)]"
   >
-    <h1 className="text-lg font-bold text-gray-900">
-      Hello <span>{user?.name || "User"}</span>
-    </h1>
+    <div>
+      <h1 className="text-xl font-bold text-green-900">{title}</h1>
+      {subtitle && (
+        <p className="text-sm text-green-700 mt-1">{subtitle}</p>
+      )}
+    </div>
     <div className="flex items-center gap-4">
       <div className="relative">
         <input
@@ -40,4 +43,4 @@ const Header = ({ user }) => (
   </header>
 );
 
-export default Header;
+export default PageHeader;

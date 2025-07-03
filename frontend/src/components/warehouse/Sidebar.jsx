@@ -9,8 +9,8 @@ import {
   faTrashAlt,
   faCreditCard,
   faChartLine,
-  faSignOutAlt,
-  faUserCircle,
+  faSignOutAlt, 
+  faBell,
 } from "@fortawesome/free-solid-svg-icons";
 
 
@@ -22,6 +22,7 @@ const navItems = [
   { to: "/warehouse/service-providers", icon: faTrashAlt, label: "Services" },
   { to: "/warehouse/payment", icon: faCreditCard, label: "Payments" },
   { to: "/warehouse/analytics", icon: faChartLine, label: "Analytics" },
+  { to: "/warehouse/notifications", icon: faBell, label: "Notifications" },
 ];
 
 const Sidebar = () => {
@@ -88,21 +89,38 @@ const Sidebar = () => {
         >
           <div className="flex items-center justify-between w-full">
             {!isCollapsed && (
-              <div className="flex items-center">
+              <a
+                href="/warehouse/profile"
+                className="flex items-center group cursor-pointer"
+                title="Go to Profile"
+              >
                 <div className="relative">
-                  <div className="bg-green-600 rounded-full w-9 h-9 
-                    flex items-center justify-center shadow-lg shadow-green-600/20
-                    hover:scale-105 transition-transform duration-200">
-                    <FontAwesomeIcon icon={faUserCircle} className="text-white text-xl" />
-                  </div>
+                  <img
+                    src="/Images/warehouse/user.jpg"
+                    alt="Profile"
+                    className="bg-green-600 rounded-full w-9 h-9 object-cover shadow-lg shadow-green-600/20 hover:scale-105 transition-transform duration-200"
+                  />
                   <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-300 rounded-full 
                     border-2 border-white animate-pulse"></div>
                 </div>
                 <div className="ml-3">
-                  <div className="text-green-900 font-semibold text-sm">John Perera</div>
+                  <div className="text-green-900 font-semibold text-sm">Kithmini</div>
                   <div className="text-green-500 text-xs">Owner</div>
                 </div>
-              </div>
+              </a>
+            )}
+            {isCollapsed && (
+              <a
+                href="/warehouse/profile"
+                className="group cursor-pointer"
+                title="Go to Profile"
+              >
+                <img
+                  src="/alex.jpg"
+                  alt="Profile"
+                  className="bg-green-600 rounded-full w-9 h-9 object-cover shadow-lg shadow-green-600/20 hover:scale-105 transition-transform duration-200"
+                />
+              </a>
             )}
             <button
               className="text-green-700 hover:text-green-900 transition-all duration-200 

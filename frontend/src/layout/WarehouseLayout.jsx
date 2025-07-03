@@ -18,8 +18,9 @@ import WarehousePaymentDetails from '../pages/warehouse/payment/WarehousePayment
 import PaymentHistory from '../pages/warehouse/payment/PaymentHistory';
 import ServiceProvidersIndex from '../pages/warehouse/ServiceProviders/index';
 import AnalyticsIndex from '../pages/warehouse/analytics/index';
-import Profile from '../pages/warehouse/profile/index';
-import Settings from '../pages/warehouse/settings/index';
+import Profile from '../pages/warehouse/Profile';
+import Settings from '../pages/warehouse/Settings';
+import Notifications from '../pages/warehouse/Notifications';
 import { Routes, Route } from 'react-router-dom';
 
 const WarehouseLayout = () => {
@@ -29,11 +30,11 @@ const WarehouseLayout = () => {
                 <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/warehouse/dashboard" element={<Dashboard />} />
-                    <Route path="/warehouse/facilities" element={<Facilities />} />
-                    <Route path="/warehouse/facilities/add" element={<AddFacility />} />
-                    <Route path="/warehouse/facilities/edit/:id" element={<EditFacility />} />
-                    <Route path="/warehouse/facilities/view/:id" element={<ViewFacility />} />
-                    <Route path="/warehouse/facilities/:id" element={<FacilityDetails />} />
+                    <Route path="/warehouse/warehouse" element={<Facilities />} />
+                    <Route path="/warehouse/warehouse/add" element={<AddFacility />} />
+                    <Route path="/warehouse/warehouse/edit/:id" element={<EditFacility />} />
+                    <Route path="/warehouse/warehouse/view/:id" element={<ViewFacility />} />
+                    <Route path="/warehouse/warehouse/:id" element={<FacilityDetails />} />
                     <Route path="/warehouse/bookings" element={<Bookings />} />
                     <Route path="/warehouse/bookings/pending" element={<PendingBookings />} />
                     <Route path="/warehouse/bookings/active" element={<ActiveBookings />} />
@@ -46,9 +47,10 @@ const WarehouseLayout = () => {
                     <Route path="/warehouse/payment/details/:id" element={<WarehousePaymentDetails />} />
                     <Route path="/warehouse/payment/history" element={<PaymentHistory />} />                   
                     <Route path="/warehouse/service-providers" element={<ServiceProvidersIndex />} />                    
-                    <Route path="/warehouse/analytics" element={<AnalyticsIndex />} />
+                    <Route path="/warehouse/analytics" element={<AnalyticsIndex />} /> 
                     <Route path="/warehouse/profile" element={<Profile />} />
                     <Route path="/warehouse/settings" element={<Settings />} />
+                    <Route path="/warehouse/notifications" element={<Notifications />} />                
                 </Routes>
             </main>
         </div>

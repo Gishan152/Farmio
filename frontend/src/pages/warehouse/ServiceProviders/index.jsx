@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../../../components/warehouse/Sidebar';
+import PageHeader from '../../../components/warehouse/PageHeader';
 
 const ServiceProvidersIndex = () => {
     const [serviceProviders, setServiceProviders] = useState([]);
@@ -63,35 +64,35 @@ const ServiceProvidersIndex = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100">
+        <div className="min-h-screen bg-gradient-to-br bg-white">
             {/* Sidebar */}
             <div className="fixed top-0 left-0 h-screen w-64 z-30">
                 <Sidebar />
             </div>
             {/* Main Content */}
-            <main className="ml-64 p-6 lg:p-10">
-                <div className="max-w-5xl mx-auto">
+            <main className="ml-64 p-8 lg:p-12 mt-10">
+                <div className="max-w-7xl mx-auto">
                     {/* Header */}
-                    <div className="mb-10">
-                        <h1 className="text-3xl font-bold text-green-900 flex items-center gap-2 mb-2">
-                            <span className="text-4xl">🌿</span> Waste Management Partners
-                        </h1>
-                        <p className="text-green-700 text-sm">Contact and manage your warehouse waste management providers.</p>
+                    <div className="fixed top-0 left-60 right-0 z-20">
+                        <PageHeader
+                            title="Waste Management Agents"
+                            subtitle="Contact and manage your warehouse waste management agents."
+                            user={{ name: "Kithmini", profilePic: "/alex.jpg" }}
+                        />
                     </div>
                     {/* Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
                         {serviceProviders.map((sp) => (
                             <div
                                 key={sp.id}
-                                className="bg-white rounded-2xl border border-green-100 shadow hover:shadow-xl transition group flex flex-col md:flex-row items-stretch"
+                                className="bg-white rounded-2xl border border-green-100 shadow hover:shadow-xl transition group flex flex-col items-stretch"
                             >
-                                <div className="md:w-40 w-full flex-shrink-0 flex items-center justify-center p-6 bg-green-50 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none">
-                                    <img
-                                        src={sp.image}
-                                        alt={sp.name}
-                                        className="rounded-xl object-cover w-28 h-28 border border-gray-100 shadow-sm"
-                                    />
-                                </div>
+                                {/* Image first, full width at the top */}
+                                <img
+                                    src={sp.image}
+                                    alt={sp.name}
+                                    className="w-full h-44 object-cover rounded-t-2xl border-b border-green-100"
+                                />
                                 <div className="flex-1 flex flex-col justify-between p-6">
                                     <div>
                                         <div className="flex items-center gap-2 mb-1">
