@@ -1,23 +1,25 @@
 import React from 'react';
-import Dashboard from '../Pages/warehouse/Dashboard';
-import Facilities from '../Pages/warehouse/facilities/index';
-import AddFacility from '../Pages/warehouse/facilities/add';
-import EditFacility from '../Pages/warehouse/facilities/edit';
-import ViewFacility from '../Pages/warehouse/facilities/view';
-import Bookings from '../Pages/warehouse/bookings/index';
-import PendingBookings from '../Pages/warehouse/bookings/pending';
-import ActiveBookings from '../Pages/warehouse/bookings/active';
-import CalendarView from '../Pages/warehouse/bookings/calendar';
-import Inventory from '../Pages/warehouse/inventory/index';
+import Dashboard from '../pages/warehouse/Dashboard';
+import Facilities from '../pages/warehouse/warehouse/index';
+import AddFacility from '../pages/warehouse/warehouse/add';
+import EditFacility from '../pages/warehouse/warehouse/edit';
+import ViewFacility from '../pages/warehouse/warehouse/view';
+import FacilityDetails from '../pages/warehouse/warehouse/facilityDetails';
+import Bookings from '../pages/warehouse/bookings/index';
+import PendingBookings from '../pages/warehouse/bookings/pending';
+import ActiveBookings from '../pages/warehouse/bookings/active';
+import CalendarView from '../pages/warehouse/bookings/calendar';
+import Inventory from '../pages/warehouse/inventory/index';
 import CurrentInventory from '../pages/warehouse/inventory/currentInventory';
 import ProductCategories from '../pages/warehouse/inventory/productCategories';
-import Capacity from '../Pages/warehouse/inventory/capacity';
-import Pricing from '../Pages/warehouse/pricing/index';
-import SeasonalPricing from '../Pages/warehouse/pricing/seasonal';;
+import Capacity from '../pages/warehouse/inventory/capacity';
+import PaymentOverview from '../pages/warehouse/payment/index';
+import WarehousePaymentDetails from '../pages/warehouse/payment/WarehousePayment';
+import PaymentHistory from '../pages/warehouse/payment/PaymentHistory';
 import ServiceProvidersIndex from '../pages/warehouse/ServiceProviders/index';
 import AnalyticsIndex from '../pages/warehouse/analytics/index';
-import Profile from '../Pages/warehouse/profile/index';
-import Settings from '../Pages/warehouse/settings/index';
+import Profile from '../pages/warehouse/profile/index';
+import Settings from '../pages/warehouse/settings/index';
 import { Routes, Route } from 'react-router-dom';
 
 const WarehouseLayout = () => {
@@ -31,6 +33,7 @@ const WarehouseLayout = () => {
                     <Route path="/warehouse/facilities/add" element={<AddFacility />} />
                     <Route path="/warehouse/facilities/edit/:id" element={<EditFacility />} />
                     <Route path="/warehouse/facilities/view/:id" element={<ViewFacility />} />
+                    <Route path="/warehouse/facilities/:id" element={<FacilityDetails />} />
                     <Route path="/warehouse/bookings" element={<Bookings />} />
                     <Route path="/warehouse/bookings/pending" element={<PendingBookings />} />
                     <Route path="/warehouse/bookings/active" element={<ActiveBookings />} />
@@ -39,8 +42,9 @@ const WarehouseLayout = () => {
                     <Route path="/warehouse/inventory/current" element={<CurrentInventory />} />
                     <Route path="/warehouse/inventory/categories" element={<ProductCategories />} />                    
                     <Route path="/warehouse/inventory/capacity" element={<Capacity />} />
-                    <Route path="/warehouse/pricing" element={<Pricing />} />
-                    <Route path="/warehouse/pricing/seasonal" element={<SeasonalPricing />} />                    
+                    <Route path="/warehouse/payment" element={<PaymentOverview />} />
+                    <Route path="/warehouse/payment/details/:id" element={<WarehousePaymentDetails />} />
+                    <Route path="/warehouse/payment/history" element={<PaymentHistory />} />                   
                     <Route path="/warehouse/service-providers" element={<ServiceProvidersIndex />} />                    
                     <Route path="/warehouse/analytics" element={<AnalyticsIndex />} />
                     <Route path="/warehouse/profile" element={<Profile />} />

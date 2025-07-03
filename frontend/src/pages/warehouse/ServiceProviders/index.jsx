@@ -14,7 +14,7 @@ const ServiceProvidersIndex = () => {
             company: "Green Waste Solutions",
             location: "Colombo",
             status: "active",
-            image: "/Images/waste1.jpg",
+            image: "/Images/warehouse/1.png",
             description: "Eco-friendly waste collection and recycling for urban warehouses."
         },
         {
@@ -25,7 +25,7 @@ const ServiceProvidersIndex = () => {
             company: "Bio Compost Lanka",
             location: "Gampaha",
             status: "active",
-            image: "/Images/waste2.jpg",
+            image: "/Images/warehouse/4.png",
             description: "Specialists in composting and organic waste management."
         },
         {
@@ -36,7 +36,7 @@ const ServiceProvidersIndex = () => {
             company: "Ware Waste Agency",
             location: "Kurunegala",
             status: "active",
-            image: "/Images/waste3.jpg",
+            image: "/Images/warehouse/2.png",
             description: "Comprehensive waste solutions for large-scale warehouse operations."
         }
     ];
@@ -117,12 +117,6 @@ const ServiceProvidersIndex = () => {
                                             </svg>
                                             <span>{sp.email}</span>
                                         </div>
-                                        <button
-                                            className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors shadow"
-                                            onClick={() => window.open(`mailto:${sp.email}`)}
-                                        >
-                                            Contact
-                                        </button>
                                     </div>
                                 </div>
                             </div>

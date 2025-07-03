@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChartBar,
-  faIndustry,
+  faHouse,
   faCalendarAlt,
   faBoxes,  
   faTrashAlt,
@@ -16,11 +16,11 @@ import {
 
 const navItems = [
   { to: "/warehouse/dashboard", icon: faChartBar, label: "Dashboard" },
-  { to: "/warehouse/facilities", icon: faIndustry, label: "Facilities" },
+  { to: "/warehouse/warehouse", icon: faHouse, label: "Warehouse" },
   { to: "/warehouse/bookings", icon: faCalendarAlt, label: "Bookings" },
   { to: "/warehouse/inventory", icon: faBoxes, label: "Inventory" },
   { to: "/warehouse/service-providers", icon: faTrashAlt, label: "Services" },
-  { to: "/warehouse/pricing", icon: faCreditCard, label: "Payments" },
+  { to: "/warehouse/payment", icon: faCreditCard, label: "Payments" },
   { to: "/warehouse/analytics", icon: faChartLine, label: "Analytics" },
 ];
 
