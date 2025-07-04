@@ -3,6 +3,8 @@ import React from "react";
 import { useLoaderData } from "react-router-dom";
 import { StarIcon, CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { TruckIcon } from "@heroicons/react/24/outline";
+import tp1 from "../../../Assets/Buyer/Transport/tp.webp";
+import tp2 from "../../../Assets/Buyer/Transport/tp2.jpg";
 
 export function transportProvidersLoader() {
     return [
@@ -14,7 +16,8 @@ export function transportProvidersLoader() {
             badges: ["24/7 Service", "Insurance Included"],
             pricePerKm: 1.5,
             available: true,
-            imageUrl: "/images/truck1.jpg",
+            // imageUrl: "/images/truck1.jpg",
+            imageUrl: tp1,
             contact: "John Smith",
             contactRating: 4.6,
         },
@@ -26,7 +29,8 @@ export function transportProvidersLoader() {
             badges: ["Temperature-Controlled"],
             pricePerKm: 2.0,
             available: false,
-            imageUrl: "/images/truck2.jpg",
+            // imageUrl: "/images/truck2.jpg",
+            imageUrl: tp2,
             contact: "Sarah Johnson",
             contactRating: 4.3,
         },
@@ -46,8 +50,14 @@ export default function TransportProviders() {
                         <div className="relative h-40 bg-gray-200">
                             <img src={p.imageUrl} alt={p.name} className="object-cover w-full h-full" />
                             <div className="absolute top-2 left-2 flex items-center space-x-1">
-                                <TruckIcon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
-                                {p.verified && <CheckBadgeIcon className="h-6 w-6 text-blue-500" />}
+                                <div className="bg-white p-1 border-none rounded-[50%]">
+                                    <TruckIcon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+                                </div>
+                                {p.verified &&
+                                    <div className="bg-white p-1 border-none rounded-[50%]">
+                                        <CheckBadgeIcon className="h-6 w-6 text-green-500" />
+                                    </div>
+                                }
                             </div>
                         </div>
                         <div className="p-4 space-y-2">
@@ -80,7 +90,7 @@ export default function TransportProviders() {
                                 ))}
                             </div>
 
-                            <button className="mt-4 w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                            <button className="mt-4 w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
                                 View Details
                             </button>
                         </div>

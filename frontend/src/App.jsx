@@ -27,6 +27,7 @@ import CreateTransportJob from './Pages/Buyer/Sections/CreateTransport';
 import OrderDetails from './Pages/Buyer/Sections/OrderDetails';
 import Requirements from './Pages/Buyer/Sections/Requirements';
 import RequirementDetails from './Pages/Buyer/Sections/RequirementDetails';
+import WarehouseReservationDetails, { warehouseReservationLoader } from './Pages/Buyer/Sections/ReservedStorageDetails';
 
 
 let router = createBrowserRouter([
@@ -162,6 +163,11 @@ let router = createBrowserRouter([
 						path: "all/:warehouseId",
 						Component: WarehouseDetails,
 						loader: warehouseDetailsLoader
+					},
+					{
+						path: "reserved/:warehouseId",
+						Component: WarehouseReservationDetails,
+						loader: warehouseReservationLoader
 					}
 				],
 			},
