@@ -1,52 +1,239 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { useState } from 'react'
+import { createBrowserRouter, RouterProvider } from "react-router";
+import './App.css'
+import LandingPage from './Pages/LandingPage';
+import Root from './Pages/Root';
+import Login, { loginAction, loginLoader } from './Pages/LoginRegister/Login';
+import Registration, { RegistrationAction, RegistrationLoader } from './Pages/LoginRegister/Registration';
+import FarmerRegistration, { FarmerRegistrationAction, FarmerRegistrationLoader } from './Pages/LoginRegister/FarmerRegistration';
+import BuyerRegistration, { BuyerRegistrationAction, BuyerRegistrationLoader } from './Pages/LoginRegister/BuyerRegistration';
+import WarehouseProviderRegistration, { WarehouseProviderRegistrationAction, WarehouseProviderRegistrationLoader } from './Pages/LoginRegister/WarehouseProviderRegistration';
+import TransportProviderRegistration, { TransportProviderRegistrationAction, TransportProviderRegistrationLoader } from './Pages/LoginRegister/TransportProviderRegistration';
+import WasteAgentRegistration, { WasteAgentRegistrationAction, WasteAgentRegistrationLoader } from './Pages/LoginRegister/WasteAgentRegistration';
+import ProductPage from './Pages/ProductsPage';
+import BuyerLayout from './Pages/Buyer/BuyerLayout';
+import Crops from './Pages/Buyer/Sections/Crops';
+import Warehouses from './Pages/Buyer/Sections/Warehouses';
+import ReservedStorage, { reservedLoader } from './Pages/Buyer/Sections/ReservedStorage';
+import TransportProviders, { transportProvidersLoader } from './Pages/Buyer/Sections/TransportProviders';
+import TransportSchedules from './Pages/Buyer/Sections/TransportSchedules';
+import CropDetails, { cropDetailsLoader } from './Pages/Buyer/Sections/CropDetails';
+import WarehouseDetails, { warehouseDetailsLoader } from './Pages/Buyer/Sections/WarehouseDetails';
+import Saves from './Pages/Buyer/Sections/Saves';
+import OrderConfirmation from './Pages/Buyer/Sections/OrderConfirmation';
+import CropTransport from './Pages/Buyer/Sections/CropTransport';
+import Orders from './Pages/Buyer/Sections/Orders';
+import CreateTransportJob from './Pages/Buyer/Sections/CreateTransport';
+// Waste Agent imports
+import WasteAgentLayout from './Pages/WasteAgent/WasteAgentLayout';
+import WasteAgentDashboard from './Pages/WasteAgent/Sections/WasteAgentDashboard';
+import WasteCollection from './Pages/WasteAgent/Sections/WasteCollection';
+import Pickups from './Pages/WasteAgent/Sections/Pickups';
 
-export default function App() {
-  return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b">
-          <div className="flex items-center gap-2 px-3">
-            <SidebarTrigger />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink className="capitalize" href="#">
-                    waste management
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Browse Waste</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-        </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-          </div>
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
-  )
+
+let router = createBrowserRouter([
+	// {
+	//   path: "/",
+	//   Component: Root,
+	//   children: [
+	//     {
+	//       path: "shows/:showId",
+	//       Component: Show,
+	//       loader: ({ request, params }) =>
+	//         fetch(`/api/show/${params.showId}.json`, {
+	//           signal: request.signal,
+	//         }),
+	//     },
+	//   ],
+	// },
+	{
+		index: true,
+		Component: LandingPage
+	},
+	{
+		path: "/login",
+		loader: loginLoader,
+		action: loginAction,
+		Component: Login
+	},
+	{
+		path: "/register",
+		loader: RegistrationLoader,
+		action: RegistrationAction,
+		Component: Registration
+	},
+	{
+		path: "/register/farmer",
+		loader: FarmerRegistrationLoader,
+		action: FarmerRegistrationAction,
+		Component: FarmerRegistration,
+	},
+	{
+		path: "/register/buyer",
+		loader: BuyerRegistrationLoader,
+		action: BuyerRegistrationAction,
+		Component: BuyerRegistration,
+	},
+	{
+		path: "/register/warehouse-provider",
+		loader: WarehouseProviderRegistrationLoader,
+		action: WarehouseProviderRegistrationAction,
+		Component: WarehouseProviderRegistration,
+	},
+	{
+		path: "/register/transport-provider",
+		loader: TransportProviderRegistrationLoader,
+		action: TransportProviderRegistrationAction,
+		Component: TransportProviderRegistration,
+	},
+	{
+		path: "/register/waste-agent",
+		loader: WasteAgentRegistrationLoader,
+		action: WasteAgentRegistrationAction,
+		Component: WasteAgentRegistration,
+	},
+	{
+		path: "/user",
+		Component: Root,
+		children: [
+
+		]
+	},
+	{
+		path: "/products",
+		Component: ProductPage
+	},
+	{
+		path: '/buyer',
+		Component: BuyerLayout,
+		children: [
+			{ 
+				index: true,
+				Component: Crops
+			},
+			{ 
+				path: 'crops',
+				Component: Crops
+			},
+			{
+				path: "crops/:cropId",
+				Component: CropDetails,
+				loader: cropDetailsLoader
+			},
+			{
+				path: "saves",
+				Component: Saves
+			},
+			{
+				path: "orders",
+				Component: Orders
+			},
+			{
+				path: "order-confirmation",
+				Component: OrderConfirmation
+			},
+			{
+				path: "transport-confirmation",
+				Component: CropTransport
+			},
+			{
+				path: 'warehouses',
+				children: [
+					{ 
+						path: 'all',
+						Component: Warehouses
+					},
+					{ 
+						path: 'reserved',
+						Component: ReservedStorage,
+						loader: reservedLoader
+					},
+					{
+						path: ":warehouseId",
+						Component: WarehouseDetails,
+						loader: warehouseDetailsLoader
+					}
+				],
+			},
+			{
+				path: 'transport',
+				children: [
+					{ 
+						path: 'providers',
+						Component: TransportProviders,
+						loader: transportProvidersLoader
+					},
+					{ 
+						path: 'create',
+						Component: CreateTransportJob,
+					},
+					{ 
+						path: 'schedules',
+						Component: TransportSchedules
+					},
+				],
+			},
+		],
+	},
+	{
+		path: "/waste-agent",
+		Component: WasteAgentLayout,
+		children: [
+			{
+				index: true,
+				Component: WasteAgentDashboard
+			},
+			{
+				path: "dashboard",
+				Component: WasteAgentDashboard
+			},
+			{
+				path: "waste-collection",
+				Component: WasteCollection
+			},
+			{
+				path: "pickups",
+				Component: Pickups
+			},
+			{
+				path: "routes",
+				element: <div className="p-6"><h1 className="text-2xl font-bold">Routes - Coming Soon</h1></div>
+			},
+			{
+				path: 'processing',
+				children: [
+					{ 
+						path: 'centers',
+						element: <div className="p-6"><h1 className="text-2xl font-bold">Processing Centers - Coming Soon</h1></div>
+					},
+					{ 
+						path: 'schedule',
+						element: <div className="p-6"><h1 className="text-2xl font-bold">Processing Schedule - Coming Soon</h1></div>
+					},
+				],
+			},
+			{
+				path: 'reports',
+				children: [
+					{ 
+						path: 'collection',
+						element: <div className="p-6"><h1 className="text-2xl font-bold">Collection Reports - Coming Soon</h1></div>
+					},
+					{ 
+						path: 'analytics',
+						element: <div className="p-6"><h1 className="text-2xl font-bold">Performance Analytics - Coming Soon</h1></div>
+					},
+				],
+			},
+		],
+	},
+]);
+
+
+function App() {
+	return (
+		<RouterProvider router={router} />
+	)
 }
+
+export default App

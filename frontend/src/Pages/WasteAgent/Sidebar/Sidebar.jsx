@@ -1,0 +1,77 @@
+import { ArrowRightStartOnRectangleIcon, Cog8ToothIcon, UserIcon } from '@heroicons/react/24/solid';
+import SidebarItem from './SidebarItem';
+
+const menu = [
+    { label: 'Dashboard', to: 'dashboard' },
+    { label: 'Waste Collection', to: 'waste-collection' },
+    { label: 'Pickups', to: 'pickups' },
+    { label: 'Routes', to: 'routes' },
+    {
+        label: 'Waste Processing',
+        children: [
+            { label: 'Processing Centers', to: 'processing/centers' },
+            { label: 'Processing Schedule', to: 'processing/schedule' },
+        ],
+    },
+    {
+        label: 'Reports',
+        children: [
+            { label: 'Collection Reports', to: 'reports/collection' },
+            { label: 'Performance Analytics', to: 'reports/analytics' },
+        ],
+    },
+];
+
+export default function Sidebar() {
+    return (
+        <aside className="w-64 bg-white border-r border-gray-200 p-6 flex flex-col justify-between min-h-screen">
+            <div>
+                <div className="flex items-center mb-8">
+                    <div className="w-10 h-10 bg-blue-500 rounded flex items-center justify-center text-white font-bold text-xl mr-3">W</div>
+                    <span className="font-bold text-lg">WasteAgent</span>
+                </div>
+                <div className="flex items-center mb-8">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="profile" className="w-10 h-10 rounded-full mr-3" />
+                    <div>
+                        <div className="font-semibold">John Smith <span className="bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded ml-1">Agent</span></div>
+                        <div className="text-xs text-gray-500">john.smith@waste.com</div>
+                    </div>
+                </div>
+                <nav className="flex flex-col gap-2">
+                    <ul>
+                        {menu.map(item => (
+                            <SidebarItem key={item.label} {...item} />
+                        ))}
+                    </ul>
+                </nav>
+            </div>
+            <div>
+                <div className="flex flex-col gap-2">
+                    <button
+                        className="flex items-center gap-4 text-gray-700 hover:text-blue-500 transition text-sm"
+                        aria-label="Settings"
+                    >
+                        <Cog8ToothIcon className="h-7 w-8 flex-shrink-0" />
+                        <span>Settings</span>
+                    </button>
+
+                    <button
+                        className="flex items-center gap-4 text-gray-700 hover:text-blue-500 transition text-sm"
+                        aria-label="User Profile"
+                    >
+                        <UserIcon className="h-7 w-8 flex-shrink-0" />
+                        <span>User</span>
+                    </button>
+
+                    <button
+                        className="flex items-center gap-4 text-gray-700 hover:text-red-500 transition text-sm"
+                        aria-label="Logout"
+                    >
+                        <ArrowRightStartOnRectangleIcon className="h-7 w-8 flex-shrink-0" />
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+    );
+}
