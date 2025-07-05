@@ -24,11 +24,11 @@ import OrderConfirmation from './Pages/Buyer/Sections/OrderConfirmation';
 import CropTransport from './Pages/Buyer/Sections/CropTransport';
 import Orders from './Pages/Buyer/Sections/Orders';
 import CreateTransportJob from './Pages/Buyer/Sections/CreateTransport';
-// Waste Agent imports
 import WasteAgentLayout from './Pages/WasteAgent/WasteAgentLayout';
-import WasteAgentDashboard from './Pages/WasteAgent/Sections/WasteAgentDashboard';
-import WasteCollection from './Pages/WasteAgent/Sections/WasteCollection';
-import Pickups from './Pages/WasteAgent/Sections/Pickups';
+import WasteListings from './Pages/WasteAgent/Sections/WasteListings';
+import MyOrders from './Pages/WasteAgent/Sections/MyOrders';
+import Payments from './Pages/WasteAgent/Sections/Payments';
+import ReviewsRatings from './Pages/WasteAgent/Sections/ReviewsRatings';
 
 
 let router = createBrowserRouter([
@@ -176,54 +176,28 @@ let router = createBrowserRouter([
 		],
 	},
 	{
-		path: "/waste-agent",
+		path: '/waste-agent',
 		Component: WasteAgentLayout,
 		children: [
-			{
+			{ 
 				index: true,
-				Component: WasteAgentDashboard
+				Component: WasteListings
+			},
+			{ 
+				path: 'waste-listings',
+				Component: WasteListings
 			},
 			{
-				path: "dashboard",
-				Component: WasteAgentDashboard
+				path: "my-orders",
+				Component: MyOrders
 			},
 			{
-				path: "waste-collection",
-				Component: WasteCollection
+				path: "payments",
+				Component: Payments
 			},
 			{
-				path: "pickups",
-				Component: Pickups
-			},
-			{
-				path: "routes",
-				element: <div className="p-6"><h1 className="text-2xl font-bold">Routes - Coming Soon</h1></div>
-			},
-			{
-				path: 'processing',
-				children: [
-					{ 
-						path: 'centers',
-						element: <div className="p-6"><h1 className="text-2xl font-bold">Processing Centers - Coming Soon</h1></div>
-					},
-					{ 
-						path: 'schedule',
-						element: <div className="p-6"><h1 className="text-2xl font-bold">Processing Schedule - Coming Soon</h1></div>
-					},
-				],
-			},
-			{
-				path: 'reports',
-				children: [
-					{ 
-						path: 'collection',
-						element: <div className="p-6"><h1 className="text-2xl font-bold">Collection Reports - Coming Soon</h1></div>
-					},
-					{ 
-						path: 'analytics',
-						element: <div className="p-6"><h1 className="text-2xl font-bold">Performance Analytics - Coming Soon</h1></div>
-					},
-				],
+				path: "reviews-ratings",
+				Component: ReviewsRatings
 			},
 		],
 	},

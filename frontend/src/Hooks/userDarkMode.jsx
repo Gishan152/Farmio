@@ -4,7 +4,8 @@ export default function useDarkMode() {
     const [isDarkMode, setIsDarkMode] = useState(() => {
         const stored = localStorage.getItem("theme");
         if (stored) return stored === "dark";
-        return window.matchMedia("(prefers-color-scheme: dark)").matches;
+        // Default to light mode initially instead of checking system preference
+        return false;
     });
 
     const toggleDarkMode = useCallback(() => {

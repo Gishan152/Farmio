@@ -11,7 +11,7 @@ export default function SidebarItem({ label, to, children }) {
             {hasChildren ? (
                 <button
                     onClick={() => setOpen(!open)}
-                    className="flex justify-between items-center w-full gap-3 px-3 py-2 rounded-md text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="flex justify-between items-center w-full gap-3 px-3 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                     <span>{label}</span>
                     <ChevronRightIcon className={`w-4 h-4 ml-2 transform transition ${open ? 'rotate-90' : ''}`} />
@@ -21,8 +21,8 @@ export default function SidebarItem({ label, to, children }) {
                     to={to}
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium ${isActive
-                            ? 'bg-blue-100 text-blue-600'
-                            : 'text-gray-700 hover:bg-gray-100'
+                            ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                         }`
                     }
                 >
