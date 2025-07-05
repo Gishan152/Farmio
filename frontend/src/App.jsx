@@ -28,6 +28,7 @@ import OrderDetails from './Pages/Buyer/Sections/OrderDetails';
 import Requirements from './Pages/Buyer/Sections/Requirements';
 import RequirementDetails from './Pages/Buyer/Sections/RequirementDetails';
 import WarehouseReservationDetails, { warehouseReservationLoader } from './Pages/Buyer/Sections/ReservedStorageDetails';
+import SettingsPage from './Pages/SettingsPage';
 
 
 let router = createBrowserRouter([
@@ -103,14 +104,18 @@ let router = createBrowserRouter([
 		Component: ProductPage
 	},
 	{
+		path: 'settings',
+		Component: SettingsPage
+	},
+	{
 		path: '/buyer',
 		Component: BuyerLayout,
 		children: [
-			{ 
+			{
 				index: true,
 				Component: Crops
 			},
-			{ 
+			{
 				path: 'crops',
 				Component: Crops
 			},
@@ -150,11 +155,11 @@ let router = createBrowserRouter([
 			{
 				path: 'warehouses',
 				children: [
-					{ 
+					{
 						path: 'all',
 						Component: Warehouses
 					},
-					{ 
+					{
 						path: 'reserved',
 						Component: ReservedStorage,
 						loader: reservedLoader
@@ -174,16 +179,16 @@ let router = createBrowserRouter([
 			{
 				path: 'transport',
 				children: [
-					{ 
+					{
 						path: 'providers',
 						Component: TransportProviders,
 						loader: transportProvidersLoader
 					},
-					{ 
+					{
 						path: 'create',
 						Component: CreateTransportJob,
 					},
-					{ 
+					{
 						path: 'schedules',
 						Component: TransportSchedules
 					},
