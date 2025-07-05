@@ -20,6 +20,43 @@ spring:
           uri: lb://auth-service
           predicates:
             - Path=/api/auth/**,/api/user/**
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/order/**
+        - id: crop-service
+          uri: lb://crop-service
+          predicates:
+            - Path=/api/crop/**
+        - id: waste-service
+          uri: lb://waste-service
+          predicates:
+            - Path=/api/waste/**
+        - id: transport-service
+          uri: lb://transport-service
+          predicates:
+            - Path=/api/transport/**
+        - id: warehouse-service
+          uri: lb://warehouse-service
+          predicates:
+            - Path=/api/warehouse/**
+        - id: analytics-service
+          uri: lb://analytics-service
+          predicates:
+            - Path=/api/analytics/**
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payment/**
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notification/**
+        - id: chat-service
+          uri: lb://chat-service
+          predicates:
+            - Path=/api/chat/**
+
   security:
     user:
       name: farmio
