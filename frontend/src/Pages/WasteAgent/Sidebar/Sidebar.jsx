@@ -2,11 +2,11 @@ import { ArrowRightStartOnRectangleIcon, Cog8ToothIcon, UserIcon } from '@heroic
 import SidebarItem from './SidebarItem';
 
 const menu = [
-    { label: 'Waste Listings', to: 'listings' },
+    { label: 'Waste Listings', to: '' },
     { label: 'Browse by Location', to: 'browse-location' },
     { label: 'Browse by Type', to: 'browse-type' },
     { label: 'Saved Listings', to: 'saved' },
-    { label: 'My Orders', to: 'orders' },
+    { label: 'My Orders', to: 'my-orders' },
     {
         label: 'Order Management',
         children: [
@@ -23,7 +23,7 @@ const menu = [
         ],
     },
     { label: 'Payments', to: 'payments' },
-    { label: 'Reviews & Ratings', to: 'reviews' },
+    { label: 'Reviews & Ratings', to: 'reviews-ratings' },
 ];
 
 export default function Sidebar() {

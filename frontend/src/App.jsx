@@ -184,7 +184,7 @@ let router = createBrowserRouter([
 				Component: WasteListings
 			},
 			{ 
-				path: 'waste-listings',
+				path: '',
 				Component: WasteListings
 			},
 			{
