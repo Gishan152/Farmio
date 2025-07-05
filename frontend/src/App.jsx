@@ -29,6 +29,7 @@ import Requirements from './Pages/Buyer/Sections/Requirements';
 import RequirementDetails from './Pages/Buyer/Sections/RequirementDetails';
 import WarehouseReservationDetails, { warehouseReservationLoader } from './Pages/Buyer/Sections/ReservedStorageDetails';
 import SettingsPage from './Pages/SettingsPage';
+import UserContextProvider from './Contexts/UserContext';
 
 
 let router = createBrowserRouter([
@@ -201,7 +202,9 @@ let router = createBrowserRouter([
 
 function App() {
 	return (
-		<RouterProvider router={router} />
+		<UserContextProvider>
+			<RouterProvider router={router} />
+		</UserContextProvider>
 	)
 }
 
