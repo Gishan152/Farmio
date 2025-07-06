@@ -24,7 +24,13 @@ import OrderConfirmation from './Pages/Buyer/Sections/OrderConfirmation';
 import CropTransport from './Pages/Buyer/Sections/CropTransport';
 import Orders from './Pages/Buyer/Sections/Orders';
 import CreateTransportJob from './Pages/Buyer/Sections/CreateTransport';
-
+import TransLayout from './Pages/transporter/TransLayout';
+import Dashboard from './Pages/transporter/Sections/Dashboard';
+import AvailableLoads from './Pages/transporter/Sections/AvailableLoads';
+import AssignedLoads from './Pages/transporter/Sections/AssignedLoads';
+import PickupDropPoints from './Pages/transporter/Sections/PickupDropPoints';
+import ConfirmPickup from './Pages/transporter/Sections/ConfirmPickup';
+import RoutePlanner from './Pages/transporter/Sections/RoutePlanner';
 
 let router = createBrowserRouter([
 	// {
@@ -97,6 +103,57 @@ let router = createBrowserRouter([
 	{
 		path: "/products",
 		Component: ProductPage
+	},{
+		path: '/transporter',
+		Component: TransLayout,
+		children: [
+			{ 
+				index: true,
+				Component: Dashboard
+			},
+			{
+				path: 'dashboard',
+				Component: Dashboard
+			},
+			{
+				path: 'availableLoads',
+				Component: AvailableLoads,
+			},
+			{
+				path: 'assignedLoads',
+				children: [
+					{ 
+						path: 'all',
+						Component: AssignedLoads,
+					},
+					{ 
+						path: 'reserved',
+						Component: ReservedStorage,
+						loader: reservedLoader
+					},
+					{
+						path: ":warehouseId",
+						Component: WarehouseDetails,
+						loader: warehouseDetailsLoader
+					}
+				],
+			},
+			{
+				path:'pickupDropPoints',
+				Component: PickupDropPoints,
+				children:[
+					{
+						path: 'confirm/loadID', 
+						Component: ConfirmPickup
+					}
+				]
+			},
+			{
+				path: 'routePlanner',
+				Component: RoutePlanner
+			}
+			
+		]
 	},
 	{
 		path: '/buyer',
