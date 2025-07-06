@@ -8,6 +8,20 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 
+import { BiExport } from "react-icons/bi";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+import { IoFilter } from "react-icons/io5";
 import {
 	Select,
 	SelectContent,
@@ -15,7 +29,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-
+import { Label } from "@/components/ui/label";
 import { HiDotsVertical } from "react-icons/hi";
 import { ChevronsUpDown, Check } from "lucide-react";
 import {
@@ -45,6 +59,7 @@ import {
 import { Toaster, toast } from "sonner";
 import { Input } from "@/Components/ui/input";
 import { CardDescription, CardTitle } from "@/Components/ui/card";
+import { PopoverAnchor } from "@radix-ui/react-popover";
 
 const WasteListings = () => {
 	const [listings, setListings] = useState([
@@ -239,8 +254,30 @@ const WasteListings = () => {
 					Agricultural Waste Listings
 				</h1>
 				<div className="flex space-x-2">
-					<Button variant="outline">Export Listings</Button>
-					<Button>Create Alert</Button>
+					<AlertDialog>
+						<AlertDialogTrigger className="flex gap-1 items-center">
+							<Button>
+								<BiExport />
+								Generate report
+							</Button>
+						</AlertDialogTrigger>
+						<AlertDialogContent>
+							<AlertDialogHeader>
+								<AlertDialogTitle>
+									Are you absolutely sure?
+								</AlertDialogTitle>
+								<AlertDialogDescription>
+									This action cannot be undone. This will
+									permanently delete your account and remove
+									your data from our servers.
+								</AlertDialogDescription>
+							</AlertDialogHeader>
+							<AlertDialogFooter>
+								<AlertDialogCancel>Cancel</AlertDialogCancel>
+								<AlertDialogAction>Continue</AlertDialogAction>
+							</AlertDialogFooter>
+						</AlertDialogContent>
+					</AlertDialog>
 				</div>
 			</div>
 
@@ -320,14 +357,15 @@ const WasteListings = () => {
 					<CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
 						Waste Listings ({filteredListings.length})
 					</CardTitle>
-          <CardDescription>
-           Browse and reserve agricultural waste from verified farmers across Sri Lanka
-          </CardDescription>
+					<CardDescription>
+						Browse and reserve agricultural waste from verified
+						farmers across Sri Lanka
+					</CardDescription>
 					<div id="waste-search" className="flex mt-5 gap-1">
 						<div className="flex-1">
 							<Input
 								type="text"
-								placeholder="Search waste"
+								placeholder="Search by waste type or material..."
 								value={filters.wasteType}
 								onChange={(e) =>
 									setFilters({
@@ -429,45 +467,13 @@ const WasteListings = () => {
 							</Popover>
 						</div>
 						<div>
-							<Input
-								type="number"
-								placeholder="Min quantity (kg)"
-								value={filters.minQuantity}
-								onChange={(e) =>
-									setFilters({
-										...filters,
-										minQuantity: e.target.value,
-									})
-								}
-								min="0"
-								step="50"
-								className="w-[145px]"
-							/>
-						</div>
-						<div>
-							<Input
-								type="number"
-								placeholder="Max pricing per kg"
-								value={filters.maxPrice}
-								onChange={(e) =>
-									setFilters({
-										...filters,
-										maxPrice: e.target.value,
-									})
-								}
-								min="0"
-								step="0.01"
-								className="w-[155px]"
-							/>
-						</div>
-						<div>
 							<Select
 								value={filters.status}
 								onValueChange={(value) =>
 									setFilters({ ...filters, status: value })
 								}
 							>
-								<SelectTrigger className="w-fit">
+								<SelectTrigger className="w-fit cursor-pointer">
 									<SelectValue placeholder="Status" />
 								</SelectTrigger>
 								<SelectContent>
@@ -484,6 +490,76 @@ const WasteListings = () => {
 								</SelectContent>
 							</Select>
 						</div>
+						<Popover>
+							<PopoverTrigger asChild>
+								<Button variant="default">
+									<IoFilter size="10px" />
+									Filter
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className="w-auto p-4">
+								<div className="flex flex-col">
+									<div className="space-y-2">
+										<h3 className="font-[600] text-lg leading-none">
+											Advance Filter
+										</h3>
+										<p className="text-sm mt-[-5px] text-muted-foreground">
+											Filter by quantity and price range
+										</p>
+									</div>
+									<div className="grid gap-y-3 mt-6">
+										<div className="flex justify-between items-center gap-3">
+											<Label
+												htmlFor="minQuant"
+												className="whitespace-nowrap"
+											>
+												Min quantity(kg)
+											</Label>
+											<Input
+												id="minQuant"
+												type="number"
+												value={filters.minQuantity}
+												onChange={(e) =>
+													setFilters({
+														...filters,
+														minQuantity:
+															e.target.value,
+													})
+												}
+												min="0"
+												step="50"
+												className="w-[100px]"
+												placeholder="250"
+											/>
+										</div>
+										<div className="flex justify-between items-center gap-3">
+											<Label
+												htmlFor="maxPrice"
+												className="whitespace-nowrap"
+											>
+												Max pricing per kg
+											</Label>
+											<Input
+												id="maxPrice"
+												type="number"
+												placeholder="0.15"
+												value={filters.maxPrice}
+												onChange={(e) =>
+													setFilters({
+														...filters,
+														maxPrice:
+															e.target.value,
+													})
+												}
+												min="0"
+												step="0.01"
+												className="w-[100px]"
+											/>
+										</div>
+									</div>
+								</div>
+							</PopoverContent>
+						</Popover>
 					</div>
 				</div>
 
@@ -574,7 +650,10 @@ const WasteListings = () => {
 									<div className="flex justify-end space-x-2">
 										<DropdownMenu>
 											<DropdownMenuTrigger>
-												<Button variant="outline" className="cursor-pointer">
+												<Button
+													variant="outline"
+													className="cursor-pointer"
+												>
 													<HiDotsVertical />
 												</Button>
 											</DropdownMenuTrigger>
