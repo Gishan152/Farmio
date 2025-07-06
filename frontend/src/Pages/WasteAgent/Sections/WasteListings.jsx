@@ -178,7 +178,7 @@ const WasteListings = () => {
 		location: "",
 		minQuantity: "",
 		maxPrice: "",
-		status: "Available",
+		status: "All",
 	});
 
 	const getStatusBadge = (status) => {
@@ -700,7 +700,7 @@ const WasteListings = () => {
 					</TableBody>
 				</Table>
 			</div>
-			<Toaster position="bottom-right" richColors />
+			<Toaster position="bottom-center" richColors />
 		</div>
 	);
 };

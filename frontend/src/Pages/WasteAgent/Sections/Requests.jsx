@@ -8,6 +8,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import NumberFlow from "@number-flow/react";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -242,7 +243,7 @@ const Requests = () => {
 						Pending Requests
 					</h3>
 					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						{pendingCount}
+						<NumberFlow value={pendingCount}/>
 					</p>
 				</div>
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -250,8 +251,8 @@ const Requests = () => {
 						<Check className="h-4 w-4" />
 						Accepted
 					</h3>
-					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						{acceptedCount}
+					<p className="text-6xl text-right mt-2 font-bold text-gray-400" >
+						<NumberFlow value={acceptedCount} />
 					</p>
 				</div>
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -260,7 +261,7 @@ const Requests = () => {
 						Rejected
 					</h3>
 					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						{rejectedCount}
+						<NumberFlow value={rejectedCount} />
 					</p>
 				</div>
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -269,8 +270,8 @@ const Requests = () => {
 						Total Value
 					</h3>
 					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						${requests.filter(r => r.status === 'Accepted')
-							.reduce((sum, r) => sum + parseFloat(r.totalOffer.replace('$', '')), 0)}
+						$<NumberFlow value={requests.filter(r => r.status === 'Accepted')
+							.reduce((sum, r) => sum + parseFloat(r.totalOffer.replace('$', '')), 0)} />
 					</p>
 				</div>
 			</div>
@@ -343,7 +344,6 @@ const Requests = () => {
 							<TableHead>Requester</TableHead>
 							<TableHead>Waste Details</TableHead>
 							<TableHead>Offer</TableHead>
-							<TableHead>Priority</TableHead>
 							<TableHead>Status</TableHead>
 							<TableHead>Request Date</TableHead>
 							<TableHead className="text-right">Actions</TableHead>
@@ -397,11 +397,6 @@ const Requests = () => {
 									</div>
 								</TableCell>
 								<TableCell>
-									<Badge className={`${getUrgencyBadge(request.urgency)} border`} variant="outline">
-										{request.urgency}
-									</Badge>
-								</TableCell>
-								<TableCell>
 									<Badge className={`${getStatusBadge(request.status)} border`} variant="outline">
 										{request.status}
 									</Badge>
@@ -451,7 +446,7 @@ const Requests = () => {
 					</TableBody>
 				</Table>
 			</div>
-			<Toaster position="bottom-right" richColors />
+			<Toaster position="bottom-center" richColors />
 		</div>
 	);
 };

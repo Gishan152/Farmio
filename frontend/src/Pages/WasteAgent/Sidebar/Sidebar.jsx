@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const menu = [
 	{ label: "Listing", to: "listings" },
 	{ label: "Requests", to: "requests" },
-	{ label: "Payments", to: "payments" },
+	{ label: "manage Payments", to: "manage-payments" },
 ];
 
 export default function Sidebar() {
@@ -45,9 +45,9 @@ export default function Sidebar() {
 					</div>
 				</div>
 				<nav className="flex flex-col gap-2">
-					<ul>
+					<ul className="capitalize">
 						{menu.map((item) => (
-							<SidebarItem key={item.label} {...item} />
+							<SidebarItem key={item.label} {...item}/>
 						))}
 					</ul>
 				</nav>

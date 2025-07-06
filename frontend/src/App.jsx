@@ -191,7 +191,7 @@ let router = createBrowserRouter([
 				Component: BrowseDiscover
 			},
 			{
-				path: "payments",
+				path: "manage-payments",
 				Component: Payments
 			},
 			{
