@@ -8,7 +8,8 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 
-import { BiExport } from "react-icons/bi";
+import NumberFlow from "@number-flow/react";
+import { FaTruckMoving } from "react-icons/fa6";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -31,7 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { HiDotsVertical } from "react-icons/hi";
-import { ChevronsUpDown, Check } from "lucide-react";
+import { ChevronsUpDown, Check, Currency } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -257,8 +258,8 @@ const WasteListings = () => {
 					<AlertDialog>
 						<AlertDialogTrigger className="flex gap-1 items-center">
 							<Button>
-								<BiExport />
-								Generate report
+								<FaTruckMoving />
+								Waste requests
 							</Button>
 						</AlertDialogTrigger>
 						<AlertDialogContent>
@@ -287,66 +288,79 @@ const WasteListings = () => {
 					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
 						Available Listings
 					</h3>
-					<p className="text-2xl font-bold text-green-600">
-						{
-							filteredListings.filter(
-								(l) => l.status === "Available"
-							).length
-						}
+					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
+						<NumberFlow
+							value={
+								filteredListings.filter(
+									(l) => l.status === "Available"
+								).length
+							}
+						/>
 					</p>
 				</div>
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
 					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
 						Total Quantity
 					</h3>
-					<p className="text-2xl font-bold text-blue-600">
-						{filteredListings
-							.reduce(
+					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
+						<NumberFlow
+							value={filteredListings.reduce(
 								(total, listing) =>
 									total +
 									parseInt(
 										listing.quantity.replace(/[^\d]/g, "")
 									),
 								0
-							)
-							.toLocaleString()}{" "}
-						kg
+							)}
+							suffix="kg"
+						/>
 					</p>
 				</div>
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
 					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
 						Avg Price/kg
 					</h3>
-					<p className="text-2xl font-bold text-purple-600">
+					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
 						$
-						{(
-							filteredListings.reduce(
-								(total, listing) =>
-									total +
-									parseFloat(
-										listing.pricePerKg.replace("$", "")
-									),
-								0
-							) / filteredListings.length
-						).toFixed(2)}
+						<NumberFlow
+							value={
+								filteredListings.length > 0
+									? parseFloat(
+											(
+												filteredListings.reduce(
+													(total, listing) =>
+														total +
+														parseFloat(
+															listing.pricePerKg.replace(
+																"$",
+																""
+															)
+														),
+													0
+												) / filteredListings.length
+											).toFixed(2)
+									  )
+									: 0
+							}
+						/>
 					</p>
 				</div>
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
 					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
 						Potential Value
 					</h3>
-					<p className="text-2xl font-bold text-green-600">
+					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
 						$
-						{filteredListings
-							.reduce(
+						<NumberFlow
+							value={filteredListings.reduce(
 								(total, listing) =>
 									total +
 									parseFloat(
 										listing.totalValue.replace("$", "")
 									),
 								0
-							)
-							.toLocaleString()}
+							)}
+						/>
 					</p>
 				</div>
 			</div>

@@ -5,7 +5,7 @@ export default function Header() {
     return (
         <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex justify-between items-center">
             <div className="flex items-center">
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Waste Agent Dashboard</h1>
+                <h1 className="text-lg font-medium text-gray-800 dark:text-gray-100">Hello Naleeka</h1>
             </div>
             <div className="flex items-center gap-4">
                 <div className="relative">
@@ -20,7 +20,7 @@ export default function Header() {
                     <BellIcon className="w-6 h-6" />
                     <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
-                <ThemeToggle />
+                {/* <ThemeToggle /> */}
             </div>
         </header>
     );
