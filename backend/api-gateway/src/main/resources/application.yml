@@ -9,6 +9,8 @@ spring:
 
   cloud:
     gateway:
+      default-filters:
+        - name: AuthenticationFilter
       routes:
         - id: product-service
           uri: lb://product-service
@@ -18,6 +20,10 @@ spring:
           uri: lb://auth-service
           predicates:
             - Path=/api/auth/**
+  security:
+    user:
+      name: farmio
+      password: farmio
 
 eureka:
   client:
