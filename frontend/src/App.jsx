@@ -26,9 +26,9 @@ import Orders from './Pages/Buyer/Sections/Orders';
 import CreateTransportJob from './Pages/Buyer/Sections/CreateTransport';
 import WasteAgentLayout from './Pages/WasteAgent/WasteAgentLayout';
 import WasteListings from './Pages/WasteAgent/Sections/WasteListings';
-import MyOrders from './Pages/WasteAgent/Sections/MyOrders';
+import Requests from './Pages/WasteAgent/Sections/Requests';
 import Payments from './Pages/WasteAgent/Sections/Payments';
-import ReviewsRatings from './Pages/WasteAgent/Sections/ReviewsRatings';
+import BrowseDiscover from './Pages/WasteAgent/Sections/BrowseDiscover';
 
 
 let router = createBrowserRouter([
@@ -174,8 +174,7 @@ let router = createBrowserRouter([
 				],
 			},
 		],
-	},
-	{
+	},			{
 		path: '/waste-agent',
 		Component: WasteAgentLayout,
 		children: [
@@ -184,20 +183,20 @@ let router = createBrowserRouter([
 				Component: WasteListings
 			},
 			{ 
-				path: '',
+				path: 'listings',
 				Component: WasteListings
 			},
 			{
-				path: "my-orders",
-				Component: MyOrders
+				path: "browse-discover",
+				Component: BrowseDiscover
 			},
 			{
 				path: "payments",
 				Component: Payments
 			},
 			{
-				path: "reviews-ratings",
-				Component: ReviewsRatings
+				path: "requests",
+				Component: Requests
 			},
 		],
 	},

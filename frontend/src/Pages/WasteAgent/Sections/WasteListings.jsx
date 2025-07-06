@@ -8,8 +8,10 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 
-import NumberFlow from "@number-flow/react";
+import { IoLocationOutline } from "react-icons/io5";
 import { FaTruckMoving } from "react-icons/fa6";
+import NumberFlow from "@number-flow/react";
+import { Badge } from "@/components/ui/badge";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -32,7 +34,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { HiDotsVertical } from "react-icons/hi";
-import { ChevronsUpDown, Check, Currency } from "lucide-react";
+import { ChevronsUpDown, Check } from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -251,34 +253,15 @@ const WasteListings = () => {
 	return (
 		<div className="space-y-6">
 			<div className="flex justify-between items-center">
-				<h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-					Agricultural Waste Listings
-				</h1>
+				<div>
+					<h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+						Agricultural Waste Listings
+					</h1>
+					<p className="text-gray-600 dark:text-gray-300 mt-1">
+						Find available agricultural waste listed by farmers
+					</p>
+				</div>
 				<div className="flex space-x-2">
-					<AlertDialog>
-						<AlertDialogTrigger className="flex gap-1 items-center">
-							<Button>
-								<FaTruckMoving />
-								Waste requests
-							</Button>
-						</AlertDialogTrigger>
-						<AlertDialogContent>
-							<AlertDialogHeader>
-								<AlertDialogTitle>
-									Are you absolutely sure?
-								</AlertDialogTitle>
-								<AlertDialogDescription>
-									This action cannot be undone. This will
-									permanently delete your account and remove
-									your data from our servers.
-								</AlertDialogDescription>
-							</AlertDialogHeader>
-							<AlertDialogFooter>
-								<AlertDialogCancel>Cancel</AlertDialogCancel>
-								<AlertDialogAction>Continue</AlertDialogAction>
-							</AlertDialogFooter>
-						</AlertDialogContent>
-					</AlertDialog>
 				</div>
 			</div>
 
@@ -366,7 +349,7 @@ const WasteListings = () => {
 			</div>
 
 			{/* Listings Table */}
-			<div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+			<div className="bg-white dark:bg-gray-800 rounded-[1.5rem] border border-gray-200 dark:border-gray-700 shadow-sm">
 				<div className="p-4 border-b border-gray-200 dark:border-gray-700">
 					<CardTitle className="text-xl font-semibold text-gray-900 dark:text-gray-100">
 						Waste Listings ({filteredListings.length})
@@ -389,7 +372,7 @@ const WasteListings = () => {
 								}
 							/>
 						</div>
-						<div>
+						<div className="ml-4">
 							<Popover open={open} onOpenChange={setOpen}>
 								<PopoverTrigger asChild>
 									<Button
@@ -398,12 +381,13 @@ const WasteListings = () => {
 										aria-expanded={open}
 										className="w-fit"
 									>
+										<IoLocationOutline className="h-4 w-4 mr-2" />
 										{value
 											? cities.find(
 													(city) =>
 														city.value === value
 											  )?.label
-											: "Select City"}
+											: "Select district"}
 										<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 									</Button>
 								</PopoverTrigger>
@@ -652,13 +636,14 @@ const WasteListings = () => {
 									</div>
 								</TableCell>
 								<TableCell>
-									<span
-										className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(
+									<Badge
+										className={`${getStatusBadge(
 											listing.status
-										)}`}
+										)} leading-normal rounded-full`}
+										variant="outline"
 									>
 										{listing.status}
-									</span>
+									</Badge>
 								</TableCell>
 								<TableCell className="text-right">
 									<div className="flex justify-end space-x-2">

@@ -7,28 +7,9 @@ import SidebarItem from "./SidebarItem";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const menu = [
-	{ label: "Waste Listings", to: "" },
-	{ label: "Browse by Location", to: "browse-location" },
-	{ label: "Browse by Type", to: "browse-type" },
-	{ label: "Saved Listings", to: "saved" },
-	{ label: "My Orders", to: "my-orders" },
-	{
-		label: "Order Management",
-		children: [
-			{ label: "Active Orders", to: "orders/active" },
-			{ label: "Pending Pickup", to: "orders/pending" },
-			{ label: "Completed Orders", to: "orders/completed" },
-		],
-	},
-	{
-		label: "Logistics",
-		children: [
-			{ label: "Pickup Scheduling", to: "logistics/pickup" },
-			{ label: "Transportation", to: "logistics/transport" },
-		],
-	},
+	{ label: "Listing", to: "listings" },
+	{ label: "Requests", to: "requests" },
 	{ label: "Payments", to: "payments" },
-	{ label: "Reviews & Ratings", to: "reviews-ratings" },
 ];
 
 export default function Sidebar() {
