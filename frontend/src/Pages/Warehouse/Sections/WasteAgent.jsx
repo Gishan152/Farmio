@@ -30,7 +30,7 @@ export default function WasteAgent() {
         // Load nearby agents on component mount
         getNearbyAgents(warehouseLocation.lat, warehouseLocation.lon, 50, searchTerm);
         getHireRequests();
-    }, [getNearbyAgents, getHireRequests, searchTerm]);
+    }, [getNearbyAgents, getHireRequests, searchTerm, warehouseLocation.lat, warehouseLocation.lon]);
 
     const handleHireRequest = (agent) => {
         setSelectedAgent(agent);
