@@ -10,6 +10,7 @@ const menu = [
 	{ label: "Listing", to: "listings" },
 	{ label: "Requests", to: "requests" },
 	{ label: "manage Payments", to: "manage-payments" },
+	{ label: "chat", to: "chat" },
 ];
 
 export default function Sidebar() {

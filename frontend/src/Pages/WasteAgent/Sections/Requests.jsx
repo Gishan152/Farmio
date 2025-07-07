@@ -417,6 +417,7 @@ const Requests = () => {
 													className="text-red-600 border-red-200 hover:bg-red-50"
 												>
 													<X className="h-4 w-4" />
+													Reject
 												</Button>
 												<Button
 													size="sm"
@@ -424,6 +425,7 @@ const Requests = () => {
 													className="bg-green-600 hover:bg-green-700"
 												>
 													<Check className="h-4 w-4" />
+													Accept
 												</Button>
 											</>
 										)}

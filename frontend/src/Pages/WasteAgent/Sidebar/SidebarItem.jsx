@@ -20,9 +20,9 @@ export default function SidebarItem({ label, to, children }) {
                 <NavLink
                     to={to}
                     className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium ${isActive
-                            ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400'
-                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        `flex items-center gap-3 px-3 py-2 rounded-md text-sm ${isActive
+                            ? 'bg-green-100 font-semibold dark:bg-green-900 text-green-600 dark:text-green-400'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 font-medium dark:hover:bg-gray-700'
                         }`
                     }
                 >
