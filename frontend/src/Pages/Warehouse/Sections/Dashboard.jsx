@@ -164,7 +164,7 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen p-6">
+        <div className="p-6 bg-gray-50 min-h-screen">
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header with green gradient */}
                 <div className="text-left">

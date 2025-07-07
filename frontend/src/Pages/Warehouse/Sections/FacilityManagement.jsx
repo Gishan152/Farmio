@@ -158,7 +158,7 @@ export default function FacilityManagement() {
     const isModalOpen = showForm || viewingWarehouse || deletingWarehouse;
 
     return (
-        <div className="p-6 bg-white min-h-screen">
+        <div className="p-6 bg-gray-50 min-h-screen ">
             <div className={`max-w-7xl mx-auto space-y-6 transition-all duration-300 ${isModalOpen ? 'backdrop-blur-sm' : ''}`}>
                 {/* Header */}
                 <div className="flex justify-between items-center">
