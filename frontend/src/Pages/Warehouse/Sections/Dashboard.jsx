@@ -168,10 +168,10 @@ export default function Dashboard() {
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header with green gradient */}
                 <div className="text-left">
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">
+                    <h1 className="text-3xl font-bold text-gray-800">
                         Warehouse Dashboard
                     </h1>
-                    <p className="text-gray-600 dark:text-gray-300 mt-2 text-lg">
+                    <p className="text-gray-600 mt-1">
                         Complete overview of your warehouse operations
                     </p>
                 </div>
