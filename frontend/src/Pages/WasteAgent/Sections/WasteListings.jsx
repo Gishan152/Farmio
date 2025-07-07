@@ -12,18 +12,6 @@ import { IoLocationOutline } from "react-icons/io5";
 import { FaTruckMoving } from "react-icons/fa6";
 import NumberFlow from "@number-flow/react";
 import { Badge } from "@/components/ui/badge";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-
 import { IoFilter } from "react-icons/io5";
 import {
 	Select,
@@ -579,7 +567,7 @@ const WasteListings = () => {
 		location: "",
 		minQuantity: "",
 		maxPrice: "",
-		status: "Accepted", // Default to showing accepted requests
+		status: "Accepted",
 	});
 
 	const getStatusBadge = (status) => {
@@ -654,6 +642,7 @@ const WasteListings = () => {
 	};
 
 	const filteredListings = listings.filter((listing) => {
+
 		return (
 			(filters.wasteType === "" ||
 				listing.wasteType

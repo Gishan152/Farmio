@@ -18,6 +18,8 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Popover, PopoverTrigger, PopoverContent } from "@/Components/ui/popover";
+import { IoLocationOutline } from "react-icons/io5";
 import {
 	Select,
 	SelectContent,
@@ -35,6 +37,7 @@ import {
 	MapPin,
 	Package,
 	DollarSign,
+	ChevronsUpDown,
 } from "lucide-react";
 import { HiDotsVertical } from "react-icons/hi";
 import {
@@ -43,6 +46,15 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+	Command,
+	CommandEmpty,
+	CommandGroup,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 const Requests = () => {
 	const [requests, setRequests] = useState([
@@ -157,10 +169,41 @@ const Requests = () => {
 		},
 	]);
 
+	const cities = [
+		{ value: "colombo", label: "Colombo" },
+		{ value: "gampaha", label: "Gampaha" },
+		{ value: "kalutara", label: "Kalutara" },
+		{ value: "kandy", label: "Kandy" },
+		{ value: "matale", label: "Matale" },
+		{ value: "nuwara_eliya", label: "Nuwara Eliya" },
+		{ value: "galle", label: "Galle" },
+		{ value: "matara", label: "Matara" },
+		{ value: "hambantota", label: "Hambantota" },
+		{ value: "jaffna", label: "Jaffna" },
+		{ value: "kilinochchi", label: "Kilinochchi" },
+		{ value: "mannar", label: "Mannar" },
+		{ value: "vavuniya", label: "Vavuniya" },
+		{ value: "mullaitivu", label: "Mullaitivu" },
+		{ value: "batticaloa", label: "Batticaloa" },
+		{ value: "ampara", label: "Ampara" },
+		{ value: "trincomalee", label: "Trincomalee" },
+		{ value: "kurunegala", label: "Kurunegala" },
+		{ value: "puttalam", label: "Puttalam" },
+		{ value: "anuradhapura", label: "Anuradhapura" },
+		{ value: "polonnaruwa", label: "Polonnaruwa" },
+		{ value: "badulla", label: "Badulla" },
+		{ value: "monaragala", label: "Monaragala" },
+		{ value: "ratnapura", label: "Ratnapura" },
+		{ value: "kegalle", label: "Kegalle" },
+	];
+	const [open, setOpen] = useState(false);
+    const [selectedDistrict, setSelectedDistrict] = useState("");
+
 	const [filters, setFilters] = useState({
 		status: "All",
 		urgency: "All",
 		wasteType: "",
+		location: "", // Add location filter
 	});
 
 	const handleRequestAction = (requestId, action) => {
@@ -201,6 +244,10 @@ const Requests = () => {
 	};
 
 	const filteredRequests = requests.filter((request) => {
+		// Get selected district label
+		const selectedDistrictLabel = selectedDistrict ? 
+			cities.find(city => city.value === selectedDistrict)?.label : "";
+
 		return (
 			(filters.status === "All" || request.status === filters.status) &&
 			(filters.urgency === "All" ||
@@ -208,7 +255,15 @@ const Requests = () => {
 			(filters.wasteType === "" ||
 				request.wasteType
 					.toLowerCase()
-					.includes(filters.wasteType.toLowerCase()))
+					.includes(filters.wasteType.toLowerCase()) ||
+				request.requesterName
+					.toLowerCase()
+					.includes(filters.wasteType.toLowerCase()) ||
+				request.requesterLocation
+					.toLowerCase()
+					.includes(filters.wasteType.toLowerCase())) &&
+			(selectedDistrictLabel === "" ||
+				request.requesterLocation.toLowerCase() === selectedDistrictLabel.toLowerCase())
 		);
 	});
 
@@ -298,6 +353,73 @@ const Requests = () => {
 									})
 								}
 							/>
+						</div>
+						<div className="ml-4">
+							<Popover open={open} onOpenChange={setOpen}>
+								<PopoverTrigger asChild>
+									<Button
+										variant="outline"
+										role="combobox"
+										aria-expanded={open}
+										className="w-fit"
+									>
+										<IoLocationOutline className="h-4 w-4 mr-2" />
+										{selectedDistrict
+											? cities.find(
+													(city) =>
+														city.value === selectedDistrict
+											  )?.label
+											: "Select district"}
+										<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+									</Button>
+								</PopoverTrigger>
+								<PopoverContent className="w-[200px] p-0">
+									<Command>
+										<CommandInput placeholder="Search district..." />
+										<CommandList>
+											<CommandEmpty>
+												No district found.
+											</CommandEmpty>
+											<CommandGroup>
+												{cities
+													.sort((a, b) =>
+														a.label.localeCompare(
+															b.label
+														)
+													)
+													.map((city) => (
+														<CommandItem
+															key={city.value}
+															value={city.value}
+															onSelect={(
+																currentValue
+															) => {
+																setSelectedDistrict(
+																	currentValue ===
+																		selectedDistrict
+																		? ""
+																		: currentValue
+																);
+																setOpen(false);
+															}}
+														>
+															<Check
+																className={cn(
+																	"mr-2 h-4 w-4",
+																	selectedDistrict ===
+																		city.value
+																		? "opacity-100"
+																		: "opacity-0"
+																)}
+															/>
+															{city.label}
+														</CommandItem>
+													))}
+											</CommandGroup>
+										</CommandList>
+									</Command>
+								</PopoverContent>
+							</Popover>
 						</div>
 						<div>
 							<Select
