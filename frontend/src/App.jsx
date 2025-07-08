@@ -35,6 +35,35 @@ import WasteAgent from './Pages/Warehouse/Sections/WasteAgent';
 import Notifications from './Pages/Warehouse/Sections/Notifications';
 import Analytics from './Pages/Warehouse/Sections/Analytics';
 
+// Admin imports
+import AdminLogin from './Pages/admin/Login';
+import AdminDashboard from './Pages/admin/Dashboard';
+import UserManagementHome from './Pages/admin/users/index';
+import FarmerManagement from './Pages/admin/users/Farmers';
+import BuyerManagement from './Pages/admin/users/Buyers';
+import TransportProviderManagement from './Pages/admin/users/TransportProviders';
+import WarehouseOwnerManagement from './Pages/admin/users/WarehouseOwners';
+import WasteManagementAgentManagement from './Pages/admin/users/WasteManagementAgents';
+import ModeratorManagement from './Pages/admin/users/Moderators';
+import AdminManagement from './Pages/admin/users/Admins';
+import ProductsManagementWithErrorHandling from './Pages/admin/products/index';
+import OrdersManagement from './Pages/admin/orders/index';
+import AnalyticsPage from './Pages/admin/analytics/index';
+import SettingsPage from './Pages/admin/settings/index';
+
+// Moderator imports (placeholder components for empty files)
+const ModeratorLogin = () => <div>Moderator Login - Coming Soon</div>;
+const ModeratorDashboard = () => <div>Moderator Dashboard - Coming Soon</div>;
+const ModeratorProducts = () => <div>Moderator Products - Coming Soon</div>;
+const ModeratorProductReview = () => <div>Moderator Product Review - Coming Soon</div>;
+const ModeratorProductQuality = () => <div>Moderator Product Quality - Coming Soon</div>;
+const ModeratorOrders = () => <div>Moderator Orders - Coming Soon</div>;
+const ModeratorSupport = () => <div>Moderator Support - Coming Soon</div>;
+const ModeratorSettings = () => <div>Moderator Settings - Coming Soon</div>;
+
+
+
+
 let router = createBrowserRouter([
 	// {
 	//   path: "/",
@@ -217,6 +246,119 @@ let router = createBrowserRouter([
         }
     ],
 },
+
+// Add Admin routes
+{
+    path: '/admin',
+    children: [
+        {
+            path: 'login',
+            Component: AdminLogin
+        },
+        {
+            path: 'dashboard',
+            Component: AdminDashboard
+        },
+        {
+            path: 'users',
+            children: [
+                {
+                    index: true,
+                    Component: UserManagementHome
+                },
+                {
+                    path: 'farmers',
+                    Component: FarmerManagement
+                },
+                {
+                    path: 'buyers',
+                    Component: BuyerManagement
+                },
+                {
+                    path: 'transport-providers',
+                    Component: TransportProviderManagement
+                },
+                {
+                    path: 'warehouse-owners',
+                    Component: WarehouseOwnerManagement
+                },
+                {
+                    path: 'waste-management-agents',
+                    Component: WasteManagementAgentManagement
+                },
+                {
+                    path: 'moderators',
+                    Component: ModeratorManagement
+                },
+                {
+                    path: 'admins',
+                    Component: AdminManagement
+                }
+            ]
+        },
+        {
+            path: 'products',
+            Component: ProductsManagementWithErrorHandling
+        },
+        {
+            path: 'orders',
+            Component: OrdersManagement
+        },
+        {
+            path: 'analytics',
+            Component: AnalyticsPage
+        },
+        {
+            path: 'settings',
+            Component: SettingsPage
+        }
+    ]
+},
+// Add Moderator routes
+{
+    path: '/moderator',
+    children: [
+        {
+            path: 'login',
+            Component: ModeratorLogin
+        },
+        {
+            path: 'dashboard',
+            Component: ModeratorDashboard
+        },
+        {
+            path: 'products',
+            children: [
+                {
+                    index: true,
+                    Component: ModeratorProducts
+                },
+                {
+                    path: 'review',
+                    Component: ModeratorProductReview
+                },
+                {
+                    path: 'quality',
+                    Component: ModeratorProductQuality
+                }
+            ]
+        },
+        {
+            path: 'orders',
+            Component: ModeratorOrders
+        },
+        {
+            path: 'support',
+            Component: ModeratorSupport
+        },
+        {
+            path: 'settings',
+            Component: ModeratorSettings
+        }
+    ]
+}
+
+
 ]);
 
 
