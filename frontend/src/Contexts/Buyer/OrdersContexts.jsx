@@ -146,8 +146,8 @@ const OrderContextProvider = ({ children }) => {
 
 	console.log("orders context : ", orders)
 
-	const addOrder = (item) => {
-		setOrders([...orders, item])
+	const addOrder = (order) => {
+		setOrders([...orders, order])
 	}
 
 	const removeOrder = id => setOrders(orders.filter(i => i.id !== id));

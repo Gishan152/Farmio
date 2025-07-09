@@ -1,17 +1,22 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSavesContext } from "../../../Contexts/Buyer/SavesContext";
 import { } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { CheckBadgeIcon, CheckCircleIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { useToast } from "../../../Contexts/ToastContext";
+import { useOrderContext } from "../../../Contexts/Buyer/OrdersContexts";
 
 const FREE_SHIPPING_THRESHOLD = 85;
 
 const OrderConfirmation = () => {
 
     const [subtotal, setSubtotal] = useState(0);
+    const {orders, addOrder} = useOrderContext();
     const [orderPlaced, setOrderPlaced] = useState(false)
-    const { items } = useSavesContext()
+    // const { items } = useSavesContext()
+    const location = useLocation();
+    console.log("location : ", location)
+    const { items } = location.state;
     const navigate = useNavigate()
 
     const { push } = useToast();
@@ -22,6 +27,19 @@ const OrderConfirmation = () => {
 
     const progress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
     const remaining = Math.max(FREE_SHIPPING_THRESHOLD - subtotal, 0);
+
+    const handlePlaceOrder = () => {
+        addOrder({
+            id: String(orders.length),
+            paymentStatus: "Pending",
+            total: subtotal,
+            items
+        })
+        push("⚡ Order placed")
+        setTimeout(() => {
+            setOrderPlaced(true)
+        }, 2000)
+    }
 
     const handlePayment = () => {
         navigate("../transport-confirmation")
@@ -45,7 +63,7 @@ const OrderConfirmation = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {items.filter(v=>!v.unchecked).map(item => (
+                        {items.map(item => (
                             <tr key={item.id} className="bg-white dark:bg-gray-800 rounded-lg">
                                 <td className="flex items-center space-x-4 p-4">
                                     <img src={item.imageUrl} alt="" className="w-20 h-20 object-cover rounded" />
@@ -85,12 +103,7 @@ const OrderConfirmation = () => {
                         </button>
                         :
                         <button
-                            onClick={() => {
-                                push("⚡ Order placed")
-                                setTimeout(() => {
-                                    setOrderPlaced(true)
-                                }, 2000)
-                            }}
+                            onClick={handlePlaceOrder}
                             className="mt-4 w-full py-3 bg-green-600 text-white rounded hover:bg-green-700 transition"
                         >
                             Place Order

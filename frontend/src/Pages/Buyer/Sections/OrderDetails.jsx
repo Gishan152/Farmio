@@ -3,11 +3,13 @@ import { PlusIcon, MinusIcon, TrashIcon } from "@heroicons/react/24/solid";
 import wheat from "../../../Assets/Buyer/Crops/wheat.webp";
 import { Link, useParams } from "react-router-dom";
 import { useOrderContext } from "../../../Contexts/Buyer/OrdersContexts";
+import { useTransportsContext } from "../../../Contexts/Buyer/TransportContext";
 
 const FREE_SHIPPING_THRESHOLD = 85;
 
 export default function OrderDetails() {
     const {orders, changeTransport} = useOrderContext();
+    const {addJob} = useTransportsContext();
     const {orderId} = useParams();
 
     const order = orders.find(order => order.id === orderId) 
@@ -27,9 +29,15 @@ export default function OrderDetails() {
         setSubtotal(items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0));
     }, [items]);
 
-    const handleCreateTransport = (orderId, items) => {
-        console.log("Creating transport for order", orderId, items);
+    const handleCreateTransport = (orderId) => {
+        console.log("Creating transport for order", orderId);
         // call API or dispatch action...
+        addJob({
+            pickupLocations: ["farm1", "farm2", "farm3"],
+            dropOffLocation: "buyer location",
+            orderId,
+            items
+        })
     };
 
     return (
@@ -70,6 +78,7 @@ export default function OrderDetails() {
                     <div className="flex gap-5 items-start">
                         {order.paymentStatus != "Paid" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md">Pay</button>}
                         <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={openModel}>Add transport</button>
+                        <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={openModel}>Confirm Delivery</button>
                     </div>
                 </div>
                 <h3 className="text-2xl font-medium mt-8">Order Items</h3>
@@ -96,7 +105,7 @@ export default function OrderDetails() {
                                 </td>
                                 <td className="p-4 font-semibold">Rs. {(item.pricePerUnit * item.quantity).toFixed(2)}</td>
                                 <td>Pending</td>
-                                <td><button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md">Confirm Delivery</button></td>
+                                {/* <td><button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md">Confirm Delivery</button></td> */}
                             </tr>
                         ))}
                     </tbody>
@@ -135,9 +144,9 @@ function TransportJobModal({ isOpen, onClose, order, onCreate }) {
     };
 
     const handleCreate = () => {
-        const items = order.items.filter(i => selectedItems[i.id]);
-        if (items.length === 0) return;
-        onCreate(order.id, items);
+        // const items = order.items.filter(i => selectedItems[i.id]);
+        // if (items.length === 0) return;
+        onCreate(order.id);
         onClose();
     };
 
@@ -149,9 +158,9 @@ function TransportJobModal({ isOpen, onClose, order, onCreate }) {
 
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6 z-10">
                 <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">
-                    Select items from Order {order.id}
+                    Create a transport job(s) for Order {order.id}
                 </h2>
-                <div className="max-h-64 overflow-y-auto">
+                {/* <div className="max-h-64 overflow-y-auto">
                     {order.items.map(item => (
                         <div
                             key={item.id}
@@ -171,7 +180,7 @@ function TransportJobModal({ isOpen, onClose, order, onCreate }) {
                             </div>
                         </div>
                     ))}
-                </div>
+                </div> */}
                 <div className="mt-4 flex justify-end space-x-2">
                     <button
                         onClick={onClose}
@@ -181,7 +190,7 @@ function TransportJobModal({ isOpen, onClose, order, onCreate }) {
                     </button>
                     <button
                         onClick={handleCreate}
-                        disabled={!Object.values(selectedItems).some(Boolean)}
+                        // disabled={!Object.values(selectedItems).some(Boolean)}
                         className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
                     >
                         Create Transport Jobs

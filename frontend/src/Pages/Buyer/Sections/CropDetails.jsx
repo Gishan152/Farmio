@@ -1,5 +1,5 @@
-import React from "react";
-import { useLoaderData, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useLoaderData, Link, useNavigate } from "react-router-dom";
 import {
     StarIcon,
     CheckBadgeIcon,
@@ -32,7 +32,7 @@ const relatedCrops = [
     {
         id: 'CROP-201',
         type: 'Wheat',
-        price: 10.0,
+        pricePerUnit: 10.0,
         farm: 'Golden Fields',
         location: 'Kansas, USA',
         rating: 4.2,
@@ -44,7 +44,7 @@ const relatedCrops = [
     {
         id: 'CROP-202',
         type: 'Rice',
-        price: 11.5,
+        pricePerUnit: 11.5,
         farm: 'Riverbank Farm',
         location: 'Arkansas, USA',
         rating: 4.8,
@@ -56,7 +56,7 @@ const relatedCrops = [
     {
         id: 'CROP-203',
         type: 'Barley',
-        price: 9.75,
+        pricePerUnit: 9.75,
         farm: 'Mountain Grain',
         location: 'Colorado, USA',
         rating: 4.1,
@@ -68,7 +68,7 @@ const relatedCrops = [
     {
         id: 'CROP-204',
         type: 'Corn',
-        price: 12.5,
+        pricePerUnit: 12.5,
         farm: 'Sunny Farm',
         location: 'Iowa, USA',
         rating: 4.5,
@@ -80,7 +80,7 @@ const relatedCrops = [
     {
         id: 'CROP-205',
         type: 'Soybean',
-        price: 14.0,
+        pricePerUnit: 14.0,
         farm: 'Green Acre',
         location: 'Illinois, USA',
         rating: 4.3,
@@ -94,16 +94,20 @@ const relatedCrops = [
 
 export async function cropDetailsLoader({ params }) {
     const { cropId } = params;
+
     return {
         id: cropId,
         type: "Corn",
-        price: 12.5,
+        pricePerUnit: 12.5,
         farm: "Sunny Farm",
         location: "Iowa, USA",
         rating: 4.5,
         verified: true,
         imageUrl: corn,
-        badges: ["Organic", "Non‑GMO"],
+        unitMeasurement: "kg",
+        transpotationAvailable: true,
+        returnsAccepted: false,
+        badges: ["Organic", "Non-GMO"],
         stock: 120,
         sku: "CRN-001",
         description:
@@ -117,9 +121,16 @@ export async function cropDetailsLoader({ params }) {
 }
 
 export default function CropDetails() {
+    const [open, setOpen] = useState();
     const crop = useLoaderData();
+    const navigate = useNavigate();
 
     const { items: savedItems, addItem, removeItem } = useSavesContext();
+    const handleBuy = (qty) => {
+        const item = crop;
+        item.quantity = qty;
+        navigate("../order-confirmation", { state: { items: [item] } })
+    }
 
     return (
         <div className="p-6 max-w-5xl mx-auto space-y-8">
@@ -143,7 +154,7 @@ export default function CropDetails() {
                 <div className="space-y-4">
                     <h1 className="text-4xl font-bold dark:text-gray-100">{crop.type}</h1>
                     <div className="flex items-center space-x-4">
-                        <span className="text-2xl font-semibold dark:text-gray-200">${crop.price.toFixed(2)}/kg</span>
+                        <span className="text-2xl font-semibold dark:text-gray-200">${crop.pricePerUnit.toFixed(2)}/kg</span>
                         <span className="px-2 py-1 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 rounded text-xs">
                             In stock: {crop.stock} kg
                         </span>
@@ -161,6 +172,12 @@ export default function CropDetails() {
                             :
                             <button className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700" onClick={() => addItem(crop, 0)}>Add to Saves</button>
                         }
+                        <button
+                            onClick={()=>setOpen(true)}
+                            className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
+                        >
+                            Buy now
+                        </button>
                         <button className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600">Contact Farmer</button>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -211,12 +228,18 @@ export default function CropDetails() {
             {/* Related Products Placeholder */}
             <div className="space-y-4">
                 <h2 className="text-2xl font-semibold dark:text-gray-100">You May Also Like</h2>
-                <div className="flex space-x-4 overflow-x-auto pb-2">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {relatedCrops.map(crop => (
                         <RelatedCropCard key={crop.id} crop={crop} />
                     ))}
                 </div>
             </div>
+
+            <QuantityModal
+                isOpen={open}
+                onClose={() => setOpen(false)}
+                onConfirm={handleBuy}
+            />
 
         </div>
     );
@@ -245,7 +268,7 @@ function RelatedCropCard({ crop }) {
                     </h2>
                 </Link>
                 <p className="text-lg font-semibold dark:text-gray-200">
-                    Rs {crop.price.toFixed(2)}
+                    Rs {crop.pricePerUnit.toFixed(2)}
                 </p>
 
                 <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -266,6 +289,72 @@ function RelatedCropCard({ crop }) {
                             {badge}
                         </span>
                     ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function QuantityModal({ isOpen, onClose, onConfirm }) {
+    const [qty, setQty] = useState(10);
+    const [error, setError] = useState('');
+
+    // Reset when modal opens
+    useEffect(() => {
+        if (!isOpen) {
+            setQty(10);
+            setError('');
+        }
+    }, [isOpen]);
+
+    const handleConfirm = () => {
+        if (qty < 10) {
+            setError('Minimum quantity is 10 kg');
+            return;
+        }
+        onConfirm(qty);
+        onClose();
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div
+                className="absolute inset-0 bg-black opacity-50"
+                onClick={onClose}
+            />
+
+            <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6 z-10">
+                <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">
+                    Select Quantity (kg)
+                </h2>
+
+                <input
+                    type="number"
+                    min="10"
+                    value={qty}
+                    onChange={e => {
+                        setQty(+e.target.value);
+                        if (error) setError('');
+                    }}
+                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+
+                <div className="mt-6 flex justify-end space-x-2">
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleConfirm}
+                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                    >
+                        Add to Saves
+                    </button>
                 </div>
             </div>
         </div>

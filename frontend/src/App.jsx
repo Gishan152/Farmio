@@ -25,11 +25,12 @@ import CropTransport from './Pages/Buyer/Sections/CropTransport';
 import Orders from './Pages/Buyer/Sections/Orders';
 import CreateTransportJob from './Pages/Buyer/Sections/CreateTransport';
 import OrderDetails from './Pages/Buyer/Sections/OrderDetails';
-import Requirements from './Pages/Buyer/Sections/Requirements';
-import RequirementDetails from './Pages/Buyer/Sections/RequirementDetails';
+import Requests from './Pages/Buyer/Sections/Requests';
+import RequestDetails from './Pages/Buyer/Sections/RequestDetails';
 import WarehouseReservationDetails, { warehouseReservationLoader } from './Pages/Buyer/Sections/ReservedStorageDetails';
 import SettingsPage from './Pages/SettingsPage';
 import UserContextProvider from './Contexts/UserContext';
+import TransportJobDetails from './Pages/Buyer/Sections/TransportJobDetails';
 
 
 let router = createBrowserRouter([
@@ -146,12 +147,12 @@ let router = createBrowserRouter([
 				Component: CropTransport
 			},
 			{
-				path: "requirements",
-				Component: Requirements
+				path: "requests",
+				Component: Requests
 			},
 			{
-				path: "requirements/:requirementId",
-				Component: RequirementDetails
+				path: "requests/:requestId",
+				Component: RequestDetails
 			},
 			{
 				path: 'warehouses',
@@ -192,6 +193,10 @@ let router = createBrowserRouter([
 					{
 						path: 'schedules',
 						Component: TransportSchedules
+					},
+					{
+						path: 'schedules/:jobId',
+						Component: TransportJobDetails
 					},
 				],
 			},
