@@ -225,7 +225,7 @@ const AgentProfile = () => {
         {/* Personal Information */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center text-xl gap-1">
               <User className="h-5 w-5" />
               Personal Information
             </CardTitle>
@@ -321,7 +321,7 @@ const AgentProfile = () => {
         {/* Verification Status */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex text-xl items-center gap-2">
               <Shield className="h-5 w-5" />
               Verification Status
             </CardTitle>
@@ -368,7 +368,7 @@ const AgentProfile = () => {
         {/* Business Information */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex text-xl items-center gap-2">
               <Building className="h-5 w-5" />
               Business Information
             </CardTitle>
@@ -416,9 +416,9 @@ const AgentProfile = () => {
         </Card>
 
         {/* Financial Information */}
-        <Card>
+        <Card className="gap-3">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex text-xl items-center gap-2">
               <DollarSign className="h-5 w-5" />
               Payment & Incentives
             </CardTitle>
@@ -502,7 +502,7 @@ const AgentProfile = () => {
         {/* Location Information */}
         <Card className="lg:col-span-3">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex text-xl items-center gap-2">
               <MapPin className="h-5 w-5" />
               Location & Service Area
             </CardTitle>
@@ -573,7 +573,7 @@ const AgentProfile = () => {
                   onChange={(e) => handleInputChange('gpsPickupRange', e.target.value)}
                 />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
                 <Label htmlFor="willingToTravel">Willing to travel for pickups</Label>
                 <Switch
                   id="willingToTravel"
@@ -588,7 +588,7 @@ const AgentProfile = () => {
         {/* Service Details */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex text-xl items-center gap-2">
               <Truck className="h-5 w-5" />
               Service Details
             </CardTitle>
@@ -653,17 +653,17 @@ const AgentProfile = () => {
         </Card>
 
         {/* Availability & Preferences */}
-        <Card>
+        <Card className="gap-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex text-xl items-center gap-2">
               <Clock className="h-5 w-5" />
               Availability
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <div>Available Pickup Days</div>
-              <div className="space-y-2">
+              <div className='text-gray-500'>Available Pickup Days</div>
+              <div className="space-y-1">
                 {daysOfWeek.map(day => (
                   <div key={day} className="flex items-center space-x-2">
                     <Checkbox
@@ -678,7 +678,7 @@ const AgentProfile = () => {
             </div>
 
             <div className="space-y-2">
-              <Label>Available Time Slots</Label>
+              <div className='text-gray-500'>Available Time Slots</div>
               <div className="space-y-2">
                 {timeSlots.map(slot => (
                   <div key={slot} className="flex items-center space-x-2">
@@ -698,7 +698,7 @@ const AgentProfile = () => {
         {/* Notification Preferences */}
         <Card className="lg:col-span-3">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex text-xl items-center gap-2">
               <Settings className="h-5 w-5" />
               Preferences & Notifications
             </CardTitle>
@@ -708,7 +708,7 @@ const AgentProfile = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
                 <Label htmlFor="emailNotifications">Email Notifications</Label>
                 <Switch
                   id="emailNotifications"
@@ -716,7 +716,7 @@ const AgentProfile = () => {
                   onCheckedChange={(checked) => handleInputChange('emailNotifications', checked)}
                 />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
                 <Label htmlFor="smsNotifications">SMS Notifications</Label>
                 <Switch
                   id="smsNotifications"
@@ -724,7 +724,7 @@ const AgentProfile = () => {
                   onCheckedChange={(checked) => handleInputChange('smsNotifications', checked)}
                 />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
                 <Label htmlFor="pushNotifications">Push Notifications</Label>
                 <Switch
                   id="pushNotifications"
@@ -732,7 +732,7 @@ const AgentProfile = () => {
                   onCheckedChange={(checked) => handleInputChange('pushNotifications', checked)}
                 />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
                 <Label htmlFor="messagingAvailability">Messaging Availability</Label>
                 <Switch
                   id="messagingAvailability"
@@ -741,7 +741,7 @@ const AgentProfile = () => {
                 />
               </div>
             </div>
-            <div className="flex items-center justify-between max-w-md">
+            <div className="flex items-center gap-4 max-w-md">
               <Label htmlFor="darkModePreference">Dark Mode</Label>
               <Switch
                 id="darkModePreference"
