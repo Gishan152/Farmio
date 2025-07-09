@@ -59,7 +59,7 @@ const Table = ({
               >
                 {columns.map((column, colIndex) => (
                   <td key={colIndex} className="px-4 py-3 whitespace-nowrap">
-                    {column.cell ? column.cell(row) : row[column.accessor]}
+                    {column.render ? column.render(row[column.key], row) : row[column.key]}
                   </td>
                 ))}
               </tr>

@@ -42,6 +42,7 @@ const OrdersManagement = () => {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [selectedTab, setSelectedTab] = useState('all');
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
 
   // Sample order data
   const orders = [
@@ -55,7 +56,17 @@ const OrdersManagement = () => {
       status: 'Pending',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-25',
-      transport: 'Fast Track Logistics'
+      transport: 'Fast Track Logistics',
+      orderDetails: [
+        { product: 'Organic Tomatoes', quantity: 50, unit: 'kg', price: '$4.50/kg', total: '$225.00' },
+        { product: 'Fresh Lettuce', quantity: 40, unit: 'kg', price: '$3.20/kg', total: '$128.00' },
+        { product: 'Carrots', quantity: 60, unit: 'kg', price: '$2.75/kg', total: '$165.00' },
+        { product: 'Red Onions', quantity: 45, unit: 'kg', price: '$3.10/kg', total: '$139.50' },
+        { product: 'Bell Peppers', quantity: 35, unit: 'kg', price: '$4.80/kg', total: '$168.00' },
+        { product: 'Cucumbers', quantity: 55, unit: 'kg', price: '$2.90/kg', total: '$159.50' },
+        { product: 'Potatoes', quantity: 80, unit: 'kg', price: '$1.95/kg', total: '$156.00' },
+        { product: 'Green Beans', quantity: 30, unit: 'kg', price: '$3.50/kg', total: '$105.00' }
+      ]
     },
     {
       id: 'ORD-10044',
@@ -67,7 +78,16 @@ const OrdersManagement = () => {
       status: 'Processing',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-24',
-      transport: 'Green Mile Transports'
+      transport: 'Green Mile Transports',
+      orderDetails: [
+        { product: 'Organic Apples', quantity: 35, unit: 'kg', price: '$3.75/kg', total: '$131.25' },
+        { product: 'Free-Range Eggs', quantity: 40, unit: 'dozen', price: '$4.50/dozen', total: '$180.00' },
+        { product: 'Honey', quantity: 15, unit: 'liter', price: '$12.00/liter', total: '$180.00' },
+        { product: 'Fresh Basil', quantity: 10, unit: 'kg', price: '$8.50/kg', total: '$85.00' },
+        { product: 'Cherry Tomatoes', quantity: 20, unit: 'kg', price: '$5.20/kg', total: '$104.00' },
+        { product: 'Zucchini', quantity: 25, unit: 'kg', price: '$3.10/kg', total: '$77.50' },
+        { product: 'Sweet Corn', quantity: 30, unit: 'dozen', price: '$3.95/dozen', total: '$118.50' }
+      ]
     },
     {
       id: 'ORD-10043',
@@ -79,7 +99,13 @@ const OrdersManagement = () => {
       status: 'Shipped',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-22',
-      transport: 'Rural Routes Delivery'
+      transport: 'Rural Routes Delivery',
+      orderDetails: [
+        { product: 'Strawberries', quantity: 20, unit: 'kg', price: '$6.80/kg', total: '$136.00' },
+        { product: 'Blueberries', quantity: 15, unit: 'kg', price: '$8.50/kg', total: '$127.50' },
+        { product: 'Blackberries', quantity: 10, unit: 'kg', price: '$7.90/kg', total: '$79.00' },
+        { product: 'Raspberries', quantity: 8, unit: 'kg', price: '$8.75/kg', total: '$70.00' }
+      ]
     },
     {
       id: 'ORD-10042',
@@ -91,7 +117,12 @@ const OrdersManagement = () => {
       status: 'Delivered',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-21',
-      transport: 'Fast Track Logistics'
+      transport: 'Fast Track Logistics',
+      orderDetails: [
+        { product: 'Organic Spinach', quantity: 25, unit: 'kg', price: '$4.25/kg', total: '$106.25' },
+        { product: 'Kale', quantity: 15, unit: 'kg', price: '$3.50/kg', total: '$52.50' },
+        { product: 'Fresh Mint', quantity: 10, unit: 'kg', price: '$4.00/kg', total: '$40.00' }
+      ]
     },
     {
       id: 'ORD-10041',
@@ -103,7 +134,19 @@ const OrdersManagement = () => {
       status: 'Delivered',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-20',
-      transport: 'Swift Stream Logistics'
+      transport: 'Swift Stream Logistics',
+      orderDetails: [
+        { product: 'Organic Potatoes', quantity: 100, unit: 'kg', price: '$2.10/kg', total: '$210.00' },
+        { product: 'Onions', quantity: 80, unit: 'kg', price: '$1.75/kg', total: '$140.00' },
+        { product: 'Garlic', quantity: 30, unit: 'kg', price: '$5.50/kg', total: '$165.00' },
+        { product: 'Sweet Potatoes', quantity: 70, unit: 'kg', price: '$2.80/kg', total: '$196.00' },
+        { product: 'Broccoli', quantity: 50, unit: 'kg', price: '$3.40/kg', total: '$170.00' },
+        { product: 'Cauliflower', quantity: 40, unit: 'kg', price: '$3.60/kg', total: '$144.00' },
+        { product: 'Cabbage', quantity: 60, unit: 'kg', price: '$2.20/kg', total: '$132.00' },
+        { product: 'Eggplant', quantity: 35, unit: 'kg', price: '$3.30/kg', total: '$115.50' },
+        { product: 'Squash', quantity: 45, unit: 'kg', price: '$2.90/kg', total: '$130.50' },
+        { product: 'Mushrooms', quantity: 25, unit: 'kg', price: '$6.60/kg', total: '$165.00' }
+      ]
     },
     {
       id: 'ORD-10040',
@@ -115,7 +158,14 @@ const OrdersManagement = () => {
       status: 'Cancelled',
       paymentStatus: 'Refunded',
       deliveryDate: 'N/A',
-      transport: 'N/A'
+      transport: 'N/A',
+      orderDetails: [
+        { product: 'Organic Apples', quantity: 60, unit: 'kg', price: '$3.75/kg', total: '$225.00' },
+        { product: 'Organic Pears', quantity: 45, unit: 'kg', price: '$4.10/kg', total: '$184.50' },
+        { product: 'Organic Bananas', quantity: 55, unit: 'kg', price: '$2.95/kg', total: '$162.25' },
+        { product: 'Organic Oranges', quantity: 50, unit: 'kg', price: '$3.50/kg', total: '$175.00' },
+        { product: 'Organic Grapes', quantity: 35, unit: 'kg', price: '$4.95/kg', total: '$173.25' }
+      ]
     },
     {
       id: 'ORD-10039',
@@ -127,7 +177,18 @@ const OrdersManagement = () => {
       status: 'Delivered',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-19',
-      transport: 'Local Haul Co-op'
+      transport: 'Local Haul Co-op',
+      orderDetails: [
+        { product: 'Fresh Rosemary', quantity: 8, unit: 'kg', price: '$9.50/kg', total: '$76.00' },
+        { product: 'Fresh Thyme', quantity: 7, unit: 'kg', price: '$8.75/kg', total: '$61.25' },
+        { product: 'Fresh Sage', quantity: 5, unit: 'kg', price: '$9.20/kg', total: '$46.00' },
+        { product: 'Fresh Oregano', quantity: 6, unit: 'kg', price: '$8.90/kg', total: '$53.40' },
+        { product: 'Fresh Parsley', quantity: 10, unit: 'kg', price: '$7.50/kg', total: '$75.00' },
+        { product: 'Fresh Cilantro', quantity: 9, unit: 'kg', price: '$7.80/kg', total: '$70.20' },
+        { product: 'Fresh Chives', quantity: 7, unit: 'kg', price: '$8.60/kg', total: '$60.20' },
+        { product: 'Fresh Mint', quantity: 12, unit: 'kg', price: '$8.10/kg', total: '$97.20' },
+        { product: 'Fresh Dill', quantity: 10, unit: 'kg', price: '$9.50/kg', total: '$95.00' }
+      ]
     },
     {
       id: 'ORD-10038',
@@ -139,7 +200,12 @@ const OrdersManagement = () => {
       status: 'Delivered',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-18',
-      transport: 'Rural Routes Delivery'
+      transport: 'Rural Routes Delivery',
+      orderDetails: [
+        { product: 'Local Honey', quantity: 15, unit: 'liter', price: '$12.50/liter', total: '$187.50' },
+        { product: 'Maple Syrup', quantity: 10, unit: 'liter', price: '$14.80/liter', total: '$148.00' },
+        { product: 'Beeswax', quantity: 5, unit: 'kg', price: '$5.40/kg', total: '$27.00' }
+      ]
     }
   ];
 
@@ -271,6 +337,63 @@ const OrdersManagement = () => {
     );
   };
 
+  // Order Details Component
+  const OrderDetails = ({ order }) => {
+    if (!order.orderDetails || order.orderDetails.length === 0) {
+      return (
+        <div className="p-4 text-center text-gray-500">
+          No order details available for this order.
+        </div>
+      );
+    }
+
+    return (
+      <div className="p-4 bg-gray-50">
+        <div className="mb-3 flex justify-between items-center">
+          <div>
+            <h4 className="text-sm font-medium text-gray-700">Order Details - {order.id}</h4>
+            <p className="text-xs text-gray-500">Customer: {order.customer} | Ordered: {order.date}</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-gray-500">Status:</span>
+            <OrderStatusBadge status={order.status} />
+          </div>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="text-xs text-left text-gray-500 bg-gray-100">
+                <th className="px-4 py-2">Product</th>
+                <th className="px-4 py-2">Quantity</th>
+                <th className="px-4 py-2">Unit</th>
+                <th className="px-4 py-2">Price</th>
+                <th className="px-4 py-2">Total</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {order.orderDetails.map((item, idx) => (
+                <tr key={idx} className="hover:bg-gray-100">
+                  <td className="px-4 py-2 font-medium">{item.product}</td>
+                  <td className="px-4 py-2">{item.quantity}</td>
+                  <td className="px-4 py-2">{item.unit}</td>
+                  <td className="px-4 py-2">{item.price}</td>
+                  <td className="px-4 py-2 font-medium">{item.total}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="font-medium text-gray-700 bg-gray-100">
+                <td colSpan="4" className="px-4 py-2 text-right">Total:</td>
+                <td className="px-4 py-2">{order.total}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
   // Table columns
   const columns = [
     { key: 'id', header: 'Order ID' },
@@ -303,7 +426,14 @@ const OrdersManagement = () => {
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">
-          <button className="text-blue-600 hover:text-blue-800" title="View Details">
+          <button 
+            className={`text-blue-600 hover:text-blue-800 ${expandedOrderId === row.id ? 'text-blue-800' : ''}`}
+            title={expandedOrderId === row.id ? "Hide Details" : "View Details"}
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpandedOrderId(expandedOrderId === row.id ? null : row.id);
+            }}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -512,6 +642,8 @@ const OrdersManagement = () => {
           data={filteredData}
           onRowClick={(row) => console.log('View order details:', row)}
           emptyMessage="No orders found matching your criteria."
+          expandedRowRender={(row) => <OrderDetails order={row} />}
+          expandedRowId={expandedOrderId}
         />
       </Card>
     </DashboardLayout>
