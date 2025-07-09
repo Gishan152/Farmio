@@ -18,7 +18,11 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Popover, PopoverTrigger, PopoverContent } from "@/Components/ui/popover";
+import {
+	Popover,
+	PopoverTrigger,
+	PopoverContent,
+} from "@/Components/ui/popover";
 import { IoLocationOutline } from "react-icons/io5";
 import {
 	Select,
@@ -197,7 +201,7 @@ const Requests = () => {
 		{ value: "kegalle", label: "Kegalle" },
 	];
 	const [open, setOpen] = useState(false);
-    const [selectedDistrict, setSelectedDistrict] = useState("");
+	const [selectedDistrict, setSelectedDistrict] = useState("");
 
 	const [filters, setFilters] = useState({
 		status: "All",
@@ -245,8 +249,9 @@ const Requests = () => {
 
 	const filteredRequests = requests.filter((request) => {
 		// Get selected district label
-		const selectedDistrictLabel = selectedDistrict ? 
-			cities.find(city => city.value === selectedDistrict)?.label : "";
+		const selectedDistrictLabel = selectedDistrict
+			? cities.find((city) => city.value === selectedDistrict)?.label
+			: "";
 
 		return (
 			(filters.status === "All" || request.status === filters.status) &&
@@ -263,7 +268,8 @@ const Requests = () => {
 					.toLowerCase()
 					.includes(filters.wasteType.toLowerCase())) &&
 			(selectedDistrictLabel === "" ||
-				request.requesterLocation.toLowerCase() === selectedDistrictLabel.toLowerCase())
+				request.requesterLocation.toLowerCase() ===
+					selectedDistrictLabel.toLowerCase())
 		);
 	});
 
@@ -276,7 +282,7 @@ const Requests = () => {
 	).length;
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 mt-6">
 			{/* Header */}
 			<div className="flex justify-between items-center">
 				<div>
@@ -298,7 +304,7 @@ const Requests = () => {
 						Pending Requests
 					</h3>
 					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						<NumberFlow value={pendingCount}/>
+						<NumberFlow value={pendingCount} />
 					</p>
 				</div>
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -306,7 +312,7 @@ const Requests = () => {
 						<Check className="h-4 w-4" />
 						Accepted
 					</h3>
-					<p className="text-6xl text-right mt-2 font-bold text-gray-400" >
+					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
 						<NumberFlow value={acceptedCount} />
 					</p>
 				</div>
@@ -325,8 +331,19 @@ const Requests = () => {
 						Total Value
 					</h3>
 					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						$<NumberFlow value={requests.filter(r => r.status === 'Accepted')
-							.reduce((sum, r) => sum + parseFloat(r.totalOffer.replace('$', '')), 0)} />
+						$
+						<NumberFlow
+							value={requests
+								.filter((r) => r.status === "Accepted")
+								.reduce(
+									(sum, r) =>
+										sum +
+										parseFloat(
+											r.totalOffer.replace("$", "")
+										),
+									0
+								)}
+						/>
 					</p>
 				</div>
 			</div>
@@ -338,7 +355,8 @@ const Requests = () => {
 						Waste Collection Requests ({filteredRequests.length})
 					</CardTitle>
 					<CardDescription>
-						Review and manage incoming requests from farmers for waste collection services
+						Review and manage incoming requests from farmers for
+						waste collection services
 					</CardDescription>
 					<div id="request-search" className="flex mt-5 gap-1">
 						<div className="flex-1">
@@ -367,7 +385,8 @@ const Requests = () => {
 										{selectedDistrict
 											? cities.find(
 													(city) =>
-														city.value === selectedDistrict
+														city.value ===
+														selectedDistrict
 											  )?.label
 											: "Select district"}
 										<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -432,10 +451,18 @@ const Requests = () => {
 									<SelectValue placeholder="Status" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="All">All Status</SelectItem>
-									<SelectItem value="Pending">Pending</SelectItem>
-									<SelectItem value="Accepted">Accepted</SelectItem>
-									<SelectItem value="Rejected">Rejected</SelectItem>
+									<SelectItem value="All">
+										All Status
+									</SelectItem>
+									<SelectItem value="Pending">
+										Pending
+									</SelectItem>
+									<SelectItem value="Accepted">
+										Accepted
+									</SelectItem>
+									<SelectItem value="Rejected">
+										Rejected
+									</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
@@ -450,9 +477,13 @@ const Requests = () => {
 									<SelectValue placeholder="Priority" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="All">All Priority</SelectItem>
+									<SelectItem value="All">
+										All Priority
+									</SelectItem>
 									<SelectItem value="High">High</SelectItem>
-									<SelectItem value="Medium">Medium</SelectItem>
+									<SelectItem value="Medium">
+										Medium
+									</SelectItem>
 									<SelectItem value="Low">Low</SelectItem>
 								</SelectContent>
 							</Select>
@@ -468,7 +499,9 @@ const Requests = () => {
 							<TableHead>Offer</TableHead>
 							<TableHead>Status</TableHead>
 							<TableHead>Request Date</TableHead>
-							<TableHead className="text-right">Actions</TableHead>
+							<TableHead className="text-right">
+								Actions
+							</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
@@ -477,8 +510,16 @@ const Requests = () => {
 								<TableCell>
 									<div className="flex items-center gap-3">
 										<Avatar>
-											<AvatarImage src={request.requesterAvatar} alt={request.requesterName} />
-											<AvatarFallback>{request.requesterName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+											<AvatarImage
+												src={request.requesterAvatar}
+												alt={request.requesterName}
+											/>
+											<AvatarFallback>
+												{request.requesterName
+													.split(" ")
+													.map((n) => n[0])
+													.join("")}
+											</AvatarFallback>
 										</Avatar>
 										<div>
 											<div className="font-medium text-gray-900 dark:text-gray-100">
@@ -519,23 +560,35 @@ const Requests = () => {
 									</div>
 								</TableCell>
 								<TableCell>
-									<Badge className={`${getStatusBadge(request.status)} border`} variant="outline">
+									<Badge
+										className={`${getStatusBadge(
+											request.status
+										)} border`}
+										variant="outline"
+									>
 										{request.status}
 									</Badge>
 								</TableCell>
 								<TableCell>
 									<div className="text-sm text-gray-900 dark:text-gray-100">
-										{new Date(request.requestDate).toLocaleDateString()}
+										{new Date(
+											request.requestDate
+										).toLocaleDateString()}
 									</div>
 								</TableCell>
 								<TableCell className="text-right">
 									<div className="flex justify-end gap-2">
-										{request.status === 'Pending' && (
+										{request.status === "Pending" && (
 											<>
 												<Button
 													variant="outline"
 													size="sm"
-													onClick={() => handleRequestAction(request.id, 'reject')}
+													onClick={() =>
+														handleRequestAction(
+															request.id,
+															"reject"
+														)
+													}
 													className="text-red-600 border-red-200 hover:bg-red-50"
 												>
 													<X className="h-4 w-4" />
@@ -543,7 +596,12 @@ const Requests = () => {
 												</Button>
 												<Button
 													size="sm"
-													onClick={() => handleRequestAction(request.id, 'accept')}
+													onClick={() =>
+														handleRequestAction(
+															request.id,
+															"accept"
+														)
+													}
 													className="bg-green-600 hover:bg-green-700"
 												>
 													<Check className="h-4 w-4" />
@@ -553,14 +611,23 @@ const Requests = () => {
 										)}
 										<DropdownMenu>
 											<DropdownMenuTrigger asChild>
-												<Button variant="outline" size="sm">
+												<Button
+													variant="outline"
+													size="sm"
+												>
 													<HiDotsVertical className="h-4 w-4" />
 												</Button>
 											</DropdownMenuTrigger>
 											<DropdownMenuContent align="end">
-												<DropdownMenuItem>View Details</DropdownMenuItem>
-												<DropdownMenuItem>Contact Farmer</DropdownMenuItem>
-												<DropdownMenuItem>Download Info</DropdownMenuItem>
+												<DropdownMenuItem>
+													View Details
+												</DropdownMenuItem>
+												<DropdownMenuItem>
+													Contact Farmer
+												</DropdownMenuItem>
+												<DropdownMenuItem>
+													Download Info
+												</DropdownMenuItem>
 											</DropdownMenuContent>
 										</DropdownMenu>
 									</div>
@@ -570,7 +637,7 @@ const Requests = () => {
 					</TableBody>
 				</Table>
 			</div>
-			<Toaster position="bottom-center" richColors />
+			<Toaster position="bottom-right" richColors />
 		</div>
 	);
 };

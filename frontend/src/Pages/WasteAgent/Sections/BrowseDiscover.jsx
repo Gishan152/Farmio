@@ -20,7 +20,14 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { HiDotsVertical } from "react-icons/hi";
-import { ChevronsUpDown, Check, MapPin } from "lucide-react";
+import { 
+	ChevronsUpDown, 
+	Check, 
+	MapPin, 
+	PackageCheck, 
+	Scale, 
+	DollarSign 
+} from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -262,7 +269,8 @@ const BrowseDiscover = () => {
 			{/* Summary Cards */}
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
+						<PackageCheck className="h-4 w-4" />
 						Available Listings
 					</h3>
 					<p className="text-6xl text-right mt-2 font-bold text-green-600">
@@ -270,7 +278,8 @@ const BrowseDiscover = () => {
 					</p>
 				</div>
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
+						<Scale className="h-4 w-4" />
 						Total Quantity
 					</h3>
 					<p className="text-6xl text-right mt-2 font-bold text-blue-600">
@@ -283,7 +292,8 @@ const BrowseDiscover = () => {
 					</p>
 				</div>
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
+						<MapPin className="h-4 w-4" />
 						Avg Distance
 					</h3>
 					<p className="text-6xl text-right mt-2 font-bold text-purple-600">
@@ -298,7 +308,8 @@ const BrowseDiscover = () => {
 					</p>
 				</div>
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
+						<DollarSign className="h-4 w-4" />
 						Potential Value
 					</h3>
 					<p className="text-6xl text-right mt-2 font-bold text-green-600">

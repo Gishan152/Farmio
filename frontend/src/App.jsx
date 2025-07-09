@@ -29,6 +29,7 @@ import WasteListings from './Pages/WasteAgent/Sections/WasteListings';
 import Requests from './Pages/WasteAgent/Sections/Requests';
 import Payments from './Pages/WasteAgent/Sections/Payments';
 import BrowseDiscover from './Pages/WasteAgent/Sections/BrowseDiscover';
+import AgentProfile from './Pages/WasteAgent/Sections/AgentProfile';
 
 
 let router = createBrowserRouter([
@@ -197,6 +198,10 @@ let router = createBrowserRouter([
 			{
 				path: "requests",
 				Component: Requests
+			},
+			{
+				path: "profile",
+				Component: AgentProfile
 			},
 		],
 	},

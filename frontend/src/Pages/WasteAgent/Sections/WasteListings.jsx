@@ -22,7 +22,14 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { HiDotsVertical } from "react-icons/hi";
-import { ChevronsUpDown, Check } from "lucide-react";
+import { 
+	ChevronsUpDown, 
+	Check, 
+	CheckCircle, 
+	RotateCcw, 
+	DollarSign, 
+	Banknote 
+} from "lucide-react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -665,7 +672,7 @@ const WasteListings = () => {
 	});
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 mt-6">
 			<div className="flex justify-between items-center">
 				<div>
 					<h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
@@ -682,7 +689,8 @@ const WasteListings = () => {
 			{/* Summary Cards */}
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
+						<CheckCircle className="h-4 w-4" />
 						Accepted Requests
 					</h3>
 					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
@@ -696,7 +704,8 @@ const WasteListings = () => {
 					</p>
 				</div>
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
+						<RotateCcw className="h-4 w-4" />
 						Total Quantity
 					</h3>
 					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
@@ -714,7 +723,8 @@ const WasteListings = () => {
 					</p>
 				</div>
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
+						<DollarSign className="h-4 w-4" />
 						Avg Price/kg
 					</h3>
 					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
@@ -743,7 +753,8 @@ const WasteListings = () => {
 					</p>
 				</div>
 				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
+						<Banknote className="h-4 w-4" />
 						Potential Value
 					</h3>
 					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
@@ -1125,7 +1136,12 @@ const WasteListings = () => {
 					</TableBody>
 				</Table>
 			</div>
-			<Toaster position="bottom-center" richColors />
+			<Toaster position="bottom-right" richColors toastOptions={{
+				classNames: {
+					icon: '360px',
+					description: 'mt[-5px]'
+				}
+			}}/>
 		</div>
 	);
 };

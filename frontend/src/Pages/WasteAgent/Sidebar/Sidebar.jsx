@@ -5,15 +5,23 @@ import {
 } from "@heroicons/react/24/solid";
 import SidebarItem from "./SidebarItem";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom";
 
 const menu = [
 	{ label: "Listing", to: "listings" },
 	{ label: "Requests", to: "requests" },
 	{ label: "manage Payments", to: "manage-payments" },
+	{ label: "Profile", to: "profile" },
 	{ label: "chat", to: "chat" },
 ];
 
 export default function Sidebar() {
+	const navigate = useNavigate();
+
+	const handleProfileClick = () => {
+		navigate("/waste-agent/profile");
+	};
+
 	return (
 		<aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-6 flex flex-col justify-between min-h-screen">
 			<div>
@@ -66,9 +74,10 @@ export default function Sidebar() {
 					<button
 						className="flex items-center gap-4 text-gray-700 dark:text-gray-300 hover:text-green-500 transition text-sm"
 						aria-label="User Profile"
+						onClick={handleProfileClick}
 					>
 						<UserIcon className="h-7 w-8 flex-shrink-0" />
-						<span>User</span>
+						<span>Profile</span>
 					</button>
 
 					<button
