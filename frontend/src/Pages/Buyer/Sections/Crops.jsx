@@ -230,7 +230,7 @@ export default function Crops() {
                             isOpen={open}
                             onClose={() => setOpen(false)}
                             onConfirm={handleConfirm}
-                            submitButtonText={selectedCrop.operation === "save" ? "Add to Saves" : "Order"}
+                            submitButtonText={selectedCrop?.operation === "save" ? "Add to Saves" : "Order"}
                         />
                     </div>
                 ))}

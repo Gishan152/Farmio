@@ -31,6 +31,8 @@ import WarehouseReservationDetails, { warehouseReservationLoader } from './Pages
 import SettingsPage from './Pages/SettingsPage';
 import UserContextProvider from './Contexts/UserContext';
 import TransportJobDetails from './Pages/Buyer/Sections/TransportJobDetails';
+import WarehouseSearch from './Pages/Buyer/Sections/WarehouseSearch';
+import { GoogleMapsProvider } from './Contexts/GoogleMapContext';
 
 
 let router = createBrowserRouter([
@@ -175,6 +177,10 @@ let router = createBrowserRouter([
 						path: "reserved/:warehouseId",
 						Component: WarehouseReservationDetails,
 						loader: warehouseReservationLoader
+					},
+					{
+						path: "search",
+						Component: WarehouseSearch,
 					}
 				],
 			},
@@ -208,7 +214,9 @@ let router = createBrowserRouter([
 function App() {
 	return (
 		<UserContextProvider>
-			<RouterProvider router={router} />
+			<GoogleMapsProvider>
+				<RouterProvider router={router} />
+			</GoogleMapsProvider>
 		</UserContextProvider>
 	)
 }
