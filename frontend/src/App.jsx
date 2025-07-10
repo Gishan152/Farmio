@@ -24,6 +24,12 @@ import OrderConfirmation from './Pages/Buyer/Sections/OrderConfirmation';
 import CropTransport from './Pages/Buyer/Sections/CropTransport';
 import Orders from './Pages/Buyer/Sections/Orders';
 import CreateTransportJob from './Pages/Buyer/Sections/CreateTransport';
+import WasteAgentLayout from './Pages/WasteAgent/WasteAgentLayout';
+import WasteListings from './Pages/WasteAgent/Sections/WasteListings';
+import Requests from './Pages/WasteAgent/Sections/Requests';
+import Payments from './Pages/WasteAgent/Sections/Payments';
+import BrowseDiscover from './Pages/WasteAgent/Sections/BrowseDiscover';
+import AgentProfile from './Pages/WasteAgent/Sections/AgentProfile';
 
 
 let router = createBrowserRouter([
@@ -169,11 +175,43 @@ let router = createBrowserRouter([
 				],
 			},
 		],
+	},			{
+		path: '/waste-agent',
+		Component: WasteAgentLayout,
+		children: [
+			{ 
+				index: true,
+				Component: WasteListings
+			},
+			{ 
+				path: 'listings',
+				Component: WasteListings
+			},
+			{
+				path: "browse-discover",
+				Component: BrowseDiscover
+			},
+			{
+				path: "manage-payments",
+				Component: Payments
+			},
+			{
+				path: "requests",
+				Component: Requests
+			},
+			{
+				path: "profile",
+				Component: AgentProfile
+			},
+		],
 	},
 ]);
 
 
 function App() {
+	return (
+		<RouterProvider router={router} />
+	)
 	return (
 		<RouterProvider router={router} />
 	)
