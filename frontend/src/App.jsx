@@ -70,15 +70,18 @@ import AnalyticsActivity from './Pages/admin/analytics/activity';
 import AnalyticsSupplyChain from './Pages/admin/analytics/supply-chain';
 import AnalyticsSustainability from './Pages/admin/analytics/sustainability';
 
-// Moderator imports (placeholder components for empty files)
-const ModeratorLogin = () => <div>Moderator Login - Coming Soon</div>;
-const ModeratorDashboard = () => <div>Moderator Dashboard - Coming Soon</div>;
-const ModeratorProducts = () => <div>Moderator Products - Coming Soon</div>;
-const ModeratorProductReview = () => <div>Moderator Product Review - Coming Soon</div>;
-const ModeratorProductQuality = () => <div>Moderator Product Quality - Coming Soon</div>;
-const ModeratorOrders = () => <div>Moderator Orders - Coming Soon</div>;
-const ModeratorSupport = () => <div>Moderator Support - Coming Soon</div>;
-const ModeratorSettings = () => <div>Moderator Settings - Coming Soon</div>;
+// Moderator imports
+import ModeratorLogin from './Pages/moderator/Login';
+import ModeratorDashboard from './Pages/moderator/Dashboard';
+import ModeratorProducts from './Pages/moderator/products/index';
+import ModeratorProductReview from './Pages/moderator/products/review';
+import ModeratorProductQuality from './Pages/moderator/products/quality';
+import ModeratorOrders from './Pages/moderator/orders/index';
+import ModeratorSupport from './Pages/moderator/support/index';
+import ModeratorSettings from './Pages/moderator/settings/index';
+import ModeratorPricing from './Pages/moderator/pricing/index';
+import ModeratorPricingHistory from './Pages/moderator/pricing/history';
+import ModeratorPricingAnalytics from './Pages/moderator/pricing/analytics';
 
 
 
@@ -431,6 +434,23 @@ let router = createBrowserRouter([
                 {
                     path: 'quality',
                     Component: ModeratorProductQuality
+                }
+            ]
+        },
+        {
+            path: 'pricing',
+            children: [
+                {
+                    index: true,
+                    Component: ModeratorPricing
+                },
+                {
+                    path: 'history',
+                    Component: ModeratorPricingHistory
+                },
+                {
+                    path: 'analytics',
+                    Component: ModeratorPricingAnalytics
                 }
             ]
         },
