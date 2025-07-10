@@ -42,42 +42,42 @@ import {
 const AgentProfile = () => {
   const [profileData, setProfileData] = useState({
     // Personal Information
-    fullName: "Rajesh Patel",
-    email: "rajesh.patel@wasteagent.lk",
-    mobile: "+94 77 123 4567",
-    nicOrRegistration: "123456789V",
+    fullName: "Naleeka Kumarasinghe",
+    email: "naleeka.kumarasinghe@wasteagent.lk",
+    mobile: "+94 77 345 6789",
+    nicOrRegistration: "851234567V",
     profilePicture: "",
-    preferredLanguage: "English",
+    preferredLanguage: "Sinhala",
     
     // Business Information
-    companyName: "EcoWaste Solutions Pvt Ltd",
-    serviceType: "Organic Waste Collection",
-    serviceLicense: "WM-2024-001234",
-    yearsExperience: "5",
+    companyName: "Ceylon Green Waste Management",
+    serviceType: "Agricultural & Organic Waste Collection",
+    serviceLicense: "WM-LK-2024-0587",
+    yearsExperience: "7",
     
     // Location Information
-    address: "123 Green Valley Road, Colombo 07",
-    district: "Colombo",
-    province: "Western",
-    serviceCoverageRadius: "25",
-    gpsPickupRange: "30",
+    address: "45/2 Kandy Road, Peradeniya, Kandy",
+    district: "Kandy",
+    province: "Central",
+    serviceCoverageRadius: "35",
+    gpsPickupRange: "40",
     willingToTravel: true,
     
     // Service Details
-    vehicleType: "Small Truck",
-    maxDailyCapacity: "2500",
-    wasteTypesAccepted: ["Organic Waste", "Agricultural Residue", "Food Waste"],
-    availablePickupDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    vehicleType: "Small Lorry",
+    maxDailyCapacity: "3500",
+    wasteTypesAccepted: ["Paddy Straw", "Tea Waste", "Coconut Husk", "Vegetable Trimmings"],
+    availablePickupDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
     availableTimeSlots: ["Morning (8AM-12PM)", "Afternoon (1PM-5PM)"],
     
     // Financial Information
     incentiveParticipation: true,
     preferredPaymentMethod: "Bank Transfer",
-    bankName: "Commercial Bank of Ceylon",
-    accountNumber: "****-****-****-1234",
-    accountHolderName: "Rajesh Patel",
+    bankName: "Bank of Ceylon",
+    accountNumber: "****-****-****-7891",
+    accountHolderName: "Naleeka Kumarasinghe",
     willingToOfferIncentive: true,
-    incentiveRatePerKg: "0.05",
+    incentiveRatePerKg: "3.50",
     
     // Preferences
     emailNotifications: true,
@@ -105,14 +105,16 @@ const AgentProfile = () => {
   ];
 
   const wasteTypes = [
-    "Organic Waste", "Agricultural Residue", "Food Waste", "Garden Waste",
-    "Crop Residue", "Processing Waste", "Coconut Husk", "Tea Waste",
-    "Rice Straw", "Vegetable Trimmings", "Fruit Peels"
+    "Paddy Straw", "Tea Waste", "Coconut Husk", "Vegetable Trimmings", 
+    "Fruit Peels", "Spice Processing Waste", "Sugarcane Bagasse", "Organic Kitchen Waste",
+    "Garden Waste", "Agricultural Residue", "Crop Residue", "Cinnamon Bark Waste",
+    "Rubber Processing Waste", "Cashew Shell Waste", "Betel Leaf Waste"
   ];
 
   const vehicleTypes = [
-    "Motorcycle", "Three Wheeler", "Small Truck", "Medium Truck",
-    "Large Truck", "Pickup Truck", "Van", "Tractor"
+    "Three Wheeler", "Tuk-Tuk", "Small Lorry", "Medium Lorry",
+    "Large Lorry", "Pickup Truck", "Van", "Tractor with Trailer",
+    "Motorcycle with Cart", "Mini Truck"
   ];
 
   const timeSlots = [
@@ -444,8 +446,9 @@ const AgentProfile = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                    <SelectItem value="Mobile Wallet">Mobile Wallet</SelectItem>
-                    <SelectItem value="Check">Check</SelectItem>
+                    <SelectItem value="Mobile Wallet">eZ Cash / Dialog eZ Pay</SelectItem>
+                    <SelectItem value="Check">Bank Check</SelectItem>
+                    <SelectItem value="Cash">Cash Payment</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -485,13 +488,14 @@ const AgentProfile = () => {
               </div>
               {profileData.willingToOfferIncentive && (
                 <div className="space-y-2">
-                  <Label htmlFor="incentiveRatePerKg">Incentive Rate per kg ($)</Label>
+                  <Label htmlFor="incentiveRatePerKg">Incentive Rate per kg (LKR)</Label>
                   <Input
                     id="incentiveRatePerKg"
                     type="number"
-                    step="0.01"
+                    step="0.50"
                     value={profileData.incentiveRatePerKg}
                     onChange={(e) => handleInputChange('incentiveRatePerKg', e.target.value)}
+                    placeholder="e.g., 2.50"
                   />
                 </div>
               )}
