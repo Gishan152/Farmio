@@ -42,6 +42,7 @@ const menu = [
             { label: 'Find Agents', to: 'wastemanagement/agents' },
         ],
     },
+    { label: 'Payments', to: 'payments'},
     { label: 'Chat  💬', to: 'chat'},
 ];
 

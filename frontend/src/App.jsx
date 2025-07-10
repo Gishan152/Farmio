@@ -50,6 +50,7 @@ import WasteAgents from './Pages/Farmer/Sections/WasteAgents';
 import FarmerChat from './Pages/Farmer/Sections/FarmerChat';
 import Offers from './Pages/Farmer/Sections/Offerstobuyers';
 import FarmerProfile from './Pages/Farmer/Sections/FarmerProfile';
+import FarmerPayments from './Pages/Farmer/Sections/FarmerPayments';
 
 
 
@@ -218,6 +219,10 @@ let router = createBrowserRouter([
 				path: 'crops',
 				Component: FarmerCrops,
 				loader: FarmercropsLoader
+			},
+			{ 
+				path: 'payments',
+				Component: FarmerPayments,
 			},
 			{ 
 				path: 'profile',
