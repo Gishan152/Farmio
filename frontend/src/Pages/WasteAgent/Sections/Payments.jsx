@@ -618,7 +618,6 @@ const Payments = () => {
 				toastOptions={{
 					classNames: {
 						title: "font-bold font-inherit text-base tracking-tight",
-						title: "leading-tight font-inherit",
 						description: "mt-0 leading-relaxed",
 					},
 				}}
