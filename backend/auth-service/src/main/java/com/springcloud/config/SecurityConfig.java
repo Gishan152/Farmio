@@ -21,25 +21,27 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity // for @PreAuthorize on methods
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    }
+//    @Autowired
+//    private JwtAuthenticationFilter jwtAuthenticationFilter;
+//
+//    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
+//        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+//    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register", "/api/auth/login", "/actuator/**").permitAll()
-                        .requestMatchers("/api/test/admin").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .httpBasic(withDefaults());
+                .authorizeHttpRequests(auth->auth
+                        .requestMatchers("/**").permitAll());
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/api/auth/register", "/api/auth/login", "/actuator/**").permitAll()
+//                        .requestMatchers("/api/test/admin").hasRole("ADMIN")
+//                        .anyRequest().authenticated()
+//                )
+//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+//                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .httpBasic(withDefaults());
 
         return http.build();
     }
