@@ -1,4 +1,19 @@
 services:
+  postgres:
+    image: postgres:17.5
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: userdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: farmio@1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - spring-net
+
   rabbitmq:
     image: rabbitmq:4-management
     ports:
@@ -13,6 +28,7 @@ services:
       context: ./
       dockerfile: ./eureka-server/Dockerfile.dev
     container_name: eureka-server-farmio
+    hostname: eureka-server
     depends_on:
       - rabbitmq
     ports:
@@ -103,6 +119,7 @@ services:
     depends_on:
       - eureka-server
       - rabbitmq
+      - postgres
     environment:
       - SERVER_PORT=8085
       - SPRING_APPLICATION_NAME=auth-service
@@ -126,7 +143,7 @@ services:
     depends_on:
       - rabbitmq
       - eureka-server
-      - product-service
+#      - product-service
       - auth-service
     ports:
       - "8080:8080"
@@ -139,6 +156,9 @@ services:
         - action: rebuild
           path: ./api-gateway/target/*-SNAPSHOT.jar
 
+
+volumes:
+  pgdata:
 
 networks:
   spring-net:
