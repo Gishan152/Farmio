@@ -1,6 +1,7 @@
 // Order.java
 package com.springcloud.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "\"order\"") // escape reserved word
+@Table(name = "\"orders\"") // escape reserved word
 @Data
 @Builder
 @NoArgsConstructor
@@ -40,8 +41,9 @@ public class Order {
 
     @NotBlank
     @Column(nullable = false)
-    private String paymentStatus;
+    private String status;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<OrderItem> items = new ArrayList<>();
