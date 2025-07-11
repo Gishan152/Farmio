@@ -315,14 +315,10 @@ let router = createBrowserRouter([
 					},
 				],
 			},
-				{
+			{
 				path: 'wastemanagement',
-				children: [
-					{ 
-						path: 'agents',
-						Component: WasteAgents
-					}
-				],
+				Component: WasteAgents
+		
 			},
 		],
 	},

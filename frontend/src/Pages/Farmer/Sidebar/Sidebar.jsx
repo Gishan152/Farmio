@@ -37,10 +37,7 @@ const menu = [
         ],
     },
      {
-        label: 'Waste Management',
-        children: [
-            { label: 'Find Agents', to: 'wastemanagement/agents' },
-        ],
+        label: 'Waste Management', to:'wastemanagement'
     },
     { label: 'Payments', to: 'payments'},
     { label: 'Chat  💬', to: 'chat'},

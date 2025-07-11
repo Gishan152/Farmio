@@ -132,7 +132,7 @@ export default function FarmerProfilePage() {
               htmlFor="fileInput"
               className="absolute inset-0 flex items-center justify-center bg-black opacity-0 text-white text-sm font-medium opacity-0 group-hover:opacity-30 transition-opacity duration-200 cursor-pointer rounded-full"
             >
-              Change Photo
+              Change 
             </label>
             <input
               type="file"

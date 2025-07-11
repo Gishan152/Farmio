@@ -32,7 +32,7 @@ export default function FarmerChat() {
   };
 
   return (
-    <div className="flex h-full bg-gray-100">
+    <div className="flex h-full bg-gray-50">
       {/* Sidebar */}
       <aside className="w-1/4 bg-white border-r overflow-auto">
         <h2 className="p-4 font-semibold text-lg">Chat</h2>
@@ -40,7 +40,7 @@ export default function FarmerChat() {
           <div
             key={c.id}
             onClick={() => setSelected(c)}
-            className={`flex items-center p-4 cursor-pointer hover:bg-gray-100 transition ${selected?.id === c.id ? 'bg-gray-200' : ''}`}
+            className={`flex items-center p-4 cursor-pointer hover:bg-gray-50 transition ${selected?.id === c.id ? 'bg-gray-100' : ''}`}
           >
             <img src={c.avatar} alt={c.name} className="h-10 w-10 rounded-full mr-3" />
             <div>
