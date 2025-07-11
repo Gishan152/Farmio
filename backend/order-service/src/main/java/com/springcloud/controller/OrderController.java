@@ -4,6 +4,7 @@ import com.springcloud.dto.CreateOrderRequest;
 import com.springcloud.model.CropInfo;
 import com.springcloud.model.Order;
 import com.springcloud.service.OrderService;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,12 +36,12 @@ public class OrderController {
         return ResponseEntity.ok(orderList);
     }
 
-    @PostMapping("/cancel/:orderId")
+    @PostMapping("/cancel/{orderId}")
     public ResponseEntity<Order> cancelOrder(
             @RequestHeader("X-User-Id") String userId,
             @RequestHeader("X-User-Name") String username,
             @RequestHeader("X-Roles") String rolesCsv,
-            @PathVariable Long orderId
+            @PathVariable("orderId") @NotNull  Long orderId
     ) {
         var orderList = orderService.cancel(Long.valueOf(userId), orderId);
 

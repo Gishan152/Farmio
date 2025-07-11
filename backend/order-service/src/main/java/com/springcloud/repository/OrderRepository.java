@@ -11,5 +11,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByBuyerId(Long farmerId);
 
     // Find all orders by payment status
-    List<Order> findByPaymentStatus(String paymentStatus);
+    List<Order> findByStatus(String status);
 }
