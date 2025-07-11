@@ -11,8 +11,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.springcloud.common.enums.OrderStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -64,7 +67,7 @@ public class OrderService {
                     .farmerId(1L)
                     .buyerId(userId)
                     .paymentId("123")
-                    .status("PENDING")
+                    .status(OrderStatus.PENDING)
                     .total(total)
                     .build();
 
@@ -102,14 +105,117 @@ public class OrderService {
         return orderList;
     }
 
+    public Order markReadyToPickup(Long userId, Long orderId) {
+        return orderRepository.findById(orderId)
+                .map(order -> {
+                    if(!order.getFarmerId().equals(userId)){
+                        throw new RuntimeException("Unauthorized");
+                    }
+                    if(order.getStatus().equals(OrderStatus.PROCESSING)){
+                        throw new RuntimeException("Buyer have not made the payment yet");
+                    }
+                    order.setStatus(OrderStatus.AWAITING_PICKUP);
+                    return orderRepository.save(order);
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+    }
+
+    public Order markPaymentCompleted(Long orderId) {
+        // TODO : make security verifications
+        return orderRepository.findById(orderId)
+                .map(order -> {
+                    if(!order.getStatus().equals(OrderStatus.PENDING)){
+                        throw new RuntimeException("Payment is already completed");
+                    }
+                    order.setStatus(OrderStatus.PROCESSING);
+                    return orderRepository.save(order);
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+    }
+
+    public Order markInTransport(Long userId, Long orderId) {
+        return orderRepository.findById(orderId)
+                .map(order -> {
+                    if(!order.getFarmerId().equals(userId)){
+                        throw new RuntimeException("Unauthorized");
+                    }
+                    if(!order.getStatus().equals(OrderStatus.PENDING)){
+                        throw new RuntimeException("Payment is already completed");
+                    }
+                    order.setStatus(OrderStatus.PROCESSING);
+                    return orderRepository.save(order);
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+    }
+
+    public Order markDelivered(Long userId, Long orderId) {
+        return orderRepository.findById(orderId)
+                .map(order -> {
+                    if(!order.getBuyerId().equals(userId)){
+                        throw new RuntimeException("Unauthorized");
+                    }
+                    OrderStatus status = order.getStatus();
+                    if(!EnumSet.of(OrderStatus.AWAITING_PICKUP, OrderStatus.IN_TRANSPORT).contains(status)){
+                        throw new IllegalStateException(
+                                "Order cannot be cancelled in the current state: " + status
+                        );
+                    }
+
+                    // TODO : Relese the pending payment to the farmer
+                    order.setStatus(OrderStatus.DELIVERED);
+                    return orderRepository.save(order);
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+    }
+
+    public Order refund(Long userId, Long orderId) {
+        return orderRepository.findById(orderId)
+                .map(order -> {
+                    if(!order.getBuyerId().equals(userId)){
+                        throw new RuntimeException("Unauthorized");
+                    }
+                    OrderStatus status = order.getStatus();
+                    if(!status.equals(OrderStatus.DELIVERED)){
+                        throw new IllegalStateException(
+                                "Order cannot be refunded in the current state: " + status + ", Cancel the order instead"
+                        );
+                    }
+
+                    // TODO : Release the pending payment to the farmer
+                    order.setStatus(OrderStatus.DELIVERED);
+                    return orderRepository.save(order);
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+    }
+
     public Order cancel(Long userId, Long orderId) {
 
         return orderRepository.findById(orderId)
                 .map(order -> {
-                    order.setStatus("CANCELED");
+                    OrderStatus status = order.getStatus();
+
+                    if (!EnumSet.of(OrderStatus.PENDING, OrderStatus.PROCESSING, OrderStatus.AWAITING_PICKUP).contains(status)) {
+                        throw new IllegalStateException(
+                                "Order cannot be cancelled in the current state: " + status
+                        );
+                    }
+
+                    BigDecimal refundRatio = switch (status) {
+                        case OrderStatus.PROCESSING -> BigDecimal.valueOf(0.8);
+                        case OrderStatus.AWAITING_PICKUP -> BigDecimal.valueOf(0.7);
+                        default -> BigDecimal.ZERO;
+                    };
+
+                    BigDecimal refundAmount = order.getTotal()
+                            .multiply(refundRatio)
+                            .setScale(2, RoundingMode.HALF_UP);
+//                    order.setRefundAmount(refundAmount);
+
+                    order.setStatus(OrderStatus.CANCELLED);
                     // TODO : restore the stock of order items
                     return orderRepository.save(order);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
     }
+
 }

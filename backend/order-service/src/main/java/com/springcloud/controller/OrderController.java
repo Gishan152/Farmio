@@ -43,9 +43,57 @@ public class OrderController {
             @RequestHeader("X-Roles") String rolesCsv,
             @PathVariable("orderId") @NotNull  Long orderId
     ) {
-        var orderList = orderService.cancel(Long.valueOf(userId), orderId);
+        var order = orderService.cancel(Long.valueOf(userId), orderId);
 
-        return ResponseEntity.ok(orderList);
+        return ResponseEntity.ok(order);
+    }
+
+    @PostMapping("/refund/{orderId}")
+    public ResponseEntity<Order> refundOrder(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Name") String username,
+            @RequestHeader("X-Roles") String rolesCsv,
+            @PathVariable("orderId") @NotNull  Long orderId
+    ) {
+        var order = orderService.refund(Long.valueOf(userId), orderId);
+
+        return ResponseEntity.ok(order);
+    }
+
+    @PostMapping("/delivered/{orderId}")
+    public ResponseEntity<Order> deliveredOrder(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Name") String username,
+            @RequestHeader("X-Roles") String rolesCsv,
+            @PathVariable("orderId") @NotNull  Long orderId
+    ) {
+        var order = orderService.markDelivered(Long.valueOf(userId), orderId);
+
+        return ResponseEntity.ok(order);
+    }
+
+    @PostMapping("/in-transport/{orderId}")
+    public ResponseEntity<Order> inTransportOrder(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Name") String username,
+            @RequestHeader("X-Roles") String rolesCsv,
+            @PathVariable("orderId") @NotNull  Long orderId
+    ) {
+        var order = orderService.markInTransport(Long.valueOf(userId), orderId);
+
+        return ResponseEntity.ok(order);
+    }
+
+    @PostMapping("/ready-to-pickup/{orderId}")
+    public ResponseEntity<Order> readyToPickupOrder(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Name") String username,
+            @RequestHeader("X-Roles") String rolesCsv,
+            @PathVariable("orderId") @NotNull  Long orderId
+    ) {
+        var order = orderService.markReadyToPickup(Long.valueOf(userId), orderId);
+
+        return ResponseEntity.ok(order);
     }
 
     @PostMapping("/get")

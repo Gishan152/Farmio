@@ -2,6 +2,7 @@
 package com.springcloud.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.springcloud.common.enums.OrderStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -41,7 +42,14 @@ public class Order {
 
     @NotBlank
     @Column(nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+    // PENDING - The order has been submitted, but payment is not yet confirmed
+    // PROCESSING - Payment is authorized, and order is undergoing processing (e.g., invoiced, preparing fulfillment)
+    // AWAITING_PICKUP - Order is ready for fulfillment or shipping, but has not yet been dispatched
+    // IN_TRANSPORT - Items are picked by the transport provider
+    // DELIVERTED - Order confirmed delivered (or for digital goods, available). Considered closed
+    // CANCELED - The order is canceled by the buyer or the system automatically due to long waiting in the PENDING state
 
     @JsonManagedReference
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
