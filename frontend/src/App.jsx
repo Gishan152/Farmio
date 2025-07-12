@@ -201,6 +201,10 @@ let router = createBrowserRouter([
 						Component: TransportSchedules
 					},
 					{
+						path: 'schedules/of-order/:orderId',
+						Component: TransportSchedules
+					},
+					{
 						path: 'schedules/:jobId',
 						Component: TransportJobDetails
 					},

@@ -1,32 +1,22 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 // import TransportJobModal from './TransportJobModal';
 import { ChevronRightIcon } from '@heroicons/react/24/solid';
-
-// Sample transport job data
-export const sampleJobs = [
-	{
-		id: 'TJ-1001',
-		orderId: 'ORD-1001',
-		status: 'Open',
-		vehicleType: 'Small Van',
-		capacityRemaining: '30 kg',
-		items: [ /* item data */],
-		createdAt: '2025-07-01'
-	},
-	{
-		id: 'TJ-1002',
-		orderId: 'ORD-1003',
-		status: 'In Progress',
-		vehicleType: 'Large Truck',
-		capacityRemaining: '150 kg',
-		items: [ /* item data */],
-		createdAt: '2025-07-02'
-	}
-];
+import { useTransportsContext } from '../../../Contexts/Buyer/TransportContext';
 
 export default function TransportJobs() {
-	const [jobs] = useState(sampleJobs);
+	const {orderId} = useParams();
+	const {jobs} = useTransportsContext();
+	const [jobsFiltered, setJobsFiltered] = useState(jobs);
+
+	useEffect(()=>{
+		if(orderId){
+			setJobsFiltered(jobs.filter(j=>j.orderId === orderId))
+		}else{
+			setJobsFiltered(jobs)
+		}
+	}, [orderId, jobs])
+
 	// const [modalJob, setModalJob] = useState(null);
 	const [expanded, setExpanded] = useState([]);
 
@@ -37,11 +27,11 @@ export default function TransportJobs() {
 		<div className="container mx-auto p-6 space-y-6">
 			<h1 className="text-3xl font-bold dark:text-gray-100">Transport Jobs</h1>
 			<div className="space-y-4">
-				{jobs.map(job => (
+				{jobsFiltered.map(job => (
 					<div key={job.id} className="bg-white dark:bg-gray-800 rounded-lg shadow">
 						<div className="flex justify-between items-center p-4">
 							<div className="space-x-6 flex items-center">
-								<Link to={`./${job.id}`} className="text-lg font-medium">{job.id}</Link>
+								<Link to={`/buyer/transport/schedules/${job.id}`} className="text-lg font-medium">{job.id}</Link>
 								<span className="text-sm">{job.status}</span>
 								<span className="text-sm">Vehicle: {job.vehicleType}</span>
 								<span className="text-sm">Remaining: {job.capacityRemaining}</span>
@@ -71,7 +61,7 @@ export default function TransportJobs() {
 								<table className="w-full table-auto border-separate border-spacing-y-4">
 									<thead className="text-left text-gray-600">
 										<tr>
-											<th>Product</th><th>Qty (kg)</th><th>Price/kg</th><th>Total</th>
+											<th>Product</th><th>Qty (kg)</th><th>Price/kg</th><th>Total</th><th>Pickup confirmation</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -83,6 +73,7 @@ export default function TransportJobs() {
 												<td className="p-2 font-semibold">
 													Rs. {(item.quantity * item.pricePerUnit).toFixed(2)}
 												</td>
+												<td>{item.pickup_confirmation}</td>
 											</tr>
 										))}
 									</tbody>

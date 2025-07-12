@@ -1,14 +1,16 @@
 import { useState, useEffect, use } from "react";
 import { PlusIcon, MinusIcon, TrashIcon } from "@heroicons/react/24/solid";
 import wheat from "../../../Assets/Buyer/Crops/wheat.webp";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useOrderContext } from "../../../Contexts/Buyer/OrdersContexts";
 import { useTransportsContext } from "../../../Contexts/Buyer/TransportContext";
+import CustomModal from "../../../Components/CustomModel";
 
 export default function OrderDetails() {
     const { orders, updateOrder } = useOrderContext();
     const { addJob } = useTransportsContext();
     const { orderId } = useParams();
+    const navigate = useNavigate();
 
     const order = orders.find(order => order.id === orderId)
     const items = order.items
@@ -19,17 +21,17 @@ export default function OrderDetails() {
     });
 
     const openModel = (model) => {
-        setModelDetails(prev=>{
+        setModelDetails(prev => {
             prev.isOpen = true
             prev.model = model
-            return {...prev}
+            return { ...prev }
         })
     }
 
     const closeModal = () => {
-        setModelDetails(prev=>{
+        setModelDetails(prev => {
             prev.isOpen = false
-            return {...prev}
+            return { ...prev }
         })
     }
 
@@ -38,34 +40,45 @@ export default function OrderDetails() {
     }, [items]);
 
     const handleMakePayment = () => {
-
+        updateOrder(orderId, {status: "PROCESSING"})
+        closeModal();
     }
 
     const handleCreateTransport = () => {
         console.log("Creating transport for order", orderId);
         // call API or dispatch action...
-        updateOrder(orderId, {transport: "BY_BUYER_SYSTEM"})
+        updateOrder(orderId, { transport: "BY_BUYER_SYSTEM" })
         addJob({
-            pickupLocations: ["farm1", "farm2", "farm3"],
-            dropOffLocation: "buyer location",
+            id: "TJ-10001",
             orderId,
-            items
+            status: "PENDING",
+            vehicleType: 'Small Van',
+            capacityRemaining: '30 kg',
+            items: items.map(i => {i.load_id = "LD-1001"; i.pickup_confirmation = "PENDING"; return i}),
+            createdAt: '2025-07-01',
+            // pickupLocations: ["farm1", "farm2", "farm3"],
+            pickupLocation: "farm location",
+            dropOffLocation: "buyer location",
         })
         closeModal();
     };
 
+    const handleViewTransport = () => {
+        navigate(`/buyer/transport/schedules/of-order/${orderId}`)
+    }
+
     const handleCancelTransport = () => {
-        updateOrder(orderId, {transport: "BY_BUYER"})
+        updateOrder(orderId, { transport: "BY_BUYER" })
         closeModal();
     }
 
     const handleCancelOrder = () => {
-        updateOrder(orderId, {status: "CANCELED"})
+        updateOrder(orderId, { status: "CANCELED" })
         closeModal();
     }
-    
+
     const handleConfirmDelivery = () => {
-        updateOrder(orderId, {status: "DELIVERED"})
+        updateOrder(orderId, { status: "DELIVERED" })
         closeModal();
     }
 
@@ -150,28 +163,28 @@ export default function OrderDetails() {
                         </tbody>
                     </table>
                     <div className="flex gap-5 items-start">
-                        {order.status === "PENDING" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>openModel("MAKE_PAYMENT")}>Make payment</button>}
+                        {order.status === "PENDING" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={() => openModel("MAKE_PAYMENT")}>Make payment</button>}
                         {(order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
                             <>
-                                {order.transport === "BY_BUYER" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>openModel("ADD_TRANSPORT")}>Add transport</button>}
-                                {order.transport === "BY_FARMER_SYSTEM" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>{}}>View transport</button>}
+                                {order.transport === "BY_BUYER" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={() => openModel("ADD_TRANSPORT")}>Add transport</button>}
+                                {order.transport === "BY_FARMER_SYSTEM" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={handleViewTransport}>View transport</button>}
                                 {order.transport === "BY_BUYER_SYSTEM" && (
                                     <>
-                                        <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>{}}>View transport</button>
-                                        <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>openModel("CANCEL_TRANSPORT")}>Cancel transport</button>
+                                        <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={handleViewTransport}>View transport</button>
+                                        <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={() => openModel("CANCEL_TRANSPORT")}>Cancel transport</button>
                                     </>
                                 )}
                             </>
                         )}
-                        {(order.status === "IN_TRANSPORT" || order.status === "DELIVERED") && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>{}}>View transport</button>}
+                        {(order.status === "IN_TRANSPORT" || order.status === "DELIVERED") && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={handleViewTransport}>View transport</button>}
                         {(order.status === "PENDING" || order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
-                            <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>openModel("CANCEL_ORDER")}>Cancel Order</button>
+                            <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={() => openModel("CANCEL_ORDER")}>Cancel Order</button>
                         )}
                         {order.status === "IN_TRANSPORT" && (
-                            <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>openModel("CONFIRM_DELIVERY")}>Confirm Delivery</button>
+                            <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={() => openModel("CONFIRM_DELIVERY")}>Confirm Delivery</button>
                         )}
                         {order.status === "DELIVERED" && (
-                            <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>openModel("REQUEST_REFUND")}>Request Refund</button>
+                            <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={() => openModel("REQUEST_REFUND")}>Request Refund</button>
                         )}
                     </div>
                 </div>
@@ -299,61 +312,6 @@ function TransportJobModal({ isOpen, onClose, order, onCreate }) {
                         Create Transport Jobs
                     </button>
                 </div>
-            </div>
-        </div>
-    );
-}
-
-function CustomModal({
-    isOpen,
-    onClose,
-    title = "Modal Title",
-    description,
-    submitText = "Submit",
-    onSubmit,
-    children,
-    showFooter = true,
-}) {
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black opacity-50" onClick={onClose} />
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-lg w-full p-6 z-10">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold dark:text-gray-100">{title}</h2>
-                    <button
-                        onClick={onClose}
-                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                    >
-                        &times;
-                    </button>
-                </div>
-
-                {/* Body */}
-                {description && (
-                    <p className="mb-4 text-gray-600 dark:text-gray-300">{description}</p>
-                )}
-                {children}
-
-                {/* Footer with actions */}
-                {showFooter && (
-                    <div className="mt-6 flex justify-end space-x-2">
-                        <button
-                            onClick={onClose}
-                            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={onSubmit}
-                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                        >
-                            {submitText}
-                        </button>
-                    </div>
-                )}
             </div>
         </div>
     );
