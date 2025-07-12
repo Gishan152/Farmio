@@ -13,6 +13,17 @@ export default function OrderDetails() {
     const navigate = useNavigate();
 
     const order = orders.find(order => order.id === orderId)
+
+    if(!order){
+        // TODO : Try to fetch the order from the backend
+        // TODO : If the order cannot be found in that way either, show 404
+        return (
+            <div>
+                <p>Order cannot be found.</p>
+            </div>
+        )
+    }
+
     const items = order.items
     const [subtotal, setSubtotal] = useState(0);
     const [modelDetails, setModelDetails] = useState({

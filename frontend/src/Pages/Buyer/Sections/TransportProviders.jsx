@@ -1,7 +1,7 @@
 // src/buyer/pages/TransportProviders.jsx
-import React from "react";
+import { useState, useEffect } from "react";
 import { useLoaderData } from "react-router-dom";
-import { StarIcon, CheckBadgeIcon } from "@heroicons/react/24/solid";
+import { StarIcon, CheckBadgeIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { TruckIcon } from "@heroicons/react/24/outline";
 import tp1 from "../../../Assets/Buyer/Transport/tp.webp";
 import tp2 from "../../../Assets/Buyer/Transport/tp2.jpg";
@@ -39,11 +39,16 @@ export function transportProvidersLoader() {
 }
 
 export default function TransportProviders() {
+    const [modalOpen, setModalOpen] = useState();
     const providers = useLoaderData();
 
     return (
         <section className="p-6">
             <h1 className="text-2xl font-semibold mb-6 dark:text-gray-100">Transport Providers</h1>
+            <div className="flex justify-between items-center">
+                <div></div>
+                <button className="w-fit p-2 bg-green-600 text-white rounded hover:bg-green-700 transition" onClick={()=>setModalOpen(true)}>Create Job</button>
+            </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {providers.map(p => (
                     <div key={p.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg transition overflow-hidden">
@@ -97,6 +102,124 @@ export default function TransportProviders() {
                     </div>
                 ))}
             </div>
+
+            <TransportJobFormModal
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                onSubmit={data => {
+                    console.log('New transport job data:', data);
+                    // call API or add to state...
+                }}
+            />
+
         </section>
+    );
+}
+
+function TransportJobFormModal({ isOpen, onClose, onSubmit }) {
+    const [pickup, setPickup] = useState('');
+    const [dropoff, setDropoff] = useState('');
+    const [items, setItems] = useState([{ description: '', quantity: '' }]);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setPickup('');
+            setDropoff('');
+            setItems([{ description: '', quantity: '' }]);
+        }
+    }, [isOpen]);
+
+    const addItem = () => {
+        if (items.length < 10) {
+            setItems(prev => [...prev, { description: '', quantity: '' }]);
+        }
+    };
+
+    const removeItem = idx => {
+        setItems(prev => prev.filter((_, i) => i !== idx));
+    };
+
+    const updateItem = (idx, field, value) => {
+        setItems(prev => prev.map((it, i) => i === idx ? { ...it, [field]: value } : it));
+    };
+
+    const handleSubmit = () => {
+        onSubmit({ pickup, dropoff, items });
+        onClose();
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black opacity-50" onClick={onClose} />
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-lg w-full p-6 z-10">
+                <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">
+                    Create Transport Job
+                </h2>
+
+                <div className="space-y-4 mb-4">
+                    <input
+                        type="text"
+                        placeholder="Pickup Location Address"
+                        value={pickup}
+                        onChange={e => setPickup(e.target.value)}
+                        className="w-full border p-2 rounded"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Drop-off Location Address"
+                        value={dropoff}
+                        onChange={e => setDropoff(e.target.value)}
+                        className="w-full border p-2 rounded"
+                    />
+                </div>
+
+                <div className="mt-4">
+                    <h3 className="font-semibold mb-2 dark:text-gray-100">Items ({items.length})</h3>
+                    {items.map((item, idx) => (
+                        <div key={idx} className="flex gap-2 mb-2">
+                            <input
+                                type="text"
+                                placeholder="Item description"
+                                value={item.description}
+                                onChange={e => updateItem(idx, 'description', e.target.value)}
+                                className="flex-1 border p-2 rounded"
+                            />
+                            <input
+                                type="number"
+                                placeholder="Quantity"
+                                value={item.quantity}
+                                onChange={e => updateItem(idx, 'quantity', e.target.value)}
+                                className="w-25 border p-2 rounded"
+                            />
+                            {items.length > 1 && (
+                                <button onClick={() => removeItem(idx)} className="text-red-500"><TrashIcon className="w-5 h-5"/></button>
+                            )}
+                        </div>
+                    ))}
+                    {items.length < 10 && (
+                        <button onClick={addItem} className="mt-2 text-blue-600 hover:underline">
+                            + Add item
+                        </button>
+                    )}
+                </div>
+
+                <div className="mt-6 flex justify-end space-x-2">
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleSubmit}
+                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                    >
+                        Create Job
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 }

@@ -141,7 +141,7 @@ export default function WarehouseSearch() {
     };
 
     return (
-        <div className="p-6 max-w-7xl mx-auto">
+        <div className="p-6 max-w-7xl">
             <h2 className="text-2xl font-semibold mb-4">Warehouse Search</h2>
             <form onSubmit={handleSearch} className="space-y-4">
                 <div>
@@ -170,7 +170,7 @@ export default function WarehouseSearch() {
                         <button
                             type="button"
                             onClick={getCurrentLocation}
-                            className="bg-blue-600 text-white px-4 rounded hover:bg-blue-700"
+                            className="bg-green-600 text-white px-4 rounded hover:bg-green-700"
                         >
                             Use Current Location
                         </button>

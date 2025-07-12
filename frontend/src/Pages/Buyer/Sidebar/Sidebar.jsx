@@ -10,6 +10,7 @@ const menu = [
         label: 'Warehouses',
         children: [
             { label: 'Warehouses', to: 'warehouses/all' },
+            { label: 'Search Warehouses', to: 'warehouses/search' },
             { label: 'Reserved Storage Units', to: 'warehouses/reserved' },
         ],
     },

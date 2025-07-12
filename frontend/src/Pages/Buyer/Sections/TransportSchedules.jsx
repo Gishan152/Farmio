@@ -27,6 +27,7 @@ export default function TransportJobs() {
 		<div className="container mx-auto p-6 space-y-6">
 			<h1 className="text-3xl font-bold dark:text-gray-100">Transport Jobs</h1>
 			<div className="space-y-4">
+				{jobsFiltered.length === 0 && <div>No transport Jobs to show.</div>}
 				{jobsFiltered.map(job => (
 					<div key={job.id} className="bg-white dark:bg-gray-800 rounded-lg shadow">
 						<div className="flex justify-between items-center p-4">

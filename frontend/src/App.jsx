@@ -164,6 +164,10 @@ let router = createBrowserRouter([
 						Component: Warehouses
 					},
 					{
+						path: 'search',
+						Component: WarehouseSearch
+					},
+					{
 						path: 'reserved',
 						Component: ReservedStorage,
 						loader: reservedLoader
