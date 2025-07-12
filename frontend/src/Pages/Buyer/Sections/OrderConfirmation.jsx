@@ -31,8 +31,9 @@ const OrderConfirmation = () => {
     const handlePlaceOrder = () => {
         addOrder({
             id: String(orders.length),
-            paymentStatus: "Pending",
+            status: "PENDING",
             total: subtotal,
+            transport: "BY_BUYER",
             items
         })
         push("⚡ Order placed")
@@ -42,7 +43,7 @@ const OrderConfirmation = () => {
     }
 
     const handlePayment = () => {
-        navigate("../transport-confirmation")
+        // navigate("../transport-confirmation")
     }
 
     return (

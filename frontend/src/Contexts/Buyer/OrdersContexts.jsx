@@ -6,8 +6,9 @@ const orderContext = createContext([]);
 const initialOrders = [
 	{
 		id: "ORD-1001",
-		paymentStatus: "Paid",
+		status: "AWAITING_PICKUP",
 		total: 1250,
+		transport: "BY_BUYER",
 		items: [
 			{
 				id: "CROP-1",
@@ -35,8 +36,9 @@ const initialOrders = [
 	},
 	{
 		id: "ORD-1002",
-		paymentStatus: "Pending",
+		status: "IN_TRANSPORT",
 		total: 1250,
+		transport: "BY_BUYER",
 		items: [
 			{
 				id: "CROP-3",
@@ -53,8 +55,9 @@ const initialOrders = [
 	},
 	{
 		id: "ORD-1003",
-		paymentStatus: "Paid",
+		status: "PROCESSING",
 		total: 1250,
+		transport: "BY_FARMER_SYSTEM",
 		items: [
 			{
 				id: "CROP-4",
@@ -93,8 +96,9 @@ const initialOrders = [
 	},
 	{
 		id: "ORD-1004",
-		paymentStatus: "Paid",
+		status: "PROCESSING",
 		total: 1250,
+		transport: "BY_BUYER_SYSTEM",
 		items: [
 			{
 				id: "CROP-7",
@@ -111,8 +115,9 @@ const initialOrders = [
 	},
 	{
 		id: "ORD-1005",
-		paymentStatus: "Paid",
+		status: "PROCESSING",
 		total: 1250,
+		transport: "BY_FARMER",
 		items: [
 			{
 				id: "CROP-8",
@@ -160,8 +165,18 @@ const OrderContextProvider = ({ children }) => {
 		}))
 	}
 
+	const updateOrder = (orderId, updates) => {
+		setOrders(prev=>prev.map(o=>{
+			if(o.id === orderId){
+				o = {...o, ...updates}
+				return o
+			}
+			return o
+		}))
+	}
+
 	return (
-		<orderContext.Provider value={{ orders, addOrder, removeOrder, changeTransport }}>
+		<orderContext.Provider value={{ orders, addOrder, removeOrder, updateOrder, changeTransport }}>
 			{children}
 		</orderContext.Provider>
 	);

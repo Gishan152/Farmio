@@ -5,8 +5,6 @@ import { Link } from "react-router-dom";
 import { useSavesContext } from "../../../Contexts/Buyer/SavesContext";
 import { useOrderContext } from "../../../Contexts/Buyer/OrdersContexts";
 
-const FREE_SHIPPING_THRESHOLD = 85;
-
 export default function Orders() {
     const {
         orders,
@@ -40,7 +38,7 @@ export default function Orders() {
                         <div className="flex justify-between gap-10 items-center w-full p-4">
                             <div className="flex items-center gap-10">
                                 <Link to={`./${order.id}`} className="text-m font-medium">Order {order.id}</Link>
-                                <span className="text-m font-medium">{order.paymentStatus}</span>
+                                <span className="text-m font-medium">{order.status}</span>
                                 <span className="text-m font-medium">Rs. {order.items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0)}</span>
                             </div>
                             <div className="flex items-center gap-10">

@@ -5,40 +5,113 @@ import { Link, useParams } from "react-router-dom";
 import { useOrderContext } from "../../../Contexts/Buyer/OrdersContexts";
 import { useTransportsContext } from "../../../Contexts/Buyer/TransportContext";
 
-const FREE_SHIPPING_THRESHOLD = 85;
-
 export default function OrderDetails() {
-    const {orders, changeTransport} = useOrderContext();
-    const {addJob} = useTransportsContext();
-    const {orderId} = useParams();
+    const { orders, updateOrder } = useOrderContext();
+    const { addJob } = useTransportsContext();
+    const { orderId } = useParams();
 
-    const order = orders.find(order => order.id === orderId) 
+    const order = orders.find(order => order.id === orderId)
     const items = order.items
     const [subtotal, setSubtotal] = useState(0);
-    const [openTransportModel, setOpenTransportModel] = useState();
+    const [modelDetails, setModelDetails] = useState({
+        isOpen: false,
+        model: "",
+    });
 
-    const openModel = () => {
-        setOpenTransportModel(true);
+    const openModel = (model) => {
+        setModelDetails(prev=>{
+            prev.isOpen = true
+            prev.model = model
+            return {...prev}
+        })
     }
 
     const closeModal = () => {
-        setOpenTransportModel(false);
+        setModelDetails(prev=>{
+            prev.isOpen = false
+            return {...prev}
+        })
     }
 
     useEffect(() => {
         setSubtotal(items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0));
     }, [items]);
 
-    const handleCreateTransport = (orderId) => {
+    const handleMakePayment = () => {
+
+    }
+
+    const handleCreateTransport = () => {
         console.log("Creating transport for order", orderId);
         // call API or dispatch action...
+        updateOrder(orderId, {transport: "BY_BUYER_SYSTEM"})
         addJob({
             pickupLocations: ["farm1", "farm2", "farm3"],
             dropOffLocation: "buyer location",
             orderId,
             items
         })
+        closeModal();
     };
+
+    const handleCancelTransport = () => {
+        updateOrder(orderId, {transport: "BY_BUYER"})
+        closeModal();
+    }
+
+    const handleCancelOrder = () => {
+        updateOrder(orderId, {status: "CANCELED"})
+        closeModal();
+    }
+    
+    const handleConfirmDelivery = () => {
+        updateOrder(orderId, {status: "DELIVERED"})
+        closeModal();
+    }
+
+    const handleRefundRequest = () => {
+        closeModal();
+    }
+
+    const modelValues = {
+        MAKE_PAYMENT: {
+            title: "Make Payment",
+            description: "Proceed to complete the order payment securely.",
+            submitText: "Pay Now",
+            onSubmit: handleMakePayment
+        },
+        ADD_TRANSPORT: {
+            title: "Add Transport Job",
+            description: "Assign transport jobs to fulfill the order.",
+            submitText: "Create Transport",
+            onSubmit: handleCreateTransport
+        },
+        CANCEL_TRANSPORT: {
+            title: "Cancel Transport Job",
+            description: "You are about to cancel the transport job. This may affect delivery timelines.",
+            submitText: "Confirm Cancellation",
+            onSubmit: handleCancelTransport
+        },
+        CANCEL_ORDER: {
+            title: "Cancel Order",
+            description: "You are about to cancel the order.",
+            submitText: "Confirm Cancellation",
+            onSubmit: handleCancelOrder
+        },
+        CONFIRM_DELIVERY: {
+            title: "Confirm Delivery",
+            description: "Confirm that the order has been delivered to the buyer.",
+            submitText: "Mark as Delivered",
+            onSubmit: handleConfirmDelivery
+        },
+        REQUEST_FUND: {
+            title: "Request Fund Release",
+            description: "Request release of funds held in escrow after confirmation.",
+            submitText: "Request Funds",
+            onSubmit: handleRefundRequest
+        }
+    };
+
 
     return (
         <div className="container mx-auto p-6 space-y-6">
@@ -64,21 +137,42 @@ export default function OrderDetails() {
                     <table className="w-md table-auto border-separate border-spacing-y-4">
                         <thead className="text-left text-gray-600">
                             <tr>
-                                <th>Order Id</th><th>Payment Status</th><th>Total</th>
+                                <th>Order Id</th><th>Status</th><th>Transport</th><th>Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr className="bg-white dark:bg-gray-800 rounded-lg">
                                 <td><Link to={`./${order.id}`} className="text-m font-medium">{order.id}</Link></td>
-                                <td><span className="text-m font-medium">{order.paymentStatus}</span></td>
+                                <td><span className="text-m font-medium">{order.status}</span></td>
+                                <td><span className="text-m font-medium">{order.transport}</span></td>
                                 <td><span className="text-m font-medium">Rs. {subtotal.toFixed(2)}</span></td>
                             </tr>
                         </tbody>
                     </table>
                     <div className="flex gap-5 items-start">
-                        {order.paymentStatus != "Paid" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md">Pay</button>}
-                        <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={openModel}>Add transport</button>
-                        <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={openModel}>Confirm Delivery</button>
+                        {order.status === "PENDING" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>openModel("MAKE_PAYMENT")}>Make payment</button>}
+                        {(order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
+                            <>
+                                {order.transport === "BY_BUYER" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>openModel("ADD_TRANSPORT")}>Add transport</button>}
+                                {order.transport === "BY_FARMER_SYSTEM" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>{}}>View transport</button>}
+                                {order.transport === "BY_BUYER_SYSTEM" && (
+                                    <>
+                                        <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>{}}>View transport</button>
+                                        <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>openModel("CANCEL_TRANSPORT")}>Cancel transport</button>
+                                    </>
+                                )}
+                            </>
+                        )}
+                        {(order.status === "IN_TRANSPORT" || order.status === "DELIVERED") && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>{}}>View transport</button>}
+                        {(order.status === "PENDING" || order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
+                            <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>openModel("CANCEL_ORDER")}>Cancel Order</button>
+                        )}
+                        {order.status === "IN_TRANSPORT" && (
+                            <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>openModel("CONFIRM_DELIVERY")}>Confirm Delivery</button>
+                        )}
+                        {order.status === "DELIVERED" && (
+                            <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={()=>openModel("REQUEST_REFUND")}>Request Refund</button>
+                        )}
                     </div>
                 </div>
                 <h3 className="text-2xl font-medium mt-8">Order Items</h3>
@@ -112,11 +206,20 @@ export default function OrderDetails() {
                 </table>
             </div>
 
-            <TransportJobModal
+            {/* <TransportJobModal
                 isOpen={openTransportModel}
                 onClose={closeModal}
                 order={order}
                 onCreate={handleCreateTransport}
+            /> */}
+
+            <CustomModal
+                isOpen={modelDetails.isOpen}
+                onClose={closeModal}
+                title={modelValues[modelDetails.model]?.title}
+                description={modelValues[modelDetails.model]?.description}
+                submitText={modelValues[modelDetails.model]?.submitText}
+                onSubmit={modelValues[modelDetails.model]?.onSubmit}
             />
 
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center">
@@ -196,6 +299,61 @@ function TransportJobModal({ isOpen, onClose, order, onCreate }) {
                         Create Transport Jobs
                     </button>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+function CustomModal({
+    isOpen,
+    onClose,
+    title = "Modal Title",
+    description,
+    submitText = "Submit",
+    onSubmit,
+    children,
+    showFooter = true,
+}) {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black opacity-50" onClick={onClose} />
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-lg w-full p-6 z-10">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold dark:text-gray-100">{title}</h2>
+                    <button
+                        onClick={onClose}
+                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    >
+                        &times;
+                    </button>
+                </div>
+
+                {/* Body */}
+                {description && (
+                    <p className="mb-4 text-gray-600 dark:text-gray-300">{description}</p>
+                )}
+                {children}
+
+                {/* Footer with actions */}
+                {showFooter && (
+                    <div className="mt-6 flex justify-end space-x-2">
+                        <button
+                            onClick={onClose}
+                            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={onSubmit}
+                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                        >
+                            {submitText}
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
