@@ -18,12 +18,18 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.userRepo = repo;
     }
 
+//    @Override
+//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//        User u = userRepo.findByUsername(username)
+//                .orElseThrow(() -> new UsernameNotFoundException("No user: " + username));
+//        return new org.springframework.security.core.userdetails.User(
+//                u.getUsername(), u.getPassword(), List.of(new SimpleGrantedAuthority("ROLE_" + u.getRole()))
+//        );
+//    }
+
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User u = userRepo.findByUsername(username)
+    public UserDetails loadUserByUsername(String username) {
+        return userRepo.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("No user: " + username));
-        return new org.springframework.security.core.userdetails.User(
-                u.getUsername(), u.getPassword(), List.of(new SimpleGrantedAuthority("ROLE_" + u.getRole()))
-        );
     }
 }
