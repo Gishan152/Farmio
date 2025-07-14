@@ -15,7 +15,7 @@ const menu = [
   { label: 'Pickup & Drop Points', to: 'pickupDropPoints',},
   { label: 'Route Planner', to: 'routePlanner' },
   { label: 'Vehicle Info', to: 'vehicleInfo' },
-  { label: 'Delivery History', to: 'loads/history' },
+  { label: 'Delivery History', to: 'deliveryHistory' },
   { label: 'Ratings & Feedback', to: 'feedback' },
   { label: 'Notifications', to: 'notifications' },
 ];
