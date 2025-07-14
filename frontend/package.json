@@ -10,8 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
+<<<<<<< HEAD
     "@tailwindcss/vite": "^4.1.11",
+=======
+    "@react-google-maps/api": "^2.20.7",
+    "@tailwindcss/vite": "^4.1.10",
+>>>>>>> dev
     "axios": "^1.9.0",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",

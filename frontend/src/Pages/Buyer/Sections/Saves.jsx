@@ -1,7 +1,7 @@
 import { useState, useEffect, use } from "react";
 import { PlusIcon, MinusIcon, TrashIcon } from "@heroicons/react/24/solid";
 import wheat from "../../../Assets/Buyer/Crops/wheat.webp";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useSavesContext } from "../../../Contexts/Buyer/SavesContext";
 
 const FREE_SHIPPING_THRESHOLD = 85;
@@ -9,6 +9,7 @@ const FREE_SHIPPING_THRESHOLD = 85;
 export default function Saves() {
     const {items, updateQty, removeItem, checkItem, uncheckItem, changeTransport} = useSavesContext();
     const [subtotal, setSubtotal] = useState(0);
+    const navigate = useNavigate();
 
     // console.log("items : ", items)
 
@@ -33,6 +34,10 @@ export default function Saves() {
 
     const progress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
     const remaining = Math.max(FREE_SHIPPING_THRESHOLD - subtotal, 0);
+
+    const handleCheckout = () => {
+        navigate("../order-confirmation", {state: {items: items.filter(v=>!v.unchecked)}})   
+    }
 
     return (
         <div className="container mx-auto p-6 space-y-6">
@@ -69,13 +74,14 @@ export default function Saves() {
                 <table className="w-full table-auto border-separate border-spacing-y-4">
                     <thead className="text-left text-gray-600">
                         <tr>
-                            <th></th><th>Product</th><th>Price</th><th>Quantity (Kg)</th><th>Total</th><th>Transpotation Required</th>
+                            {/* <th></th><th>Product</th><th>Price</th><th>Quantity (Kg)</th><th>Total</th><th>Transpotation Required</th> */}
+                            <th></th><th>Product</th><th>Price</th><th>Quantity (Kg)</th><th>Total</th>
                         </tr>
                     </thead>
                     <tbody>
                         {items.map(item => (
                             <tr key={item.id} className="bg-white dark:bg-gray-800 rounded-lg">
-                                <td><input type="checkbox" checked={item.checked} onChange={(e)=>handleItemCheck(e, item)} /></td>
+                                <td><input type="checkbox" checked={!item.unchecked} onChange={(e)=>handleItemCheck(e, item)} /></td>
                                 <td className="flex items-center space-x-4 p-4">
                                     <img src={item.imageUrl} alt="" className="w-20 h-20 object-cover rounded" />
                                     <div>
@@ -100,7 +106,7 @@ export default function Saves() {
                                     </div>
                                 </td>
                                 <td className="p-4 font-semibold">Rs. {(item.pricePerUnit * item.quantity).toFixed(2)}</td>
-                                <td><input type="checkbox" checked={item.transpotationRequired} onChange={()=>changeTransport(item.id)} /></td>
+                                {/* <td><input type="checkbox" checked={item.transpotationRequired} onChange={()=>changeTransport(item.id)} /></td> */}
                             </tr>
                         ))}
                     </tbody>
@@ -114,9 +120,9 @@ export default function Saves() {
                 <div className="mt-4 lg:mt-0 bg-white dark:bg-gray-800 p-6 rounded-lg shadow w-full lg:w-auto">
                     <p className="text-lg text-gray-600 dark:text-gray-300">Sub Total: <span className="font-semibold">Rs. {subtotal.toFixed(2)}</span></p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Excl. Delivery charges</p>
-                    <Link to="../order-confirmation" className="block text-center mt-4 w-full py-3 bg-green-600 text-white rounded hover:bg-green-700 transition">
+                    <button onClick={handleCheckout} className="block text-center mt-4 w-full py-3 bg-green-600 text-white rounded hover:bg-green-700 transition">
                         GO TO CHECKOUT
-                    </Link>
+                    </button>
                 </div>
             </div>
         </div>
