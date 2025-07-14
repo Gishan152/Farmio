@@ -29,8 +29,9 @@ import FarmerLayout from './Pages/Farmer/FarmerLayout';
 import FarmerCrops, {FarmercropsLoader} from './Pages/Farmer/Sections/Crops';
 import FarmerWarehouses from './Pages/Farmer/Sections/Warehouses';
 import FarmerReservedStorage, { FarmerreservedLoader } from './Pages/Farmer/Sections/ReservedStorage';
-import FarmerTransportProviders, { FarmertransportProvidersLoader } from './Pages/Farmer/Sections/TransportProviders';
-import FarmerTransportSchedules from './Pages/Farmer/Sections/TransportSchedules';
+import  FarmerTransportProviders, { FarmertransportProvidersLoader } from './Pages/Farmer/Sections/TransportProviders';
+import FarmerTransportJobs from './Pages/Farmer/Sections/TransportSchedules';
+import FarmerTransportJobDetails from './Pages/Farmer/Sections/TransportJobDetails';
 import FarmerCropDetails, { FarmercropDetailsLoader } from './Pages/Farmer/Sections/CropDetails';
 import FarmerWarehouseDetails, { FarmerwarehouseDetailsLoader } from './Pages/Farmer/Sections/WarehouseDetails';
 import FarmerCropTransport from './Pages/Farmer/Sections/CropTransport';
@@ -300,18 +301,26 @@ let router = createBrowserRouter([
 			{
 				path: 'transport',
 				children: [
-					{ 
+					{
 						path: 'providers',
 						Component: FarmerTransportProviders,
-						loader: FarmertransportProvidersLoader
+						loader: FarmertransportProvidersLoader,
 					},
-					{ 
+					{
 						path: 'create',
 						Component: FarmerCreateTransportJob,
 					},
-					{ 
+					{
 						path: 'schedules',
-						Component: FarmerTransportSchedules
+						Component: FarmerTransportJobs,
+					},
+					{
+						path: 'schedules/of-order/:orderId',
+						Component: TransportSchedules,
+					},
+					{
+						path: 'schedules/:jobId',
+						Component: FarmerTransportJobDetails,
 					},
 				],
 			},

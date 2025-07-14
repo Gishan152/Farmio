@@ -30,11 +30,7 @@ const menu = [
         ],
     },
     {
-        label: 'Transport',
-        children: [
-            { label: 'Transport Providers', to: 'transport/providers' },
-            { label: 'Transport Schedules', to: 'transport/schedules' },
-        ],
+        label: 'Transport', to: 'transport/schedules'
     },
      {
         label: 'Waste Management', to:'wastemanagement'

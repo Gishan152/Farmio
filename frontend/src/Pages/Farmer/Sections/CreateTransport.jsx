@@ -1,202 +1,130 @@
-import React, { useState, useEffect } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/solid';
-import corn from "../../../Assets/Farmer/Crops/corn.jpeg";
+import { useState } from 'react';
+import { useToast } from '../../../Contexts/ToastContext';
 
-const sampleOrders = [
-  {
-    id: '123456',
-    buyerName: 'John Doe',
-    buyerAddress: '123 Main St, Springfield',
-    buyerLocation: 'Springfield, IL',
-    productName: 'Rice',
-    quantity: '200kg',
-    totalPrice: '$199.98',
-    imageUrl: corn,
-    returnTransport: {
-      vehicleReg: 'RET 1234',
-      driverName: 'Return Driver',
-      driverPhone: '123-456-7890',
-      driverEmail: 'return@example.com',
-      loadNumber: 'RET-5678',
-    },
-    refundProcessed: false,
-  },
-  {
-    id: '654321',
-    buyerName: 'Jane Smith',
-    buyerAddress: '789 South Rd, Shelbyville',
-    buyerLocation: 'Shelbyville, IL',
-    productName: 'Corn',
-    quantity: '100kg',
-    totalPrice: '$149.99',
-    imageUrl: corn,
-    returnTransport: null,
-    refundProcessed: true,
-  },
-];
+export default function FarmerCreateTransportJob() {
+    const toast = useToast();
+    const [form, setForm] = useState({
+        providerId: '',
+        pickupLocation: '',
+        dropoffLocation: '',
+        date: '',
+        cargo: '',
+        weight: '',
+    });
+    const [errors, setErrors] = useState({});
 
-export default function ReturnDashboard({ onRefund }) {
-  const [orders, setOrders] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [isRefundPopupOpen, setRefundPopupOpen] = useState(false);
-  const [isTransportPopupOpen, setTransportPopupOpen] = useState(false);
+    const validate = () => {
+        const errs = {};
+        if (!form.providerId) errs.providerId = 'Select a provider';
+        if (!form.pickupLocation) errs.pickupLocation = 'Required';
+        if (!form.dropoffLocation) errs.dropoffLocation = 'Required';
+        if (!form.date) errs.date = 'Required';
+        if (!form.cargo) errs.cargo = 'Required';
+        if (!form.weight || isNaN(form.weight) || +form.weight <= 0) errs.weight = 'Positive weight required';
+        setErrors(errs);
+        return Object.keys(errs).length === 0;
+    };
 
-  useEffect(() => {
-    setTimeout(() => {
-      setOrders(sampleOrders);
-      setIsLoading(false);
-    }, 1000);
-  }, []);
+    const handleSubmit = e => {
+        e.preventDefault();
+        if (!validate()) return;
+        // TODO: call API to create job
+        toast.push('Transport job created successfully!');
+        // navigate('/transport/jobs');
+    };
 
-  const handleRefund = (id) => {
-    setOrders(prev =>
-      prev.map(order =>
-        order.id === id ? { ...order, refundProcessed: true } : order
-      )
-    );
-    onRefund && onRefund(id);
-  };
+    const handleChange = e => {
+        setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+        setErrors(prev => ({ ...prev, [e.target.name]: '' }));
+    };
 
-  return (
-    <section className="p-6 space-y-10 max-w-7xl mx-auto">
-      <div className="grid md:grid-cols-3 gap-4">
-        <div className="bg-white shadow-md rounded-2xl p-6 text-center">
-          <h3 className="text-lg font-semibold">Total Returns</h3>
-          <p className="text-2xl text-green-600">{orders.length}</p>
-        </div>
-        <div className="bg-white shadow-md rounded-2xl p-6 text-center">
-          <h3 className="text-lg font-semibold">Refunds Processed</h3>
-          <p className="text-2xl text-green-600">{orders.filter(o => o.refundProcessed).length}</p>
-        </div>
-        <div className="bg-white shadow-md rounded-2xl p-6 text-center">
-          <h3 className="text-lg font-semibold">Pending Refunds</h3>
-          <p className="text-2xl text-red-500">{orders.filter(o => !o.refundProcessed).length}</p>
-        </div>
-      </div>
-
-      {isLoading ? (
-        <div className="flex justify-center py-10">
-          <svg className="animate-spin h-10 w-10 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-          </svg>
-        </div>
-      ) : (
-        <div className="space-y-8">
-          {orders.map((order) => (
-            <div key={order.id} className="bg-white rounded-3xl shadow-lg p-8 flex flex-col md:flex-row gap-6">
-              <div className="md:w-1/4">
-                <img src={order.imageUrl} alt={order.productName} className="rounded-2xl h-40 w-full object-cover" />
-              </div>
-              <div className="flex-1 space-y-3">
-                <p className="text-sm text-blue-600">Order ID: {order.id}</p>
-                <h2 className="text-2xl font-bold text-green-700">{order.productName} ({order.quantity})</h2>
-                <p className="text-lg text-gray-800"><span className="font-medium">Buyer:</span> {order.buyerName}</p>
-                <p className="text-lg text-gray-800"><span className="font-medium">Total Price:</span> {order.totalPrice}</p>
-                <p className="text-lg">
-                  <span className="font-medium">Refund Status:</span>
-                  <span className={`ml-2 px-3 py-1 rounded-full text-sm font-medium ${order.refundProcessed ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                    {order.refundProcessed ? 'Refunded' : 'Pending'}
-                  </span>
-                </p>
-                <div className="flex flex-wrap gap-4 mt-4">
-                  <button
-                    className={`px-5 py-2 text-white rounded-lg font-medium transition ${order.refundProcessed ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
-                    disabled={order.refundProcessed}
-                    onClick={() => {
-                      setSelectedOrder(order);
-                      setRefundPopupOpen(true);
-                    }}
-                  >
-                    Process Refund
-                  </button>
-
-                  <button
-                    className="px-5 py-2 bg-white text-green-600 border border-green-600 rounded-lg font-medium hover:bg-green-50"
-                    onClick={() => {
-                      setSelectedOrder(order);
-                      setTransportPopupOpen(true);
-                    }}
-                  >
-                    Transport Info
-                  </button>
+    return (
+        <div className="max-w-lg mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+            <h1 className="text-2xl font-semibold mb-4 dark:text-gray-100">Create Transport Job</h1>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium dark:text-gray-200">Provider</label>
+                    <select
+                        name="providerId"
+                        value={form.providerId}
+                        onChange={handleChange}
+                        className="mt-1 block w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    >
+                        <option value="">Select provider</option>
+                        <option value="1">FastMove Logistics</option>
+                        <option value="2">Trusty Transport</option>
+                    </select>
+                    {errors.providerId && <p className="text-red-500 text-sm mt-1">{errors.providerId}</p>}
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
-      {isRefundPopupOpen && selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black opacity-60" onClick={() => setRefundPopupOpen(false)} />
-          <div className="bg-white rounded-xl shadow-xl p-6 z-10 max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-gray-900">Confirm Refund</h3>
-              <button onClick={() => setRefundPopupOpen(false)} className="text-gray-500 hover:text-gray-700">
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </div>
-            <div className="space-y-3 text-gray-800">
-              <p>Refund <strong>{selectedOrder.totalPrice}</strong> for:</p>
-              <p><strong>Order ID:</strong> {selectedOrder.id}</p>
-              <p><strong>Product:</strong> {selectedOrder.productName}</p>
-              <p><strong>Buyer:</strong> {selectedOrder.buyerName}</p>
-            </div>
-            <div className="mt-6 flex justify-end space-x-4">
-              <button
-                onClick={() => setRefundPopupOpen(false)}
-                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  handleRefund(selectedOrder.id);
-                  setRefundPopupOpen(false);
-                }}
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-              >
-                Confirm Refund
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                <div>
+                    <label className="block text-sm font-medium dark:text-gray-200">Pickup Location</label>
+                    <input
+                        name="pickupLocation"
+                        value={form.pickupLocation}
+                        onChange={handleChange}
+                        className="mt-1 w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded"
+                        placeholder="City, Country"
+                    />
+                    {errors.pickupLocation && <p className="text-red-500 text-sm mt-1">{errors.pickupLocation}</p>}
+                </div>
 
-      {isTransportPopupOpen && selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black opacity-60" onClick={() => setTransportPopupOpen(false)} />
-          <div className="bg-white rounded-xl shadow-xl p-6 z-10 max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-gray-900">Return Transport Details</h3>
-              <button onClick={() => setTransportPopupOpen(false)} className="text-gray-500 hover:text-gray-700">
-                <XMarkIcon className="h-6 w-6" />
-              </button>
-            </div>
-            {selectedOrder.returnTransport ? (
-              <div className="space-y-2 text-gray-800">
-                <p><strong>Vehicle Reg:</strong> {selectedOrder.returnTransport.vehicleReg}</p>
-                <p><strong>Driver Name:</strong> {selectedOrder.returnTransport.driverName}</p>
-                <p><strong>Driver Phone:</strong> {selectedOrder.returnTransport.driverPhone}</p>
-                <p><strong>Driver Email:</strong> {selectedOrder.returnTransport.driverEmail}</p>
-                <p><strong>Load Number:</strong> {selectedOrder.returnTransport.loadNumber}</p>
-              </div>
-            ) : (
-              <p className="text-gray-500">Transport details not available.</p>
-            )}
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={() => setTransportPopupOpen(false)}
-                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
-              >
-                Close
-              </button>
-            </div>
-          </div>
+                <div>
+                    <label className="block text-sm font-medium dark:text-gray-200">Drop-off Location</label>
+                    <input
+                        name="dropoffLocation"
+                        value={form.dropoffLocation}
+                        onChange={handleChange}
+                        className="mt-1 w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded"
+                        placeholder="City, Country"
+                    />
+                    {errors.dropoffLocation && <p className="text-red-500 text-sm mt-1">{errors.dropoffLocation}</p>}
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium dark:text-gray-200">Pickup Date</label>
+                    <input
+                        type="date"
+                        name="date"
+                        value={form.date}
+                        onChange={handleChange}
+                        className="mt-1 w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded"
+                    />
+                    {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium dark:text-gray-200">Cargo Description</label>
+                    <input
+                        name="cargo"
+                        value={form.cargo}
+                        onChange={handleChange}
+                        className="mt-1 w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded"
+                        placeholder="E.g., 10 bags of wheat"
+                    />
+                    {errors.cargo && <p className="text-red-500 text-sm mt-1">{errors.cargo}</p>}
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium dark:text-gray-200">Weight (kg)</label>
+                    <input
+                        name="weight"
+                        type="number"
+                        value={form.weight}
+                        onChange={handleChange}
+                        className="mt-1 w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded"
+                        placeholder="Enter total weight"
+                    />
+                    {errors.weight && <p className="text-red-500 text-sm mt-1">{errors.weight}</p>}
+                </div>
+
+                <button
+                    type="submit"
+                    className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                >
+                    Create Job
+                </button>
+            </form>
         </div>
-      )}
-    </section>
-  );
+    );
 }

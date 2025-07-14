@@ -65,9 +65,9 @@ export default function WasteAgentCard({ agent, onHireRequest }) {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-200">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-200  min-h-64">
             {/* Header */}
-            <div className="bg-green-600 text-white p-3">
+            <div className="bg-green-600 text-white p-3 min-h-22">
                 <div className="flex justify-between items-start">
                     <div className="flex-1">
                         <div className="flex items-center mb-1">
@@ -109,7 +109,7 @@ export default function WasteAgentCard({ agent, onHireRequest }) {
                 {/* Specialties */}
                 <div>
                     <h4 className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Specialties:</h4>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1 min-h-11">
                         {agent.specialties.slice(0, 2).map((specialty, index) => (
                             <span key={index} className="inline-flex px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
                                 {specialty}
