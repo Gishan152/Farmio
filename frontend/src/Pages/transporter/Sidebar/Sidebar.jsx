@@ -16,7 +16,7 @@ const menu = [
   { label: 'Route Planner', to: 'routePlanner' },
   { label: 'Vehicle Info', to: 'vehicleInfo' },
   { label: 'Delivery History', to: 'deliveryHistory' },
-  { label: 'Ratings & Feedback', to: 'feedback' },
+  { label: 'Ratings & Feedback', to: 'ratingsFeedback' },
   { label: 'Notifications', to: 'notifications' },
 ];
 
