@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Component, useState } from 'react'
 import { createBrowserRouter, RouterProvider } from "react-router";
 import './App.css'
 import LandingPage from './Pages/LandingPage';
@@ -33,7 +33,16 @@ import UserContextProvider from './Contexts/UserContext';
 import TransportJobDetails from './Pages/Buyer/Sections/TransportJobDetails';
 import WarehouseSearch from './Pages/Buyer/Sections/WarehouseSearch';
 import { GoogleMapsProvider } from './Contexts/GoogleMapContext';
-
+import TransLayout from './Pages/transporter/TransLayout';
+import Dashboard from './Pages/transporter/Sections/Dashboard';
+import AvailableLoads from './Pages/transporter/Sections/AvailableLoads';
+import AssignedLoads from './Pages/transporter/Sections/AssignedLoads';
+import PickupDropPoints from './Pages/transporter/Sections/PickupDropPoints';
+import RoutePlanner from './Pages/transporter/Sections/RoutePlanner';
+import VehicleInfo from './Pages/transporter/Sections/VehicleInfo';
+import DeliveryHistory from './Pages/transporter/Sections/DeliveryHistory';
+import RatingsFeedback from './Pages/transporter/Sections/RatingsFeedback';
+import Notifications from './Pages/transporter/Sections/Notifications';
 
 let router = createBrowserRouter([
 	// {
@@ -110,6 +119,52 @@ let router = createBrowserRouter([
 	{
 		path: 'settings',
 		Component: SettingsPage
+	},
+	{
+		path: '/transporter',
+		Component: TransLayout,
+		children: [
+			{
+				index: true,
+				Component: Dashboard
+			},
+			{
+				path: 'dashboard',
+				Component: Dashboard
+			},
+			{
+				path:'availableLoads',
+				Component: AvailableLoads
+			},
+			{
+				path: 'assignedLoads/all',
+				Component: AssignedLoads
+			},
+			{
+				parth: 'pickupDropPoints',
+				Component: PickupDropPoints
+			},
+			{
+				path : 'routePlanner',
+				Component: RoutePlanner
+			},
+			{
+				path : 'vehicleInfo',
+				Component: VehicleInfo
+			},
+			{
+				path : 'deliveryHistory',
+				Component: DeliveryHistory
+			},
+			{
+				path: 'ratingsFeedback',
+				Component: RatingsFeedback
+			},
+			{
+				path: 'notifications',
+				Component: Notifications
+			}
+		]
 	},
 	{
 		path: '/buyer',
