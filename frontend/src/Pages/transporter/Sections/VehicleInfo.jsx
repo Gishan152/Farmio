@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 export default function VehicleInfo() {
   const [vehicle, setVehicle] = useState({
     regNo: 'WP CAB-6573',
-    type: 'Truck',
+    type: '',
     kind: 'Mahindra Bolero',
     minLoad: 100,
     maxLoad: 1000,
-    frontPhoto: 'https://via.placeholder.com/200x120?text=Front+View',
-    sidePhoto: 'https://via.placeholder.com/200x120?text=Side+View',
+    frontPhoto: '',
+    sidePhoto: '',
   });
 
   const handleChange = (e) => {
@@ -21,8 +21,6 @@ export default function VehicleInfo() {
     if (file) {
       const photoUrl = URL.createObjectURL(file);
       setVehicle({ ...vehicle, [view]: photoUrl });
-
-      // TODO: upload to backend
     }
   };
 
@@ -49,8 +47,8 @@ export default function VehicleInfo() {
               name="regNo"
               value={vehicle.regNo}
               onChange={handleChange}
-              className="w-full border p-2 rounded"
-              readOnly // 🔒 Lock if vehicle already exists
+              className="w-full border p-2 rounded bg-gray-100 cursor-not-allowed"
+              readOnly
             />
           </div>
 
@@ -60,13 +58,14 @@ export default function VehicleInfo() {
               name="type"
               value={vehicle.type}
               onChange={handleChange}
-              className="w-full border p-2 rounded"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
             >
-              <option value="Truck">Truck</option>
-              <option value="Lorry">Lorry</option>
-              <option value="Van">Van</option>
-              <option value="Tuk Tuk">Tuk Tuk</option>
-              <option value="Tractor">Tractor</option>
+              <option value="">Select vehicle type</option>
+              <option value="Truck">🚚 Truck</option>
+              <option value="Lorry">🚛 Lorry</option>
+              <option value="Van">🚐 Van</option>
+              <option value="Tuk Tuk">🛺 Tuk Tuk</option>
+              <option value="Tractor">🚜 Tractor</option>
             </select>
           </div>
 
@@ -81,8 +80,8 @@ export default function VehicleInfo() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
+          <div className="gap-4">
+            {/* <div>
               <label className="block font-medium mb-1">Min Load (kg)</label>
               <input
                 type="number"
@@ -91,7 +90,7 @@ export default function VehicleInfo() {
                 onChange={handleChange}
                 className="w-full border p-2 rounded"
               />
-            </div>
+            </div> */}
             <div>
               <label className="block font-medium mb-1">Max Load (kg)</label>
               <input
@@ -109,38 +108,58 @@ export default function VehicleInfo() {
         <div className="flex flex-col gap-6 items-center justify-start">
           {/* Front View */}
           <div className="text-center">
-            <img
-              src={vehicle.frontPhoto}
-              alt="Front View"
-              className="w-60 h-36 object-cover border rounded shadow mb-2"
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handlePhotoChange(e, 'frontPhoto')}
-              className="text-sm"
-            />
-            <p className="text-xs text-gray-500 mt-1">Front View</p>
+            {vehicle.frontPhoto && (
+              <img
+                src={vehicle.frontPhoto}
+                alt="Front View"
+                className="w-60 h-36 object-cover border rounded shadow mb-2"
+              />
+            )}
+
+            <label className="bg-green-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-green-700 text-sm inline-block">
+              Select Photo
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handlePhotoChange(e, 'frontPhoto')}
+                className="hidden"
+              />
+            </label>
+
+            <p className="text-xs text-gray-500 mt-1">
+              {vehicle.frontPhoto?.startsWith('blob:') ? 'Photo selected' : 'No photo selected'}
+            </p>
+            <p className="text-xs text-gray-400">Front View</p>
           </div>
 
           {/* Side View */}
           <div className="text-center">
-            <img
-              src={vehicle.sidePhoto}
-              alt="Side View"
-              className="w-60 h-36 object-cover border rounded shadow mb-2"
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handlePhotoChange(e, 'sidePhoto')}
-              className="text-sm"
-            />
-            <p className="text-xs text-gray-500 mt-1">Side View</p>
+            {vehicle.sidePhoto && (
+              <img
+                src={vehicle.sidePhoto}
+                alt="Side View"
+                className="w-60 h-36 object-cover border rounded shadow mb-2"
+              />
+            )}
+
+            <label className="bg-green-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-green-700 text-sm inline-block">
+              Select Photo
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handlePhotoChange(e, 'sidePhoto')}
+                className="hidden"
+              />
+            </label>
+
+            <p className="text-xs text-gray-500 mt-1">
+              {vehicle.sidePhoto?.startsWith('blob:') ? 'Photo selected' : 'No photo selected'}
+            </p>
+            <p className="text-xs text-gray-400">Side View</p>
           </div>
         </div>
 
-        {/* Save Button */}
+        {/* Submit Button */}
         <div className="md:col-span-2 flex justify-end pt-4">
           <button
             type="submit"

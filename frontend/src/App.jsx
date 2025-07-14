@@ -31,6 +31,7 @@ import AssignedLoads from './Pages/transporter/Sections/AssignedLoads';
 import PickupDropPoints from './Pages/transporter/Sections/PickupDropPoints';
 import ConfirmPickup from './Pages/transporter/Sections/ConfirmPickup';
 import RoutePlanner from './Pages/transporter/Sections/RoutePlanner';
+import VehicleInfo from './Pages/transporter/Sections/VehicleInfo';
 
 let router = createBrowserRouter([
 	// {
@@ -151,6 +152,10 @@ let router = createBrowserRouter([
 			{
 				path: 'routePlanner',
 				Component: RoutePlanner
+			},
+			{
+				path: 'vehicleInfo',
+				Component: VehicleInfo
 			}
 			
 		]
