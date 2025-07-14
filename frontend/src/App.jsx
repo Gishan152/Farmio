@@ -34,6 +34,7 @@ import RoutePlanner from './Pages/transporter/Sections/RoutePlanner';
 import VehicleInfo from './Pages/transporter/Sections/VehicleInfo';
 import DeliveryHistory from './Pages/transporter/Sections/DeliveryHostory';
 import RatingsFeedback from './Pages/transporter/Sections/RatingsFeedback';
+import Notifications from './Pages/transporter/Sections/Notificaions';
 
 let router = createBrowserRouter([
 	// {
@@ -166,6 +167,10 @@ let router = createBrowserRouter([
 			{
 				path: 'ratingsFeedback',
 				Component:RatingsFeedback
+			},
+			{
+				path: 'notifications',
+				Component: Notifications
 			}
 			
 		]

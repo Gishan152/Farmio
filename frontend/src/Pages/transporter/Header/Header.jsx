@@ -1,6 +1,8 @@
 import { Cog8ToothIcon, LinkIcon, MagnifyingGlassIcon, BellIcon} from "@heroicons/react/24/solid";
+import { useNavigate } from "react-router-dom";
 
 export default function Header() {
+    const navigate = useNavigate();
     return (
         // <header className="flex items-center justify-between px-8 py-5 border-b border-gray-200 bg-white"></header>
         <header className="flex items-center justify-between px-8 py-5 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
@@ -26,7 +28,9 @@ export default function Header() {
                     <LinkIcon className="h-6 w-6 text-gray-700 dark:text-gray-200" />
                 </button>
 
-                <button className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+                <button 
+                    onClick={() => navigate('/transporter/notifications')}
+                    className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
                     <BellIcon className="h-6 w-6 text-gray-700 dark:text-gray-200" />
                 </button>
 
