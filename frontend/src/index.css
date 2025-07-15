@@ -1,4 +1,13 @@
 @import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
+/* @custom-variant dark (&:is(.dark *)); */
+
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+}
 
 @theme {
   --color-farmio-light: #8CC084;
@@ -24,6 +33,4 @@
   --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
   --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
-
-@custom-variant dark (&:is(.dark *));
 

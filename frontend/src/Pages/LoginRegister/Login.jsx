@@ -91,7 +91,7 @@ const Login = () => {
                         <Link to="/register" className="underline text-blue-400">Register</Link>
                     </p>
 
-                    <fetcher.Form className="space-y-4">
+                    <fetcher.Form method="post" className="space-y-4">
                         <input
                             name="username"
                             type="text"
