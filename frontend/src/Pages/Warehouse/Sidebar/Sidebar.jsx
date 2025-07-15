@@ -1,19 +1,29 @@
-import { ArrowRightStartOnRectangleIcon, Cog8ToothIcon, UserIcon } from '@heroicons/react/24/solid';
+import {
+    ArrowRightStartOnRectangleIcon,
+    Cog8ToothIcon,
+    UserIcon,
+    BuildingStorefrontIcon,
+    CalendarIcon,
+    CreditCardIcon,
+    UsersIcon,
+    BellIcon,
+    ChartBarIcon,
+    TrashIcon
+} from '@heroicons/react/24/solid';
 import SidebarItem from './SidebarItem';
 
 const menu = [
-    { label: 'Dashboard', to: '/warehouse'},
-    { label: 'Facility Management', to: '/warehouse/facilities' },
-    { label: 'Slot Management', to: '/warehouse/slots' },
-    { label: 'Booking Management', to: '/warehouse/bookings' },
-    { label: 'Payment Management', to: '/warehouse/payments' },
-    { label: 'Waste Agent Management', to: '/warehouse/waste-agents' },
-    { label: 'Notifications', to: '/warehouse/notifications' },
-    { label: 'Analytics', to: '/warehouse/analytics' }
+    { label: 'Dashboard', to: '/warehouse', icon: ChartBarIcon },
+    { label: 'Facility Management', to: '/warehouse/facilities', icon: BuildingStorefrontIcon },
+    { label: 'Slot Management', to: '/warehouse/slots', icon: CalendarIcon },
+    { label: 'Booking Management', to: '/warehouse/bookings', icon: CreditCardIcon },
+    { label: 'Payment Management', to: '/warehouse/payments', icon: CreditCardIcon },
+    { label: 'Waste Agent Management', to: '/warehouse/waste-agents', icon: TrashIcon },
+    { label: 'Notifications', to: '/warehouse/notifications', icon: BellIcon },
+    { label: 'Analytics', to: '/warehouse/analytics', icon: ChartBarIcon }
 ];
 
 export default function Sidebar() {
-
     return (
         <aside className="w-64 bg-white border-r border-gray-200 p-6 flex flex-col justify-between min-h-screen">
             <div>
@@ -37,30 +47,6 @@ export default function Sidebar() {
                 </nav>
             </div>
             <div>
-                {/* <div className="mb-8">
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                        <span className="text-xs">Product Plan</span>
-                    </div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                        <span className="text-xs">Campaign</span>
-                    </div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="w-2 h-2 rounded-full bg-pink-500"></span>
-                        <span className="text-xs">Stock Product</span>
-                    </div>
-                </div> */}
-                {/* <div className="mb-4">
-                    <div className="flex justify-between text-xs mb-1">
-                        <span>Storage Product</span>
-                        <button className="text-green-600 font-semibold">Upgrade</button>
-                    </div>
-                    <div className="w-full h-2 bg-gray-200 rounded">
-                        <div className="h-2 bg-green-500 rounded" style={{ width: '70%' }}></div>
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">70% of products have been uploaded</div>
-                </div> */}
                 <div className="flex flex-col gap-2">
                     <button
                         className="flex items-center gap-4 text-gray-700 hover:text-green-500 transition text-sm"
@@ -69,7 +55,6 @@ export default function Sidebar() {
                         <Cog8ToothIcon className="h-7 w-8 flex-shrink-0" />
                         <span>Settings</span>
                     </button>
-
                     <button
                         className="flex items-center gap-4 text-gray-700 hover:text-green-500 transition text-sm"
                         aria-label="User Profile"
@@ -77,7 +62,6 @@ export default function Sidebar() {
                         <UserIcon className="h-7 w-8 flex-shrink-0" />
                         <span>User</span>
                     </button>
-
                     <button
                         className="flex items-center gap-4 text-gray-700 hover:text-red-500 transition text-sm"
                         aria-label="Logout"
@@ -89,14 +73,4 @@ export default function Sidebar() {
             </div>
         </aside>
     );
-
-    // return (
-    //     <aside className="w-64 p-4 bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-auto">
-    //         <ul>
-    //             {menu.map(item => (
-    //                 <SidebarItem key={item.label} {...item} />
-    //             ))}
-    //         </ul>
-    //     </aside>
-    // );
 }
