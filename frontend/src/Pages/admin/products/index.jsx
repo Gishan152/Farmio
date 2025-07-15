@@ -146,7 +146,6 @@ const ProductsManagement = () => {
       harvested: '2023-06-14',
       image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
       description: 'Premium cuts of grass-fed beef from cattle raised on open pastures. No hormones or antibiotics. Our beef is aged for tenderness and rich flavor.',
-      harvested: '2023-06-05',
       lifespan: 'Use within 3-5 days or freeze for up to 6 months',
       storageConditions: 'Keep refrigerated at 40°F or below. Freeze for longer storage.'
     },

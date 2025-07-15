@@ -34,7 +34,7 @@ import TransportJobDetails from './Pages/Buyer/Sections/TransportJobDetails';
 import WarehouseSearch from './Pages/Buyer/Sections/WarehouseSearch';
 import { GoogleMapsProvider } from './Contexts/GoogleMapContext';
 import TransLayout from './Pages/transporter/TransLayout';
-import Dashboard from './Pages/transporter/Sections/Dashboard';
+import TransporterDashboard from './Pages/transporter/Sections/Dashboard';
 import AvailableLoads from './Pages/transporter/Sections/AvailableLoads';
 import AssignedLoads from './Pages/transporter/Sections/AssignedLoads';
 import PickupDropPoints from './Pages/transporter/Sections/PickupDropPoints';
@@ -42,7 +42,7 @@ import RoutePlanner from './Pages/transporter/Sections/RoutePlanner';
 import VehicleInfo from './Pages/transporter/Sections/VehicleInfo';
 import DeliveryHistory from './Pages/transporter/Sections/DeliveryHistory';
 import RatingsFeedback from './Pages/transporter/Sections/RatingsFeedback';
-import Notifications from './Pages/transporter/Sections/Notifications';
+import TransporterNotifications from './Pages/transporter/Sections/Notifications';
 //farmer
 import FarmerLayout from './Pages/Farmer/FarmerLayout';
 import FarmerCrops, { FarmercropsLoader } from './Pages/Farmer/Sections/Crops';
@@ -74,13 +74,13 @@ import FarmerPayments from './Pages/Farmer/Sections/FarmerPayments';
 
 // warehouse imports
 import WarehouseLayout from './Pages/Warehouse/WarehouseLayout';
-import Dashboard from './Pages/Warehouse/Sections/Dashboard';
+import WarehouseDashboard from './Pages/Warehouse/Sections/Dashboard';
 import FacilityManagement from './Pages/Warehouse/Sections/FacilityManagement';
 import SlotManagement from './Pages/Warehouse/Sections/SlotManagement';
 import BookingManagement from './Pages/Warehouse/Sections/BookingManagement';
 import PaymentManagement from './Pages/Warehouse/Sections/PaymentManagement';
 import WasteAgent from './Pages/Warehouse/Sections/WasteAgent';
-import Notifications from './Pages/Warehouse/Sections/Notifications';
+import WarehouseNotifications from './Pages/Warehouse/Sections/Notifications';
 import Analytics from './Pages/Warehouse/Sections/Analytics';
 
 // Admin imports
@@ -100,7 +100,7 @@ import PendingOrders from './Pages/admin/orders/pending';
 import Deliveries from './Pages/admin/orders/deliveries';
 import OrdersIssues from './Pages/admin/orders/issues';
 import AnalyticsPage from './Pages/admin/analytics/index';
-import SettingsPage from './Pages/admin/settings/index';
+import AdminSettingsPage from './Pages/admin/settings/index';
 
 // Admin Logistics pages
 import LogisticsRoutes from './Pages/admin/logistics/routes';
@@ -217,11 +217,11 @@ let router = createBrowserRouter([
 		children: [
 			{
 				index: true,
-				Component: Dashboard
+				Component: TransporterDashboard
 			},
 			{
 				path: 'dashboard',
-				Component: Dashboard
+				Component: TransporterDashboard
 			},
 			{
 				path: 'availableLoads',
@@ -253,7 +253,7 @@ let router = createBrowserRouter([
 			},
 			{
 				path: 'notifications',
-				Component: Notifications
+				Component: TransporterNotifications
 			}
 		]
 	},
@@ -500,7 +500,7 @@ let router = createBrowserRouter([
 		children: [
 			{
 				index: true,
-				Component: Dashboard
+				Component: WarehouseDashboard
 			},
 			{
 				path: 'facilities',
@@ -524,7 +524,7 @@ let router = createBrowserRouter([
 			},
 			{
 				path: 'notifications',
-				Component: Notifications
+				Component: WarehouseNotifications
 			},
 			{
 				path: 'analytics',
@@ -668,7 +668,7 @@ let router = createBrowserRouter([
 			},
 			{
 				path: 'settings',
-				Component: SettingsPage
+				Component: AdminSettingsPage
 			}
 		]
 	},
