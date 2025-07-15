@@ -45,10 +45,10 @@ import RatingsFeedback from './Pages/transporter/Sections/RatingsFeedback';
 import Notifications from './Pages/transporter/Sections/Notifications';
 //farmer
 import FarmerLayout from './Pages/Farmer/FarmerLayout';
-import FarmerCrops, {FarmercropsLoader} from './Pages/Farmer/Sections/Crops';
+import FarmerCrops, { FarmercropsLoader } from './Pages/Farmer/Sections/Crops';
 import FarmerWarehouses from './Pages/Farmer/Sections/Warehouses';
 import FarmerReservedStorage, { FarmerreservedLoader } from './Pages/Farmer/Sections/ReservedStorage';
-import  FarmerTransportProviders, { FarmertransportProvidersLoader } from './Pages/Farmer/Sections/TransportProviders';
+import FarmerTransportProviders, { FarmertransportProvidersLoader } from './Pages/Farmer/Sections/TransportProviders';
 import FarmerTransportJobs from './Pages/Farmer/Sections/TransportSchedules';
 import FarmerTransportJobDetails from './Pages/Farmer/Sections/TransportJobDetails';
 import FarmerCropDetails, { FarmercropDetailsLoader } from './Pages/Farmer/Sections/CropDetails';
@@ -71,6 +71,67 @@ import FarmerChat from './Pages/Farmer/Sections/FarmerChat';
 import Offers from './Pages/Farmer/Sections/Offerstobuyers';
 import FarmerProfile from './Pages/Farmer/Sections/FarmerProfile';
 import FarmerPayments from './Pages/Farmer/Sections/FarmerPayments';
+
+// warehouse imports
+import WarehouseLayout from './Pages/Warehouse/WarehouseLayout';
+import Dashboard from './Pages/Warehouse/Sections/Dashboard';
+import FacilityManagement from './Pages/Warehouse/Sections/FacilityManagement';
+import SlotManagement from './Pages/Warehouse/Sections/SlotManagement';
+import BookingManagement from './Pages/Warehouse/Sections/BookingManagement';
+import PaymentManagement from './Pages/Warehouse/Sections/PaymentManagement';
+import WasteAgent from './Pages/Warehouse/Sections/WasteAgent';
+import Notifications from './Pages/Warehouse/Sections/Notifications';
+import Analytics from './Pages/Warehouse/Sections/Analytics';
+
+// Admin imports
+import AdminLogin from './Pages/admin/Login';
+import AdminDashboard from './Pages/admin/Dashboard';
+import UserManagementHome from './Pages/admin/users/index';
+import FarmerManagement from './Pages/admin/users/Farmers';
+import BuyerManagement from './Pages/admin/users/Buyers';
+import TransportProviderManagement from './Pages/admin/users/TransportProviders';
+import WarehouseOwnerManagement from './Pages/admin/users/WarehouseOwners';
+import WasteManagementAgentManagement from './Pages/admin/users/WasteManagementAgents';
+import ModeratorManagement from './Pages/admin/users/Moderators';
+import AdminManagement from './Pages/admin/users/Admins';
+import ProductsManagementWithErrorHandling from './Pages/admin/products/index';
+import OrdersManagement from './Pages/admin/orders/index';
+import PendingOrders from './Pages/admin/orders/pending';
+import Deliveries from './Pages/admin/orders/deliveries';
+import OrdersIssues from './Pages/admin/orders/issues';
+import AnalyticsPage from './Pages/admin/analytics/index';
+import SettingsPage from './Pages/admin/settings/index';
+
+// Admin Logistics pages
+import LogisticsRoutes from './Pages/admin/logistics/routes';
+import LogisticsWarehouses from './Pages/admin/logistics/warehouses';
+import LogisticsShipping from './Pages/admin/logistics/shipping';
+
+// Admin Waste Management pages
+import WasteCollection from './Pages/admin/waste/collection';
+import WasteProcessing from './Pages/admin/waste/processing';
+import WasteStats from './Pages/admin/waste/stats';
+
+// Admin Analytics pages
+import AnalyticsSales from './Pages/admin/analytics/sales';
+import AnalyticsActivity from './Pages/admin/analytics/activity';
+import AnalyticsSupplyChain from './Pages/admin/analytics/supply-chain';
+import AnalyticsSustainability from './Pages/admin/analytics/sustainability';
+
+// Moderator imports
+import ModeratorLogin from './Pages/moderator/Login';
+import ModeratorDashboard from './Pages/moderator/Dashboard';
+import ModeratorProducts from './Pages/moderator/products/index';
+import ModeratorProductReview from './Pages/moderator/products/review';
+import ModeratorProductQuality from './Pages/moderator/products/quality';
+import ModeratorOrders from './Pages/moderator/orders/index';
+import ModeratorSupport from './Pages/moderator/support/index';
+import ModeratorSettings from './Pages/moderator/settings/index';
+import ModeratorPricing from './Pages/moderator/pricing/index';
+import ModeratorPricingHistory from './Pages/moderator/pricing/history';
+import ModeratorPricingAnalytics from './Pages/moderator/pricing/analytics';
+
+
 
 
 
@@ -163,7 +224,7 @@ let router = createBrowserRouter([
 				Component: Dashboard
 			},
 			{
-				path:'availableLoads',
+				path: 'availableLoads',
 				Component: AvailableLoads
 			},
 			{
@@ -175,15 +236,15 @@ let router = createBrowserRouter([
 				Component: PickupDropPoints
 			},
 			{
-				path : 'routePlanner',
+				path: 'routePlanner',
 				Component: RoutePlanner
 			},
 			{
-				path : 'vehicleInfo',
+				path: 'vehicleInfo',
 				Component: VehicleInfo
 			},
 			{
-				path : 'deliveryHistory',
+				path: 'deliveryHistory',
 				Component: DeliveryHistory
 			},
 			{
@@ -301,47 +362,47 @@ let router = createBrowserRouter([
 			},
 		],
 	},
-		{
+	{
 		path: '/farmer',
 		Component: FarmerLayout,
 		children: [
-			{ 
+			{
 				index: true,
 				Component: MyProducts
 			},
-			{ 
+			{
 				path: 'MyProducts',
 				Component: MyProducts
 			},
 			{
 				path: "MyProducts/:MyProductId",
-				Component:  MyProductsDetails,
+				Component: MyProductsDetails,
 				loader: MyProductsDetailsLoader
 			},
-			{ 
+			{
 				path: 'crops',
 				Component: FarmerCrops,
 				loader: FarmercropsLoader
 			},
-			{ 
+			{
 				path: 'payments',
 				Component: FarmerPayments,
 			},
-			{ 
+			{
 				path: 'profile',
 				Component: FarmerProfile
 			},
-            {
+			{
 				path: 'orders',
 				children: [
-					{ 
+					{
 						path: 'Awaiting Shipment',
 						Component: AwaitingShipment
 					},
-					{ 
+					{
 						path: 'Ongoing Shipment',
 						Component: OngoingShipment
-						
+
 					},
 					{
 						path: "Paid and Shiped",
@@ -354,19 +415,19 @@ let router = createBrowserRouter([
 					}
 				],
 			},
-			{ 
+			{
 				path: 'requests',
 				Component: BuyerRequests,
-		
+
 			},
-				{ 
+			{
 				path: 'offers',
 				Component: Offers
 			},
-			{ 
+			{
 				path: 'prices',
 				Component: FarmioPrices,
-			
+
 			},
 			{
 				path: "crops/:cropId",
@@ -384,11 +445,11 @@ let router = createBrowserRouter([
 			{
 				path: 'warehouses',
 				children: [
-					{ 
+					{
 						path: 'all',
 						Component: FarmerWarehouses
 					},
-					{ 
+					{
 						path: 'reserved',
 						Component: FarmerReservedStorage,
 						loader: FarmerreservedLoader
@@ -429,10 +490,248 @@ let router = createBrowserRouter([
 			{
 				path: 'wastemanagement',
 				Component: WasteAgents
-		
+
 			},
 		],
 	},
+	{
+		path: '/warehouse',
+		Component: WarehouseLayout,
+		children: [
+			{
+				index: true,
+				Component: Dashboard
+			},
+			{
+				path: 'facilities',
+				Component: FacilityManagement
+			},
+			{
+				path: 'slots',
+				Component: SlotManagement
+			},
+			{
+				path: 'bookings',
+				Component: BookingManagement
+			},
+			{
+				path: 'payments',
+				Component: PaymentManagement
+			},
+			{
+				path: 'waste-agents',
+				Component: WasteAgent
+			},
+			{
+				path: 'notifications',
+				Component: Notifications
+			},
+			{
+				path: 'analytics',
+				Component: Analytics
+			}
+		],
+	},
+
+	// Add Admin routes
+	{
+		path: '/admin',
+		children: [
+			{
+				path: 'login',
+				Component: AdminLogin
+			},
+			{
+				path: 'dashboard',
+				Component: AdminDashboard
+			},
+			{
+				path: 'users',
+				children: [
+					{
+						index: true,
+						Component: UserManagementHome
+					},
+					{
+						path: 'farmers',
+						Component: FarmerManagement
+					},
+					{
+						path: 'buyers',
+						Component: BuyerManagement
+					},
+					{
+						path: 'transport-providers',
+						Component: TransportProviderManagement
+					},
+					{
+						path: 'warehouse-owners',
+						Component: WarehouseOwnerManagement
+					},
+					{
+						path: 'waste-management-agents',
+						Component: WasteManagementAgentManagement
+					},
+					{
+						path: 'moderators',
+						Component: ModeratorManagement
+					},
+					{
+						path: 'admins',
+						Component: AdminManagement
+					}
+				]
+			},
+			{
+				path: 'products',
+				Component: ProductsManagementWithErrorHandling
+			},
+			{
+				path: 'orders',
+				children: [
+					{
+						index: true,
+						Component: OrdersManagement
+					},
+					{
+						path: 'pending',
+						Component: PendingOrders
+					},
+					{
+						path: 'deliveries',
+						Component: Deliveries
+					},
+					{
+						path: 'issues',
+						Component: OrdersIssues
+					}
+				]
+			},
+			{
+				path: 'analytics',
+				children: [
+					{
+						index: true,
+						Component: AnalyticsPage
+					},
+					{
+						path: 'sales',
+						Component: AnalyticsSales
+					},
+					{
+						path: 'activity',
+						Component: AnalyticsActivity
+					},
+					{
+						path: 'supply-chain',
+						Component: AnalyticsSupplyChain
+					},
+					{
+						path: 'sustainability',
+						Component: AnalyticsSustainability
+					}
+				]
+			},
+			{
+				path: 'logistics',
+				children: [
+					{
+						path: 'routes',
+						Component: LogisticsRoutes
+					},
+					{
+						path: 'warehouses',
+						Component: LogisticsWarehouses
+					},
+					{
+						path: 'shipping',
+						Component: LogisticsShipping
+					}
+				]
+			},
+			{
+				path: 'waste',
+				children: [
+					{
+						path: 'collection',
+						Component: WasteCollection
+					},
+					{
+						path: 'processing',
+						Component: WasteProcessing
+					},
+					{
+						path: 'stats',
+						Component: WasteStats
+					}
+				]
+			},
+			{
+				path: 'settings',
+				Component: SettingsPage
+			}
+		]
+	},
+	// Add Moderator routes
+	{
+		path: '/moderator',
+		children: [
+			{
+				path: 'login',
+				Component: ModeratorLogin
+			},
+			{
+				path: 'dashboard',
+				Component: ModeratorDashboard
+			},
+			{
+				path: 'products',
+				children: [
+					{
+						index: true,
+						Component: ModeratorProducts
+					},
+					{
+						path: 'review',
+						Component: ModeratorProductReview
+					},
+					{
+						path: 'quality',
+						Component: ModeratorProductQuality
+					}
+				]
+			},
+			{
+				path: 'pricing',
+				children: [
+					{
+						index: true,
+						Component: ModeratorPricing
+					},
+					{
+						path: 'history',
+						Component: ModeratorPricingHistory
+					},
+					{
+						path: 'analytics',
+						Component: ModeratorPricingAnalytics
+					}
+				]
+			},
+			{
+				path: 'orders',
+				Component: ModeratorOrders
+			},
+			{
+				path: 'support',
+				Component: ModeratorSupport
+			},
+			{
+				path: 'settings',
+				Component: ModeratorSettings
+			}
+		]
+	}
 ]);
 
 
@@ -445,5 +744,10 @@ function App() {
 		</UserContextProvider>
 	)
 }
+
+
+
+
+
 
 export default App
