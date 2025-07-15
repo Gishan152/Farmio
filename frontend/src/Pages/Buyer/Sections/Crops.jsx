@@ -1,10 +1,10 @@
 // src/buyer/pages/Crops.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // import { useLoaderData } from 'react-router-dom';
 import { StarIcon, CheckBadgeIcon } from '@heroicons/react/24/solid';
 import wheat from "../../../Assets/Buyer/Crops/wheat.webp";
 import corn from "../../../Assets/Buyer/Crops/corn.jpeg";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSavesContext } from '../../../Contexts/Buyer/SavesContext';
 
 export function cropsLoader() {
@@ -18,6 +18,9 @@ export function cropsLoader() {
             rating: 4.5,
             verified: true,
             imageUrl: corn,
+            unitMeasurement: "kg",
+            transpotationAvailable: true,
+            returnsAccepted: false,
             badges: ['Organic', 'On Sale'],
         },
         {
@@ -29,6 +32,9 @@ export function cropsLoader() {
             rating: 4.2,
             verified: false,
             imageUrl: wheat,
+            unitMeasurement: "kg",
+            transpotationAvailable: true,
+            returnsAccepted: false,
             badges: [],
         },
         {
@@ -40,6 +46,9 @@ export function cropsLoader() {
             rating: 4.7,
             verified: true,
             imageUrl: wheat,
+            unitMeasurement: "kg",
+            transpotationAvailable: true,
+            returnsAccepted: false,
             badges: ['Organic'],
         },
         {
@@ -51,6 +60,9 @@ export function cropsLoader() {
             rating: 4.0,
             verified: false,
             imageUrl: wheat,
+            unitMeasurement: "kg",
+            transpotationAvailable: true,
+            returnsAccepted: false,
             badges: ['On Sale'],
         },
         {
@@ -62,6 +74,9 @@ export function cropsLoader() {
             rating: 4.3,
             verified: true,
             imageUrl: wheat,
+            unitMeasurement: "kg",
+            transpotationAvailable: true,
+            returnsAccepted: false,
             badges: [],
         },
         {
@@ -73,6 +88,9 @@ export function cropsLoader() {
             rating: 4.8,
             verified: true,
             imageUrl: wheat,
+            unitMeasurement: "kg",
+            transpotationAvailable: true,
+            returnsAccepted: false,
             badges: ['Organic', 'Certified'],
         }
     ];
@@ -83,23 +101,38 @@ export default function Crops() {
     // const crops = useLoaderData();
     const crops = cropsLoader();
     const { items: savedItems, addItem: addItemToSaves, removeItem: removeItemFromSaves } = useSavesContext();
+    const navigate = useNavigate();
 
     const [open, setOpen] = useState(false);
-    const [crop, setCrop] = useState(null);
+    const [selectedCrop, setSelectedCrop] = useState(null);
 
     const handleAdd = qty => {
-        console.log(`Adding ${qty} kg of`, crop.type);
-        addItemToSaves(crop, qty);
+        console.log(`Adding ${qty} kg of`, selectedCrop.data.type);
+        addItemToSaves(selectedCrop.data, qty);
     };
 
     const handleRemove = crop => {
         removeItemFromSaves(crop.id)
     }
 
+    const handleBuy = (qty) => {
+        const item = selectedCrop.data;
+        item.quantity = qty;
+        navigate("../order-confirmation", { state: { items: [item] } })
+    }
+
+    const handleConfirm = (qty) => {
+        if(selectedCrop.operation === "save"){
+            handleAdd(qty);
+        }else{
+            handleBuy(qty);
+        }
+    }
+
     return (
         <section className="p-6">
             <h1 className="text-2xl font-semibold mb-6 dark:text-gray-100">Available Crops</h1>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xlg:grid-cols-4">
                 {crops.map(crop => (
                     <div
                         key={crop.id}
@@ -125,11 +158,23 @@ export default function Crops() {
                                         {crop.type}
                                     </h2>
                                 </Link>
-                                <p className="text-lg dark:text-gray-200">Rs{crop.pricePerUnit.toFixed(2)}</p>
+                                <p className="text-lg dark:text-gray-200">Rs{crop.pricePerUnit.toFixed(2)} per {crop.unitMeasurement}</p>
 
                                 <div className="text-sm text-gray-500 dark:text-gray-400">
                                     <span className="font-medium dark:text-gray-300">{crop.farm}</span>{' '}
                                     • {crop.location}
+                                </div>
+
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="font-medium dark:text-gray-300">{crop.transpotationAvailable ? "Transpotation Available" : "Transpotation Not Available"}</span>
+                                </div>
+
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="font-medium dark:text-gray-300">{crop.totalStock} {crop.unitMeasurement} Available</span>
+                                </div>
+
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="font-medium dark:text-gray-300">{crop.returnsAccepted ? "Returns Accepted" : "No Returns"}</span>
                                 </div>
 
                                 <div className="flex items-center text-gray-700 dark:text-gray-300">
@@ -151,31 +196,41 @@ export default function Crops() {
 
                             </div>
                         </div>
-                        <div className="p-4 space-y-2">
+                        <div className="flex gap-2 items-center p-4 space-y-2">
                             {
-                                savedItems?.find(v=>crop.id==v.id) ? 
-                                <button
-                                    className="w-full py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
-                                    onClick={() => {
-                                        handleRemove(crop)
-                                    }}>
-                                    Remove from Cart
-                                </button> 
-                                :
-                                <button
-                                    className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-                                    onClick={() => {
-                                        setCrop(crop)
-                                        setOpen(true)
-                                    }}>
-                                    Add to Cart
-                                </button>
+                                savedItems?.find(v => crop.id == v.id) ?
+                                    <button
+                                        className="p-2 m-0 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
+                                        onClick={() => {
+                                            handleRemove(crop)
+                                        }}>
+                                        Remove from Saves
+                                    </button>
+                                    :
+                                    <button
+                                        className="p-2 m-0 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                                        onClick={() => {
+                                            setSelectedCrop({operation: "save", data: crop})
+                                            setOpen(true)
+                                        }}>
+                                        Add to Saves
+                                    </button>
                             }
+                            <button
+                                onClick={() => {
+                                    setSelectedCrop({operation: "order", data: crop})
+                                    setOpen(true)
+                                }}
+                                className="p-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                            >
+                                Buy now
+                            </button>
                         </div>
                         <QuantityModal
                             isOpen={open}
                             onClose={() => setOpen(false)}
-                            onConfirm={handleAdd}
+                            onConfirm={handleConfirm}
+                            submitButtonText={selectedCrop?.operation === "save" ? "Add to Saves" : "Order"}
                         />
                     </div>
                 ))}
@@ -184,11 +239,17 @@ export default function Crops() {
     );
 }
 
-function QuantityModal({ isOpen, onClose, onConfirm }) {
+function QuantityModal({ isOpen, onClose, onConfirm, submitButtonText }) {
     const [qty, setQty] = useState(10);
     const [error, setError] = useState('');
 
-    if (!isOpen) return null;
+    // Reset when modal opens
+    useEffect(() => {
+        if (!isOpen) {
+            setQty(10);
+            setError('');
+        }
+    }, [isOpen]);
 
     const handleConfirm = () => {
         if (qty < 10) {
@@ -199,16 +260,20 @@ function QuantityModal({ isOpen, onClose, onConfirm }) {
         onClose();
     };
 
+    if (!isOpen) return null;
+
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div
-                className="absolute inset-0 bg-black opacity-50"
+                className="absolute inset-0 bg-black opacity-15"
                 onClick={onClose}
             />
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 z-10 w-full max-w-sm">
-                <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">
+
+            <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full p-6 z-10">
+                <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">
                     Select Quantity (kg)
-                </h3>
+                </h2>
+
                 <input
                     type="number"
                     min="10"
@@ -217,21 +282,22 @@ function QuantityModal({ isOpen, onClose, onConfirm }) {
                         setQty(+e.target.value);
                         if (error) setError('');
                     }}
-                    className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                {error && <p className="mt-1 text-red-500">{error}</p>}
-                <div className="mt-4 flex justify-end space-x-2">
+                {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+
+                <div className="mt-6 flex justify-end space-x-2">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 border rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                        className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleConfirm}
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                     >
-                        Add to Cart
+                        {submitButtonText}
                     </button>
                 </div>
             </div>

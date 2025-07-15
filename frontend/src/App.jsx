@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Component, useState } from 'react'
 import { createBrowserRouter, RouterProvider } from "react-router";
 import './App.css'
 import LandingPage from './Pages/LandingPage';
@@ -24,6 +24,25 @@ import OrderConfirmation from './Pages/Buyer/Sections/OrderConfirmation';
 import CropTransport from './Pages/Buyer/Sections/CropTransport';
 import Orders from './Pages/Buyer/Sections/Orders';
 import CreateTransportJob from './Pages/Buyer/Sections/CreateTransport';
+import OrderDetails from './Pages/Buyer/Sections/OrderDetails';
+import Requests from './Pages/Buyer/Sections/Requests';
+import RequestDetails from './Pages/Buyer/Sections/RequestDetails';
+import WarehouseReservationDetails, { warehouseReservationLoader } from './Pages/Buyer/Sections/ReservedStorageDetails';
+import SettingsPage from './Pages/SettingsPage';
+import UserContextProvider from './Contexts/UserContext';
+import TransportJobDetails from './Pages/Buyer/Sections/TransportJobDetails';
+import WarehouseSearch from './Pages/Buyer/Sections/WarehouseSearch';
+import { GoogleMapsProvider } from './Contexts/GoogleMapContext';
+import TransLayout from './Pages/transporter/TransLayout';
+import Dashboard from './Pages/transporter/Sections/Dashboard';
+import AvailableLoads from './Pages/transporter/Sections/AvailableLoads';
+import AssignedLoads from './Pages/transporter/Sections/AssignedLoads';
+import PickupDropPoints from './Pages/transporter/Sections/PickupDropPoints';
+import RoutePlanner from './Pages/transporter/Sections/RoutePlanner';
+import VehicleInfo from './Pages/transporter/Sections/VehicleInfo';
+import DeliveryHistory from './Pages/transporter/Sections/DeliveryHistory';
+import RatingsFeedback from './Pages/transporter/Sections/RatingsFeedback';
+import Notifications from './Pages/transporter/Sections/Notifications';
 //farmer
 import FarmerLayout from './Pages/Farmer/FarmerLayout';
 import FarmerCrops, {FarmercropsLoader} from './Pages/Farmer/Sections/Crops';
@@ -128,14 +147,64 @@ let router = createBrowserRouter([
 		Component: ProductPage
 	},
 	{
+		path: 'settings',
+		Component: SettingsPage
+	},
+	{
+		path: '/transporter',
+		Component: TransLayout,
+		children: [
+			{
+				index: true,
+				Component: Dashboard
+			},
+			{
+				path: 'dashboard',
+				Component: Dashboard
+			},
+			{
+				path:'availableLoads',
+				Component: AvailableLoads
+			},
+			{
+				path: 'assignedLoads/all',
+				Component: AssignedLoads
+			},
+			{
+				parth: 'pickupDropPoints',
+				Component: PickupDropPoints
+			},
+			{
+				path : 'routePlanner',
+				Component: RoutePlanner
+			},
+			{
+				path : 'vehicleInfo',
+				Component: VehicleInfo
+			},
+			{
+				path : 'deliveryHistory',
+				Component: DeliveryHistory
+			},
+			{
+				path: 'ratingsFeedback',
+				Component: RatingsFeedback
+			},
+			{
+				path: 'notifications',
+				Component: Notifications
+			}
+		]
+	},
+	{
 		path: '/buyer',
 		Component: BuyerLayout,
 		children: [
-			{ 
+			{
 				index: true,
 				Component: Crops
 			},
-			{ 
+			{
 				path: 'crops',
 				Component: Crops
 			},
@@ -153,6 +222,10 @@ let router = createBrowserRouter([
 				Component: Orders
 			},
 			{
+				path: "orders/:orderId",
+				Component: OrderDetails
+			},
+			{
 				path: "order-confirmation",
 				Component: OrderConfirmation
 			},
@@ -161,39 +234,68 @@ let router = createBrowserRouter([
 				Component: CropTransport
 			},
 			{
+				path: "requests",
+				Component: Requests
+			},
+			{
+				path: "requests/:requestId",
+				Component: RequestDetails
+			},
+			{
 				path: 'warehouses',
 				children: [
-					{ 
+					{
 						path: 'all',
 						Component: Warehouses
 					},
-					{ 
+					{
+						path: 'search',
+						Component: WarehouseSearch
+					},
+					{
 						path: 'reserved',
 						Component: ReservedStorage,
 						loader: reservedLoader
 					},
 					{
-						path: ":warehouseId",
+						path: "all/:warehouseId",
 						Component: WarehouseDetails,
 						loader: warehouseDetailsLoader
+					},
+					{
+						path: "reserved/:warehouseId",
+						Component: WarehouseReservationDetails,
+						loader: warehouseReservationLoader
+					},
+					{
+						path: "search",
+						Component: WarehouseSearch,
 					}
 				],
 			},
 			{
 				path: 'transport',
 				children: [
-					{ 
+					{
 						path: 'providers',
 						Component: TransportProviders,
 						loader: transportProvidersLoader
 					},
-					{ 
+					{
 						path: 'create',
 						Component: CreateTransportJob,
 					},
-					{ 
+					{
 						path: 'schedules',
 						Component: TransportSchedules
+					},
+					{
+						path: 'schedules/of-order/:orderId',
+						Component: TransportSchedules
+					},
+					{
+						path: 'schedules/:jobId',
+						Component: TransportJobDetails
 					},
 				],
 			},
@@ -336,7 +438,11 @@ let router = createBrowserRouter([
 
 function App() {
 	return (
-		<RouterProvider router={router} />
+		<UserContextProvider>
+			<GoogleMapsProvider>
+				<RouterProvider router={router} />
+			</GoogleMapsProvider>
+		</UserContextProvider>
 	)
 }
 

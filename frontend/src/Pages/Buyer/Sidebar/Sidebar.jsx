@@ -3,13 +3,14 @@ import SidebarItem from './SidebarItem';
 
 const menu = [
     { label: 'Crops', to: 'crops' },
-    { label: 'Requirements', to: 'requirements' },
+    { label: 'Requests', to: 'requests' },
     { label: 'Saved items', to: 'saves' },
     { label: 'Orders', to: 'orders' },
     {
         label: 'Warehouses',
         children: [
             { label: 'Warehouses', to: 'warehouses/all' },
+            { label: 'Search Warehouses', to: 'warehouses/search' },
             { label: 'Reserved Storage Units', to: 'warehouses/reserved' },
         ],
     },
