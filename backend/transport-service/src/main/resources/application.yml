@@ -15,7 +15,7 @@ spring:
     port: 5672
 
   datasource:
-    url: jdbc:postgres://avnadmin:AVNS_W5zTqR7lJoTKHHmmmKQ@pg-349c31eb-gishan768-629b.e.aivencloud.com:15794/transportdb?sslmode=require
+    url: jdbc:postgresql://pg-349c31eb-gishan768-629b.e.aivencloud.com:15794/transportdb?sslmode=require
     username: avnadmin
     password: AVNS_W5zTqR7lJoTKHHmmmKQ
     driver-class-name: org.postgresql.Driver
