@@ -133,6 +133,12 @@ import ModeratorPricingAnalytics from './Pages/moderator/pricing/analytics';
 
 
 
+import WasteAgentLayout from './Pages/WasteAgent/WasteAgentLayout';
+import WasteListings from './Pages/WasteAgent/Sections/WasteListings';
+import WasteRequests from './Pages/WasteAgent/Sections/Requests';
+import Payments from './Pages/WasteAgent/Sections/Payments';
+import BrowseDiscover from './Pages/WasteAgent/Sections/BrowseDiscover';
+import AgentProfile from './Pages/WasteAgent/Sections/AgentProfile';
 
 
 let router = createBrowserRouter([
@@ -359,6 +365,36 @@ let router = createBrowserRouter([
 						Component: TransportJobDetails
 					},
 				],
+			},
+		],
+	},
+	, {
+		path: '/waste-agent',
+		Component: WasteAgentLayout,
+		children: [
+			{
+				index: true,
+				Component: WasteListings
+			},
+			{
+				path: 'listings',
+				Component: WasteListings
+			},
+			{
+				path: "browse-discover",
+				Component: BrowseDiscover
+			},
+			{
+				path: "manage-payments",
+				Component: Payments
+			},
+			{
+				path: "requests",
+				Component: WasteRequests
+			},
+			{
+				path: "profile",
+				Component: AgentProfile
 			},
 		],
 	},
@@ -744,10 +780,5 @@ function App() {
 		</UserContextProvider>
 	)
 }
-
-
-
-
-
 
 export default App
