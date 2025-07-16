@@ -69,6 +69,10 @@ public class User implements UserDetails {
                 .collect(Collectors.toSet());
     }
 
+    public Long getUserId() {
+        return this.id;
+    }
+
     @Override
     public String getUsername() {
         return this.username;
