@@ -4,7 +4,7 @@ import {
 	UserIcon,
 } from "@heroicons/react/24/solid";
 import SidebarItem from "./SidebarItem";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/Components/WasteUI/avatar";
 import { useNavigate } from "react-router-dom";
 
 const menu = [

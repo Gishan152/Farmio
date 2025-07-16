@@ -6,22 +6,22 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+} from "@/Components/WasteUI/table";
+import { Button } from "@/Components/WasteUI/button";
 import NumberFlow from "@number-flow/react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/Components/WasteUI/badge";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@/components/ui/card";
+} from "@/Components/WasteUI/card";
 import {
 	Popover,
 	PopoverTrigger,
 	PopoverContent,
-} from "@/components/ui/popover";
+} from "@/Components/WasteUI/popover";
 import { IoLocationOutline } from "react-icons/io5";
 import {
 	Select,
@@ -29,8 +29,8 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+} from "@/Components/WasteUI/select";
+import { Input } from "@/Components/WasteUI/input";
 import { toast, Toaster } from "sonner";
 import {
 	Check,
@@ -47,7 +47,7 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
-} from "@/components/ui/command";
+} from "@/Components/WasteUI/command";
 import {
   Dialog,
   DialogClose,
@@ -57,9 +57,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/Components/WasteUI/dialog"
 import { cn } from "@/lib/utils";
-import { Label } from "@/Components/ui/label";
+import { Label } from "@/Components/WasteUI/label";
 import { FaDownload } from "react-icons/fa6";
 
 const Payments = () => {

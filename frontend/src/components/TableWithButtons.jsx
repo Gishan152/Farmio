@@ -6,8 +6,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+} from "@/Components/WasteUI/table";
+import { Button } from "@/Components/WasteUI/button";
 
 const TableWithButtons = () => {
   // Sample data for demonstration

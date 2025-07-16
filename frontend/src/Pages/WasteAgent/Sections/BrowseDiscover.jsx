@@ -6,7 +6,7 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
+} from "@/Components/WasteUI/table";
 import NumberFlow from "@number-flow/react";
 import { IoFilter, IoLocationOutline } from "react-icons/io5";
 import { MdRecycling } from "react-icons/md";
@@ -17,8 +17,8 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+} from "@/Components/WasteUI/select";
+import { Label } from "@/Components/WasteUI/label";
 import { HiDotsVertical } from "react-icons/hi";
 import { 
 	ChevronsUpDown, 
@@ -33,9 +33,9 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/Components/WasteUI/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/WasteUI/button";
 import {
 	Command,
 	CommandEmpty,
@@ -43,15 +43,15 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
-} from "@/components/ui/command";
+} from "@/Components/WasteUI/command";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/Components/WasteUI/popover";
 import { Toaster, toast } from "sonner";
-import { Input } from "@/components/ui/input";
-import { CardDescription, CardTitle } from "@/components/ui/card";
+import { Input } from "@/Components/WasteUI/input";
+import { CardDescription, CardTitle } from "@/Components/WasteUI/card";
 
 const BrowseDiscover = () => {
 	const [wasteListings, setWasteListings] = useState([

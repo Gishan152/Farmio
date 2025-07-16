@@ -6,23 +6,23 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+} from "@/Components/WasteUI/table";
+import { Badge } from "@/Components/WasteUI/badge";
 import NumberFlow from "@number-flow/react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/Components/WasteUI/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+} from "@/Components/WasteUI/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/Components/WasteUI/avatar";
 import {
 	Popover,
 	PopoverTrigger,
 	PopoverContent,
-} from "@/Components/ui/popover";
+} from "@/Components/WasteUI/popover";
 import { IoLocationOutline } from "react-icons/io5";
 import {
 	Select,
@@ -30,8 +30,8 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+} from "@/Components/WasteUI/select";
+import { Input } from "@/Components/WasteUI/input";
 import { toast, Toaster } from "sonner";
 import {
 	Check,
@@ -49,7 +49,7 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/Components/WasteUI/dropdown-menu";
 import {
 	Command,
 	CommandEmpty,
@@ -57,7 +57,7 @@ import {
 	CommandInput,
 	CommandItem,
 	CommandList,
-} from "@/components/ui/command";
+} from "@/Components/WasteUI/command";
 import { cn } from "@/lib/utils";
 
 const Requests = () => {

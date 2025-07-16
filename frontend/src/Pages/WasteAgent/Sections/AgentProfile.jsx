@@ -1,26 +1,26 @@
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/Components/WasteUI/button";
+import { Input } from "@/Components/WasteUI/input";
+import { Label } from "@/Components/WasteUI/label";
+import { Textarea } from "@/Components/WasteUI/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/Components/WasteUI/select";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+} from "@/Components/WasteUI/card";
+import { Badge } from "@/Components/WasteUI/badge";
+import { Switch } from "@/Components/WasteUI/switch";
+import { Checkbox } from "@/Components/WasteUI/checkbox";
+import { Avatar, AvatarFallback, AvatarImage } from "@/Components/WasteUI/avatar";
 import { toast, Toaster } from "sonner";
 import {
   User,
