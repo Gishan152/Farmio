@@ -28,7 +28,13 @@
 		<module>order-service</module>
 		<module>test-service</module>
 		<module>auth-service</module>
-        <module>config-server</module>
+        <module>crop-listing-service</module>
+        <module>transport-service</module>
+        <module>waste-service</module>
+        <module>warehouse-service</module>
+        <module>analytic-service</module>
+        <module>chat-service</module>
+        <module>payment-service</module>
     </modules>
 	<scm>
 		<connection/>

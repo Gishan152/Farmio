@@ -1,0 +1,46 @@
+# Server
+server:
+  port: 8089
+
+# Database
+spring:
+  application:
+    name: transport-service
+  cloud:
+    config:
+      import-check:
+        enabled: false
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+
+  datasource:
+    url: jdbc:postgres://avnadmin:AVNS_W5zTqR7lJoTKHHmmmKQ@pg-349c31eb-gishan768-629b.e.aivencloud.com:15794/transportdb?sslmode=require
+    username: avnadmin
+    password: AVNS_W5zTqR7lJoTKHHmmmKQ
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    health:
+      show-components: always
+      show-details: always
+      db:
+        enabled: true
+  security:
+    enabled: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
