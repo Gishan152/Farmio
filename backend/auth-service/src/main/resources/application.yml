@@ -27,9 +27,9 @@ spring:
 #    open-in-view: false
 
   datasource:
-    url: jdbc:postgresql://postgres:5432/userdb
-    username: postgres
-    password: farmio@1234
+    url: jdbc:postgresql://pg-349c31eb-gishan768-629b.e.aivencloud.com:15794/userdb?sslmode=require
+    username: avnadmin
+    password: AVNS_W5zTqR7lJoTKHHmmmKQ
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
