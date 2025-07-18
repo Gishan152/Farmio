@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CustomModal from '../../../Components/CustomModel';
 import {
     MagnifyingGlassIcon,
     FunnelIcon,
@@ -142,6 +143,12 @@ function PaymentTable({ payments }) {
 
 export default function PaymentManagement() {
     const { payments, loading, loadPayments } = useBuyerPayment();
+    // Wallet state (mocked for demo)
+    const [wallet, setWallet] = useState(15000); // Rs. 15,000 in wallet
+    const [withdrawModal, setWithdrawModal] = useState(false);
+    const [withdrawAmount, setWithdrawAmount] = useState('');
+    const [withdrawError, setWithdrawError] = useState('');
+
     // Simple CSV export for buyer payments
     const exportPayments = () => {
         if (!payments.length) return;
@@ -191,6 +198,23 @@ export default function PaymentManagement() {
         orderPayments: payments.filter(p => p.type === 'Order').length
     };
 
+    // Withdraw handler
+    const handleWithdraw = () => {
+        setWithdrawError('');
+        const amount = parseFloat(withdrawAmount);
+        if (isNaN(amount) || amount <= 0) {
+            setWithdrawError('Please enter a valid amount.');
+            return;
+        }
+        if (amount > wallet) {
+            setWithdrawError('Insufficient wallet balance.');
+            return;
+        }
+        setWallet(w => w - amount);
+        setWithdrawModal(false);
+        setWithdrawAmount('');
+    };
+
     return (
         <div className="bg-gray-50 min-h-screen">
             <div className="max-w-6xl mx-auto space-y-4 p-4">
@@ -216,12 +240,30 @@ export default function PaymentManagement() {
                                 <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
                                 Export
                             </button>
+                            <button
+                                className="flex items-center bg-green-100 text-green-700 px-3 py-2 rounded-lg hover:bg-green-200 transition-colors duration-200 text-sm font-semibold shadow border border-green-400"
+                                onClick={() => setWithdrawModal(true)}
+                            >
+                                <CurrencyDollarIcon className="h-4 w-4 mr-2" />
+                                Withdraw
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Stats Cards + Wallet Card */}
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    {/* Wallet Card */}
+                    <div className="bg-white rounded-lg shadow-sm border border-green-400 p-4 flex flex-col justify-between">
+                        <div className="flex items-center">
+                            <CurrencyDollarIcon className="h-7 w-7 text-green-600" />
+                            <div className="ml-3">
+                                <p className="text-xs font-medium text-gray-500">Wallet Balance</p>
+                                <p className="text-xl font-bold text-green-700">Rs. {wallet.toLocaleString()}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {/* Other Stat Cards */}
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                         <div className="flex items-center">
                             <CurrencyDollarIcon className="h-6 w-6 text-green-600" />
@@ -259,6 +301,35 @@ export default function PaymentManagement() {
                         </div>
                     </div>
                 </div>
+            {/* Withdraw Modal */}
+            <CustomModal
+                isOpen={withdrawModal}
+                onClose={() => { setWithdrawModal(false); setWithdrawError(''); setWithdrawAmount(''); }}
+                title="Withdraw Funds"
+                description="Enter the amount you want to withdraw from your wallet."
+                submitText="Withdraw"
+                onSubmit={handleWithdraw}
+            >
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Available Balance</label>
+                        <div className="p-2 bg-gray-100 rounded text-green-700 font-bold">Rs. {wallet.toLocaleString()}</div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Withdraw Amount</label>
+                        <input
+                            type="number"
+                            className="w-full border rounded px-3 py-2"
+                            placeholder="Enter amount"
+                            value={withdrawAmount}
+                            onChange={e => setWithdrawAmount(e.target.value)}
+                            min={1}
+                            max={wallet}
+                        />
+                    </div>
+                    {withdrawError && <div className="text-red-600 text-sm font-medium">{withdrawError}</div>}
+                </div>
+            </CustomModal>
 
                 {/* Filters */}
                 {showFilters && (
