@@ -123,24 +123,64 @@ export default function BuyerDashboard() {
           />
         </div>
 
-        {/* Recent Orders */}
+        {/* Recent Orders - Modernized */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Recent Orders</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <CreditCardIcon className="h-7 w-7 text-green-500" /> Recent Orders
+          </h2>
           {orders.length === 0 ? (
             <p className="text-gray-600 dark:text-gray-300">No orders placed yet.</p>
           ) : (
             <ul className="divide-y divide-gray-100 dark:divide-gray-700">
-              {orders.slice(0, 5).map(order => (
-                <li key={order.id} className="py-4 flex flex-col md:flex-row md:justify-between md:items-center">
-                  <div>
-                    <Link to={`/buyer/orders/${order.id}`} className="font-medium text-green-700 dark:text-green-300 hover:underline">
-                      Order #{order.id}
-                    </Link>
-                    <span className="ml-4 text-sm text-gray-500">{order.status}</span>
-                  </div>
-                  <span className="font-semibold text-gray-700 dark:text-gray-200">Rs. {order.items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0)}</span>
-                </li>
-              ))}
+              {orders.slice(0, 5).map(order => {
+                // Order info
+                const total = order.items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0);
+                const itemCount = order.items.length;
+                // Try to get order date if available
+                let orderDate = order.date || order.createdAt || null;
+                let dateStr = orderDate ? new Date(orderDate).toLocaleDateString() : null;
+                // Status badge color and label
+                const statusMap = {
+                  PENDING:    { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
+                  PROCESSING: { color: 'bg-blue-100 text-blue-800', label: 'Processing' },
+                  AWAITING_PICKUP: { color: 'bg-orange-100 text-orange-800', label: 'Awaiting Pickup' },
+                  IN_TRANSPORT: { color: 'bg-purple-100 text-purple-800', label: 'In Transport' },
+                  DELIVERED:  { color: 'bg-green-100 text-green-800', label: 'Delivered' },
+                  REFUNDED:   { color: 'bg-red-100 text-red-800', label: 'Refunded' },
+                };
+                let statusKey = (order.status || '').toUpperCase();
+                let statusObj = statusMap[statusKey] || {
+                  color: 'bg-gray-100 text-gray-800',
+                  label: order.status
+                    ? order.status
+                        .toLowerCase()
+                        .split('_')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ')
+                    : 'Unknown'
+                };
+                return (
+                  <li key={order.id} className="py-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-0">
+                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 flex-1 min-w-0">
+                      <Link to={`/buyer/orders/${order.id}`} className="font-semibold text-green-700 dark:text-green-300 hover:underline truncate">
+                        Order - {order.id}
+                      </Link>
+                      {dateStr && (
+                        <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">{dateStr}</span>
+                      )}
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusObj.color} ml-0 md:ml-2`}>{statusObj.label}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-0 md:ml-2">{itemCount} item{itemCount !== 1 ? "s" : ""}</span>
+                    </div>
+                    <div className="flex flex-col items-end min-w-[120px]">
+                      <span className="font-bold text-lg text-gray-900 dark:text-white">Rs. {total}</span>
+                      {/* Add more info if needed, e.g. payment method */}
+                      {order.paymentMethod && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">{order.paymentMethod}</span>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
