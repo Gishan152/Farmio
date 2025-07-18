@@ -185,62 +185,99 @@ export default function BuyerDashboard() {
           )}
         </div>
 
-        {/* Recent Requests */}
+        {/* Recent Requests - Modernized */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Recent Requests</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <ClipboardDocumentListIcon className="h-7 w-7 text-blue-500" /> Recent Requests
+          </h2>
           {requests.length === 0 ? (
             <p className="text-gray-600 dark:text-gray-300">No requests made yet.</p>
           ) : (
             <ul className="divide-y divide-gray-100 dark:divide-gray-700">
-              {requests.slice(0, 5).map(req => (
-                <li key={req.id} className="py-4 flex flex-col md:flex-row md:justify-between md:items-center">
-                  <div>
-                    <span className="font-medium text-blue-700 dark:text-blue-300">{req.crop} – {req.quantity}kg</span>
-                    <span className="ml-4 text-sm text-gray-500">{req.status || "Open"}</span>
-                  </div>
-                  <span className="font-semibold text-gray-700 dark:text-gray-200">Price: Rs {req.priceRange?.min}–{req.priceRange?.max}/kg</span>
-                </li>
-              ))}
+              {requests.slice(0, 5).map(req => {
+                const price = req.priceRange ? `Rs ${req.priceRange.min}–${req.priceRange.max}/kg` : '';
+                const dateStr = req.date ? new Date(req.date).toLocaleDateString() : '';
+                return (
+                  <li key={req.id} className="py-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-0">
+                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 flex-1 min-w-0">
+                      <span className="font-semibold text-blue-700 dark:text-blue-300 truncate">
+                        {req.crop} – {req.quantity}{req.unitMeasurement || 'kg'}
+                      </span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">{dateStr}</span>
+                      <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 ml-0 md:ml-2">{req.quality || 'Any'}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-0 md:ml-2">{req.visibility}</span>
+                    </div>
+                    <div className="flex flex-col items-end min-w-[120px]">
+                      <span className="font-bold text-lg text-gray-900 dark:text-white">{price}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">Deadline: {req.deadline}</span>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
 
-        {/* Recent Warehouse Bookings */}
+        {/* Recent Warehouse Bookings - Modernized */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Recent Warehouse Bookings</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <BuildingStorefrontIcon className="h-7 w-7 text-yellow-500" /> Recent Warehouse Bookings
+          </h2>
           {warehouseBookings.length === 0 ? (
             <p className="text-gray-600 dark:text-gray-300">No warehouse bookings yet.</p>
           ) : (
             <ul className="divide-y divide-gray-100 dark:divide-gray-700">
-              {warehouseBookings.slice(0, 5).map(b => (
-                <li key={b.id} className="py-4 flex flex-col md:flex-row md:justify-between md:items-center">
-                  <div>
-                    <span className="font-medium text-yellow-700 dark:text-yellow-300">{b.warehouseName}</span>
-                    <span className="ml-4 text-sm text-gray-500">{b.status}</span>
-                  </div>
-                  <span className="font-semibold text-gray-700 dark:text-gray-200">Booking ID: {b.id}</span>
-                </li>
-              ))}
+              {warehouseBookings.slice(0, 5).map(b => {
+                // Status badge color
+                const statusMap = {
+                  Active: 'bg-yellow-100 text-yellow-800',
+                  Completed: 'bg-green-100 text-green-800',
+                  Cancelled: 'bg-red-100 text-red-800',
+                };
+                const badgeColor = statusMap[b.status] || 'bg-gray-100 text-gray-800';
+                return (
+                  <li key={b.id} className="py-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-0">
+                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 flex-1 min-w-0">
+                      <span className="font-semibold text-yellow-700 dark:text-yellow-300 truncate">{b.warehouseName}</span>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${badgeColor} ml-0 md:ml-2`}>{b.status}</span>
+                    </div>
+                    <div className="flex flex-col items-end min-w-[120px]">
+                      <span className="font-bold text-lg text-gray-900 dark:text-white">Booking ID: {b.id}</span>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
 
-        {/* Recent Transport Jobs */}
+        {/* Recent Transport Jobs - Modernized */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Recent Transport Jobs</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <TruckIcon className="h-7 w-7 text-purple-500" /> Recent Transport Jobs
+          </h2>
           {transportJobs.length === 0 ? (
             <p className="text-gray-600 dark:text-gray-300">No transport jobs yet.</p>
           ) : (
             <ul className="divide-y divide-gray-100 dark:divide-gray-700">
-              {transportJobs.slice(0, 5).map(job => (
-                <li key={job.id} className="py-4 flex flex-col md:flex-row md:justify-between md:items-center">
-                  <div>
-                    <span className="font-medium text-purple-700 dark:text-purple-300">Job #{job.id}</span>
-                    <span className="ml-4 text-sm text-gray-500">{job.status}</span>
-                  </div>
-                  <span className="font-semibold text-gray-700 dark:text-gray-200">Vehicle: {job.vehicleType}</span>
-                </li>
-              ))}
+              {transportJobs.slice(0, 5).map(job => {
+                // Status badge color
+                const statusMap = {
+                  Active: 'bg-purple-100 text-purple-800',
+                  Completed: 'bg-green-100 text-green-800',
+                  Cancelled: 'bg-red-100 text-red-800',
+                };
+                const badgeColor = statusMap[job.status] || 'bg-gray-100 text-gray-800';
+                return (
+                  <li key={job.id} className="py-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-0">
+                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 flex-1 min-w-0">
+                      <span className="font-semibold text-purple-700 dark:text-purple-300 truncate">Job #{job.id}</span>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${badgeColor} ml-0 md:ml-2`}>{job.status}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-0 md:ml-2">{job.vehicleType}</span>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

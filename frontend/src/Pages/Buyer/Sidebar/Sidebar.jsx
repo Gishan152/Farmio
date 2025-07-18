@@ -18,9 +18,10 @@ import SidebarItem from './SidebarItem';
 const menu = [
   { label: 'Dashboard', to: 'dashboard', icon: HomeIcon },
   { label: 'Crops', to: 'crops', icon: ShoppingBagIcon },
-  { label: 'Requests', to: 'requests', icon: ClipboardDocumentListIcon },
+  { label: 'Requests', to: 'requests', icon: ArchiveBoxIcon }, // ArchiveBoxIcon for requests
   { label: 'Saved items', to: 'saves', icon: HeartIcon },
-  { label: 'Orders', to: 'orders', icon: CreditCardIcon },
+  { label: 'Orders', to: 'orders', icon: ClipboardDocumentListIcon }, // ClipboardDocumentListIcon for orders
+  { label: 'Payments', to: 'payments', icon: CreditCardIcon }, // CreditCardIcon for payments
   {
     label: 'Warehouses',
     icon: BuildingStorefrontIcon,

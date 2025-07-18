@@ -18,6 +18,7 @@ import WarehouseReservationDetails, { warehouseReservationLoader } from '../Page
 import TransportJobDetails from '../Pages/Buyer/Sections/TransportJobDetails';
 import WarehouseSearch from '../Pages/Buyer/Sections/WarehouseSearch';
 import Dashboard from '../Pages/Buyer/Sections/Dashboard';
+import PaymentManagement from '../Pages/Buyer/Sections/PaymentManagement';
 
 
 const buyerRoutes = {
@@ -64,6 +65,10 @@ const buyerRoutes = {
         {
             path: "requests",
             Component: Requests
+        },
+        {
+            path: "payments",
+            Component: PaymentManagement
         },
         {
             path: "requests/:requestId",
