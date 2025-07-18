@@ -10,11 +10,13 @@ import {
   MagnifyingGlassIcon,
   ArchiveBoxIcon,
   TruckIcon,
-  CalendarIcon
+  CalendarIcon,
+  HomeIcon
 } from '@heroicons/react/24/solid';
 import SidebarItem from './SidebarItem';
 
 const menu = [
+  { label: 'Dashboard', to: 'dashboard', icon: HomeIcon },
   { label: 'Crops', to: 'crops', icon: ShoppingBagIcon },
   { label: 'Requests', to: 'requests', icon: ClipboardDocumentListIcon },
   { label: 'Saved items', to: 'saves', icon: HeartIcon },

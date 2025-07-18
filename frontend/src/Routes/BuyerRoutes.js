@@ -17,6 +17,7 @@ import RequestDetails from '../Pages/Buyer/Sections/RequestDetails';
 import WarehouseReservationDetails, { warehouseReservationLoader } from '../Pages/Buyer/Sections/ReservedStorageDetails';
 import TransportJobDetails from '../Pages/Buyer/Sections/TransportJobDetails';
 import WarehouseSearch from '../Pages/Buyer/Sections/WarehouseSearch';
+import Dashboard from '../Pages/Buyer/Sections/Dashboard';
 
 
 const buyerRoutes = {
@@ -25,7 +26,11 @@ const buyerRoutes = {
     children: [
         {
             index: true,
-            Component: Crops
+            Component: Dashboard
+        },
+        {
+            path: 'dashboard',
+            Component: Dashboard
         },
         {
             path: 'crops',
