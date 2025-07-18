@@ -4,7 +4,7 @@ import { ChevronRightIcon } from '@heroicons/react/24/outline';
 // import { ChevronRightIcon as ArrowRightSolidIcon } from '@heroicons/react/24/solid';
 
 
-export default function SidebarItem({ label, to, children }) {
+export default function SidebarItem({ label, to, icon: Icon, children }) {
     const [open, setOpen] = useState(false);
     const hasChildren = Array.isArray(children);
 
@@ -15,7 +15,10 @@ export default function SidebarItem({ label, to, children }) {
                     onClick={() => setOpen(!open)}
                     className="flex justify-between items-center w-full gap-3 px-3 py-2 rounded-md text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
-                    <span>{label}</span>
+                    <span className="flex items-center gap-2">
+                        {Icon && <Icon className="h-5 w-5 text-gray-500" />}
+                        {label}
+                    </span>
                     <ChevronRightIcon className={`w-4 h-4 ml-2 transform transition ${open ? 'rotate-90' : ''}`} />
                 </button>
             ) : (
@@ -28,6 +31,7 @@ export default function SidebarItem({ label, to, children }) {
                         }`
                     }
                 >
+                    {Icon && <Icon className="h-5 w-5 text-gray-500" />}
                     {label}
                 </NavLink>
             )}
