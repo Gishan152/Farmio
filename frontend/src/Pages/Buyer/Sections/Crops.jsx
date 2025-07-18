@@ -327,14 +327,14 @@ export default function Crops() {
                                 Buy now
                             </button>
                         </div>
-                        <QuantityModal
-                            isOpen={open}
-                            onClose={() => setOpen(false)}
-                            onConfirm={handleConfirm}
-                            submitButtonText={selectedCrop?.operation === "save" ? "Add to Saves" : "Order"}
-                        />
                     </div>
                 ))}
+                <QuantityModal
+                    isOpen={open}
+                    onClose={() => setOpen(false)}
+                    onConfirm={handleConfirm}
+                    submitButtonText={selectedCrop?.operation === "save" ? "Add to Saves" : "Order"}
+                />
             </div>
         </section>
     );
@@ -364,9 +364,9 @@ function QuantityModal({ isOpen, onClose, onConfirm, submitButtonText }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-51 flex items-center justify-center">
             <div
-                className="absolute inset-0 bg-black opacity-15"
+                className="absolute inset-0 bg-black opacity-30"
                 onClick={onClose}
             />
 
