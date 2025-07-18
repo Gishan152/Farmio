@@ -173,105 +173,116 @@ export default function WarehouseSearch() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-4 p-4">
-            <h2 className="text-2xl font-semibold mb-4">Warehouse Search</h2>
-            {/* Modern filter bar (Crops style) */}
-            <form onSubmit={handleSearch} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-wrap gap-3 items-center mb-6">
-                {/* Location */}
-                <div className="flex flex-col">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Location</label>
-                    <div className="flex gap-2">
-                        <input
-                            type="number"
-                            step="any"
-                            placeholder="Lat"
-                            className="w-24 px-2 py-1 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                            value={location.lat ?? ""}
-                            onChange={e => setLocation(loc => ({ ...loc, lat: parseFloat(e.target.value) }))}
-                        />
-                        <input
-                            type="number"
-                            step="any"
-                            placeholder="Lng"
-                            className="w-24 px-2 py-1 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                            value={location.lng ?? ""}
-                            onChange={e => setLocation(loc => ({ ...loc, lng: parseFloat(e.target.value) }))}
-                        />
-                        <button
-                            type="button"
-                            onClick={getCurrentLocation}
-                            className="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 text-xs"
-                        >
-                            Use My Location
-                        </button>
-                        <LocationPickerModal
-                            initialLocation={{ lat: 6.9271, lng: 79.8612 }}
-                            onSelect={loc => setLocation(loc)}
-                            buttonLabel="Pick Location"
-                            buttonClassName="w-32 px-2 py-1 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700 text-green-700 dark:text-green-200 font-semibold hover:bg-green-100 dark:hover:bg-green-800 transition-colors"
-                        />
+        <div className="bg-gray-50 min-h-screen">
+            <div className="max-w-7xl mx-auto space-y-4 p-4">
+                {/* Header */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-2">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900">Warehouse Search</h1>
+                            <p className="text-gray-600 mt-1 text-sm">Find and reserve storage at trusted warehouses</p>
+                        </div>
                     </div>
                 </div>
-                {/* Radius */}
-                <div className="flex flex-col">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Radius (km)</label>
-                    <input
-                        type="number"
-                        min={1}
-                        max={100}
-                        value={radius}
-                        onChange={e => setRadius(Number(e.target.value))}
-                        className="w-24 px-2 py-1 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                    />
-                </div>
-                {/* Storage Type */}
-                <div className="flex flex-col">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Storage Type</label>
-                    <select
-                        className="w-32 px-2 py-1 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                        value={storageType}
-                        onChange={e => setStorageType(e.target.value)}
+
+                {/* Modern filter bar (Crops style) */}
+                <form onSubmit={handleSearch} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-wrap gap-3 items-center mb-6">
+                    {/* Location */}
+                    <div className="flex flex-col">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Location</label>
+                        <div className="flex gap-2">
+                            <input
+                                type="number"
+                                step="any"
+                                placeholder="Lat"
+                                className="w-24 px-2 py-1 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
+                                value={location.lat ?? ""}
+                                onChange={e => setLocation(loc => ({ ...loc, lat: parseFloat(e.target.value) }))}
+                            />
+                            <input
+                                type="number"
+                                step="any"
+                                placeholder="Lng"
+                                className="w-24 px-2 py-1 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
+                                value={location.lng ?? ""}
+                                onChange={e => setLocation(loc => ({ ...loc, lng: parseFloat(e.target.value) }))}
+                            />
+                            <button
+                                type="button"
+                                onClick={getCurrentLocation}
+                                className="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 text-xs"
+                            >
+                                Use My Location
+                            </button>
+                            <LocationPickerModal
+                                initialLocation={{ lat: 6.9271, lng: 79.8612 }}
+                                onSelect={loc => setLocation(loc)}
+                                buttonLabel="Pick Location"
+                                buttonClassName="w-32 px-2 py-1 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700 text-green-700 dark:text-green-200 font-semibold hover:bg-green-100 dark:hover:bg-green-800 transition-colors"
+                            />
+                        </div>
+                    </div>
+                    {/* Radius */}
+                    <div className="flex flex-col">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Radius (km)</label>
+                        <input
+                            type="number"
+                            min={1}
+                            max={100}
+                            value={radius}
+                            onChange={e => setRadius(Number(e.target.value))}
+                            className="w-24 px-2 py-1 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
+                        />
+                    </div>
+                    {/* Storage Type */}
+                    <div className="flex flex-col">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Storage Type</label>
+                        <select
+                            className="w-32 px-2 py-1 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
+                            value={storageType}
+                            onChange={e => setStorageType(e.target.value)}
+                        >
+                            <option value="">Any</option>
+                            {storageTypes.map(type => (
+                                <option key={type} value={type}>{type}</option>
+                            ))}
+                        </select>
+                    </div>
+                    {/* Capacity */}
+                    <div className="flex flex-col">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Min Capacity (tons)</label>
+                        <input
+                            type="number"
+                            min={0}
+                            value={capacity}
+                            onChange={e => setCapacity(Number(e.target.value))}
+                            className="w-28 px-2 py-1 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
+                        />
+                    </div>
+                    {/* Search Button */}
+                    <button
+                        type="submit"
+                        className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 text-sm mt-5"
                     >
-                        <option value="">Any</option>
-                        {storageTypes.map(type => (
-                            <option key={type} value={type}>{type}</option>
-                        ))}
-                    </select>
-                </div>
-                {/* Capacity */}
-                <div className="flex flex-col">
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Min Capacity (tons)</label>
-                    <input
-                        type="number"
-                        min={0}
-                        value={capacity}
-                        onChange={e => setCapacity(Number(e.target.value))}
-                        className="w-28 px-2 py-1 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                    />
-                </div>
-                {/* Search Button */}
-                <button
-                    type="submit"
-                    className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 text-sm mt-5"
-                >
-                    Search
-                </button>
-            </form>
+                        Search
+                    </button>
+                </form>
 
-            <Warehouses warehouses={warehouses} />
+                <Warehouses warehouses={warehouses} />
 
-            {/* <div className="mt-8">
-                <h3 className="text-xl font-semibold mb-2">Map View</h3>
-                {isLoaded ? (
-                    <GoogleMap mapContainerStyle={containerStyle} center={mapCenter} zoom={10}>
-                        {warehouses.map((wh) => (
-                            <Marker key={wh.id} position={{ lat: wh.lat, lng: wh.lng }} />
-                        ))}
-                    </GoogleMap>
-                ) : (
-                    <p>Loading map...</p>
-                )}
-            </div> */}
+                {/* <div className="mt-8">
+                    <h3 className="text-xl font-semibold mb-2">Map View</h3>
+                    {isLoaded ? (
+                        <GoogleMap mapContainerStyle={containerStyle} center={mapCenter} zoom={10}>
+                            {warehouses.map((wh) => (
+                                <Marker key={wh.id} position={{ lat: wh.lat, lng: wh.lng }} />
+                            ))}
+                        </GoogleMap>
+                    ) : (
+                        <p>Loading map...</p>
+                    )}
+                </div> */}
+            </div>
         </div>
     );
 }

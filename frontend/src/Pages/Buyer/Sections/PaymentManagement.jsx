@@ -217,7 +217,7 @@ export default function PaymentManagement() {
 
     return (
         <div className="bg-gray-50 min-h-screen">
-            <div className="max-w-6xl mx-auto space-y-4 p-4">
+            <div className="max-w-7xl mx-auto space-y-4 p-4">
                 {/* Header */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                     <div className="flex justify-between items-center">

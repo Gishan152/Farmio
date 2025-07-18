@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import CustomModal from '../../../Components/CustomModel';
 // import TransportJobModal from './TransportJobModal';
-import { ChevronRightIcon } from '@heroicons/react/24/solid';
+import { ChevronRightIcon, TruckIcon, CheckCircleIcon, ClockIcon, ExclamationCircleIcon } from '@heroicons/react/24/solid';
 import { useTransportsContext } from '../../../Contexts/Buyer/TransportContext';
 
 export default function TransportJobs() {
@@ -36,80 +36,121 @@ const [newJob, setNewJob] = useState({
 	const pending = jobsFiltered.filter(j => j.status === 'Pending').length;
 
 	return (
-		<div className="max-w-5xl mx-auto p-4 md:p-8 space-y-8">
-			{/* Title & subtitle + create button */}
-			<div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-				<div>
-					<h1 className="text-3xl font-bold dark:text-gray-100">Transport Jobs</h1>
-					<div className="mt-1 text-gray-600 dark:text-gray-300 text-lg">All your scheduled and completed transport jobs are listed below.</div>
+		<div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+			{/* Header styled like PaymentManagement.jsx */}
+			<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-2">
+				<div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+					<div>
+						<h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Transport Jobs</h1>
+						<p className="text-gray-600 mt-1 text-sm dark:text-gray-300">All your scheduled and completed transport jobs are listed below.</p>
+					</div>
+					<div className="flex items-center space-x-3">
+						{/* Future: Add filter/export buttons here if needed */}
+						<button
+							className="flex items-center bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-semibold shadow"
+							onClick={() => setModalOpen(true)}
+						>
+							+ New Transport Job
+						</button>
+					</div>
 				</div>
-				<button
-					className="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 font-semibold"
-					onClick={() => setModalOpen(true)}
-				>
-					+ New Transport Job
-				</button>
 			</div>
 
-			{/* Stat cards */}
+			{/* Stat cards styled like Orders.jsx */}
 			<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-				<div className="bg-white dark:bg-gray-900 rounded-lg shadow p-4 flex flex-col items-center border border-gray-200 dark:border-gray-700">
-					<span className="text-xs text-gray-500">Total Jobs</span>
-					<span className="text-2xl font-bold text-green-700 dark:text-green-300">{totalJobs}</span>
+				{/* Total Jobs */}
+				<div className="bg-white dark:bg-gray-900 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+					<div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 dark:bg-green-900">
+						<TruckIcon className="w-6 h-6 text-green-600 dark:text-green-300" />
+					</div>
+					<div>
+						<div className="text-xs text-gray-500">Total Jobs</div>
+						<div className="text-xl font-bold text-green-700 dark:text-green-300">{totalJobs}</div>
+					</div>
 				</div>
-				<div className="bg-white dark:bg-gray-900 rounded-lg shadow p-4 flex flex-col items-center border border-gray-200 dark:border-gray-700">
-					<span className="text-xs text-gray-500">Completed</span>
-					<span className="text-2xl font-bold text-blue-700 dark:text-blue-300">{completed}</span>
+				{/* Completed */}
+				<div className="bg-white dark:bg-gray-900 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+					<div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900">
+						<CheckCircleIcon className="w-6 h-6 text-blue-600 dark:text-blue-300" />
+					</div>
+					<div>
+						<div className="text-xs text-gray-500">Completed</div>
+						<div className="text-xl font-bold text-blue-700 dark:text-blue-300">{completed}</div>
+					</div>
 				</div>
-				<div className="bg-white dark:bg-gray-900 rounded-lg shadow p-4 flex flex-col items-center border border-gray-200 dark:border-gray-700">
-					<span className="text-xs text-gray-500">In Progress</span>
-					<span className="text-2xl font-bold text-yellow-600 dark:text-yellow-300">{inProgress}</span>
+				{/* In Progress */}
+				<div className="bg-white dark:bg-gray-900 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+					<div className="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900">
+						<ClockIcon className="w-6 h-6 text-yellow-600 dark:text-yellow-300" />
+					</div>
+					<div>
+						<div className="text-xs text-gray-500">In Progress</div>
+						<div className="text-xl font-bold text-yellow-600 dark:text-yellow-300">{inProgress}</div>
+					</div>
 				</div>
-				<div className="bg-white dark:bg-gray-900 rounded-lg shadow p-4 flex flex-col items-center border border-gray-200 dark:border-gray-700">
-					<span className="text-xs text-gray-500">Pending</span>
-					<span className="text-2xl font-bold text-gray-700 dark:text-gray-300">{pending}</span>
+				{/* Pending */}
+				<div className="bg-white dark:bg-gray-900 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+					<div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800">
+						<ExclamationCircleIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+					</div>
+					<div>
+						<div className="text-xs text-gray-500">Pending</div>
+						<div className="text-xl font-bold text-gray-700 dark:text-gray-300">{pending}</div>
+					</div>
 				</div>
 			</div>
 
 			{/* Jobs Table */}
-			<div className="overflow-auto">
-				<table className="w-full table-auto border-separate border-spacing-y-4">
-					<thead className="text-left text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900">
-						<tr>
-							<th>Job ID</th>
-							<th>Status</th>
-							<th>Vehicle</th>
-							<th>Remaining (kg)</th>
-							<th>Items</th>
-						</tr>
-					</thead>
-					<tbody>
-						{jobsFiltered.length === 0 && (
-							<tr>
-								<td colSpan={5} className="text-center py-8 text-gray-500">No transport jobs to show.</td>
-							</tr>
-						)}
-						{jobsFiltered.map(job => (
-							<tr key={job.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-								<td className="p-4 font-medium text-green-900 dark:text-green-100">
-									<Link to={`/buyer/transport/schedules/${job.id}`} className="hover:underline">{job.id}</Link>
-								</td>
-								<td className="p-4">
-									<span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold 
-										${job.status === 'Completed' ? 'bg-blue-100 text-blue-700' :
-											job.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' :
-											job.status === 'Pending' ? 'bg-gray-100 text-gray-700' :
-											'bg-gray-200 text-gray-800'}`}>{job.status}</span>
-								</td>
-								<td className="p-4">{job.vehicleType}</td>
-								<td className="p-4">{job.capacityRemaining}</td>
-								<td className="p-4">
-									<button onClick={() => window.open(`/buyer/transport/schedules/${job.id}`, '_self')} className="text-green-600 hover:underline font-semibold">View Items</button>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+			<div className="space-y-4">
+				{jobsFiltered.length === 0 && (
+					<div className="text-center py-8 text-gray-500">No transport jobs to show.</div>
+				)}
+				{jobsFiltered.map(job => (
+					<div
+						key={job.id}
+						className="relative flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-100 dark:border-gray-700 overflow-hidden group hover:shadow-lg transition"
+					>
+						{/* Accent bar */}
+						<div className={`w-2 md:w-3 h-full ${job.status === 'Completed' ? 'bg-blue-500' : job.status === 'In Progress' ? 'bg-yellow-400' : job.status === 'Pending' ? 'bg-gray-400' : 'bg-gray-300'}`}></div>
+						{/* Main content */}
+						<div className="flex-1 flex flex-col md:flex-row items-start md:items-center p-4 gap-4">
+							<div className="flex-1 min-w-0">
+								<div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
+									<div className="flex items-center gap-2">
+										<span className="font-bold text-lg text-green-900 dark:text-green-100">{job.vehicleType}</span>
+										<span className="text-xs px-2 py-1 rounded-full font-semibold ml-2
+											${job.status === 'Completed' ? 'bg-blue-100 text-blue-700' :
+												job.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' :
+												job.status === 'Pending' ? 'bg-gray-100 text-gray-700' :
+												'bg-gray-200 text-gray-800'}">
+											{job.status}
+										</span>
+									</div>
+									<div className="flex items-center gap-2 text-gray-500 dark:text-gray-300 text-sm">
+										<span>Job ID:</span>
+										<Link to={`/buyer/transport/schedules/${job.id}`} className="hover:underline font-medium text-green-700 dark:text-green-300">{job.id}</Link>
+									</div>
+									<div className="flex items-center gap-2 text-gray-500 dark:text-gray-300 text-sm">
+										<span>Remaining:</span>
+										<span className="font-semibold text-gray-700 dark:text-gray-100">{job.capacityRemaining} kg</span>
+									</div>
+								</div>
+								<div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-300">
+									<span>Pickup: <span className="font-medium text-gray-800 dark:text-gray-100">{job.pickupLocation}</span></span>
+									<span>Drop-off: <span className="font-medium text-gray-800 dark:text-gray-100">{job.dropOffLocation}</span></span>
+								</div>
+							</div>
+							<div className="flex flex-col gap-2 md:items-end md:justify-center">
+								<button
+									onClick={() => window.open(`/buyer/transport/schedules/${job.id}`, '_self')}
+									className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold shadow hover:bg-green-700 transition"
+								>
+									View Details
+								</button>
+							</div>
+						</div>
+					</div>
+				))}
 			</div>
 
 			{/* New Transport Job Modal */}

@@ -2,12 +2,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useRequestsContext } from '../../../Contexts/Buyer/BuyerRequestContext';
-import { ArchiveBoxIcon, CalendarIcon, ArrowPathIcon, EyeIcon, ChatBubbleLeftRightIcon, ExclamationCircleIcon } from '@heroicons/react/24/solid';
+import { ArchiveBoxIcon, CalendarIcon, ArrowPathIcon, EyeIcon, ChatBubbleLeftRightIcon, ExclamationCircleIcon, ClipboardDocumentListIcon, GlobeAltIcon, UsersIcon, EyeSlashIcon } from '@heroicons/react/24/solid';
 
 export default function Requests() {
-    const {requests, addRequest} = useRequestsContext();
+    const { requests, addRequest } = useRequestsContext();
     const [showModal, setShowModal] = useState(false);
-    const addReq = req => addRequest({id: requests.length, ...req});
+    const addReq = req => addRequest({ id: requests.length, ...req });
 
     // Filters state
     const [filters, setFilters] = useState({
@@ -17,6 +17,14 @@ export default function Requests() {
         visibility: '',
         search: ''
     });
+
+    // Stat cards
+    const stats = {
+        total: requests.length,
+        public: requests.filter(r => r.visibility === 'Public').length,
+        verified: requests.filter(r => r.visibility === 'Verified farmers').length,
+        regional: requests.filter(r => r.visibility === 'Regional only').length
+    };
 
     // Filtering logic
     const filteredRequests = requests.filter(req => {
@@ -32,118 +40,173 @@ export default function Requests() {
     });
 
     return (
-        <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                <div className="flex items-center gap-3">
-                    <ArchiveBoxIcon className="h-8 w-8 text-green-600" />
-                    <h1 className="text-3xl font-bold dark:text-gray-100">Buyer Requests</h1>
-                </div>
-                <button
-                    onClick={() => setShowModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
-                >
-                    <ArrowPathIcon className="h-5 w-5" />
-                    New Request
-                </button>
-            </div>
-
-            {/* Filters Bar */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-wrap gap-3 items-center">
-                <input
-                    type="text"
-                    placeholder="Search by crop or notes..."
-                    value={filters.search}
-                    onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
-                    className="w-full md:w-56 px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                />
-                <select
-                    value={filters.crop}
-                    onChange={e => setFilters(f => ({ ...f, crop: e.target.value }))}
-                    className="w-full md:w-40 px-2 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                >
-                    <option value="">All Crops</option>
-                    {CROP_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-                <select
-                    value={filters.quality}
-                    onChange={e => setFilters(f => ({ ...f, quality: e.target.value }))}
-                    className="w-full md:w-36 px-2 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                >
-                    <option value="">All Qualities</option>
-                    {QUALITY_OPTIONS.map(q => <option key={q} value={q}>{q}</option>)}
-                </select>
-                <select
-                    value={filters.repeat}
-                    onChange={e => setFilters(f => ({ ...f, repeat: e.target.value }))}
-                    className="w-full md:w-36 px-2 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                >
-                    <option value="">All Repeat</option>
-                    {REPEAT_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
-                </select>
-                <select
-                    value={filters.visibility}
-                    onChange={e => setFilters(f => ({ ...f, visibility: e.target.value }))}
-                    className="w-full md:w-44 px-2 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                >
-                    <option value="">All Visibility</option>
-                    {VISIBILITY_OPTIONS.map(v => <option key={v} value={v}>{v}</option>)}
-                </select>
-            </div>
-
-            <NewRequestModal
-                isOpen={showModal}
-                onClose={() => setShowModal(false)}
-                onSave={addReq}
-            />
-
-            {filteredRequests.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16">
-                    <ExclamationCircleIcon className="h-12 w-12 text-gray-300 mb-2" />
-                    <p className="text-gray-600 dark:text-gray-300 text-lg">No requests found.</p>
-                </div>
-            ) : (
-                <ul className="grid gap-6 md:grid-cols-1">
-                    {filteredRequests.map(req => (
-                        <li
-                            key={req.id}
-                            className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col h-full p-5 relative group transition hover:shadow-lg"
+        <div className="bg-gray-50 min-h-screen">
+            <div className="max-w-7xl mx-auto space-y-4 p-4">
+                {/* Header */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-2">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900">Requests Placed</h1>
+                            <p className="text-gray-600 mt-1 text-sm">View your crop requests and manage bids</p>
+                        </div>
+                        <button
+                            onClick={() => setShowModal(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
                         >
-                            <div className="flex items-center gap-3 mb-2">
-                                <ArchiveBoxIcon className="h-6 w-6 text-green-500" />
-                                <span className="text-lg font-semibold dark:text-gray-100">{req.crop}</span>
-                                <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">
-                                    {req.quality || 'Any'}
-                                </span>
-                            </div>
-                            <div className="flex flex-wrap gap-2 text-sm mb-2">
-                                <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">{req.quantity} {req.unitMeasurement}</span>
-                                <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">Rs {req.priceRange.min}–{req.priceRange.max}/kg</span>
-                                <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded flex items-center gap-1"><CalendarIcon className="h-4 w-4 inline text-gray-400" /> {req.deadline}</span>
-                                <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded flex items-center gap-1"><ArrowPathIcon className="h-4 w-4 inline text-gray-400" /> {req.repeat}</span>
-                                <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded flex items-center gap-1"><EyeIcon className="h-4 w-4 inline text-gray-400" /> {req.visibility}</span>
-                            </div>
-                            <div className="mb-2 text-gray-600 dark:text-gray-300 text-sm">
-                                <span className="font-medium">Location:</span> {req.location}
-                            </div>
-                            {req.notes && (
-                                <div className="mb-2 text-gray-500 dark:text-gray-400 text-xs italic">Note: {req.notes}</div>
-                            )}
-                            <div className="flex items-center justify-between mt-auto pt-2">
-                                <span className="text-xs text-gray-400">Posted on {req.date}</span>
-                                <Link
-                                    to={`./${req.id}`}
-                                    className="flex items-center gap-1 px-3 py-1.5 bg-green-500 text-white rounded hover:bg-green-600 text-xs font-medium shadow"
-                                >
-                                    <ChatBubbleLeftRightIcon className="h-4 w-4" />
-                                    View Bids
-                                </Link>
-                            </div>
-                            {/* Accent bar */}
-                            <div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-xl opacity-0 group-hover:opacity-100 transition" />
-                        </li>
-                    ))}
-                </ul>
-            )}
+                            <ArrowPathIcon className="h-5 w-5" />
+                            New Request
+                        </button>
+                    </div>
+                </div>
+
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {/* Total Requests */}
+                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+                        <div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
+                        <ClipboardDocumentListIcon className="h-7 w-7 text-green-500 mr-3 z-10" />
+                        <div className="z-10">
+                            <p className="text-xs font-medium text-gray-500">Total Requests</p>
+                            <p className="text-lg font-bold text-gray-900">{stats.total}</p>
+                        </div>
+                    </div>
+                    {/* Public */}
+                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+                        <div className="absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-l-lg" />
+                        <GlobeAltIcon className="h-7 w-7 text-blue-500 mr-3 z-10" />
+                        <div className="z-10">
+                            <p className="text-xs font-medium text-gray-500">Public</p>
+                            <p className="text-lg font-bold text-gray-900">{stats.public}</p>
+                        </div>
+                    </div>
+                    {/* Verified */}
+                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+                        <div className="absolute left-0 top-0 h-full w-1 bg-yellow-500 rounded-l-lg" />
+                        <UsersIcon className="h-7 w-7 text-yellow-500 mr-3 z-10" />
+                        <div className="z-10">
+                            <p className="text-xs font-medium text-gray-500">Verified</p>
+                            <p className="text-lg font-bold text-gray-900">{stats.verified}</p>
+                        </div>
+                    </div>
+                    {/* Regional */}
+                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+                        <div className="absolute left-0 top-0 h-full w-1 bg-gray-400 rounded-l-lg" />
+                        <EyeSlashIcon className="h-7 w-7 text-gray-500 mr-3 z-10" />
+                        <div className="z-10">
+                            <p className="text-xs font-medium text-gray-500">Regional</p>
+                            <p className="text-lg font-bold text-gray-900">{stats.regional}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Filters Bar */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-wrap gap-3 items-center">
+                    <input
+                        type="text"
+                        placeholder="Search by crop or notes..."
+                        value={filters.search}
+                        onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
+                        className="w-full md:w-56 px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
+                    />
+                    <select
+                        value={filters.crop}
+                        onChange={e => setFilters(f => ({ ...f, crop: e.target.value }))}
+                        className="w-full md:w-40 px-2 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
+                    >
+                        <option value="">All Crops</option>
+                        {CROP_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <select
+                        value={filters.quality}
+                        onChange={e => setFilters(f => ({ ...f, quality: e.target.value }))}
+                        className="w-full md:w-36 px-2 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
+                    >
+                        <option value="">All Qualities</option>
+                        {QUALITY_OPTIONS.map(q => <option key={q} value={q}>{q}</option>)}
+                    </select>
+                    <select
+                        value={filters.repeat}
+                        onChange={e => setFilters(f => ({ ...f, repeat: e.target.value }))}
+                        className="w-full md:w-36 px-2 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
+                    >
+                        <option value="">All Repeat</option>
+                        {REPEAT_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                    </select>
+                    <select
+                        value={filters.visibility}
+                        onChange={e => setFilters(f => ({ ...f, visibility: e.target.value }))}
+                        className="w-full md:w-44 px-2 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
+                    >
+                        <option value="">All Visibility</option>
+                        {VISIBILITY_OPTIONS.map(v => <option key={v} value={v}>{v}</option>)}
+                    </select>
+                </div>
+
+                <NewRequestModal
+                    isOpen={showModal}
+                    onClose={() => setShowModal(false)}
+                    onSave={addReq}
+                />
+
+                {/* Requests Table with loading spinner */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="p-4 border-b border-gray-200">
+                        <h2 className="text-lg font-semibold text-gray-900">Request History</h2>
+                    </div>
+                    {filteredRequests.length === 0 ? (
+                        <div className="p-8 text-center">
+                            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                            <p className="mt-2 text-gray-600 text-sm">No requests found.</p>
+                        </div>
+                    ) : (
+                        <div className="p-4 overflow-x-auto">
+                            <table className="min-w-full text-sm">
+                                <thead>
+                                    <tr className="bg-gray-100">
+                                        <th className="p-2 text-left font-semibold">Request ID</th>
+                                        <th className="p-2 text-left font-semibold">Crop</th>
+                                        <th className="p-2 text-left font-semibold">Visibility</th>
+                                        <th className="p-2 text-left font-semibold">Quantity</th>
+                                        <th className="p-2 text-left font-semibold">Price Range</th>
+                                        <th className="p-2 text-left font-semibold">Deadline</th>
+                                        <th className="p-2 text-left font-semibold">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredRequests.map(req => (
+                                        <tr key={req.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                            <td className="p-2 font-medium text-green-700">Req {req.id}</td>
+                                            <td className="p-2">{req.crop} <span className="ml-2 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium">{req.quality || 'Any'}</span></td>
+                                            <td className="p-2">
+                                                {(() => {
+                                                    let badgeClass = 'bg-gray-100 text-gray-700';
+                                                    let icon = null;
+                                                    if (req.visibility === 'Public') { badgeClass = 'bg-blue-100 text-blue-800'; icon = <GlobeAltIcon className="h-4 w-4 inline mr-1" />; }
+                                                    else if (req.visibility === 'Verified farmers') { badgeClass = 'bg-yellow-100 text-yellow-800'; icon = <UsersIcon className="h-4 w-4 inline mr-1" />; }
+                                                    else if (req.visibility === 'Regional only') { badgeClass = 'bg-gray-200 text-gray-800'; icon = <EyeSlashIcon className="h-4 w-4 inline mr-1" />; }
+                                                    return <span className={`w-fit px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${badgeClass}`}>{icon}{req.visibility}</span>;
+                                                })()}
+                                            </td>
+                                            <td className="p-2">{req.quantity} {req.unitMeasurement}</td>
+                                            <td className="p-2">Rs {req.priceRange?.min}–{req.priceRange?.max}/kg</td>
+                                            <td className="p-2">{req.deadline}</td>
+                                            <td className="p-2">
+                                                <Link
+                                                    to={`./${req.id}`}
+                                                    className="flex items-center gap-1 px-3 py-1.5 bg-green-500 text-white rounded hover:bg-green-600 text-xs font-medium shadow"
+                                                >
+                                                    <ChatBubbleLeftRightIcon className="h-4 w-4" />
+                                                    View Bids
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }
