@@ -35,7 +35,7 @@ const menu = [
     label: 'Transport',
     icon: TruckIcon,
     children: [
-      { label: 'Transport Providers', to: 'transport/providers', icon: TruckIcon },
+    //   { label: 'Transport Providers', to: 'transport/providers', icon: TruckIcon },
       { label: 'Transport Schedules', to: 'transport/schedules', icon: CalendarIcon },
     ],
   },

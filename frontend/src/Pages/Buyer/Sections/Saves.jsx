@@ -62,7 +62,7 @@ export default function Saves() {
             </div> */}
 
             {/* Saves items table */}
-            <div className="overflow-auto">
+            <div className="overflow-auto min-h-[30vh]">
                 <table className="w-full table-auto border-separate border-spacing-y-4">
                     <thead className="text-left text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900">
                         <tr>
