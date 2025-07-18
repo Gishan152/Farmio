@@ -2,7 +2,7 @@ import { useState } from "react";
 import { GoogleMap, Marker } from "@react-google-maps/api";
 import { useGoogleMaps } from "../Contexts/GoogleMapContext";
 
-export default function LocationPickerModal({ initialLocation, onSelect, buttonLabel = "Choose Location" }) {
+export default function LocationPickerModal({ initialLocation, onSelect, buttonLabel = "Choose Location", buttonClassName = "px-4 py-2 bg-green-600 text-white rounded" }) {
     const { isLoaded, loadError } = useGoogleMaps();
     const [open, setOpen] = useState(false);
     const [loc, setLoc] = useState(initialLocation);
@@ -16,7 +16,7 @@ export default function LocationPickerModal({ initialLocation, onSelect, buttonL
                     e.preventDefault();
                     setOpen(true);
                 }}
-                className="px-4 py-2 bg-green-600 text-white rounded"
+                className={buttonClassName}
             >
                 {buttonLabel}
             </button>

@@ -19,6 +19,7 @@ import TransportJobDetails from '../Pages/Buyer/Sections/TransportJobDetails';
 import WarehouseSearch from '../Pages/Buyer/Sections/WarehouseSearch';
 import Dashboard from '../Pages/Buyer/Sections/Dashboard';
 import PaymentManagement from '../Pages/Buyer/Sections/PaymentManagement';
+import ReservationConfirmation from '@/Pages/Buyer/Sections/ReservationConfirmation';
 
 
 const buyerRoutes = {
@@ -89,6 +90,10 @@ const buyerRoutes = {
                     path: 'reserved',
                     Component: ReservedStorage,
                     loader: reservedLoader
+                },
+                {
+                    path: 'reservation-confirmation',
+                    Component: ReservationConfirmation,
                 },
                 {
                     path: "all/:warehouseId",

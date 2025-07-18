@@ -26,8 +26,8 @@ const menu = [
     label: 'Warehouses',
     icon: BuildingStorefrontIcon,
     children: [
-      { label: 'Warehouses', to: 'warehouses/all', icon: ArchiveBoxIcon },
-      { label: 'Search Warehouses', to: 'warehouses/search', icon: MagnifyingGlassIcon },
+    //   { label: 'Warehouses', to: 'warehouses/all', icon: ArchiveBoxIcon },
+      { label: 'Warehouses', to: 'warehouses/search', icon: MagnifyingGlassIcon },
       { label: 'Reserved Storage Units', to: 'warehouses/reserved', icon: ArchiveBoxIcon },
     ],
   },

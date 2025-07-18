@@ -164,68 +164,86 @@ export default function Crops() {
                     onSubmit={e => e.preventDefault()}
                 >
                     {/* Search */}
-                    <div className="relative flex-1 min-w-[180px] max-w-xs">
-                        <MagnifyingGlassIcon className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            placeholder="Search crops, farm, or location..."
-                            className="w-full pl-9 pr-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
-                            style={{ minWidth: 0 }}
-                        />
+                    <div className="flex flex-col min-w-[180px] max-w-xs flex-1">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Search</label>
+                        <div className="relative">
+                            <MagnifyingGlassIcon className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                placeholder="Search crops, farm, or location..."
+                                className="w-full pl-9 pr-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
+                                style={{ minWidth: 0 }}
+                            />
+                        </div>
                     </div>
                     {/* Type Filter */}
-                    <select
-                        value={type}
-                        onChange={e => setType(e.target.value)}
-                        className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-gray-100 text-sm max-w-[120px] min-w-0"
-                    >
-                        <option value="">All Types</option>
-                        {cropTypes.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                    <div className="flex flex-col max-w-[120px] min-w-0">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Type</label>
+                        <select
+                            value={type}
+                            onChange={e => setType(e.target.value)}
+                            className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
+                        >
+                            <option value="">All Types</option>
+                            {cropTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                    </div>
                     {/* Badge Filter */}
-                    <select
-                        value={badge}
-                        onChange={e => setBadge(e.target.value)}
-                        className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-gray-100 text-sm max-w-[120px] min-w-0"
-                    >
-                        <option value="">All Badges</option>
-                        {allBadges.map(b => <option key={b} value={b}>{b}</option>)}
-                    </select>
+                    <div className="flex flex-col max-w-[120px] min-w-0">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Badge</label>
+                        <select
+                            value={badge}
+                            onChange={e => setBadge(e.target.value)}
+                            className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
+                        >
+                            <option value="">All Badges</option>
+                            {allBadges.map(b => <option key={b} value={b}>{b}</option>)}
+                        </select>
+                    </div>
                     {/* Min Price */}
-                    <input
-                        type="number"
-                        value={minPrice}
-                        onChange={e => setMinPrice(e.target.value)}
-                        placeholder="Min Price"
-                        className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-gray-100 text-sm max-w-[100px] min-w-0"
-                        min="0"
-                    />
+                    <div className="flex flex-col max-w-[100px] min-w-0">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Min Price</label>
+                        <input
+                            type="number"
+                            value={minPrice}
+                            onChange={e => setMinPrice(e.target.value)}
+                            placeholder="Min Price"
+                            className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
+                            min="0"
+                        />
+                    </div>
                     {/* Max Price */}
-                    <input
-                        type="number"
-                        value={maxPrice}
-                        onChange={e => setMaxPrice(e.target.value)}
-                        placeholder="Max Price"
-                        className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-gray-100 text-sm max-w-[100px] min-w-0"
-                        min="0"
-                    />
+                    <div className="flex flex-col max-w-[100px] min-w-0">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Max Price</label>
+                        <input
+                            type="number"
+                            value={maxPrice}
+                            onChange={e => setMaxPrice(e.target.value)}
+                            placeholder="Max Price"
+                            className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
+                            min="0"
+                        />
+                    </div>
                     {/* Min Rating */}
-                    <select
-                        value={minRating}
-                        onChange={e => setMinRating(e.target.value)}
-                        className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-gray-100 text-sm max-w-[150px] min-w-0"
-                    >
-                        <option value="">Any Rating</option>
-                        {[5,4.5,4,3.5,3].map(r => <option key={r} value={r}>{r}+</option>)}
-                    </select>
+                    <div className="flex flex-col max-w-[150px] min-w-0">
+                        <label className="block text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">Min Rating</label>
+                        <select
+                            value={minRating}
+                            onChange={e => setMinRating(e.target.value)}
+                            className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-gray-100 text-sm"
+                        >
+                            <option value="">Any Rating</option>
+                            {[5,4.5,4,3.5,3].map(r => <option key={r} value={r}>{r}+</option>)}
+                        </select>
+                    </div>
                     <button
                         type="button"
                         onClick={() => {
                             setSearch(""); setType(""); setMinPrice(""); setMaxPrice(""); setMinRating(""); setBadge("");
                         }}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 font-semibold text-sm whitespace-nowrap"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 font-semibold text-sm whitespace-nowrap mt-5"
                     >
                         <FunnelIcon className="h-4 w-4" />
                         Clear Filters
