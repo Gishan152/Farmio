@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useToast } from '../../../Contexts/ToastContext';
 import { useRequestsContext } from '../../../Contexts/Buyer/BuyerRequestContext';
+import { ArchiveBoxIcon, CalendarIcon, ArrowPathIcon, EyeIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/solid';
 // Mock bids data
 // src/data/sampleRequests.js
 export const sampleRequests = [
@@ -61,26 +62,18 @@ export default function RequestDetails() {
     const toast = useToast();
     const [req, setReq] = useState(null);
     const [bids, setBids] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const found = requests.find(r => r.id === requestId);
         setReq(found);
-        // TODO : fetch bids of the request
         updateBids(requestId, mockBids);
         setBids(requestBids[requestId]);
-        // setBids()
-        // if (found) setBids(mockBids);
     }, [requestId]);
 
     if (!req) {
         return <div className="p-6 text-gray-600">Request not found.</div>;
     }
-
-    const durationStr = [
-        req.duration?.years && `${req.duration.years}y`,
-        req.duration?.months && `${req.duration.months}mo`,
-        req.duration?.days && `${req.duration.days}d`
-    ].filter(Boolean).join(' ');
 
     const handleAccept = bid => {
         toast.push(`✅ Accepted bid from ${bid.provider}`);
@@ -88,47 +81,72 @@ export default function RequestDetails() {
     };
 
     return (
-        <div className="container mx-auto p-6 space-y-6">
-            <nav className="text-gray-500 text-sm flex justify-between">
-                <ul className="flex space-x-2">
-                    <li><Link to="/buyer/requests" className="hover:underline">Requests</Link> /</li>
-                    <li><span>{req.id}</span></li>
-                </ul>
-            </nav>
-
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow space-y-3">
-                <h1 className="text-2xl font-bold dark:text-gray-100">{req.crop} — {req.quantity} kg</h1>
-                <p className="text-gray-600 dark:text-gray-300">Location: {req.location}</p>
-                <p className="text-gray-600 dark:text-gray-300">Preferred grade: {req.quality || 'Any'}</p>
-                <p className="text-gray-600 dark:text-gray-300">
-                    Price range: Rs {req.priceRange.min} – Rs {req.priceRange.max}/kg
-                </p>
-                <p className="text-gray-600 dark:text-gray-300">Timeline: before {req.deadline}</p>
-                <p className="text-gray-600 dark:text-gray-300">Repeat: {req.repeat}</p>
-                <p className="text-gray-600 dark:text-gray-300">Visibility: {req.visibility}</p>
-                {req.notes && (
-                    <p className="mt-2 text-gray-600 dark:text-gray-300">Notes: {req.notes}</p>
-                )}
-                <p className="text-sm text-gray-400">Posted on {req.date}</p>
+        <div className="max-w-3xl mx-auto p-4 md:p-8 space-y-8">
+            <div className="relative">
+                <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="absolute -left-30 -top-0 inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition shadow"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                    Back
+                </button>
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col h-full p-6 relative group transition hover:shadow-lg mt-8">
+                    {/* Accent bar */}
+                    <div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-xl opacity-100 transition" />
+                    <div className="flex items-center gap-3 mb-2">
+                        <ArchiveBoxIcon className="h-6 w-6 text-green-500" />
+                        <span className="text-lg font-semibold dark:text-gray-100">{req.crop}</span>
+                        <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">
+                            {req.quality || 'Any'}
+                        </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-sm mb-2">
+                        <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">{req.quantity} kg</span>
+                        <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">Rs {req.priceRange.min}–{req.priceRange.max}/kg</span>
+                        <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded flex items-center gap-1"><CalendarIcon className="h-4 w-4 inline text-gray-400" /> {req.deadline}</span>
+                        <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded flex items-center gap-1"><ArrowPathIcon className="h-4 w-4 inline text-gray-400" /> {req.repeat}</span>
+                        <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded flex items-center gap-1"><EyeIcon className="h-4 w-4 inline text-gray-400" /> {req.visibility}</span>
+                    </div>
+                    <div className="mb-2 text-gray-600 dark:text-gray-300 text-sm">
+                        <span className="font-medium">Location:</span> {req.location}
+                    </div>
+                    {req.notes && (
+                        <div className="mb-2 text-gray-500 dark:text-gray-400 text-xs italic">Note: {req.notes}</div>
+                    )}
+                    <div className="flex items-center justify-between mt-auto pt-2">
+                        <span className="text-xs text-gray-400">Posted on {req.date}</span>
+                        <span className="flex items-center gap-1 px-3 py-1.5 bg-green-500 text-white rounded text-xs font-medium shadow">
+                            <ChatBubbleLeftRightIcon className="h-4 w-4" />
+                            Bids
+                        </span>
+                    </div>
+                </div>
             </div>
 
             <section>
-                <h2 className="text-xl font-semibold dark:text-gray-100">Bids Received ({bids.length})</h2>
+                <h2 className="text-xl font-semibold dark:text-gray-100 mb-4 mt-8">Bids Received ({bids.length})</h2>
                 {bids.length === 0 ? (
-                    <p className="text-gray-600 dark:text-gray-300">No bids yet.</p>
+                    <div className="flex flex-col items-center justify-center py-8">
+                        <p className="text-gray-600 dark:text-gray-300 text-lg">No bids yet.</p>
+                    </div>
                 ) : (
-                    <ul className="space-y-4">
+                    <ul className="grid gap-4 md:grid-cols-1">
                         {bids.map(bid => (
-                            <li key={bid.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex flex-col md:flex-row justify-between">
-                                <div>
+                            <li key={bid.id} className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center group hover:shadow-lg transition">
+                                <div className="flex-1">
                                     <p className="text-lg font-medium dark:text-gray-100">{bid.provider}</p>
-                                    <p className="text-gray-600 dark:text-gray-300">Price: Rs {bid.price}</p>
-                                    <p className="text-gray-600 dark:text-gray-300">Delivery by: {bid.proposedDate}</p>
-                                    {bid.notes && <p className="text-gray-600 dark:text-gray-300">Note: {bid.notes}</p>}
+                                    <div className="flex flex-wrap gap-2 text-sm mb-1 mt-1">
+                                        <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">Price: Rs {bid.price}</span>
+                                        <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">Delivery by: {bid.proposedDate}</span>
+                                    </div>
+                                    {bid.notes && <p className="text-gray-500 dark:text-gray-400 text-xs italic">Note: {bid.notes}</p>}
                                 </div>
                                 <button
                                     onClick={() => handleAccept(bid)}
-                                    className="mt-4 md:mt-0 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                                    className="mt-4 md:mt-0 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition shadow"
                                 >
                                     Accept Bid
                                 </button>
