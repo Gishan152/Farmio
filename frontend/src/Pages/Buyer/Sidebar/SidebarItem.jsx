@@ -1,12 +1,24 @@
-import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 // import { ChevronRightIcon as ArrowRightSolidIcon } from '@heroicons/react/24/solid';
 
 
-export default function SidebarItem({ label, to, icon: Icon, children }) {
-    const [open, setOpen] = useState(false);
+export default function SidebarItem({ label, to, icon: Icon, children, currentPath }) {
     const hasChildren = Array.isArray(children);
+    // If any child route is active, keep parent open
+    const isAnyChildActive = hasChildren && children.some(child => {
+        if (child.to && location.pathname.startsWith(currentPath + "/" + child.to)) return true;
+        if (Array.isArray(child.children)) {
+            return child.children.some(grandchild => grandchild.to && location.pathname.startsWith(grandchild.to));
+        }
+        return false;
+    });
+    const [open, setOpen] = useState(isAnyChildActive);
+
+    useEffect(() => {
+        if (isAnyChildActive && !open) setOpen(true);
+    }, [isAnyChildActive]);
 
     return (
         <li className="mb-2">
@@ -39,7 +51,7 @@ export default function SidebarItem({ label, to, icon: Icon, children }) {
             {hasChildren && open && (
                 <ul className="pl-4 mt-1 space-y-1">
                     {children.map(child => (
-                        <SidebarItem key={child.label} {...child} />
+                        <SidebarItem key={child.label} {...child} currentPath={currentPath + "/" + child.to}/>
                     ))}
                 </ul>
             )}

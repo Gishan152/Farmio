@@ -60,7 +60,7 @@ export default function Sidebar() {
                 <nav className="flex flex-col gap-2">
                     <ul>
                         {menu.map(item => (
-                            <SidebarItem key={item.label} {...item} />
+                            <SidebarItem key={item.label} {...item} currentPath={"/buyer"}/>
                         ))}
                     </ul>
                 </nav>
