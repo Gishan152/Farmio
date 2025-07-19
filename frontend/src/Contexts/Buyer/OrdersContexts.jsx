@@ -210,9 +210,9 @@ const OrderContextProvider = ({ children }) => {
 		}
 	}
 
-	// useEffect(() => {
-	// 	getOrders();
-	// }, []);
+	useEffect(() => {
+		getOrders();
+	}, []);
 
 	return (
 		<orderContext.Provider value={{ loading, orders, getOrders, addOrders, removeOrder, updateOrder, changeTransport }}>

@@ -57,7 +57,7 @@ export const mockBids = [
 
 
 export default function RequestDetails() {
-    const {requests, requestBids, updateBids} = useRequestsContext();
+    const {requests, requestBids, updateBids, loading} = useRequestsContext();
     const { requestId } = useParams();
     const toast = useToast();
     const [req, setReq] = useState(null);
@@ -65,15 +65,26 @@ export default function RequestDetails() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const found = requests.find(r => r.id === requestId);
+        const found = requests.find(r => String(r.id) === String(requestId));
         setReq(found);
         updateBids(requestId, mockBids);
         setBids(requestBids[requestId]);
-    }, [requestId]);
+    }, [requestId, requests, requestBids, updateBids]);
+
+    if (loading) {
+        return (
+            <div className="p-8 text-center">
+                <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                <p className="mt-2 text-gray-600 text-sm">Loading request...</p>
+            </div>
+        );
+    }
 
     if (!req) {
         return <div className="p-6 text-gray-600">Request not found.</div>;
     }
+
+    console.log("Request details: ", req);
 
     const handleAccept = bid => {
         toast.push(`✅ Accepted bid from ${bid.provider}`);
@@ -105,7 +116,7 @@ export default function RequestDetails() {
                     </div>
                     <div className="flex flex-wrap gap-2 text-sm mb-2">
                         <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">{req.quantity} kg</span>
-                        <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">Rs {req.priceRange.min}–{req.priceRange.max}/kg</span>
+                        <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">Rs {req.priceMin}–{req.priceMax}/kg</span>
                         <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded flex items-center gap-1"><CalendarIcon className="h-4 w-4 inline text-gray-400" /> {req.deadline}</span>
                         <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded flex items-center gap-1"><ArrowPathIcon className="h-4 w-4 inline text-gray-400" /> {req.repeat}</span>
                         <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded flex items-center gap-1"><EyeIcon className="h-4 w-4 inline text-gray-400" /> {req.visibility}</span>

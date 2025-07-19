@@ -3,11 +3,19 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useRequestsContext } from '../../../Contexts/Buyer/BuyerRequestContext';
 import { ArchiveBoxIcon, CalendarIcon, ArrowPathIcon, EyeIcon, ChatBubbleLeftRightIcon, ExclamationCircleIcon, ClipboardDocumentListIcon, GlobeAltIcon, UsersIcon, EyeSlashIcon } from '@heroicons/react/24/solid';
+import api from '@/API/client';
 
 export default function Requests() {
-    const { requests, addRequest } = useRequestsContext();
+    const { requests, addRequest, fetchRequests, loading } = useRequestsContext();
     const [showModal, setShowModal] = useState(false);
     const addReq = req => addRequest({ id: requests.length, ...req });
+
+    console.log("requets ======================== : ", requests)
+
+    useEffect(() => {
+        fetchRequests();
+        // eslint-disable-next-line
+    }, []);
 
     // Filters state
     const [filters, setFilters] = useState({
@@ -153,56 +161,64 @@ export default function Requests() {
                     <div className="p-4 border-b border-gray-200">
                         <h2 className="text-lg font-semibold text-gray-900">Request History</h2>
                     </div>
-                    {filteredRequests.length === 0 ? (
+                    {loading ? (
                         <div className="p-8 text-center">
                             <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
-                            <p className="mt-2 text-gray-600 text-sm">No requests found.</p>
+                            <p className="mt-2 text-gray-600 text-sm">Loading requests...</p>
                         </div>
                     ) : (
                         <div className="p-4 overflow-x-auto">
-                            <table className="min-w-full text-sm">
-                                <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="p-2 text-left font-semibold">Request ID</th>
-                                        <th className="p-2 text-left font-semibold">Crop</th>
-                                        <th className="p-2 text-left font-semibold">Visibility</th>
-                                        <th className="p-2 text-left font-semibold">Quantity</th>
-                                        <th className="p-2 text-left font-semibold">Price Range</th>
-                                        <th className="p-2 text-left font-semibold">Deadline</th>
-                                        <th className="p-2 text-left font-semibold">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredRequests.map(req => (
-                                        <tr key={req.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                            <td className="p-2 font-medium text-green-700">Req {req.id}</td>
-                                            <td className="p-2">{req.crop} <span className="ml-2 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium">{req.quality || 'Any'}</span></td>
-                                            <td className="p-2">
-                                                {(() => {
-                                                    let badgeClass = 'bg-gray-100 text-gray-700';
-                                                    let icon = null;
-                                                    if (req.visibility === 'Public') { badgeClass = 'bg-blue-100 text-blue-800'; icon = <GlobeAltIcon className="h-4 w-4 inline mr-1" />; }
-                                                    else if (req.visibility === 'Verified farmers') { badgeClass = 'bg-yellow-100 text-yellow-800'; icon = <UsersIcon className="h-4 w-4 inline mr-1" />; }
-                                                    else if (req.visibility === 'Regional only') { badgeClass = 'bg-gray-200 text-gray-800'; icon = <EyeSlashIcon className="h-4 w-4 inline mr-1" />; }
-                                                    return <span className={`w-fit px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${badgeClass}`}>{icon}{req.visibility}</span>;
-                                                })()}
-                                            </td>
-                                            <td className="p-2">{req.quantity} {req.unitMeasurement}</td>
-                                            <td className="p-2">Rs {req.priceRange?.min}–{req.priceRange?.max}/kg</td>
-                                            <td className="p-2">{req.deadline}</td>
-                                            <td className="p-2">
-                                                <Link
-                                                    to={`./${req.id}`}
-                                                    className="flex items-center gap-1 px-3 py-1.5 bg-green-500 text-white rounded hover:bg-green-600 text-xs font-medium shadow"
-                                                >
-                                                    <ChatBubbleLeftRightIcon className="h-4 w-4" />
-                                                    View Bids
-                                                </Link>
-                                            </td>
+                            {filteredRequests.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                                    <ClipboardDocumentListIcon className="h-12 w-12 mb-2 text-gray-300" />
+                                    <p className="text-lg font-semibold">No requests found</p>
+                                    <p className="text-sm text-gray-400 mt-1">You haven't placed any requests yet.</p>
+                                </div>
+                            ) : (
+                                <table className="min-w-full text-sm">
+                                    <thead>
+                                        <tr className="bg-gray-100">
+                                            <th className="p-2 text-left font-semibold">Request ID</th>
+                                            <th className="p-2 text-left font-semibold">Crop</th>
+                                            <th className="p-2 text-left font-semibold">Visibility</th>
+                                            <th className="p-2 text-left font-semibold">Quantity</th>
+                                            <th className="p-2 text-left font-semibold">Price Range</th>
+                                            <th className="p-2 text-left font-semibold">Deadline</th>
+                                            <th className="p-2 text-left font-semibold">Actions</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {filteredRequests.map(req => (
+                                            <tr key={req.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                                <td className="p-2 font-medium text-green-700">Req {req.id}</td>
+                                                <td className="p-2">{req.crop} <span className="ml-2 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium">{req.quality || 'Any'}</span></td>
+                                                <td className="p-2">
+                                                    {(() => {
+                                                        let badgeClass = 'bg-gray-100 text-gray-700';
+                                                        let icon = null;
+                                                        if (req.visibility === 'Public') { badgeClass = 'bg-blue-100 text-blue-800'; icon = <GlobeAltIcon className="h-4 w-4 inline mr-1" />; }
+                                                        else if (req.visibility === 'Verified farmers') { badgeClass = 'bg-yellow-100 text-yellow-800'; icon = <UsersIcon className="h-4 w-4 inline mr-1" />; }
+                                                        else if (req.visibility === 'Regional only') { badgeClass = 'bg-gray-200 text-gray-800'; icon = <EyeSlashIcon className="h-4 w-4 inline mr-1" />; }
+                                                        return <span className={`w-fit px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${badgeClass}`}>{icon}{req.visibility}</span>;
+                                                    })()}
+                                                </td>
+                                                <td className="p-2">{req.quantity} {req.unitMeasurement}</td>
+                                                <td className="p-2">Rs {req.priceRange?.min}–{req.priceRange?.max}/kg</td>
+                                                <td className="p-2">{req.deadline}</td>
+                                                <td className="p-2">
+                                                    <Link
+                                                        to={`./${req.id}`}
+                                                        className="flex items-center gap-1 px-3 py-1.5 bg-green-500 text-white rounded hover:bg-green-600 text-xs font-medium shadow"
+                                                    >
+                                                        <ChatBubbleLeftRightIcon className="h-4 w-4" />
+                                                        View Bids
+                                                    </Link>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
                         </div>
                     )}
                 </div>
@@ -230,11 +246,13 @@ function NewRequestModal({ isOpen, onClose, onSave }) {
         locationOption: 'buyer',
         customLocation: '',
         deadline: '',
-        repeat: 'One-time',
+        // repeat: 'One-time',
         notes: '',
         visibility: 'Public'
     });
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [apiError, setApiError] = useState(null);
 
     useEffect(() => {
         if (!isOpen) {
@@ -248,7 +266,7 @@ function NewRequestModal({ isOpen, onClose, onSave }) {
                 locationOption: 'buyer',
                 customLocation: '',
                 deadline: '',
-                repeat: 'One-time',
+                // repeat: 'One-time',
                 notes: '',
                 visibility: 'Public'
             });
@@ -272,25 +290,33 @@ function NewRequestModal({ isOpen, onClose, onSave }) {
         return errs;
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        setApiError(null);
         const errs = validate();
         if (Object.keys(errs).length) return setErrors(errs);
-
-        onSave({
-            id: Date.now().toString(),
-            crop: form.crop,
-            unitMeasurement: form.unitMeasurement,
-            quantity: +form.quantity,
-            quality: form.quality,
-            priceRange: { min: +form.priceMin, max: +form.priceMax },
-            location: form.locationOption === 'buyer' ? BUYER_LOCATION : form.customLocation,
-            deadline: form.deadline,
-            repeat: form.repeat,
-            notes: form.notes,
-            visibility: form.visibility,
-            date: new Date().toLocaleDateString()
-        });
-        onClose();
+        setLoading(true);
+        try {
+            const payload = {
+                crop: form.crop,
+                unitMeasurement: form.unitMeasurement,
+                quantity: +form.quantity,
+                quality: form.quality,
+                priceMin: +form.priceMin,
+                priceMax: +form.priceMax,
+                location: form.locationOption === 'buyer' ? BUYER_LOCATION : form.customLocation,
+                deadline: form.deadline,
+                notes: form.notes,
+                visibility: form.visibility,
+                date: new Date().toISOString().slice(0, 10)
+            };
+            const res = await api.post('/api/order/buyer-requests', payload);
+            onSave(res.data);
+            onClose();
+        } catch (err) {
+            setApiError(err?.response?.data?.message || 'Failed to create request.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -302,6 +328,7 @@ function NewRequestModal({ isOpen, onClose, onSave }) {
                     <ArchiveBoxIcon className="h-6 w-6 text-green-500" />
                     <h2 className="text-xl font-semibold dark:text-gray-100">New Request</h2>
                 </div>
+                {apiError && <div className="text-red-500 text-sm mb-2">{apiError}</div>}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {/* Crop type */}
                     <div>
@@ -408,7 +435,7 @@ function NewRequestModal({ isOpen, onClose, onSave }) {
                         />
                         {errors.deadline && <p className="text-red-500 text-xs mt-1">{errors.deadline}</p>}
                     </div>
-                    {/* Repeat request */}
+                    {/* Repeat request (commented out)
                     <div>
                         <label className="block text-xs font-medium dark:text-gray-200">Repeat</label>
                         <select
@@ -419,6 +446,7 @@ function NewRequestModal({ isOpen, onClose, onSave }) {
                             {REPEAT_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
                     </div>
+                    */}
                     {/* Visibility */}
                     <div>
                         <label className="block text-xs font-medium dark:text-gray-200">Visibility</label>
@@ -444,8 +472,10 @@ function NewRequestModal({ isOpen, onClose, onSave }) {
                 </div>
                 {/* Actions */}
                 <div className="flex justify-end space-x-2 mt-4">
-                    <button onClick={onClose} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 text-sm">Cancel</button>
-                    <button onClick={handleSubmit} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">Submit</button>
+                    <button onClick={onClose} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 text-sm" disabled={loading}>Cancel</button>
+                    <button onClick={handleSubmit} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm disabled:opacity-60" disabled={loading}>
+                        {loading ? 'Submitting...' : 'Submit'}
+                    </button>
                 </div>
             </div>
         </div>
