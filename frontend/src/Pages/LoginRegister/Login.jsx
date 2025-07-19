@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
 import { navigateToRoleRegistration } from "../../Utils/navigateToRoleRegistration";
 import bg from '../../Assets/bg.jpg';
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import useDarkMode from "../../Hooks/userDarkMode";
 import ThemeToggle from "../../Components/ThemeToggle";
 import { navigateToRoleDashboard } from "../../Utils/navigateToRoleDashboard";
@@ -86,7 +87,7 @@ const Login = () => {
 
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                     New here?{' '}
-                    <Link to="/register" className="underline text-blue-500 hover:text-blue-700">Register</Link>
+                    <Link to="/register" className="underline text-green-600 hover:text-green-800">Register</Link>
                 </p>
 
                 <fetcher.Form method="post" className="space-y-5">
@@ -119,9 +120,9 @@ const Login = () => {
                             aria-label={showPassword ? "Hide password" : "Show password"}
                         >
                             {showPassword ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.657.336-3.234.938-4.675m2.062 2.062A9.956 9.956 0 0112 3c5.523 0 10 4.477 10 10 0 1.657-.336 3.234-.938 4.675m-2.062-2.062A9.956 9.956 0 0112 21c-2.21 0-4.267-.72-5.938-1.938" /></svg>
+                                <EyeSlashIcon className="h-5 w-5" />
                             ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm6 0c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z" /></svg>
+                                <EyeIcon className="h-5 w-5" />
                             )}
                         </button>
                     </div>
@@ -141,7 +142,7 @@ const Login = () => {
                     )}
                     <button
                         type="submit"
-                        className={`w-full py-2 rounded-lg font-semibold shadow transition bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 flex items-center justify-center gap-2 ${busy ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        className={`w-full py-2 rounded-lg font-semibold shadow transition bg-green-600 text-white hover:bg-green-700 focus:ring-2 focus:ring-green-400 flex items-center justify-center gap-2 ${busy ? 'opacity-70 cursor-not-allowed' : ''}`}
                         disabled={busy}
                     >
                         {busy && (

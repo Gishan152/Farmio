@@ -9,12 +9,17 @@ import TransportProviderRegistration, { TransportProviderRegistrationAction, Tra
 import WasteAgentRegistration, { WasteAgentRegistrationAction, WasteAgentRegistrationLoader } from '../Pages/LoginRegister/WasteAgentRegistration';
 import ProductPage from '../Pages/ProductsPage';
 import SettingsPage from '../Pages/SettingsPage';
+import Logout from '@/Pages/LoginRegister/Logout';
 
 
 const commonRoutes = [
     {
         index: true,
         Component: LandingPage
+    },
+    {
+        path: "/logout",
+        Component: Logout
     },
     {
         path: "/login",
