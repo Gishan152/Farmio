@@ -1,5 +1,5 @@
 import BuyerLayout from '../Pages/Buyer/BuyerLayout';
-import Crops from '../Pages/Buyer/Sections/Crops';
+import Crops, { cropsLoader } from '../Pages/Buyer/Sections/Crops';
 import Warehouses from '../Pages/Buyer/Sections/Warehouses';
 import ReservedStorage, { reservedLoader } from '../Pages/Buyer/Sections/ReservedStorage';
 import TransportProviders, { transportProvidersLoader } from '../Pages/Buyer/Sections/TransportProviders';
@@ -36,7 +36,8 @@ const buyerRoutes = {
         },
         {
             path: 'crops',
-            Component: Crops
+            Component: Crops,
+            loader: cropsLoader
         },
         {
             path: "crops/:cropId",

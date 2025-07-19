@@ -1,5 +1,6 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import wheat from "../../Assets/Buyer/Crops/wheat.webp";
+import api from "@/API/client";
 
 const orderContext = createContext([]);
 
@@ -147,12 +148,29 @@ const initialOrders = [
 
 const OrderContextProvider = ({ children }) => {
 
-	const [orders, setOrders] = useState(initialOrders);
+	const [orders, setOrders] = useState([]);
+	const [loading, setLoading] = useState(false);
 
 	console.log("orders context : ", orders)
 
-	const addOrder = (order) => {
-		setOrders([...orders, order])
+	const addOrders = (orders) => {
+		const orderIds = orders.map(i => i.orderId);
+		const os = orders.map(i => {
+			i.id = String(i.orderId);
+			i.new = true;
+			return i;
+		})
+		setOrders(prev=>[...prev, ...os])
+		setTimeout(() => {
+			console.log("Marking orders as read: ", orderIds);
+			setOrders(prev => prev.map(i => {
+				// Ensure both are string for comparison
+				if (orderIds.map(String).includes(String(i.id))) {
+					return { ...i, new: false };
+				}
+				return i;
+			}));
+		}, 600000);
 	}
 
 	const removeOrder = id => setOrders(orders.filter(i => i.id !== id));
@@ -175,8 +193,28 @@ const OrderContextProvider = ({ children }) => {
 		}))
 	}
 
+	const getOrders = () => {
+		if(orders.length === 0) {
+			setLoading(true);
+			api.post('/api/order/get').then(res => {
+				console.log("Orders loaded: ", res.data);
+				setOrders(res.data.map(i => {
+					i.id = String(i.orderId);
+					return i;
+				}));
+				setLoading(false);
+			}).catch(err => {
+				console.error("Error loading orders: ", err);
+			});
+		}
+	}
+
+	useEffect(() => {
+		getOrders();
+	}, []);
+
 	return (
-		<orderContext.Provider value={{ orders, addOrder, removeOrder, updateOrder, changeTransport }}>
+		<orderContext.Provider value={{ loading, orders, getOrders, addOrders, removeOrder, updateOrder, changeTransport }}>
 			{children}
 		</orderContext.Provider>
 	);

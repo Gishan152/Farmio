@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { CheckBadgeIcon, CheckCircleIcon, XMarkIcon, ShoppingCartIcon } from "@heroicons/react/24/solid";
 import { useToast } from "../../../Contexts/ToastContext";
 import { useOrderContext } from "../../../Contexts/Buyer/OrdersContexts";
+import api from "@/API/client";
 
 const FREE_SHIPPING_THRESHOLD = 85;
 
 const OrderConfirmation = () => {
 
     const [subtotal, setSubtotal] = useState(0);
-    const {orders, addOrder} = useOrderContext();
+    const {orders, addOrders} = useOrderContext();
     const [orderPlaced, setOrderPlaced] = useState(false)
     // const { items } = useSavesContext()
     const location = useLocation();
@@ -27,17 +28,38 @@ const OrderConfirmation = () => {
     const remaining = Math.max(FREE_SHIPPING_THRESHOLD - subtotal, 0);
 
     const handlePlaceOrder = () => {
-        addOrder({
-            id: String(orders.length),
-            status: "PENDING",
-            total: subtotal,
-            transport: "BY_BUYER",
-            items
+
+        console.log("items : ", items)
+        api.post('/api/order/create', {
+            items: items.map(item => ({ 
+                cropId: item.id,
+                quantity: item.quantity,
+                pricePerUnit: item.pricePerUnit,
+                unitMeasurement: item.unitMeasurement
+            }))
+        }).then(res => {
+            console.log("Order placed successfully: ", res.data);
+            addOrders(res.data)
+            push("⚡ Order placed")
+            setTimeout(() => {
+                setOrderPlaced(true)
+            }, 2000)
+        }).catch(err => {
+            console.error("Error placing order: ", err);
+            push("❌ Error placing order. Please try again.")
         })
-        push("⚡ Order placed")
-        setTimeout(() => {
-            setOrderPlaced(true)
-        }, 2000)
+            // return;
+        // addOrders({
+        //     id: String(orders.length),
+        //     status: "PENDING",
+        //     total: subtotal,
+        //     transport: "BY_BUYER",
+        //     items
+        // })
+        // push("⚡ Order placed")
+        // setTimeout(() => {
+        //     setOrderPlaced(true)
+        // }, 2000)
     }
 
     const handlePayment = () => {

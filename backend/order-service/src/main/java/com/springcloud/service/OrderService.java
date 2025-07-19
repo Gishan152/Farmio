@@ -69,6 +69,7 @@ public class OrderService {
                     .paymentId("123")
                     .status(OrderStatus.PENDING)
                     .total(total)
+                    .transport("BY_BUYER")
                     .build();
 
 //            orderRepository.saveAndFlush(order);

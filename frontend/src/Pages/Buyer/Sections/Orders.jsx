@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PlusIcon, MinusIcon, TrashIcon, ChevronRightIcon, ClipboardDocumentListIcon, CurrencyDollarIcon, CheckBadgeIcon, ClockIcon } from "@heroicons/react/24/solid";
 import wheat from "../../../Assets/Buyer/Crops/wheat.webp";
 import { Link } from "react-router-dom";
 import { useSavesContext } from "../../../Contexts/Buyer/SavesContext";
 import { useOrderContext } from "../../../Contexts/Buyer/OrdersContexts";
+import { initial } from "lodash";
 
 export default function Orders() {
-    const { orders } = useOrderContext();
+    const { orders, getOrders } = useOrderContext();
     const [loading, setLoading] = useState(true);
     // Stat cards
     const stats = {
@@ -17,15 +18,24 @@ export default function Orders() {
     };
 
     useEffect(() => {
-        // Simulate loading effect (replace with real fetch if needed)
-        setTimeout(() => {
-            if (orders.length > 0) {
-                setLoading(false);
-            } else {
-                setLoading(true);
-            }
-        }, 2000);
+        if (orders.length > 0) {
+            setLoading(false);
+        }else{
+            getOrders();
+            setLoading(true);
+        }
     }, [orders]);
+
+    // useEffect(() => {
+    //     // Simulate loading effect (replace with real fetch if needed)
+    //     setTimeout(() => {
+    //         if (orders.length > 0) {
+    //             setLoading(false);
+    //         } else {
+    //             setLoading(true);
+    //         }
+    //     }, 2000);
+    // }, [orders]);
 
     return (
         <div className="bg-gray-50 min-h-screen">
@@ -105,7 +115,10 @@ export default function Orders() {
                                     {orders.map(order => (
                                         <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50">
                                             <td className="p-2">
-                                                <Link to={`./${order.id}`} className="text-green-700 font-medium underline">Order {order.id}</Link>
+                                                <Link to={`./${order.id}`} className="text-green-700 font-medium underline">
+                                                    Order {order.id}
+                                                </Link>
+                                                {order.new && <span className={`ml-4 px-5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800}`}>New</span>}
                                             </td>
                                             <td className="p-2">
                                                 {(() => {
