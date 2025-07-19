@@ -205,13 +205,14 @@ const OrderContextProvider = ({ children }) => {
 				setLoading(false);
 			}).catch(err => {
 				console.error("Error loading orders: ", err);
+				setLoading(false);
 			});
 		}
 	}
 
-	useEffect(() => {
-		getOrders();
-	}, []);
+	// useEffect(() => {
+	// 	getOrders();
+	// }, []);
 
 	return (
 		<orderContext.Provider value={{ loading, orders, getOrders, addOrders, removeOrder, updateOrder, changeTransport }}>

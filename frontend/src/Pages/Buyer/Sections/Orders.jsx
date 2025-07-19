@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { PlusIcon, MinusIcon, TrashIcon, ChevronRightIcon, ClipboardDocumentListIcon, CurrencyDollarIcon, CheckBadgeIcon, ClockIcon } from "@heroicons/react/24/solid";
+import { PlusIcon, MinusIcon, TrashIcon, ChevronRightIcon, ClipboardDocumentListIcon, CurrencyDollarIcon, CheckBadgeIcon, ClockIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import wheat from "../../../Assets/Buyer/Crops/wheat.webp";
 import { Link } from "react-router-dom";
 import { useSavesContext } from "../../../Contexts/Buyer/SavesContext";
@@ -7,8 +7,8 @@ import { useOrderContext } from "../../../Contexts/Buyer/OrdersContexts";
 import { initial } from "lodash";
 
 export default function Orders() {
-    const { orders, getOrders } = useOrderContext();
-    const [loading, setLoading] = useState(true);
+    const { orders, getOrders, loading } = useOrderContext();
+    // const [loading, setLoading] = useState(false);
     // Stat cards
     const stats = {
         totalOrders: orders.length,
@@ -17,14 +17,14 @@ export default function Orders() {
         pending: orders.filter(o => o.status !== 'Delivered').length
     };
 
-    useEffect(() => {
-        if (orders.length > 0) {
-            setLoading(false);
-        }else{
-            getOrders();
-            setLoading(true);
-        }
-    }, [orders]);
+    // useEffect(() => {
+    //     if (orders.length > 0) {
+    //         setLoading(false);
+    //     }else{
+    //         getOrders();
+    //         setLoading(true);
+    //     }
+    // }, [orders]);
 
     // useEffect(() => {
     //     // Simulate loading effect (replace with real fetch if needed)
@@ -47,6 +47,15 @@ export default function Orders() {
                             <h1 className="text-2xl font-bold text-gray-900">Orders Placed</h1>
                             <p className="text-gray-600 mt-1 text-sm">View your order history and details</p>
                         </div>
+                        <button
+                            onClick={() => { getOrders(); }}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-medium text-sm transition disabled:opacity-60"
+                            disabled={loading}
+                            title="Reload orders"
+                        >
+                            <ArrowPathIcon className={`h-5 w-5 text-blue-500${loading ? ' animate-spin' : ''}`} />
+                            <span className="hidden sm:inline">Reload</span>
+                        </button>
                     </div>
                 </div>
 
@@ -102,53 +111,61 @@ export default function Orders() {
                         </div>
                     ) : (
                         <div className="p-4 overflow-x-auto">
-                            <table className="min-w-full text-sm">
-                                <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="p-2 text-left font-semibold">Order ID</th>
-                                        <th className="p-2 text-left font-semibold">Status</th>
-                                        <th className="p-2 text-left font-semibold">Total</th>
-                                        <th className="p-2 text-left font-semibold">Items</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {orders.map(order => (
-                                        <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                            <td className="p-2">
-                                                <Link to={`./${order.id}`} className="text-green-700 font-medium underline">
-                                                    Order {order.id}
-                                                </Link>
-                                                {order.new && <span className={`ml-4 px-5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800}`}>New</span>}
-                                            </td>
-                                            <td className="p-2">
-                                                {(() => {
-                                                    // Color badge logic similar to Crops.jsx
-                                                    let badgeClass = 'bg-gray-100 text-gray-700';
-                                                    let status = order.status?.toUpperCase();
-                                                    if (status === 'DELIVERED') badgeClass = 'bg-blue-100 text-blue-800';
-                                                    else if (status === 'PENDING') badgeClass = 'bg-yellow-100 text-yellow-800';
-                                                    else if (status === 'PROCESSING') badgeClass = 'bg-orange-100 text-orange-800';
-                                                    else if (status === 'CANCELLED') badgeClass = 'bg-red-100 text-red-800';
-                                                    else if (status === 'COMPLETED') badgeClass = 'bg-green-100 text-green-800';
-                                                    // Humanize status: e.g. 'AWAITING_PICKUP' -> 'Awaiting Pickup'
-                                                    let displayStatus = order.status
-                                                        ? order.status
-                                                            .toLowerCase()
-                                                            .split('_')
-                                                            .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-                                                            .join(' ')
-                                                        : '';
-                                                    return (
-                                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badgeClass}`}>{displayStatus}</span>
-                                                    );
-                                                })()}
-                                            </td>
-                                            <td className="p-2 font-semibold">Rs. {order.items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0).toLocaleString()}</td>
-                                            <td className="p-2">{order.items.length}</td>
+                            {orders.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                                    <ClipboardDocumentListIcon className="h-12 w-12 mb-2 text-gray-300" />
+                                    <p className="text-lg font-semibold">No orders found</p>
+                                    <p className="text-sm text-gray-400 mt-1">You haven't placed any orders yet.</p>
+                                </div>
+                            ) : (
+                                <table className="min-w-full text-sm">
+                                    <thead>
+                                        <tr className="bg-gray-100">
+                                            <th className="p-2 text-left font-semibold">Order ID</th>
+                                            <th className="p-2 text-left font-semibold">Status</th>
+                                            <th className="p-2 text-left font-semibold">Total</th>
+                                            <th className="p-2 text-left font-semibold">Items</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {orders.map(order => (
+                                            <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                                <td className="p-2">
+                                                    <Link to={`./${order.id}`} className="text-green-700 font-medium underline">
+                                                        Order {order.id}
+                                                    </Link>
+                                                    {order.new && <span className={`ml-4 px-5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800}`}>New</span>}
+                                                </td>
+                                                <td className="p-2">
+                                                    {(() => {
+                                                        // Color badge logic similar to Crops.jsx
+                                                        let badgeClass = 'bg-gray-100 text-gray-700';
+                                                        let status = order.status?.toUpperCase();
+                                                        if (status === 'DELIVERED') badgeClass = 'bg-blue-100 text-blue-800';
+                                                        else if (status === 'PENDING') badgeClass = 'bg-yellow-100 text-yellow-800';
+                                                        else if (status === 'PROCESSING') badgeClass = 'bg-orange-100 text-orange-800';
+                                                        else if (status === 'CANCELLED') badgeClass = 'bg-red-100 text-red-800';
+                                                        else if (status === 'COMPLETED') badgeClass = 'bg-green-100 text-green-800';
+                                                        // Humanize status: e.g. 'AWAITING_PICKUP' -> 'Awaiting Pickup'
+                                                        let displayStatus = order.status
+                                                            ? order.status
+                                                                .toLowerCase()
+                                                                .split('_')
+                                                                .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                                                                .join(' ')
+                                                            : '';
+                                                        return (
+                                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badgeClass}`}>{displayStatus}</span>
+                                                        );
+                                                    })()}
+                                                </td>
+                                                <td className="p-2 font-semibold">Rs. {order.items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0).toLocaleString()}</td>
+                                                <td className="p-2">{order.items.length}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
                         </div>
                     )}
                 </div>
