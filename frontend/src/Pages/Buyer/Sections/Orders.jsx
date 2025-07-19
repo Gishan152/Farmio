@@ -8,7 +8,11 @@ import { initial } from "lodash";
 
 export default function Orders() {
     const { orders, getOrders, loading } = useOrderContext();
-    // const [loading, setLoading] = useState(false);
+    // Filters
+    const [filterOrderId, setFilterOrderId] = useState('');
+    const [filterStatus, setFilterStatus] = useState('');
+    const [filterAmountMin, setFilterAmountMin] = useState('');
+    const [filterAmountMax, setFilterAmountMax] = useState('');
     // Stat cards
     const stats = {
         totalOrders: orders.length,
@@ -16,6 +20,16 @@ export default function Orders() {
         delivered: orders.filter(o => o.status === 'Delivered').length,
         pending: orders.filter(o => o.status !== 'Delivered').length
     };
+
+    // Filtering logic
+    const filteredOrders = (orders || []).filter(order => {
+        const orderTotal = order.items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0);
+        const matchesOrderId = filterOrderId === '' || String(order.id).toLowerCase().includes(filterOrderId.toLowerCase());
+        const matchesStatus = filterStatus === '' || (order.status && order.status.toLowerCase() === filterStatus.toLowerCase());
+        const matchesAmountMin = filterAmountMin === '' || orderTotal >= Number(filterAmountMin);
+        const matchesAmountMax = filterAmountMax === '' || orderTotal <= Number(filterAmountMax);
+        return matchesOrderId && matchesStatus && matchesAmountMin && matchesAmountMax;
+    });
 
     // useEffect(() => {
     //     if (orders.length > 0) {
@@ -99,6 +113,71 @@ export default function Orders() {
                     </div>
                 </div>
 
+                {/* Filters Card */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+                    <div className="flex flex-wrap gap-3 items-end">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Order ID</label>
+                            <input
+                                type="text"
+                                value={filterOrderId}
+                                onChange={e => setFilterOrderId(e.target.value)}
+                                placeholder="Search order ID"
+                                className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-200"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Status</label>
+                            <select
+                                value={filterStatus}
+                                onChange={e => setFilterStatus(e.target.value)}
+                                className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-200"
+                            >
+                                <option value="">All</option>
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Min Amount</label>
+                            <input
+                                type="number"
+                                value={filterAmountMin}
+                                onChange={e => setFilterAmountMin(e.target.value)}
+                                placeholder="Min"
+                                className="border border-gray-300 rounded px-2 py-1 text-sm w-20 focus:outline-none focus:ring-2 focus:ring-green-200"
+                                min="0"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Max Amount</label>
+                            <input
+                                type="number"
+                                value={filterAmountMax}
+                                onChange={e => setFilterAmountMax(e.target.value)}
+                                placeholder="Max"
+                                className="border border-gray-300 rounded px-2 py-1 text-sm w-20 focus:outline-none focus:ring-2 focus:ring-green-200"
+                                min="0"
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setFilterOrderId('');
+                                setFilterStatus('');
+                                setFilterAmountMin('');
+                                setFilterAmountMax('');
+                            }}
+                            className="ml-auto px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300 transition"
+                        >
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+
                 {/* Orders Table with loading spinner */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                     <div className="p-4 border-b border-gray-200">
@@ -111,7 +190,7 @@ export default function Orders() {
                         </div>
                     ) : (
                         <div className="p-4 overflow-x-auto">
-                            {orders.length === 0 ? (
+                            {filteredOrders.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-12 text-gray-500">
                                     <ClipboardDocumentListIcon className="h-12 w-12 mb-2 text-gray-300" />
                                     <p className="text-lg font-semibold">No orders found</p>
@@ -128,7 +207,7 @@ export default function Orders() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {orders.map(order => (
+                                        {filteredOrders.map(order => (
                                             <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50">
                                                 <td className="p-2">
                                                     <Link to={`./${order.id}`} className="text-green-700 font-medium underline">

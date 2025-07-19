@@ -107,47 +107,71 @@ export default function Requests() {
                     </div>
                 </div>
 
-                {/* Filters Bar */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-wrap gap-3 items-center">
-                    <input
-                        type="text"
-                        placeholder="Search by crop or notes..."
-                        value={filters.search}
-                        onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
-                        className="w-full md:w-56 px-3 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                    />
-                    <select
-                        value={filters.crop}
-                        onChange={e => setFilters(f => ({ ...f, crop: e.target.value }))}
-                        className="w-full md:w-40 px-2 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                    >
-                        <option value="">All Crops</option>
-                        {CROP_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <select
-                        value={filters.quality}
-                        onChange={e => setFilters(f => ({ ...f, quality: e.target.value }))}
-                        className="w-full md:w-36 px-2 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                    >
-                        <option value="">All Qualities</option>
-                        {QUALITY_OPTIONS.map(q => <option key={q} value={q}>{q}</option>)}
-                    </select>
-                    <select
-                        value={filters.repeat}
-                        onChange={e => setFilters(f => ({ ...f, repeat: e.target.value }))}
-                        className="w-full md:w-36 px-2 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                    >
-                        <option value="">All Repeat</option>
-                        {REPEAT_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
-                    </select>
-                    <select
-                        value={filters.visibility}
-                        onChange={e => setFilters(f => ({ ...f, visibility: e.target.value }))}
-                        className="w-full md:w-44 px-2 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
-                    >
-                        <option value="">All Visibility</option>
-                        {VISIBILITY_OPTIONS.map(v => <option key={v} value={v}>{v}</option>)}
-                    </select>
+                {/* Filters Card (Crops style) */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Search</label>
+                            <input
+                                type="text"
+                                placeholder="Search by crop or notes..."
+                                value={filters.search}
+                                onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
+                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Crop</label>
+                            <select
+                                value={filters.crop}
+                                onChange={e => setFilters(f => ({ ...f, crop: e.target.value }))}
+                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            >
+                                <option value="">All Crops</option>
+                                {CROP_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Quality</label>
+                            <select
+                                value={filters.quality}
+                                onChange={e => setFilters(f => ({ ...f, quality: e.target.value }))}
+                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            >
+                                <option value="">All Qualities</option>
+                                {QUALITY_OPTIONS.map(q => <option key={q} value={q}>{q}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Repeat</label>
+                            <select
+                                value={filters.repeat}
+                                onChange={e => setFilters(f => ({ ...f, repeat: e.target.value }))}
+                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            >
+                                <option value="">All Repeat</option>
+                                {REPEAT_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Visibility</label>
+                            <select
+                                value={filters.visibility}
+                                onChange={e => setFilters(f => ({ ...f, visibility: e.target.value }))}
+                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            >
+                                <option value="">All Visibility</option>
+                                {VISIBILITY_OPTIONS.map(v => <option key={v} value={v}>{v}</option>)}
+                            </select>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setFilters({ crop: '', quality: '', repeat: '', visibility: '', search: '' })}
+                            className="ml-auto px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300 transition"
+                        >
+                            Clear Filters
+                        </button>
+                    </div>
                 </div>
 
                 <NewRequestModal
