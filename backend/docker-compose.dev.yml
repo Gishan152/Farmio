@@ -42,96 +42,96 @@ services:
         - action: rebuild
           path: ./eureka-server/target/*-SNAPSHOT.jar
 
-  product-service:
-    build:
-      context: ./
-      dockerfile: ./product-service/Dockerfile.dev
-    container_name: product-service-test
-    depends_on:
-      - eureka-server
-      - rabbitmq
-    environment:
-      - SERVER_PORT=8081
-      - SPRING_APPLICATION_NAME=product-service
-    ports:
-      - "8081:8081"
-    networks:
-      - spring-net
-    volumes:
-      - ./product-service:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./product-service/target/*-SNAPSHOT.jar
-
-
-  product-service2:
-    build:
-      context: ./
-      dockerfile: ./product-service/Dockerfile.dev
-    container_name: product-service2-test
-    depends_on:
-      - eureka-server
-      - rabbitmq
-    environment:
-      - SERVER_PORT=8082
-      - SPRING_APPLICATION_NAME=product-service
-    ports:
-      - "8082:8082"
-    networks:
-      - spring-net
-    volumes:
-      - ./product-service:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./product-service/target/*-SNAPSHOT.jar
-
-  order-service:
-    build:
-      context: ./
-      dockerfile: ./order-service/Dockerfile.dev
-    container_name: order-service
-    depends_on:
-      - eureka-server
-      - rabbitmq
-    environment:
-      - SERVER_PORT=8086
-      - SPRING_APPLICATION_NAME=order-service
-    ports:
-      - "8086:8086"
-    networks:
-      - spring-net
-    volumes:
-      - ./order-service:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./order-service/target/*-SNAPSHOT.jar
-
-  test-service:
-    build:
-      context: ./
-      dockerfile: ./test-service/Dockerfile.dev
-    container_name: test-service
-    depends_on:
-      - product-service
-      - eureka-server
-      - rabbitmq
-    environment:
-      - SERVER_PORT=8083
-      - SPRING_APPLICATION_NAME=test-service
-    ports:
-      - "8083:8083"
-    networks:
-      - spring-net
-    volumes:
-      - ./test-service:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./test-service/target/*-SNAPSHOT.jar
-
+#  product-service:
+#    build:
+#      context: ./
+#      dockerfile: ./product-service/Dockerfile.dev
+#    container_name: product-service-test
+#    depends_on:
+#      - eureka-server
+#      - rabbitmq
+#    environment:
+#      - SERVER_PORT=8081
+#      - SPRING_APPLICATION_NAME=product-service
+#    ports:
+#      - "8081:8081"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./product-service:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./product-service/target/*-SNAPSHOT.jar
+#
+#
+#  product-service2:
+#    build:
+#      context: ./
+#      dockerfile: ./product-service/Dockerfile.dev
+#    container_name: product-service2-test
+#    depends_on:
+#      - eureka-server
+#      - rabbitmq
+#    environment:
+#      - SERVER_PORT=8082
+#      - SPRING_APPLICATION_NAME=product-service
+#    ports:
+#      - "8082:8082"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./product-service:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./product-service/target/*-SNAPSHOT.jar
+#
+#  order-service:
+#    build:
+#      context: ./
+#      dockerfile: ./order-service/Dockerfile.dev
+#    container_name: order-service
+#    depends_on:
+#      - eureka-server
+#      - rabbitmq
+#    environment:
+#      - SERVER_PORT=8086
+#      - SPRING_APPLICATION_NAME=order-service
+#    ports:
+#      - "8086:8086"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./order-service:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./order-service/target/*-SNAPSHOT.jar
+#
+#  test-service:
+#    build:
+#      context: ./
+#      dockerfile: ./test-service/Dockerfile.dev
+#    container_name: test-service
+#    depends_on:
+#      - product-service
+#      - eureka-server
+#      - rabbitmq
+#    environment:
+#      - SERVER_PORT=8083
+#      - SPRING_APPLICATION_NAME=test-service
+#    ports:
+#      - "8083:8083"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./test-service:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./test-service/target/*-SNAPSHOT.jar
+#
 
   auth-service:
     build:
@@ -199,138 +199,138 @@ services:
       watch:
         - action: rebuild
           path: ./crop-listing-service/target/*-SNAPSHOT.jar
-
-  waste-service:
-    build:
-      context: ./
-      dockerfile: ./waste-service/Dockerfile.dev
-    container_name: waste-service
-    depends_on:
-      - eureka-server
-      - rabbitmq
-    environment:
-      - SERVER_PORT=8088
-      - SPRING_APPLICATION_NAME=waste-service
-    ports:
-      - "8088:8088"
-    networks:
-      - spring-net
-    volumes:
-      - ./waste-service:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./waste-service/target/*-SNAPSHOT.jar
-  transport-service:
-    build:
-      context: ./
-      dockerfile: ./transport-service/Dockerfile.dev
-    container_name: transport-service
-    depends_on:
-      - eureka-server
-      - rabbitmq
-    environment:
-      - SERVER_PORT=8089
-      - SPRING_APPLICATION_NAME=transport-service
-    ports:
-      - "8089:8089"
-    networks:
-      - spring-net
-    volumes:
-      - ./transport-service:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./transport-service/target/*-SNAPSHOT.jar
-
-  warehouse-service:
-    build:
-      context: ./
-      dockerfile: ./warehouse-service/Dockerfile.dev
-    container_name: warehouse-service
-    depends_on:
-      - eureka-server
-      - rabbitmq
-    environment:
-      - SERVER_PORT=8090
-      - SPRING_APPLICATION_NAME=warehouse-service
-    ports:
-      - "8090:8090"
-    networks:
-      - spring-net
-    volumes:
-      - ./warehouse-service:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./warehouse-service/target/*-SNAPSHOT.jar
-
-  analytic-service:
-    build:
-      context: ./
-      dockerfile: ./analytic-service/Dockerfile.dev
-    container_name: analytic-service
-    depends_on:
-      - eureka-server
-      - rabbitmq
-    environment:
-      - SERVER_PORT=8091
-      - SPRING_APPLICATION_NAME=analytic-service
-    ports:
-      - "8091:8091"
-    networks:
-      - spring-net
-    volumes:
-      - ./analytic-service:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./analytic-service/target/*-SNAPSHOT.jar
-
-  chat-service:
-    build:
-      context: ./
-      dockerfile: ./chat-service/Dockerfile.dev
-    container_name: chat-service
-    depends_on:
-      - eureka-server
-      - rabbitmq
-    environment:
-      - SERVER_PORT=8092
-      - SPRING_APPLICATION_NAME=chat-service
-    ports:
-      - "8092:8092"
-    networks:
-      - spring-net
-    volumes:
-      - ./chat-service:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./chat-service/target/*-SNAPSHOT.jar
-
-  payment-service:
-    build:
-      context: ./
-      dockerfile: ./payment-service/Dockerfile.dev
-    container_name: payment-service
-    depends_on:
-      - eureka-server
-      - rabbitmq
-    environment:
-      - SERVER_PORT=8093
-      - SPRING_APPLICATION_NAME=payment-service
-    ports:
-      - "8093:8093"
-    networks:
-      - spring-net
-    volumes:
-      - ./payment-service:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./payment-service/target/*-SNAPSHOT.jar
-
+#
+#  waste-service:
+#    build:
+#      context: ./
+#      dockerfile: ./waste-service/Dockerfile.dev
+#    container_name: waste-service
+#    depends_on:
+#      - eureka-server
+#      - rabbitmq
+#    environment:
+#      - SERVER_PORT=8088
+#      - SPRING_APPLICATION_NAME=waste-service
+#    ports:
+#      - "8088:8088"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./waste-service:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./waste-service/target/*-SNAPSHOT.jar
+#  transport-service:
+#    build:
+#      context: ./
+#      dockerfile: ./transport-service/Dockerfile.dev
+#    container_name: transport-service
+#    depends_on:
+#      - eureka-server
+#      - rabbitmq
+#    environment:
+#      - SERVER_PORT=8089
+#      - SPRING_APPLICATION_NAME=transport-service
+#    ports:
+#      - "8089:8089"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./transport-service:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./transport-service/target/*-SNAPSHOT.jar
+#
+#  warehouse-service:
+#    build:
+#      context: ./
+#      dockerfile: ./warehouse-service/Dockerfile.dev
+#    container_name: warehouse-service
+#    depends_on:
+#      - eureka-server
+#      - rabbitmq
+#    environment:
+#      - SERVER_PORT=8090
+#      - SPRING_APPLICATION_NAME=warehouse-service
+#    ports:
+#      - "8090:8090"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./warehouse-service:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./warehouse-service/target/*-SNAPSHOT.jar
+#
+#  analytic-service:
+#    build:
+#      context: ./
+#      dockerfile: ./analytic-service/Dockerfile.dev
+#    container_name: analytic-service
+#    depends_on:
+#      - eureka-server
+#      - rabbitmq
+#    environment:
+#      - SERVER_PORT=8091
+#      - SPRING_APPLICATION_NAME=analytic-service
+#    ports:
+#      - "8091:8091"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./analytic-service:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./analytic-service/target/*-SNAPSHOT.jar
+#
+#  chat-service:
+#    build:
+#      context: ./
+#      dockerfile: ./chat-service/Dockerfile.dev
+#    container_name: chat-service
+#    depends_on:
+#      - eureka-server
+#      - rabbitmq
+#    environment:
+#      - SERVER_PORT=8092
+#      - SPRING_APPLICATION_NAME=chat-service
+#    ports:
+#      - "8092:8092"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./chat-service:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./chat-service/target/*-SNAPSHOT.jar
+#
+#  payment-service:
+#    build:
+#      context: ./
+#      dockerfile: ./payment-service/Dockerfile.dev
+#    container_name: payment-service
+#    depends_on:
+#      - eureka-server
+#      - rabbitmq
+#    environment:
+#      - SERVER_PORT=8093
+#      - SPRING_APPLICATION_NAME=payment-service
+#    ports:
+#      - "8093:8093"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./payment-service:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./payment-service/target/*-SNAPSHOT.jar
+#
 volumes:
   pgdata:
 
