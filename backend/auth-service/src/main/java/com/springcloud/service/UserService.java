@@ -51,14 +51,14 @@ public class UserService {
     }
 
     public AuthResponse authenticate(AuthRequest request) {
+        var user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.username(),
+                        user.getUsername(),
                         request.password()
                 )
         );
-        var user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         if(user.getStatus().equals("PENDING")){
             Map<String, Object> extraClaims = new HashMap<>();
             extraClaims.put("isTemp", true);
