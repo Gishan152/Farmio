@@ -3,6 +3,7 @@ package com.springcloud.dto;
 import java.time.LocalDate;
 
 public class BuyerRequestDto {
+    private String state; // OPEN, CLOSED, CANCELED
     private Long id;
     private String crop;
     private Long userId;
@@ -18,6 +19,8 @@ public class BuyerRequestDto {
     private LocalDate date;
 
     // Getters and setters
+    public String getState() { return state; }
+    public void setState(String state) { this.state = state; }
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getCrop() { return crop; }

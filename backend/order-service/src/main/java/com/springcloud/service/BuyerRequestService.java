@@ -22,7 +22,11 @@ public class BuyerRequestService {
     }
 
     public List<BuyerRequestDto> getAllRequests() {
-        return repository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+        // Only return requests with state OPEN
+        return repository.findAll().stream()
+                .filter(r -> r.getState() != null && r.getState().name().equals("OPEN"))
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     public Optional<BuyerRequestDto> getRequestById(Long id) {
@@ -38,6 +42,17 @@ public class BuyerRequestService {
         BuyerRequest entity = toEntity(dto);
         BuyerRequest saved = repository.save(entity);
         return toDto(saved);
+    }
+
+    public BuyerRequestDto cancelRequest(Long id, Long userId, String rolesCsv) {
+        return repository.findById(id).map(existing -> {
+            if (!existing.getUserId().equals(userId)) {
+                throw new RuntimeException("You can only cancel your own requests");
+            }
+            existing.setState(com.springcloud.common.enums.BuyerRequestState.CANCELED);
+            BuyerRequest updated = repository.save(existing);
+            return toDto(updated);
+        }).orElseThrow(() -> new RuntimeException("Request not found"));
     }
 
     public Optional<BuyerRequestDto> updateRequest(Long id, BuyerRequestDto dto, Long userId, String rolesCsv) {
@@ -85,6 +100,7 @@ public class BuyerRequestService {
         dto.setVisibility(entity.getVisibility());
         dto.setDate(entity.getDate());
         dto.setUserId(entity.getUserId());
+        dto.setState(entity.getState() != null ? entity.getState().name() : null);
         return dto;
     }
 
@@ -103,6 +119,9 @@ public class BuyerRequestService {
         entity.setVisibility(dto.getVisibility());
         entity.setDate(dto.getDate());
         entity.setUserId(dto.getUserId());
+        if (dto.getState() != null) {
+            entity.setState(com.springcloud.common.enums.BuyerRequestState.valueOf(dto.getState()));
+        }
         return entity;
     }
 }

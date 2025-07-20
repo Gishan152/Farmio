@@ -3,6 +3,7 @@ package com.springcloud.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import com.springcloud.common.enums.BidStatus;
 
 @Entity
 @Table(name = "farmer_bid")
@@ -27,4 +28,8 @@ public class FarmerBid {
     private LocalDate deadline;
     private String notes;
     private LocalDate createdDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BidStatus bidStatus = BidStatus.PENDING;
 }

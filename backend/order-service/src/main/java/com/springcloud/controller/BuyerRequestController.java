@@ -15,9 +15,13 @@ public class BuyerRequestController {
     @Autowired
     private BuyerRequestService service;
 
+
+    // Only show OPEN requests to buyers
     @GetMapping
     public List<BuyerRequestDto> getAll() {
-        return service.getAllRequests();
+        return service.getAllRequests().stream()
+                .filter(r -> "OPEN".equals(r.getState()))
+                .toList();
     }
 
     @GetMapping("/{id}")
