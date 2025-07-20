@@ -20,6 +20,18 @@ const commonRoutes = [
         index: true,
         Component: LandingPage
     },
+     {
+        path: "/about",
+        Component: AboutUs,
+      },
+      {
+        path: "/faq",
+        Component: FAQ,
+      },
+      {
+        path: "/how-it-works",
+        Component: HowItWorks,
+      },
     {
         path: "/login",
         loader: loginLoader,
