@@ -10,16 +10,15 @@ import WasteAgentRegistration, { WasteAgentRegistrationAction, WasteAgentRegistr
 import ProductPage from '../Pages/ProductsPage';
 import SettingsPage from '../Pages/SettingsPage';
 import Logout from '@/Pages/LoginRegister/Logout';
+import AboutUs from '../Pages/AboutUs';
+import FAQ from '../Pages/FAQ';
+import HowItWorks from '../Pages/HowItWorks';
 
 
 const commonRoutes = [
     {
         index: true,
         Component: LandingPage
-    },
-    {
-        path: "/logout",
-        Component: Logout
     },
     {
         path: "/login",
