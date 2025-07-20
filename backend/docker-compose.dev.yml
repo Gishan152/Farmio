@@ -178,27 +178,27 @@ services:
         - action: rebuild
           path: ./api-gateway/target/*-SNAPSHOT.jar
 
-#  crop-listing-service:
-#    build:
-#      context: ./
-#      dockerfile: ./crop-listing-service/Dockerfile.dev
-#    container_name: crop-listing-service
-#    depends_on:
-#      - eureka-server
-#      - rabbitmq
-#    environment:
-#      - SERVER_PORT=8087
-#      - SPRING_APPLICATION_NAME=crop-listing-service
-#    ports:
-#      - "8087:8087"
-#    networks:
-#      - spring-net
-#    volumes:
-#      - ./crop-listing-service:/app/service
-#    develop:
-#      watch:
-#        - action: rebuild
-#          path: ./crop-listing-service/target/*-SNAPSHOT.jar
+  crop-listing-service:
+    build:
+      context: ./
+      dockerfile: ./crop-listing-service/Dockerfile.dev
+    container_name: crop-listing-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8087
+      - SPRING_APPLICATION_NAME=crop-listing-service
+    ports:
+      - "8087:8087"
+    networks:
+      - spring-net
+    volumes:
+      - ./crop-listing-service:/app/service
+    develop:
+      watch:
+        - action: rebuild
+          path: ./crop-listing-service/target/*-SNAPSHOT.jar
 #
 #  waste-service:
 #    build:
@@ -330,7 +330,7 @@ services:
 #      watch:
 #        - action: rebuild
 #          path: ./payment-service/target/*-SNAPSHOT.jar
-
+#
 volumes:
   pgdata:
 
