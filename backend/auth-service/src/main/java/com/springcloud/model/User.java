@@ -43,7 +43,7 @@ public class User implements UserDetails {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Must be a valid email")
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)

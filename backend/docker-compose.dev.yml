@@ -63,8 +63,8 @@ services:
 #      watch:
 #        - action: rebuild
 #          path: ./product-service/target/*-SNAPSHOT.jar
-#
-#
+
+
 #  product-service2:
 #    build:
 #      context: ./
@@ -86,29 +86,29 @@ services:
 #      watch:
 #        - action: rebuild
 #          path: ./product-service/target/*-SNAPSHOT.jar
-#
-#  order-service:
-#    build:
-#      context: ./
-#      dockerfile: ./order-service/Dockerfile.dev
-#    container_name: order-service
-#    depends_on:
-#      - eureka-server
-#      - rabbitmq
-#    environment:
-#      - SERVER_PORT=8086
-#      - SPRING_APPLICATION_NAME=order-service
-#    ports:
-#      - "8086:8086"
-#    networks:
-#      - spring-net
-#    volumes:
-#      - ./order-service:/app/service
-#    develop:
-#      watch:
-#        - action: rebuild
-#          path: ./order-service/target/*-SNAPSHOT.jar
-#
+
+  order-service:
+    build:
+      context: ./
+      dockerfile: ./order-service/Dockerfile.dev
+    container_name: order-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8086
+      - SPRING_APPLICATION_NAME=order-service
+    ports:
+      - "8086:8086"
+    networks:
+      - spring-net
+    volumes:
+      - ./order-service:/app/service
+    develop:
+      watch:
+        - action: rebuild
+          path: ./order-service/target/*-SNAPSHOT.jar
+
 #  test-service:
 #    build:
 #      context: ./
@@ -131,7 +131,7 @@ services:
 #      watch:
 #        - action: rebuild
 #          path: ./test-service/target/*-SNAPSHOT.jar
-#
+
 
   auth-service:
     build:

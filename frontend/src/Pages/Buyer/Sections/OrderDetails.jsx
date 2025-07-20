@@ -1,30 +1,22 @@
-import { useState, useEffect, use } from "react";
-import { PlusIcon, MinusIcon, TrashIcon } from "@heroicons/react/24/solid";
-import wheat from "../../../Assets/Buyer/Crops/wheat.webp";
+import { useState, useEffect } from "react";
+import { PlusIcon, MinusIcon, TrashIcon, ArrowLeftIcon, CheckBadgeIcon, ClockIcon, XCircleIcon } from "@heroicons/react/24/solid";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useOrderContext } from "../../../Contexts/Buyer/OrdersContexts";
 import { useTransportsContext } from "../../../Contexts/Buyer/TransportContext";
 import CustomModal from "../../../Components/CustomModel";
+import wheat from "../../../Assets/Buyer/Crops/wheat.webp";
+import corn from "../../../Assets/Buyer/Crops/corn.jpeg";
+import api from "@/API/client";
 
 export default function OrderDetails() {
-    const { orders, updateOrder } = useOrderContext();
+    const { orders, updateOrder, loading } = useOrderContext();
     const { addJob } = useTransportsContext();
     const { orderId } = useParams();
     const navigate = useNavigate();
 
-    const order = orders.find(order => order.id === orderId)
-
-    if(!order){
-        // TODO : Try to fetch the order from the backend
-        // TODO : If the order cannot be found in that way either, show 404
-        return (
-            <div>
-                <p>Order cannot be found.</p>
-            </div>
-        )
-    }
-
-    const items = order.items
+    // Always compute order from context
+    const order = orders.find(order => order.id === orderId);
+    const items = order?.items || [];
     const [subtotal, setSubtotal] = useState(0);
     const [modelDetails, setModelDetails] = useState({
         isOpen: false,
@@ -46,12 +38,23 @@ export default function OrderDetails() {
         })
     }
 
+
     useEffect(() => {
         setSubtotal(items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0));
     }, [items]);
 
+    if (!order && !loading) {
+        // TODO : Try to fetch the order from the backend
+        // TODO : If the order cannot be found in that way either, show 404
+        return (
+            <div>
+                <p>Order cannot be found.</p>
+            </div>
+        );
+    }
+
     const handleMakePayment = () => {
-        updateOrder(orderId, {status: "PROCESSING"})
+        updateOrder(orderId, { status: "PROCESSING" })
         closeModal();
     }
 
@@ -65,7 +68,7 @@ export default function OrderDetails() {
             status: "PENDING",
             vehicleType: 'Small Van',
             capacityRemaining: '30 kg',
-            items: items.map(i => {i.load_id = "LD-1001"; i.pickup_confirmation = "PENDING"; return i}),
+            items: items.map(i => { i.load_id = "LD-1001"; i.pickup_confirmation = "PENDING"; return i }),
             createdAt: '2025-07-01',
             // pickupLocations: ["farm1", "farm2", "farm3"],
             pickupLocation: "farm location",
@@ -79,13 +82,19 @@ export default function OrderDetails() {
     }
 
     const handleCancelTransport = () => {
+        // TODO : Call API to cancel transport job
         updateOrder(orderId, { transport: "BY_BUYER" })
         closeModal();
     }
 
     const handleCancelOrder = () => {
-        updateOrder(orderId, { status: "CANCELED" })
-        closeModal();
+        api.post(`/api/order/cancel/${orderId}`)
+            .then(() => {
+                updateOrder(orderId, { status: "CANCELED" })
+                closeModal();
+            }).catch(err => {
+                console.error("Error canceling order: ", err);
+            })
     }
 
     const handleConfirmDelivery = () => {
@@ -138,118 +147,142 @@ export default function OrderDetails() {
 
 
     return (
-        <div className="container mx-auto p-6 space-y-6">
-            {/* Breadcrumb & urgency banner */}
-            <nav className="text-gray-500 text-sm flex justify-between">
-                <ul className="flex space-x-2">
-                    <li><Link to="/buyer/orders" className="hover:underline">Orders</Link> /</li>
-                    <li><span>{orderId}</span></li>
-                </ul>
-            </nav>
+        <div className="bg-gray-50 min-h-screen">
+            <div className="max-w-7xl mx-auto space-y-4 p-4">
+                {/* Back button */}
+                <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-600 hover:text-green-700 mb-2">
+                    <ArrowLeftIcon className="h-5 w-5" />
+                    Back
+                </button>
 
-            {/* Title and free shipping bar */}
-            <div>
-                <h1 className="text-3xl font-bold">Order Details</h1>
-                <div className="mt-2 text-gray-600">
-                    Only the checked items will be included in the order
+
+                {/* Header Card */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-2">
+                    <h1 className="text-2xl font-bold text-gray-900">Order Details</h1>
+                    <p className="text-gray-600 mt-1 text-sm">Review your order, manage payment and transport</p>
                 </div>
-            </div>
 
-            {/* Saves items table */}
-            <div className="overflow-auto">
-                <div className="flex justify-between items-start">
-                    <table className="w-md table-auto border-separate border-spacing-y-4">
-                        <thead className="text-left text-gray-600">
-                            <tr>
-                                <th>Order Id</th><th>Status</th><th>Transport</th><th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr className="bg-white dark:bg-gray-800 rounded-lg">
-                                <td><Link to={`./${order.id}`} className="text-m font-medium">{order.id}</Link></td>
-                                <td><span className="text-m font-medium">{order.status}</span></td>
-                                <td><span className="text-m font-medium">{order.transport}</span></td>
-                                <td><span className="text-m font-medium">Rs. {subtotal.toFixed(2)}</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div className="flex gap-5 items-start">
-                        {order.status === "PENDING" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={() => openModel("MAKE_PAYMENT")}>Make payment</button>}
-                        {(order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
-                            <>
-                                {order.transport === "BY_BUYER" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={() => openModel("ADD_TRANSPORT")}>Add transport</button>}
-                                {order.transport === "BY_FARMER_SYSTEM" && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={handleViewTransport}>View transport</button>}
-                                {order.transport === "BY_BUYER_SYSTEM" && (
-                                    <>
-                                        <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={handleViewTransport}>View transport</button>
-                                        <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={() => openModel("CANCEL_TRANSPORT")}>Cancel transport</button>
-                                    </>
-                                )}
-                            </>
-                        )}
-                        {(order.status === "IN_TRANSPORT" || order.status === "DELIVERED") && <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={handleViewTransport}>View transport</button>}
-                        {(order.status === "PENDING" || order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
-                            <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={() => openModel("CANCEL_ORDER")}>Cancel Order</button>
-                        )}
-                        {order.status === "IN_TRANSPORT" && (
-                            <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={() => openModel("CONFIRM_DELIVERY")}>Confirm Delivery</button>
-                        )}
-                        {order.status === "DELIVERED" && (
-                            <button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md" onClick={() => openModel("REQUEST_REFUND")}>Request Refund</button>
-                        )}
+                {/* Order Details & Actions Card */}
+                {/* Order Items Table */}
+                {loading ? (
+                    <div className="p-8 text-center">
+                        <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                        <p className="mt-2 text-gray-600 text-sm">Loading orders...</p>
                     </div>
-                </div>
-                <h3 className="text-2xl font-medium mt-8">Order Items</h3>
-                <table className="w-full table-auto border-separate border-spacing-y-4">
-                    <thead className="text-left text-gray-600">
-                        <tr>
-                            <th>Product</th><th>Price</th><th>Quantity (Kg)</th><th>Total</th><th>Transpotation status</th><th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {items.map(item => (
-                            <tr key={item.id} className="bg-white dark:bg-gray-800 rounded-lg">
-                                <td className="flex items-center space-x-4 p-4">
-                                    <img src={item.imageUrl} alt="" className="w-20 h-20 object-cover rounded" />
-                                    <div>
-                                        <p className="font-medium">{item.type}</p>
-                                        <p className="text-sm text-gray-500">Farm: {item.farm}</p>
-                                        <p className="text-sm text-gray-500">Location: {item.location}</p>
+                ) :
+                    (
+                        <>
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-2 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div className="flex flex-col md:flex-row gap-2 md:gap-4 items-start md:items-center">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-medium text-gray-500">Order ID:</span>
+                                        <span className="font-semibold text-green-700">{order.id}</span>
                                     </div>
-                                </td>
-                                <td className="p-4">Rs. {item.pricePerUnit.toFixed(2)}</td>
-                                <td className="p-4">
-                                    <span className="px-2">{item.quantity}</span>
-                                </td>
-                                <td className="p-4 font-semibold">Rs. {(item.pricePerUnit * item.quantity).toFixed(2)}</td>
-                                <td>Pending</td>
-                                {/* <td><button className="w-fit h-fit bg-green-500 hover:bg-green-300 text-white p-2 rounded-md">Confirm Delivery</button></td> */}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-medium text-gray-500">Status:</span>
+                                        {(() => {
+                                            let badgeClass = 'bg-gray-100 text-gray-700';
+                                            let icon = <ClockIcon className="h-4 w-4 mr-1" />;
+                                            if (order.status === 'DELIVERED') { badgeClass = 'bg-blue-100 text-blue-800'; icon = <CheckBadgeIcon className="h-4 w-4 mr-1" />; }
+                                            else if (order.status === 'PENDING') { badgeClass = 'bg-yellow-100 text-yellow-800'; icon = <ClockIcon className="h-4 w-4 mr-1" />; }
+                                            else if (order.status === 'PROCESSING') { badgeClass = 'bg-orange-100 text-orange-800'; icon = <ClockIcon className="h-4 w-4 mr-1" />; }
+                                            else if (order.status === 'CANCELED') { badgeClass = 'bg-red-100 text-red-800'; icon = <XCircleIcon className="h-4 w-4 mr-1" />; }
+                                            else if (order.status === 'COMPLETED') { badgeClass = 'bg-green-100 text-green-800'; icon = <CheckBadgeIcon className="h-4 w-4 mr-1" />; }
+                                            return <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${badgeClass}`}>{icon}{order.status}</span>;
+                                        })()}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-medium text-gray-500">Transport:</span>
+                                        <span className="font-semibold text-gray-800">{order.transport}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-medium text-gray-500">Total:</span>
+                                        <span className="font-semibold text-green-700">Rs. {subtotal.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-3">
+                                    {order.status === "PENDING" && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={() => openModel("MAKE_PAYMENT")}>Make Payment</button>}
+                                    {(order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
+                                        <>
+                                            {order.transport === "BY_BUYER" && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={() => openModel("ADD_TRANSPORT")}>Add Transport</button>}
+                                            {order.transport === "BY_FARMER_SYSTEM" && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={handleViewTransport}>View Transport</button>}
+                                            {order.transport === "BY_BUYER_SYSTEM" && (
+                                                <>
+                                                    <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={handleViewTransport}>View Transport</button>
+                                                    <button className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold shadow" onClick={() => openModel("CANCEL_TRANSPORT")}>Cancel Transport</button>
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                    {(order.status === "IN_TRANSPORT" || order.status === "DELIVERED") && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={handleViewTransport}>View Transport</button>}
+                                    {(order.status === "PENDING" || order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
+                                        <button className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold shadow" onClick={() => openModel("CANCEL_ORDER")}>Cancel Order</button>
+                                    )}
+                                    {order.status === "IN_TRANSPORT" && (
+                                        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow" onClick={() => openModel("CONFIRM_DELIVERY")}>Confirm Delivery</button>
+                                    )}
+                                    {order.status === "DELIVERED" && (
+                                        <button className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-semibold shadow" onClick={() => openModel("REQUEST_REFUND")}>Request Refund</button>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mt-2">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full text-sm">
+                                        <thead>
+                                            <tr className="bg-gray-100">
+                                                <th className="p-2 text-left font-semibold">Product</th>
+                                                <th className="p-2 text-left font-semibold">Price</th>
+                                                <th className="p-2 text-left font-semibold">Quantity (Kg)</th>
+                                                <th className="p-2 text-left font-semibold">Total</th>
+                                                <th className="p-2 text-left font-semibold">Transportation Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {items.map(item => (
+                                                <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                                    <td className="flex items-center space-x-4 p-4">
+                                                        <img src={item.imageUrl || (Math.random() >= 0.5 ? wheat : corn)} alt="" className="w-20 h-20 object-cover rounded border border-gray-200" />
+                                                        <div>
+                                                            <p className="font-medium text-green-900">{item.type}</p>
+                                                            <p className="text-sm text-gray-500">Farm: {item.farm}</p>
+                                                            <p className="text-sm text-gray-500">Location: {item.location}</p>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 text-green-700 font-semibold">Rs. {item.pricePerUnit.toFixed(2)}</td>
+                                                    <td className="p-4">{item.quantity}</td>
+                                                    <td className="p-4 font-semibold text-green-800">Rs. {(item.pricePerUnit * item.quantity).toFixed(2)}</td>
+                                                    <td className="p-4">
+                                                        <span className="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">Pending</span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </>
+                    )}
 
-            {/* <TransportJobModal
-                isOpen={openTransportModel}
-                onClose={closeModal}
-                order={order}
-                onCreate={handleCreateTransport}
-            /> */}
 
-            <CustomModal
-                isOpen={modelDetails.isOpen}
-                onClose={closeModal}
-                title={modelValues[modelDetails.model]?.title}
-                description={modelValues[modelDetails.model]?.description}
-                submitText={modelValues[modelDetails.model]?.submitText}
-                onSubmit={modelValues[modelDetails.model]?.onSubmit}
-            />
 
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center">
-                <Link to="../crops" className="underline text-gray-600 hover:text-gray-800">
-                    CONTINUE SEARCHING
-                </Link>
+                {/* Modal */}
+                <CustomModal
+                    isOpen={modelDetails.isOpen}
+                    onClose={closeModal}
+                    title={modelValues[modelDetails.model]?.title}
+                    description={modelValues[modelDetails.model]?.description}
+                    submitText={modelValues[modelDetails.model]?.submitText}
+                    onSubmit={modelValues[modelDetails.model]?.onSubmit}
+                />
+
+                {/* Continue Searching Button */}
+                <div className="flex justify-end mt-6">
+                    <Link to="../crops" className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition font-semibold">
+                        Continue Searching
+                    </Link>
+                </div>
             </div>
         </div>
     );
