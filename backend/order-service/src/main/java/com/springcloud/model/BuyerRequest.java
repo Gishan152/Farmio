@@ -34,6 +34,10 @@ public class BuyerRequest {
     private String visibility;
     private LocalDate date;
 
+    @OneToMany(mappedBy = "buyerRequest", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private java.util.List<FarmerBid> bids;
+
     // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
