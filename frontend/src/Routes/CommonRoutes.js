@@ -27,6 +27,10 @@ const commonRoutes = [
         Component: Login
     },
     {
+        path: "/logout",
+        Component: Logout
+    },
+    {
         path: "/register",
         loader: RegistrationLoader,
         action: RegistrationAction,
