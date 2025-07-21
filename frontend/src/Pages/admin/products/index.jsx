@@ -117,20 +117,20 @@ const ProductsManagement = () => {
     },
     {
       id: 'P1002',
-      name: 'Free-Range Eggs',
-      category: 'Dairy & Eggs',
+      name: 'Beans',
+      category: 'Vegetables',
       farmer: 'Malini Gunasekara',
       location: 'Kandy',
-      price: '650/dozen',
+      price: '280/kg',
       stock: 80,
-      unit: 'dozen',
+      unit: 'kg',
       stockStatus: 'In Stock',
-      certifications: 'Free Range, Organic',
+      certifications: 'Organic',
       harvested: '2023-06-17',
-      image: 'https://images.unsplash.com/photo-1598965402089-897ce52e8355?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-      description: 'Free-range eggs from our happy, healthy chickens raised in the hills of Kandy. Each egg is collected daily and inspected for quality.',
-      lifespan: '3-4 weeks',
-      storageConditions: 'Refrigerate immediately. Keep in original carton to protect from odors and maintain humidity.'
+      image: 'https://images.unsplash.com/photo-1567375698348-5d9d5ae99de0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+      description: 'Fresh green beans grown in the fertile soils of Kandy. Crisp and tender, perfect for stir-fries, curries, and salads.',
+      lifespan: '1-2 weeks',
+      storageConditions: 'Refrigerate in a perforated plastic bag. For best quality, use within a week of purchase.'
     },
     {
       id: 'P1003',
@@ -819,111 +819,114 @@ const ProductsManagement = () => {
 
       {/* Product Detail Modal */}
       {showViewModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[2000] p-4" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl overflow-hidden" style={{ position: 'relative', zIndex: 2001 }}>
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">Product Details</h3>
-              <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-500">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <div className="rounded-lg overflow-hidden border border-dashboard-border h-56">
-                    <img 
-                      src={selectedProduct.image} 
-                      alt={selectedProduct.name} 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={handleCloseModal}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl overflow-hidden" style={{ position: 'relative', zIndex: 2001 }}>
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-lg font-medium text-gray-900">Product Details</h3>
+                <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-500">
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <div className="rounded-lg overflow-hidden border border-dashboard-border h-56">
+                      <img 
+                        src={selectedProduct.image} 
+                        alt={selectedProduct.name} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
 
-                  <div className="mt-4">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-xl font-medium text-dashboard-text-primary">{selectedProduct.name}</h2>
-                      <span className="text-lg font-medium text-farmio">LKR {selectedProduct.price}</span>
+                    <div className="mt-4">
+                      <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-medium text-dashboard-text-primary">{selectedProduct.name}</h2>
+                        <span className="text-lg font-medium text-farmio">LKR {selectedProduct.price}</span>
+                      </div>
+                      <p className="text-sm text-dashboard-text-secondary mt-1">{selectedProduct.category}</p>
+                      <p className="text-sm text-dashboard-text-secondary mt-1">Location: {selectedProduct.location}</p>
                     </div>
-                    <p className="text-sm text-dashboard-text-secondary mt-1">{selectedProduct.category}</p>
-                    <p className="text-sm text-dashboard-text-secondary mt-1">Location: {selectedProduct.location}</p>
-                  </div>
 
-                  <div className="mt-4">
-                    <span className={`px-3 py-1.5 text-sm rounded-full ${
-                      selectedProduct.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' : 
-                      selectedProduct.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' : 
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {selectedProduct.stockStatus} {selectedProduct.stockStatus !== 'Out of Stock' && `(${selectedProduct.stock} ${selectedProduct.unit})`}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Description</h4>
-                    <p className="text-dashboard-text-secondary">{selectedProduct.description}</p>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Listed By</h4>
-                      <p className="text-dashboard-text-secondary">{selectedProduct.farmer}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Location</h4>
-                      <p className="text-dashboard-text-secondary">{selectedProduct.location}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Harvest Date</h4>
-                      <p className="text-dashboard-text-secondary">{selectedProduct.harvested}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Certifications</h4>
-                      <p className="text-dashboard-text-secondary">{selectedProduct.certifications}</p>
+                    <div className="mt-4">
+                      <span className={`px-3 py-1.5 text-sm rounded-full ${
+                        selectedProduct.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' : 
+                        selectedProduct.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' : 
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {selectedProduct.stockStatus} {selectedProduct.stockStatus !== 'Out of Stock' && `(${selectedProduct.stock} ${selectedProduct.unit})`}
+                      </span>
                     </div>
                   </div>
                   
-                  <div>
-                    <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Storage Conditions</h4>
-                    <p className="text-dashboard-text-secondary">{selectedProduct.storageConditions}</p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Shelf Life</h4>
-                    <p className="text-dashboard-text-secondary">{selectedProduct.lifespan}</p>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Description</h4>
+                      <p className="text-dashboard-text-secondary">{selectedProduct.description}</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Listed By</h4>
+                        <p className="text-dashboard-text-secondary">{selectedProduct.farmer}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Location</h4>
+                        <p className="text-dashboard-text-secondary">{selectedProduct.location}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Harvest Date</h4>
+                        <p className="text-dashboard-text-secondary">{selectedProduct.harvested}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Certifications</h4>
+                        <p className="text-dashboard-text-secondary">{selectedProduct.certifications}</p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Storage Conditions</h4>
+                      <p className="text-dashboard-text-secondary">{selectedProduct.storageConditions}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Shelf Life</h4>
+                      <p className="text-dashboard-text-secondary">{selectedProduct.lifespan}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
-              <button
-                onClick={handleCloseModal}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 mr-2"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => {
-                  handleCloseModal();
-                  handleEditProduct(selectedProduct);
-                }}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 mr-2"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => {
-                  handleCloseModal();
-                  handleDeleteProduct(selectedProduct);
-                }}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-              >
-                Delete
-              </button>
+              
+              <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+                <button
+                  onClick={handleCloseModal}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 mr-2"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    handleCloseModal();
+                    handleEditProduct(selectedProduct);
+                  }}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 mr-2"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => {
+                    handleCloseModal();
+                    handleDeleteProduct(selectedProduct);
+                  }}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -931,282 +934,288 @@ const ProductsManagement = () => {
 
       {/* Edit Product Modal */}
       {showEditModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[2000] p-4" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl overflow-hidden" style={{ position: 'relative', zIndex: 2001 }}>
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">Edit Product</h3>
-              <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-500">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            {successMessage && (
-              <div className="mx-6 mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-green-800">{successMessage}</p>
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={handleCloseModal}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl overflow-hidden" style={{ position: 'relative', zIndex: 2001 }}>
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-lg font-medium text-gray-900">Edit Product</h3>
+                <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-500">
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {successMessage && (
+                <div className="mx-6 mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-green-800">{successMessage}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-            
-            <form onSubmit={handleEditSubmit} className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Product Name</label>
-                    <input 
-                      type="text" 
-                      id="name" 
-                      name="name"
-                      value={editFormData.name || ''}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
-                    <select 
-                      id="category" 
-                      name="category"
-                      value={editFormData.category || ''}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                      required
-                    >
-                      <option value="">Select Category</option>
-                      <option value="Vegetables">Vegetables</option>
-                      <option value="Fruits">Fruits</option>
-                      <option value="Dairy & Eggs">Dairy & Eggs</option>
-                      <option value="Meat">Meat</option>
-                      <option value="Specialty">Specialty</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price (LKR)</label>
-                    <div className="relative mt-1">
-                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                        LKR
-                      </span>
+              )}
+              
+              <form onSubmit={handleEditSubmit} className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-700">Product Name</label>
                       <input 
                         type="text" 
-                        id="price" 
-                        name="price"
-                        value={editFormData.price || ''}
-                        onChange={handleInputChange}
-                        className="pl-10 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                        required
-                        placeholder="150/kg"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="stock" className="block text-sm font-medium text-gray-700">Stock</label>
-                      <input 
-                        type="number" 
-                        id="stock" 
-                        name="stock"
-                        value={editFormData.stock || ''}
+                        id="name" 
+                        name="name"
+                        value={editFormData.name || ''}
                         onChange={handleInputChange}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                         required
                       />
                     </div>
+                    
                     <div>
-                      <label htmlFor="unit" className="block text-sm font-medium text-gray-700">Unit</label>
+                      <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
+                      <select 
+                        id="category" 
+                        name="category"
+                        value={editFormData.category || ''}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                        required
+                      >
+                        <option value="">Select Category</option>
+                        <option value="Vegetables">Vegetables</option>
+                        <option value="Fruits">Fruits</option>
+                        <option value="Dairy & Eggs">Dairy & Eggs</option>
+                        <option value="Meat">Meat</option>
+                        <option value="Specialty">Specialty</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price (LKR)</label>
+                      <div className="relative mt-1">
+                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                          LKR
+                        </span>
+                        <input 
+                          type="text" 
+                          id="price" 
+                          name="price"
+                          value={editFormData.price || ''}
+                          onChange={handleInputChange}
+                          className="pl-10 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                          required
+                          placeholder="150/kg"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="stock" className="block text-sm font-medium text-gray-700">Stock</label>
+                        <input 
+                          type="number" 
+                          id="stock" 
+                          name="stock"
+                          value={editFormData.stock || ''}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="unit" className="block text-sm font-medium text-gray-700">Unit</label>
+                        <input 
+                          type="text" 
+                          id="unit" 
+                          name="unit"
+                          value={editFormData.unit || ''}
+                          onChange={handleInputChange}
+                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="certifications" className="block text-sm font-medium text-gray-700">Certifications</label>
                       <input 
                         type="text" 
-                        id="unit" 
-                        name="unit"
-                        value={editFormData.unit || ''}
+                        id="certifications" 
+                        name="certifications"
+                        value={editFormData.certifications || ''}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="image" className="block text-sm font-medium text-gray-700">Image URL</label>
+                      <input 
+                        type="url" 
+                        id="image" 
+                        name="image"
+                        value={editFormData.image || ''}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      />
+                      {editFormData.image && (
+                        <div className="mt-2 rounded-md overflow-hidden h-24 w-24 border border-gray-200">
+                          <img src={editFormData.image} alt="Product" className="h-full w-full object-cover" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+                      <textarea 
+                        id="description" 
+                        name="description"
+                        value={editFormData.description || ''}
+                        onChange={handleInputChange}
+                        rows="3"
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                        required
+                      ></textarea>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="harvested" className="block text-sm font-medium text-gray-700">Harvest Date</label>
+                      <input 
+                        type="date" 
+                        id="harvested" 
+                        name="harvested"
+                        value={editFormData.harvested || ''}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="lifespan" className="block text-sm font-medium text-gray-700">Shelf Life</label>
+                      <input 
+                        type="text" 
+                        id="lifespan" 
+                        name="lifespan"
+                        value={editFormData.lifespan || ''}
+                        onChange={handleInputChange}
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="storageConditions" className="block text-sm font-medium text-gray-700">Storage Conditions</label>
+                      <textarea 
+                        id="storageConditions" 
+                        name="storageConditions"
+                        value={editFormData.storageConditions || ''}
+                        onChange={handleInputChange}
+                        rows="2"
+                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                      ></textarea>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
+                      <input 
+                        type="text" 
+                        id="location" 
+                        name="location"
+                        value={editFormData.location || ''}
                         onChange={handleInputChange}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                         required
                       />
                     </div>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="certifications" className="block text-sm font-medium text-gray-700">Certifications</label>
-                    <input 
-                      type="text" 
-                      id="certifications" 
-                      name="certifications"
-                      value={editFormData.certifications || ''}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                    />
                   </div>
                 </div>
                 
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="image" className="block text-sm font-medium text-gray-700">Image URL</label>
-                    <input 
-                      type="url" 
-                      id="image" 
-                      name="image"
-                      value={editFormData.image || ''}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                    />
-                    {editFormData.image && (
-                      <div className="mt-2 rounded-md overflow-hidden h-24 w-24 border border-gray-200">
-                        <img src={editFormData.image} alt="Product" className="h-full w-full object-cover" />
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-                    <textarea 
-                      id="description" 
-                      name="description"
-                      value={editFormData.description || ''}
-                      onChange={handleInputChange}
-                      rows="3"
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                      required
-                    ></textarea>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="harvested" className="block text-sm font-medium text-gray-700">Harvest Date</label>
-                    <input 
-                      type="date" 
-                      id="harvested" 
-                      name="harvested"
-                      value={editFormData.harvested || ''}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="lifespan" className="block text-sm font-medium text-gray-700">Shelf Life</label>
-                    <input 
-                      type="text" 
-                      id="lifespan" 
-                      name="lifespan"
-                      value={editFormData.lifespan || ''}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="storageConditions" className="block text-sm font-medium text-gray-700">Storage Conditions</label>
-                    <textarea 
-                      id="storageConditions" 
-                      name="storageConditions"
-                      value={editFormData.storageConditions || ''}
-                      onChange={handleInputChange}
-                      rows="2"
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                    ></textarea>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
-                    <input 
-                      type="text" 
-                      id="location" 
-                      name="location"
-                      value={editFormData.location || ''}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                      required
-                    />
-                  </div>
+                <div className="mt-6 flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={handleCloseModal}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  >
+                    Save Changes
+                  </button>
                 </div>
-              </div>
-              
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[2000] p-4" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden" style={{ position: 'relative', zIndex: 2001 }}>
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">Delete Product</h3>
-              <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-500">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            {successMessage && (
-              <div className="mx-6 mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={handleCloseModal}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden" style={{ position: 'relative', zIndex: 2001 }}>
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-lg font-medium text-gray-900">Delete Product</h3>
+                <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-500">
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {successMessage && (
+                <div className="mx-6 mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-green-800">{successMessage}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="p-6">
+                <div className="flex items-center mb-4">
+                  <div className="flex-shrink-0 bg-red-100 rounded-full p-2">
+                    <svg className="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-green-800">{successMessage}</p>
+                    <h3 className="text-lg font-medium text-gray-900">Delete this product?</h3>
+                    <p className="text-sm text-gray-500">Are you sure you want to delete "{selectedProduct.name}"? This action cannot be undone.</p>
                   </div>
                 </div>
-              </div>
-            )}
-            
-            <div className="p-6">
-              <div className="flex items-center mb-4">
-                <div className="flex-shrink-0 bg-red-100 rounded-full p-2">
-                  <svg className="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
+                
+                <div className="mt-4 flex justify-end space-x-3">
+                  <button
+                    onClick={handleCloseModal}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteConfirm}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
                 </div>
-                <div className="ml-3">
-                  <h3 className="text-lg font-medium text-gray-900">Delete this product?</h3>
-                  <p className="text-sm text-gray-500">Are you sure you want to delete "{selectedProduct.name}"? This action cannot be undone.</p>
-                </div>
-              </div>
-              
-              <div className="mt-4 flex justify-end space-x-3">
-                <button
-                  onClick={handleCloseModal}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDeleteConfirm}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                >
-                  Delete
-                </button>
               </div>
             </div>
           </div>
