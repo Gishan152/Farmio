@@ -53,9 +53,22 @@ export default function OrderDetails() {
         );
     }
 
-    const handleMakePayment = () => {
-        updateOrder(orderId, { status: "PROCESSING" })
-        closeModal();
+    const handleMakePayment = async () => {
+        try {
+            // Call backend to make payment
+            const res = await api.post('/api/order/pay', { orderId });
+            // Update local state with new order status and paymentId if present
+            if (res.data) {
+                updateOrder(orderId, { status: res.data.status, paymentId: res.data.paymentId });
+            } else {
+                updateOrder(orderId, { status: "PROCESSING" });
+            }
+        } catch (err) {
+            console.error("Payment failed:", err);
+            // Optionally show error to user
+        } finally {
+            closeModal();
+        }
     }
 
     const handleCreateTransport = () => {
