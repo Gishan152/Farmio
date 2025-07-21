@@ -15,10 +15,10 @@ spring:
     port: 5672
 
   datasource:
-      url: jdbc:postgresql://ep-dry-snow-a1szex24-pooler.ap-southeast-1.aws.neon.tech/orderdb?sslmode=require&channelBinding=require
-      username: neondb_owner
-      password: npg_l2wurAbES8Cq
-      driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://ep-dry-snow-a1szex24-pooler.ap-southeast-1.aws.neon.tech/transportdb?sslmode=require&channelBinding=require
+    username: neondb_owner
+    password: npg_l2wurAbES8Cq
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update

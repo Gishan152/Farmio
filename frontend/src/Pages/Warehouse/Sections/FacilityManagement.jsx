@@ -24,7 +24,7 @@ export default function FacilityManagement() {
             totalSlots: 50,
             capacityPerSlot: 100,
             totalCapacity: 5000,
-            pricePerKg: 0.25,
+            pricePerKg: 25,
             certifications: "HACCP, ISO 22000",
             status: "open"
         },
@@ -40,7 +40,7 @@ export default function FacilityManagement() {
             totalSlots: 30,
             capacityPerSlot: 150,
             totalCapacity: 4500,
-            pricePerKg: 0.15,
+            pricePerKg: 15,
             certifications: "Food Safety, GMP",
             status: "open"
         }
@@ -157,29 +157,29 @@ export default function FacilityManagement() {
 
     const isModalOpen = showForm || viewingWarehouse || deletingWarehouse;
 
-    return (
-        <div className="p-6 bg-gray-50 min-h-screen ">
-            <div className={`max-w-7xl mx-auto space-y-6 transition-all duration-300 ${isModalOpen ? 'backdrop-blur-sm' : ''}`}>
-                {/* Header */}
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Facility Management</h1>
-                        <p className="text-gray-500 mt-1">Manage your warehouse facilities with ease</p>
+     return (
+        <div className="p-4 bg-gray-50 min-h-screen">
+            <div className={`max-w-6xl mx-auto space-y-4 transition-all duration-300 ${isModalOpen ? 'backdrop-blur-sm' : ''}`}>
+                {/* Compact Header */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                    <div className="flex justify-between items-center mb-3">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-800">Facility Management</h1>
+                            <p className="text-gray-500 text-sm mt-1">Manage your warehouse facilities</p>
+                        </div>
+                        <button
+                            onClick={() => setShowForm(true)}
+                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-500 flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-200 text-sm"
+                        >
+                            <PlusIcon className="h-4 w-4" />
+                            Add Warehouse
+                        </button>
                     </div>
-                    <button
-                        onClick={() => setShowForm(true)}
-                        className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 flex items-center gap-2 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-                    >
-                        <PlusIcon className="h-5 w-5" />
-                        Add Warehouse
-                    </button>
-                </div>
-
-                {/* Search Bar */}
-                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4">
+                    
+                    {/* Compact Search Bar */}
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         </div>
@@ -187,116 +187,133 @@ export default function FacilityManagement() {
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Search warehouses by name or address..."
-                            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300"
+                            placeholder="Search warehouses..."
+                            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-green-400 transition-all duration-200 text-sm"
                         />
                     </div>
                 </div>
 
-                {/* Warehouse Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Wide Warehouse Cards */}
+                <div className="space-y-4">
                     {filteredWarehouses.map((warehouse) => (
-                        <div key={warehouse.id} className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                            {/* Card Header */}
-                            <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-5">
-                                <div className="flex justify-between items-start">
-                                    <div className="flex-1">
-                                        <h3 className="font-semibold text-lg mb-1">{warehouse.name}</h3>
-                                        <p className="text-green-100 text-sm flex items-center">
-                                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            </svg>
-                                            {warehouse.address}
-                                        </p>
+                        <div key={warehouse.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 transform hover:-translate-y-1">
+                            <div className="flex">
+                                {/* Left Header Section */}
+                                <div className="bg-gradient-to-br from-green-50 to-green text-green-900 p-4 flex-shrink-0 w-64">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                                <span className="text-lg">🏭</span>
+                                            </div>
+                                        </div>
+                                        <span className={`px-2 py-1 text-xs font-bold rounded-full ${
+                                            warehouse.status === 'open' 
+                                                ? 'bg-emerald-400 text-emerald-900' 
+                                                : warehouse.status === 'maintenance'
+                                                ? 'bg-yellow-400 text-yellow-900'
+                                                : 'bg-red-400 text-red-900'
+                                        }`}>
+                                            {warehouse.status.toUpperCase()}
+                                        </span>
                                     </div>
-                                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                        warehouse.status === 'open' 
-                                            ? 'bg-green-400 text-white' 
-                                            : warehouse.status === 'maintenance'
-                                            ? 'bg-yellow-400 text-white'
-                                            : 'bg-red-400 text-white'
-                                    }`}>
-                                        {warehouse.status.toUpperCase()}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Card Body */}
-                            <div className="p-5 space-y-3">
-                                {/* Storage Type */}
-                                <div className="flex items-center justify-between">
-                                    <span className={`px-2 py-1 text-sm font-medium rounded-md ${
-                                        warehouse.storageType.includes('Cold') 
-                                            ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                                            : 'bg-amber-100 text-amber-700 border border-amber-200'
-                                    }`}>
-                                        {warehouse.storageType}
-                                    </span>
-                                    <span className="text-sm text-gray-600 font-medium bg-gray-100 px-2 py-1 rounded-md">
-                                        {warehouse.temperatureMin}°C - {warehouse.temperatureMax}°C
-                                    </span>
+                                    
+                                    <h3 className="font-bold text-lg mb-2 truncate">
+                                        {warehouse.name}
+                                    </h3>
+                                    <p className="text-green-900 text-sm flex items-center">
+                                        <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        </svg>
+                                        <span className="truncate">{warehouse.address}</span>
+                                    </p>
                                 </div>
 
-                                {/* Stats */}
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="text-center p-3 bg-gray-50 rounded-md border border-gray-100">
-                                        <p className="text-xl font-semibold text-gray-800">{warehouse.totalSlots}</p>
-                                        <p className="text-xs text-gray-500">Total Slots</p>
+                                {/* Main Content Area */}
+                                <div className="flex-1 p-4 flex items-center">
+                                    <div className="grid grid-cols-5 gap-4 w-full items-center">
+                                        {/* Storage Type */}
+                                        <div className="flex flex-col items-center">
+                                            <div className="flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold bg-green-50 text-green-700 border border-green-200">
+                                                <span className="text-base">
+                                                    {warehouse.storageType.includes('Cold') ? '❄️' : '🌡️'}
+                                                </span>
+                                                <span>{warehouse.storageType.includes('Cold') ? 'Cold' : 'Dry'}</span>
+                                            </div>
+                                            <span className="text-xs text-gray-500 mt-1 font-medium">
+                                                {warehouse.temperatureMin}°C - {warehouse.temperatureMax}°C
+                                            </span>
+                                        </div>
+
+                                        {/* Slots */}
+                                        <div className="text-center">
+                                            <div className="bg-white rounded-lg p-3 border border-green-100">
+                                                <div className="text-2xl font-bold text-green-700">{warehouse.totalSlots}</div>
+                                                <div className="text-xs text-green-600 font-medium">Total Slots</div>
+                                            </div>
+                                        </div>
+
+                                        {/* Capacity */}
+                                        <div className="text-center">
+                                            <div className="bg-white rounded-lg p-3 border border-gray-100">
+                                                <div className="text-2xl font-bold text-gray-700">{warehouse.totalCapacity}</div>
+                                                <div className="text-xs text-gray-600 font-medium">Capacity (kg)</div>
+                                            </div>
+                                        </div>
+
+                                        {/* Price */}
+                                        <div className="text-center">
+                                            <div className="bg-white rounded-lg p-3 border border-green-200">
+                                                <div className="text-2xl font-bold text-green-800">Rs{warehouse.pricePerKg}</div>
+                                                <div className="text-xs text-green-700 font-medium">per kg</div>
+                                            </div>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="flex justify-center space-x-2">
+                                            <button
+                                                onClick={() => handleView(warehouse)}
+                                                className="bg-green-500 text-white py-2 px-3 rounded-lg hover:bg-green-600 transition-all duration-200 transform hover:scale-105 text-sm font-medium flex items-center space-x-1"
+                                                title="View Details"
+                                            >
+                                                <EyeIcon className="h-4 w-4" />
+                                                <span className="hidden sm:inline">View</span>
+                                            </button>
+                                            <button
+                                                onClick={() => handleEdit(warehouse)}
+                                                className="bg-green-400 text-white py-2 px-3 rounded-lg hover:bg-green-500 transition-all duration-200 transform hover:scale-105 text-sm font-medium flex items-center space-x-1"
+                                                title="Edit"
+                                            >
+                                                <PencilIcon className="h-4 w-4" />
+                                                <span className="hidden sm:inline">Edit</span>
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(warehouse)}
+                                                className="bg-gray-400 text-white py-2 px-3 rounded-lg hover:bg-gray-500 transition-all duration-200 transform hover:scale-105 text-sm font-medium"
+                                                title="Delete"
+                                            >
+                                                <TrashIcon className="h-4 w-4" />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="text-center p-3 bg-gray-50 rounded-md border border-gray-100">
-                                        <p className="text-xl font-semibold text-gray-800">{warehouse.totalCapacity}</p>
-                                        <p className="text-xs text-gray-500">Capacity (kg)</p>
-                                    </div>
-                                </div>
-
-                                {/* Price */}
-                                <div className="text-center p-3 bg-green-50 rounded-md border border-green-100">
-                                    <p className="text-xl font-semibold text-green-600">${warehouse.pricePerKg}</p>
-                                    <p className="text-xs text-green-500">Per kg</p>
-                                </div>
-
-                                {/* Actions */}
-                                <div className="flex justify-center space-x-2 pt-3 border-t border-gray-100">
-                                    <button
-                                        onClick={() => handleView(warehouse)}
-                                        className="p-2 text-green-600 hover:bg-green-50 rounded-md transition-all duration-200 hover:scale-110"
-                                        title="View Details"
-                                    >
-                                        <EyeIcon className="h-5 w-5" />
-                                    </button>
-                                    <button
-                                        onClick={() => handleEdit(warehouse)}
-                                        className="p-2 text-green-600 hover:bg-green-50 rounded-md transition-all duration-200 hover:scale-110"
-                                        title="Edit"
-                                    >
-                                        <PencilIcon className="h-5 w-5" />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(warehouse)}
-                                        className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-all duration-200 hover:scale-110"
-                                        title="Delete"
-                                    >
-                                        <TrashIcon className="h-5 w-5" />
-                                    </button>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Empty State */}
+                {/* Compact Empty State */}
                 {filteredWarehouses.length === 0 && (
-                    <div className="text-center py-12">
-                        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-10">
-                            <div className="text-5xl mb-4 animate-pulse">🏭</div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-3">No Warehouses Found</h3>
-                            <p className="text-gray-500 mb-6">
+                    <div className="text-center py-8">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+                            <div className="text-4xl mb-3">🏭</div>
+                            <h3 className="text-lg font-semibold text-gray-800 mb-2">No Warehouses Found</h3>
+                            <p className="text-gray-500 text-sm mb-4">
                                 {searchTerm ? 'Try a different search term' : 'Start by adding your first warehouse'}
                             </p>
                             {!searchTerm && (
                                 <button
                                     onClick={() => setShowForm(true)}
-                                    className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 shadow-sm hover:shadow-md transition-all duration-200 text-sm"
                                 >
                                     Add Your First Warehouse
                                 </button>
@@ -456,7 +473,7 @@ export default function FacilityManagement() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Price per kg ($) *</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Price per kg (Rs) *</label>
                                     <input
                                         type="number"
                                         name="pricePerKg"
@@ -566,7 +583,7 @@ export default function FacilityManagement() {
                             </div>
                             <div className="bg-green-50 p-3 rounded-lg border border-green-100">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Price per kg</label>
-                                <p className="text-lg font-semibold text-green-600">${viewingWarehouse.pricePerKg}</p>
+                                <p className="text-lg font-semibold text-green-600">Rs{viewingWarehouse.pricePerKg}</p>
                             </div>
                             <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>

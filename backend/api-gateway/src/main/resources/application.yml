@@ -12,10 +12,10 @@ spring:
       default-filters:
         - name: AuthenticationFilter
       routes:
-        - id: product-service
-          uri: lb://product-service
-          predicates:
-            - Path=/products/**
+#        - id: product-service
+#          uri: lb://product-service
+#          predicates:
+#            - Path=/products/**
         - id: auth-service
           uri: lb://auth-service
           predicates:
@@ -24,10 +24,10 @@ spring:
           uri: lb://order-service
           predicates:
             - Path=/api/order/**
-        - id: crop-service
-          uri: lb://crop-service
+        - id: crop-listing-service
+          uri: lb://crop-listing-service
           predicates:
-            - Path=/api/crop/**
+            - Path=/api/products/**
         - id: waste-service
           uri: lb://waste-service
           predicates:

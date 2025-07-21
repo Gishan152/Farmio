@@ -96,6 +96,13 @@ const sampleBookings = [
 export default function ReservedStorage() {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [filters, setFilters] = useState({
+        warehouse: '',
+        produce: '',
+        status: '',
+        startDate: '',
+        endDate: ''
+    });
 
     // Stat cards
     const stats = {
@@ -111,6 +118,21 @@ export default function ReservedStorage() {
             setLoading(false);
         }, 1000);
     }, []);
+
+    // Filtering logic
+    const filteredBookings = bookings.filter(b => {
+        if (filters.warehouse && b.warehouseName !== filters.warehouse) return false;
+        if (filters.produce && b.produce !== filters.produce) return false;
+        if (filters.status && b.status !== filters.status) return false;
+        if (filters.startDate && b.startDate < filters.startDate) return false;
+        if (filters.endDate && b.endDate > filters.endDate) return false;
+        return true;
+    });
+
+    // Unique options for filters
+    const warehouseOptions = Array.from(new Set(bookings.map(b => b.warehouseName)));
+    const produceOptions = Array.from(new Set(bookings.map(b => b.produce)));
+    const statusOptions = Array.from(new Set(bookings.map(b => b.status)));
 
     return (
         <div className="bg-gray-50 min-h-screen">
@@ -165,6 +187,70 @@ export default function ReservedStorage() {
                     </div>
                 </div>
 
+                {/* Filters Card */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Warehouse</label>
+                            <select
+                                value={filters.warehouse}
+                                onChange={e => setFilters(f => ({ ...f, warehouse: e.target.value }))}
+                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            >
+                                <option value="">All Warehouses</option>
+                                {warehouseOptions.map(w => <option key={w} value={w}>{w}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Product</label>
+                            <select
+                                value={filters.produce}
+                                onChange={e => setFilters(f => ({ ...f, produce: e.target.value }))}
+                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            >
+                                <option value="">All Products</option>
+                                {produceOptions.map(p => <option key={p} value={p}>{p}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Status</label>
+                            <select
+                                value={filters.status}
+                                onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
+                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            >
+                                <option value="">All Statuses</option>
+                                {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
+                            <input
+                                type="date"
+                                value={filters.startDate}
+                                onChange={e => setFilters(f => ({ ...f, startDate: e.target.value }))}
+                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">End Date</label>
+                            <input
+                                type="date"
+                                value={filters.endDate}
+                                onChange={e => setFilters(f => ({ ...f, endDate: e.target.value }))}
+                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setFilters({ warehouse: '', produce: '', status: '', startDate: '', endDate: '' })}
+                            className="ml-auto px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300 transition"
+                        >
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+
                 {/* Bookings Table with loading spinner */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                     <div className="p-4 border-b border-gray-200">
@@ -193,7 +279,7 @@ export default function ReservedStorage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {bookings.map(b => {
+                                    {filteredBookings.map(b => {
                                         let badgeClass = 'bg-gray-100 text-gray-700';
                                         let status = b.status?.toUpperCase();
                                         if (status === 'COMPLETED') badgeClass = 'bg-blue-100 text-blue-800';

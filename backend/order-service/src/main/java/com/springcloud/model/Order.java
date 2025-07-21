@@ -40,7 +40,7 @@ public class Order {
     @Column(nullable = false)
     private Long buyerId;
 
-    @NotBlank
+    @NotNull(message = "Status cannot be null")
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
@@ -55,6 +55,10 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<OrderItem> items = new ArrayList<>();
+
+    @NotBlank
+    @Column(nullable = false)
+    private String transport;
 
     public void addItem(OrderItem item) {
         items.add(item);
