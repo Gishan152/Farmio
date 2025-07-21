@@ -64,6 +64,20 @@ public class BuyerRequestController {
         }
     }
 
+        // Cancel a buyer request (only if OPEN)
+    @PostMapping("/cancel/{id}")
+    public ResponseEntity<?> cancelRequest(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-Roles") String rolesCsv) {
+        try {
+            var canceled = service.cancelRequest(id, Long.valueOf(userId), rolesCsv);
+            return ResponseEntity.ok(canceled);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(

@@ -106,17 +106,31 @@ export default function RequestDetails() {
         return matchesProvider && matchesPriceMin && matchesPriceMax && matchesDate;
     });
 
+
     const handleAccept = async (bid) => {
         try {
-            await api.post(`/api/order/buyer-requests/bids/accept/${bid.id}`);
+            const res = await api.post(`/api/order/buyer-requests/bids/accept/${bid.id}`);
             toast.push(`✅ Accepted bid from Farmer ID ${bid.farmerId}`);
-            // Refresh bids for this request
-            if (requestId) {
-                await fetchBidsForRequest(requestId);
-                setBids(requestBids[requestId] || []);
-            }
+            // Update local state: set request to CLOSED and update bids
+            setReq(prev => prev ? { ...prev, state: 'CLOSED' } : prev);
+            setBids(prevBids => prevBids.map(b =>
+                b.id === bid.id
+                    ? { ...b, bidStatus: 'ACCEPTED' }
+                    : { ...b, bidStatus: 'REJECTED' }
+            ));
         } catch (err) {
             toast.push('❌ Failed to accept bid.');
+        }
+    };
+
+    const handleCancelRequest = async () => {
+        try {
+            await api.post(`/api/order/buyer-requests/cancel/${req.id}`);
+            toast.push('✅ Request canceled.');
+            setReq({ ...req, state: 'CANCELED' });
+        } catch (err) {
+
+            toast.push('❌ Failed to cancel request.');
         }
     };
 
@@ -138,31 +152,11 @@ export default function RequestDetails() {
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">Request Details</h1>
                         <p className="text-gray-600 mt-1 text-sm">View and manage your crop request and bids</p>
-                        <span className={`inline-block ml-2 px-3 py-1 rounded-full text-xs font-semibold ${req.state === 'OPEN' ? 'bg-green-100 text-green-700' : req.state === 'CLOSED' ? 'bg-gray-200 text-gray-700' : 'bg-red-100 text-red-700'}`}>State: {req.state}</span>
                     </div>
-                    {/* Cancel button if request is OPEN */}
-                    {req.state === 'OPEN' && (
-                        <button
-                            type="button"
-                            onClick={async () => {
-                                try {
-                                    await api.post(`/api/order/buyer-requests/cancel/${req.id}`);
-                                    toast.push('✅ Request canceled.');
-                                    // Optionally update state in context or refetch
-                                    setReq({ ...req, state: 'CANCELED' });
-                                } catch (err) {
-                                    toast.push('❌ Failed to cancel request.');
-                                }
-                            }}
-                            className="ml-4 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition shadow"
-                        >
-                            Cancel Request
-                        </button>
-                    )}
                 </div>
 
                 {/* Stat Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                     <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
                         <div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
                         <ArchiveBoxIcon className="h-7 w-7 text-green-500 mr-3 z-10" />
@@ -195,11 +189,26 @@ export default function RequestDetails() {
                             <p className="text-lg font-bold text-gray-900">Rs {req.priceMin || req.priceRange?.min}–{req.priceMax || req.priceRange?.max}/kg</p>
                         </div>
                     </div>
+                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+                        <div className={`absolute left-0 top-0 h-full w-1 ${req.state === 'OPEN' ? 'bg-green-500' : req.state === 'CLOSED' ? 'bg-gray-400' : 'bg-red-500'} rounded-l-lg`} />
+                        <span className={`h-7 w-7 mr-3 z-10 font-bold text-xl flex items-center justify-center ${req.state === 'OPEN' ? 'text-green-500' : req.state === 'CLOSED' ? 'text-gray-500' : 'text-red-500'}`}>S</span>
+                        <div className="z-10">
+                            <p className="text-xs font-medium text-gray-500">Request State</p>
+                            <p className={`text-lg font-bold ${req.state === 'OPEN' ? 'text-green-700' : req.state === 'CLOSED' ? 'text-gray-700' : 'text-red-700'}`}>{req.state}</p>
+                        </div>
+                    </div>
                 </div>
-                {/* Show state in details */}
-                <div className="mt-2 mb-2">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${req.state === 'OPEN' ? 'bg-green-100 text-green-700' : req.state === 'CLOSED' ? 'bg-gray-200 text-gray-700' : 'bg-red-100 text-red-700'}`}>Request State: {req.state}</span>
-                </div>
+                {/* State Card */}
+                {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-2 mb-2">
+                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+                        <div className={`absolute left-0 top-0 h-full w-1 ${req.state === 'OPEN' ? 'bg-green-500' : req.state === 'CLOSED' ? 'bg-gray-400' : 'bg-red-500'} rounded-l-lg`} />
+                        <span className={`h-7 w-7 mr-3 z-10 font-bold text-xl flex items-center justify-center ${req.state === 'OPEN' ? 'text-green-500' : req.state === 'CLOSED' ? 'text-gray-500' : 'text-red-500'}`}>S</span>
+                        <div className="z-10">
+                            <p className="text-xs font-medium text-gray-500">Request State</p>
+                            <p className={`text-lg font-bold ${req.state === 'OPEN' ? 'text-green-700' : req.state === 'CLOSED' ? 'text-gray-700' : 'text-red-700'}`}>{req.state}</p>
+                        </div>
+                    </div>
+                </div> */}
 
                 {/* Details Card */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col h-full p-6 relative group transition hover:shadow-lg mt-4">
@@ -220,6 +229,18 @@ export default function RequestDetails() {
                             Bids
                         </span>
                     </div>
+                    {/* Cancel button if request is OPEN */}
+                    {req.state === 'OPEN' && (
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={handleCancelRequest}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition shadow w-auto"
+                            >
+                                Cancel Request
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Bids Section */}

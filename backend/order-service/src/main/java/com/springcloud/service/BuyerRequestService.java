@@ -44,10 +44,13 @@ public class BuyerRequestService {
         return toDto(saved);
     }
 
-    public BuyerRequestDto cancelRequest(Long id, Long userId, String rolesCsv) {
+        public BuyerRequestDto cancelRequest(Long id, Long userId, String rolesCsv) {
         return repository.findById(id).map(existing -> {
             if (!existing.getUserId().equals(userId)) {
                 throw new RuntimeException("You can only cancel your own requests");
+            }
+            if (existing.getState() == null || !existing.getState().name().equals("OPEN")) {
+                throw new RuntimeException("Request can only be canceled if it is in the OPEN state");
             }
             existing.setState(com.springcloud.common.enums.BuyerRequestState.CANCELED);
             BuyerRequest updated = repository.save(existing);
