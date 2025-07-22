@@ -6,8 +6,10 @@ import SlotManagement from '../Pages/Warehouse/Sections/SlotManagement';
 import BookingManagement from '../Pages/Warehouse/Sections/BookingManagement';
 import PaymentManagement from '../Pages/Warehouse/Sections/PaymentManagement';
 import WasteAgent from '../Pages/Warehouse/Sections/WasteAgent';
-import WarehouseNotifications from '../Pages/Warehouse/Sections/Notifications';
-import Analytics from '../Pages/Warehouse/Sections/Analytics';
+import UserProfile from '../Pages/Warehouse/Sections/Profile';
+import SettingsPage from '../Pages/SettingsPage';
+// import WarehouseNotifications from '../Pages/Warehouse/Sections/Notifications';
+// import Analytics from '../Pages/Warehouse/Sections/Analytics';
 
 const warehouseRoutes = {
     path: '/warehouse',
@@ -38,13 +40,21 @@ const warehouseRoutes = {
             Component: WasteAgent
         },
         {
-            path: 'notifications',
-            Component: WarehouseNotifications
+            path: 'profile',
+            Component: UserProfile
         },
         {
-            path: 'analytics',
-            Component: Analytics
+            path: 'settings',
+            Component: SettingsPage
         }
+        // {
+        //     path: 'notifications',
+        //     Component: WarehouseNotifications
+        // },
+        // {
+        //     path: 'analytics',
+        //     Component: Analytics
+        // }
     ],
 }
 

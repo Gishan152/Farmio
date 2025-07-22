@@ -4,26 +4,19 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useOrderContext } from "../../../Contexts/Buyer/OrdersContexts";
 import { useTransportsContext } from "../../../Contexts/Buyer/TransportContext";
 import CustomModal from "../../../Components/CustomModel";
+import wheat from "../../../Assets/Buyer/Crops/wheat.webp";
+import corn from "../../../Assets/Buyer/Crops/corn.jpeg";
+import api from "@/API/client";
 
 export default function OrderDetails() {
-    const { orders, updateOrder } = useOrderContext();
+    const { orders, updateOrder, loading } = useOrderContext();
     const { addJob } = useTransportsContext();
     const { orderId } = useParams();
     const navigate = useNavigate();
 
-    const order = orders.find(order => order.id === orderId)
-
-    if(!order){
-        // TODO : Try to fetch the order from the backend
-        // TODO : If the order cannot be found in that way either, show 404
-        return (
-            <div>
-                <p>Order cannot be found.</p>
-            </div>
-        )
-    }
-
-    const items = order.items
+    // Always compute order from context
+    const order = orders.find(order => order.id === orderId);
+    const items = order?.items || [];
     const [subtotal, setSubtotal] = useState(0);
     const [modelDetails, setModelDetails] = useState({
         isOpen: false,
@@ -45,31 +38,54 @@ export default function OrderDetails() {
         })
     }
 
+
     useEffect(() => {
         setSubtotal(items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0));
     }, [items]);
 
-    const handleMakePayment = () => {
-        updateOrder(orderId, {status: "PROCESSING"})
-        closeModal();
+    if (!order && !loading) {
+        // TODO : Try to fetch the order from the backend
+        // TODO : If the order cannot be found in that way either, show 404
+        return (
+            <div>
+                <p>Order cannot be found.</p>
+            </div>
+        );
+    }
+
+    const handleMakePayment = async () => {
+        try {
+            // Call backend to make payment
+            const res = await api.post('/api/order/pay', { orderId });
+            // Update local state with new order status and paymentId if present
+            if (res.data) {
+                updateOrder(orderId, { status: res.data.status, paymentId: res.data.paymentId });
+            } else {
+                updateOrder(orderId, { status: "PROCESSING" });
+            }
+        } catch (err) {
+            console.error("Payment failed:", err);
+            // Optionally show error to user
+        } finally {
+            closeModal();
+        }
     }
 
     const handleCreateTransport = () => {
         console.log("Creating transport for order", orderId);
-        // call API or dispatch action...
-        updateOrder(orderId, { transport: "BY_BUYER_SYSTEM" })
-        addJob({
+        updateOrder(orderId, { transport: "BY_BUYER_SYSTEM" });
+        const job = {
             id: "TJ-10001",
             orderId,
             status: "PENDING",
             vehicleType: 'Small Van',
-            capacityRemaining: '30 kg',
-            items: items.map(i => {i.load_id = "LD-1001"; i.pickup_confirmation = "PENDING"; return i}),
+            items: items.map(i => { i.load_id = "LD-1001"; i.pickup_confirmation = "PENDING"; return i }),
             createdAt: '2025-07-01',
             // pickupLocations: ["farm1", "farm2", "farm3"],
             pickupLocation: "farm location",
             dropOffLocation: "buyer location",
-        })
+        };
+        addJob(job);
         closeModal();
     };
 
@@ -78,13 +94,19 @@ export default function OrderDetails() {
     }
 
     const handleCancelTransport = () => {
+        // TODO : Call API to cancel transport job
         updateOrder(orderId, { transport: "BY_BUYER" })
         closeModal();
     }
 
     const handleCancelOrder = () => {
-        updateOrder(orderId, { status: "CANCELED" })
-        closeModal();
+        api.post(`/api/order/cancel/${orderId}`)
+            .then(() => {
+                updateOrder(orderId, { status: "CANCELED" })
+                closeModal();
+            }).catch(err => {
+                console.error("Error canceling order: ", err);
+            })
     }
 
     const handleConfirmDelivery = () => {
@@ -153,98 +175,109 @@ export default function OrderDetails() {
                 </div>
 
                 {/* Order Details & Actions Card */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-2 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="flex flex-col md:flex-row gap-2 md:gap-4 items-start md:items-center">
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-gray-500">Order ID:</span>
-                            <span className="font-semibold text-green-700">{order.id}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-gray-500">Status:</span>
-                            {(() => {
-                                let badgeClass = 'bg-gray-100 text-gray-700';
-                                let icon = <ClockIcon className="h-4 w-4 mr-1" />;
-                                if (order.status === 'DELIVERED') { badgeClass = 'bg-blue-100 text-blue-800'; icon = <CheckBadgeIcon className="h-4 w-4 mr-1" />; }
-                                else if (order.status === 'PENDING') { badgeClass = 'bg-yellow-100 text-yellow-800'; icon = <ClockIcon className="h-4 w-4 mr-1" />; }
-                                else if (order.status === 'PROCESSING') { badgeClass = 'bg-orange-100 text-orange-800'; icon = <ClockIcon className="h-4 w-4 mr-1" />; }
-                                else if (order.status === 'CANCELED') { badgeClass = 'bg-red-100 text-red-800'; icon = <XCircleIcon className="h-4 w-4 mr-1" />; }
-                                else if (order.status === 'COMPLETED') { badgeClass = 'bg-green-100 text-green-800'; icon = <CheckBadgeIcon className="h-4 w-4 mr-1" />; }
-                                return <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${badgeClass}`}>{icon}{order.status}</span>;
-                            })()}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-gray-500">Transport:</span>
-                            <span className="font-semibold text-gray-800">{order.transport}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-gray-500">Total:</span>
-                            <span className="font-semibold text-green-700">Rs. {subtotal.toFixed(2)}</span>
-                        </div>
-                    </div>
-                    <div className="flex flex-wrap gap-3">
-                        {order.status === "PENDING" && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={() => openModel("MAKE_PAYMENT")}>Make Payment</button>}
-                        {(order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
-                            <>
-                                {order.transport === "BY_BUYER" && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={() => openModel("ADD_TRANSPORT")}>Add Transport</button>}
-                                {order.transport === "BY_FARMER_SYSTEM" && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={handleViewTransport}>View Transport</button>}
-                                {order.transport === "BY_BUYER_SYSTEM" && (
-                                    <>
-                                        <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={handleViewTransport}>View Transport</button>
-                                        <button className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold shadow" onClick={() => openModel("CANCEL_TRANSPORT")}>Cancel Transport</button>
-                                    </>
-                                )}
-                            </>
-                        )}
-                        {(order.status === "IN_TRANSPORT" || order.status === "DELIVERED") && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={handleViewTransport}>View Transport</button>}
-                        {(order.status === "PENDING" || order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
-                            <button className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold shadow" onClick={() => openModel("CANCEL_ORDER")}>Cancel Order</button>
-                        )}
-                        {order.status === "IN_TRANSPORT" && (
-                            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow" onClick={() => openModel("CONFIRM_DELIVERY")}>Confirm Delivery</button>
-                        )}
-                        {order.status === "DELIVERED" && (
-                            <button className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-semibold shadow" onClick={() => openModel("REQUEST_REFUND")}>Request Refund</button>
-                        )}
-                    </div>
-                </div>
-
                 {/* Order Items Table */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mt-2">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full text-sm">
-                            <thead>
-                                <tr className="bg-gray-100">
-                                    <th className="p-2 text-left font-semibold">Product</th>
-                                    <th className="p-2 text-left font-semibold">Price</th>
-                                    <th className="p-2 text-left font-semibold">Quantity (Kg)</th>
-                                    <th className="p-2 text-left font-semibold">Total</th>
-                                    <th className="p-2 text-left font-semibold">Transportation Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {items.map(item => (
-                                    <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                        <td className="flex items-center space-x-4 p-4">
-                                            <img src={item.imageUrl} alt="" className="w-20 h-20 object-cover rounded border border-gray-200" />
-                                            <div>
-                                                <p className="font-medium text-green-900">{item.type}</p>
-                                                <p className="text-sm text-gray-500">Farm: {item.farm}</p>
-                                                <p className="text-sm text-gray-500">Location: {item.location}</p>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 text-green-700 font-semibold">Rs. {item.pricePerUnit.toFixed(2)}</td>
-                                        <td className="p-4">{item.quantity}</td>
-                                        <td className="p-4 font-semibold text-green-800">Rs. {(item.pricePerUnit * item.quantity).toFixed(2)}</td>
-                                        <td className="p-4">
-                                            <span className="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">Pending</span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                {loading ? (
+                    <div className="p-8 text-center">
+                        <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                        <p className="mt-2 text-gray-600 text-sm">Loading orders...</p>
                     </div>
-                </div>
+                ) :
+                    (
+                        <>
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-2 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                <div className="flex flex-col md:flex-row gap-2 md:gap-4 items-start md:items-center">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-medium text-gray-500">Order ID:</span>
+                                        <span className="font-semibold text-green-700">{order.id}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-medium text-gray-500">Status:</span>
+                                        {(() => {
+                                            let badgeClass = 'bg-gray-100 text-gray-700';
+                                            let icon = <ClockIcon className="h-4 w-4 mr-1" />;
+                                            if (order.status === 'DELIVERED') { badgeClass = 'bg-blue-100 text-blue-800'; icon = <CheckBadgeIcon className="h-4 w-4 mr-1" />; }
+                                            else if (order.status === 'PENDING') { badgeClass = 'bg-yellow-100 text-yellow-800'; icon = <ClockIcon className="h-4 w-4 mr-1" />; }
+                                            else if (order.status === 'PROCESSING') { badgeClass = 'bg-orange-100 text-orange-800'; icon = <ClockIcon className="h-4 w-4 mr-1" />; }
+                                            else if (order.status === 'CANCELED') { badgeClass = 'bg-red-100 text-red-800'; icon = <XCircleIcon className="h-4 w-4 mr-1" />; }
+                                            else if (order.status === 'COMPLETED') { badgeClass = 'bg-green-100 text-green-800'; icon = <CheckBadgeIcon className="h-4 w-4 mr-1" />; }
+                                            return <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${badgeClass}`}>{icon}{order.status}</span>;
+                                        })()}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-medium text-gray-500">Transport:</span>
+                                        <span className="font-semibold text-gray-800">{order.transport}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-medium text-gray-500">Total:</span>
+                                        <span className="font-semibold text-green-700">Rs. {subtotal.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-3">
+                                    {order.status === "PENDING" && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={() => openModel("MAKE_PAYMENT")}>Make Payment</button>}
+                                    {(order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
+                                        <>
+                                            {order.transport === "BY_BUYER" && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={() => openModel("ADD_TRANSPORT")}>Add Transport</button>}
+                                            {order.transport === "BY_FARMER_SYSTEM" && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={handleViewTransport}>View Transport</button>}
+                                            {order.transport === "BY_BUYER_SYSTEM" && (
+                                                <>
+                                                    <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={handleViewTransport}>View Transport</button>
+                                                    <button className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold shadow" onClick={() => openModel("CANCEL_TRANSPORT")}>Cancel Transport</button>
+                                                </>
+                                            )}
+                                        </>
+                                    )}
+                                    {(order.status === "IN_TRANSPORT" || order.status === "DELIVERED") && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={handleViewTransport}>View Transport</button>}
+                                    {(order.status === "PENDING" || order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
+                                        <button className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold shadow" onClick={() => openModel("CANCEL_ORDER")}>Cancel Order</button>
+                                    )}
+                                    {order.status === "IN_TRANSPORT" && (
+                                        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow" onClick={() => openModel("CONFIRM_DELIVERY")}>Confirm Delivery</button>
+                                    )}
+                                    {order.status === "DELIVERED" && (
+                                        <button className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-semibold shadow" onClick={() => openModel("REQUEST_REFUND")}>Request Refund</button>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mt-2">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full text-sm">
+                                        <thead>
+                                            <tr className="bg-gray-100">
+                                                <th className="p-2 text-left font-semibold">Product</th>
+                                                <th className="p-2 text-left font-semibold">Price</th>
+                                                <th className="p-2 text-left font-semibold">Quantity (Kg)</th>
+                                                <th className="p-2 text-left font-semibold">Total</th>
+                                                <th className="p-2 text-left font-semibold">Transportation Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {items.map(item => (
+                                                <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                                    <td className="flex items-center space-x-4 p-4">
+                                                        <img src={item.imageUrl || (Math.random() >= 0.5 ? wheat : corn)} alt="" className="w-20 h-20 object-cover rounded border border-gray-200" />
+                                                        <div>
+                                                            <p className="font-medium text-green-900">{item.type}</p>
+                                                            <p className="text-sm text-gray-500">Farm: {item.farm}</p>
+                                                            <p className="text-sm text-gray-500">Location: {item.location}</p>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 text-green-700 font-semibold">Rs. {item.pricePerUnit.toFixed(2)}</td>
+                                                    <td className="p-4">{item.quantity}</td>
+                                                    <td className="p-4 font-semibold text-green-800">Rs. {(item.pricePerUnit * item.quantity).toFixed(2)}</td>
+                                                    <td className="p-4">
+                                                        <span className="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">Pending</span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+
 
                 {/* Modal */}
                 <CustomModal
