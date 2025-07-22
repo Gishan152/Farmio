@@ -43,6 +43,11 @@ const OrdersManagement = () => {
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [selectedTab, setSelectedTab] = useState('all');
   const [expandedOrderId, setExpandedOrderId] = useState(null);
+  // Add modal state at the top of OrdersManagement
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Sample order data
   const orders = [
@@ -51,21 +56,21 @@ const OrdersManagement = () => {
       customer: 'Fresh Foods Market',
       buyer: 'Emily Clark',
       date: '2023-06-20',
-      total: '$1,245.80',
+      total: 'LKR 1,245.80',
       items: 8,
       status: 'Pending',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-25',
       transport: 'Fast Track Logistics',
       orderDetails: [
-        { product: 'Organic Tomatoes', quantity: 50, unit: 'kg', price: '$4.50/kg', total: '$225.00' },
-        { product: 'Fresh Lettuce', quantity: 40, unit: 'kg', price: '$3.20/kg', total: '$128.00' },
-        { product: 'Carrots', quantity: 60, unit: 'kg', price: '$2.75/kg', total: '$165.00' },
-        { product: 'Red Onions', quantity: 45, unit: 'kg', price: '$3.10/kg', total: '$139.50' },
-        { product: 'Bell Peppers', quantity: 35, unit: 'kg', price: '$4.80/kg', total: '$168.00' },
-        { product: 'Cucumbers', quantity: 55, unit: 'kg', price: '$2.90/kg', total: '$159.50' },
-        { product: 'Potatoes', quantity: 80, unit: 'kg', price: '$1.95/kg', total: '$156.00' },
-        { product: 'Green Beans', quantity: 30, unit: 'kg', price: '$3.50/kg', total: '$105.00' }
+        { product: 'Organic Tomatoes', quantity: 50, unit: 'kg', price: 'LKR 4.50/kg', total: 'LKR 225.00' },
+        { product: 'Fresh Lettuce', quantity: 40, unit: 'kg', price: 'LKR 3.20/kg', total: 'LKR 128.00' },
+        { product: 'Carrots', quantity: 60, unit: 'kg', price: 'LKR 2.75/kg', total: 'LKR 165.00' },
+        { product: 'Red Onions', quantity: 45, unit: 'kg', price: 'LKR 3.10/kg', total: 'LKR 139.50' },
+        { product: 'Bell Peppers', quantity: 35, unit: 'kg', price: 'LKR 4.80/kg', total: 'LKR 168.00' },
+        { product: 'Cucumbers', quantity: 55, unit: 'kg', price: 'LKR 2.90/kg', total: 'LKR 159.50' },
+        { product: 'Potatoes', quantity: 80, unit: 'kg', price: 'LKR 1.95/kg', total: 'LKR 156.00' },
+        { product: 'Green Beans', quantity: 30, unit: 'kg', price: 'LKR 3.50/kg', total: 'LKR 105.00' }
       ]
     },
     {
@@ -73,20 +78,20 @@ const OrdersManagement = () => {
       customer: 'Farm to Table Restaurants',
       buyer: 'Thomas Wright',
       date: '2023-06-20',
-      total: '$876.25',
+      total: 'LKR 876.25',
       items: 12,
       status: 'Processing',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-24',
       transport: 'Green Mile Transports',
       orderDetails: [
-        { product: 'Organic Apples', quantity: 35, unit: 'kg', price: '$3.75/kg', total: '$131.25' },
-        { product: 'Free-Range Eggs', quantity: 40, unit: 'dozen', price: '$4.50/dozen', total: '$180.00' },
-        { product: 'Honey', quantity: 15, unit: 'liter', price: '$12.00/liter', total: '$180.00' },
-        { product: 'Fresh Basil', quantity: 10, unit: 'kg', price: '$8.50/kg', total: '$85.00' },
-        { product: 'Cherry Tomatoes', quantity: 20, unit: 'kg', price: '$5.20/kg', total: '$104.00' },
-        { product: 'Zucchini', quantity: 25, unit: 'kg', price: '$3.10/kg', total: '$77.50' },
-        { product: 'Sweet Corn', quantity: 30, unit: 'dozen', price: '$3.95/dozen', total: '$118.50' }
+        { product: 'Organic Apples', quantity: 35, unit: 'kg', price: 'LKR 3.75/kg', total: 'LKR 131.25' },
+        { product: 'Free-Range Eggs', quantity: 40, unit: 'dozen', price: 'LKR 4.50/dozen', total: 'LKR 180.00' },
+        { product: 'Honey', quantity: 15, unit: 'liter', price: 'LKR 12.00/liter', total: 'LKR 180.00' },
+        { product: 'Fresh Basil', quantity: 10, unit: 'kg', price: 'LKR 8.50/kg', total: 'LKR 85.00' },
+        { product: 'Cherry Tomatoes', quantity: 20, unit: 'kg', price: 'LKR 5.20/kg', total: 'LKR 104.00' },
+        { product: 'Zucchini', quantity: 25, unit: 'kg', price: 'LKR 3.10/kg', total: 'LKR 77.50' },
+        { product: 'Sweet Corn', quantity: 30, unit: 'dozen', price: 'LKR 3.95/dozen', total: 'LKR 118.50' }
       ]
     },
     {
@@ -94,17 +99,17 @@ const OrdersManagement = () => {
       customer: 'Wholesome Foods Co-op',
       buyer: 'Samantha Green',
       date: '2023-06-19',
-      total: '$412.60',
+      total: 'LKR 412.60',
       items: 5,
       status: 'Shipped',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-22',
       transport: 'Rural Routes Delivery',
       orderDetails: [
-        { product: 'Strawberries', quantity: 20, unit: 'kg', price: '$6.80/kg', total: '$136.00' },
-        { product: 'Blueberries', quantity: 15, unit: 'kg', price: '$8.50/kg', total: '$127.50' },
-        { product: 'Blackberries', quantity: 10, unit: 'kg', price: '$7.90/kg', total: '$79.00' },
-        { product: 'Raspberries', quantity: 8, unit: 'kg', price: '$8.75/kg', total: '$70.00' }
+        { product: 'Strawberries', quantity: 20, unit: 'kg', price: 'LKR 6.80/kg', total: 'LKR 136.00' },
+        { product: 'Blueberries', quantity: 15, unit: 'kg', price: 'LKR 8.50/kg', total: 'LKR 127.50' },
+        { product: 'Blackberries', quantity: 10, unit: 'kg', price: 'LKR 7.90/kg', total: 'LKR 79.00' },
+        { product: 'Raspberries', quantity: 8, unit: 'kg', price: 'LKR 8.75/kg', total: 'LKR 70.00' }
       ]
     },
     {
@@ -112,16 +117,16 @@ const OrdersManagement = () => {
       customer: 'Green Smoothie Cafes',
       buyer: 'Daniel Brown',
       date: '2023-06-19',
-      total: '$198.75',
+      total: 'LKR 198.75',
       items: 3,
       status: 'Delivered',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-21',
       transport: 'Fast Track Logistics',
       orderDetails: [
-        { product: 'Organic Spinach', quantity: 25, unit: 'kg', price: '$4.25/kg', total: '$106.25' },
-        { product: 'Kale', quantity: 15, unit: 'kg', price: '$3.50/kg', total: '$52.50' },
-        { product: 'Fresh Mint', quantity: 10, unit: 'kg', price: '$4.00/kg', total: '$40.00' }
+        { product: 'Organic Spinach', quantity: 25, unit: 'kg', price: 'LKR 4.25/kg', total: 'LKR 106.25' },
+        { product: 'Kale', quantity: 15, unit: 'kg', price: 'LKR 3.50/kg', total: 'LKR 52.50' },
+        { product: 'Fresh Mint', quantity: 10, unit: 'kg', price: 'LKR 4.00/kg', total: 'LKR 40.00' }
       ]
     },
     {
@@ -129,23 +134,23 @@ const OrdersManagement = () => {
       customer: 'Sunrise Grocery Store',
       buyer: 'Jennifer Lee',
       date: '2023-06-18',
-      total: '$1,567.90',
+      total: 'LKR 1,567.90',
       items: 15,
       status: 'Delivered',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-20',
       transport: 'Swift Stream Logistics',
       orderDetails: [
-        { product: 'Organic Potatoes', quantity: 100, unit: 'kg', price: '$2.10/kg', total: '$210.00' },
-        { product: 'Onions', quantity: 80, unit: 'kg', price: '$1.75/kg', total: '$140.00' },
-        { product: 'Garlic', quantity: 30, unit: 'kg', price: '$5.50/kg', total: '$165.00' },
-        { product: 'Sweet Potatoes', quantity: 70, unit: 'kg', price: '$2.80/kg', total: '$196.00' },
-        { product: 'Broccoli', quantity: 50, unit: 'kg', price: '$3.40/kg', total: '$170.00' },
-        { product: 'Cauliflower', quantity: 40, unit: 'kg', price: '$3.60/kg', total: '$144.00' },
-        { product: 'Cabbage', quantity: 60, unit: 'kg', price: '$2.20/kg', total: '$132.00' },
-        { product: 'Eggplant', quantity: 35, unit: 'kg', price: '$3.30/kg', total: '$115.50' },
-        { product: 'Squash', quantity: 45, unit: 'kg', price: '$2.90/kg', total: '$130.50' },
-        { product: 'Mushrooms', quantity: 25, unit: 'kg', price: '$6.60/kg', total: '$165.00' }
+        { product: 'Organic Potatoes', quantity: 100, unit: 'kg', price: 'LKR 2.10/kg', total: 'LKR 210.00' },
+        { product: 'Onions', quantity: 80, unit: 'kg', price: 'LKR 1.75/kg', total: 'LKR 140.00' },
+        { product: 'Garlic', quantity: 30, unit: 'kg', price: 'LKR 5.50/kg', total: 'LKR 165.00' },
+        { product: 'Sweet Potatoes', quantity: 70, unit: 'kg', price: 'LKR 2.80/kg', total: 'LKR 196.00' },
+        { product: 'Broccoli', quantity: 50, unit: 'kg', price: 'LKR 3.40/kg', total: 'LKR 170.00' },
+        { product: 'Cauliflower', quantity: 40, unit: 'kg', price: 'LKR 3.60/kg', total: 'LKR 144.00' },
+        { product: 'Cabbage', quantity: 60, unit: 'kg', price: 'LKR 2.20/kg', total: 'LKR 132.00' },
+        { product: 'Eggplant', quantity: 35, unit: 'kg', price: 'LKR 3.30/kg', total: 'LKR 115.50' },
+        { product: 'Squash', quantity: 45, unit: 'kg', price: 'LKR 2.90/kg', total: 'LKR 130.50' },
+        { product: 'Mushrooms', quantity: 25, unit: 'kg', price: 'LKR 6.60/kg', total: 'LKR 165.00' }
       ]
     },
     {
@@ -153,18 +158,18 @@ const OrdersManagement = () => {
       customer: 'Fresh Foods Market',
       buyer: 'Emily Clark',
       date: '2023-06-17',
-      total: '$920.45',
+      total: 'LKR 920.45',
       items: 7,
       status: 'Cancelled',
       paymentStatus: 'Refunded',
       deliveryDate: 'N/A',
       transport: 'N/A',
       orderDetails: [
-        { product: 'Organic Apples', quantity: 60, unit: 'kg', price: '$3.75/kg', total: '$225.00' },
-        { product: 'Organic Pears', quantity: 45, unit: 'kg', price: '$4.10/kg', total: '$184.50' },
-        { product: 'Organic Bananas', quantity: 55, unit: 'kg', price: '$2.95/kg', total: '$162.25' },
-        { product: 'Organic Oranges', quantity: 50, unit: 'kg', price: '$3.50/kg', total: '$175.00' },
-        { product: 'Organic Grapes', quantity: 35, unit: 'kg', price: '$4.95/kg', total: '$173.25' }
+        { product: 'Organic Apples', quantity: 60, unit: 'kg', price: 'LKR 3.75/kg', total: 'LKR 225.00' },
+        { product: 'Organic Pears', quantity: 45, unit: 'kg', price: 'LKR 4.10/kg', total: 'LKR 184.50' },
+        { product: 'Organic Bananas', quantity: 55, unit: 'kg', price: 'LKR 2.95/kg', total: 'LKR 162.25' },
+        { product: 'Organic Oranges', quantity: 50, unit: 'kg', price: 'LKR 3.50/kg', total: 'LKR 175.00' },
+        { product: 'Organic Grapes', quantity: 35, unit: 'kg', price: 'LKR 4.95/kg', total: 'LKR 173.25' }
       ]
     },
     {
@@ -172,22 +177,22 @@ const OrdersManagement = () => {
       customer: 'Farm to Table Restaurants',
       buyer: 'Thomas Wright',
       date: '2023-06-17',
-      total: '$634.15',
+      total: 'LKR 634.15',
       items: 9,
       status: 'Delivered',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-19',
       transport: 'Local Haul Co-op',
       orderDetails: [
-        { product: 'Fresh Rosemary', quantity: 8, unit: 'kg', price: '$9.50/kg', total: '$76.00' },
-        { product: 'Fresh Thyme', quantity: 7, unit: 'kg', price: '$8.75/kg', total: '$61.25' },
-        { product: 'Fresh Sage', quantity: 5, unit: 'kg', price: '$9.20/kg', total: '$46.00' },
-        { product: 'Fresh Oregano', quantity: 6, unit: 'kg', price: '$8.90/kg', total: '$53.40' },
-        { product: 'Fresh Parsley', quantity: 10, unit: 'kg', price: '$7.50/kg', total: '$75.00' },
-        { product: 'Fresh Cilantro', quantity: 9, unit: 'kg', price: '$7.80/kg', total: '$70.20' },
-        { product: 'Fresh Chives', quantity: 7, unit: 'kg', price: '$8.60/kg', total: '$60.20' },
-        { product: 'Fresh Mint', quantity: 12, unit: 'kg', price: '$8.10/kg', total: '$97.20' },
-        { product: 'Fresh Dill', quantity: 10, unit: 'kg', price: '$9.50/kg', total: '$95.00' }
+        { product: 'Fresh Rosemary', quantity: 8, unit: 'kg', price: 'LKR 9.50/kg', total: 'LKR 76.00' },
+        { product: 'Fresh Thyme', quantity: 7, unit: 'kg', price: 'LKR 8.75/kg', total: 'LKR 61.25' },
+        { product: 'Fresh Sage', quantity: 5, unit: 'kg', price: 'LKR 9.20/kg', total: 'LKR 46.00' },
+        { product: 'Fresh Oregano', quantity: 6, unit: 'kg', price: 'LKR 8.90/kg', total: 'LKR 53.40' },
+        { product: 'Fresh Parsley', quantity: 10, unit: 'kg', price: 'LKR 7.50/kg', total: 'LKR 75.00' },
+        { product: 'Fresh Cilantro', quantity: 9, unit: 'kg', price: 'LKR 7.80/kg', total: 'LKR 70.20' },
+        { product: 'Fresh Chives', quantity: 7, unit: 'kg', price: 'LKR 8.60/kg', total: 'LKR 60.20' },
+        { product: 'Fresh Mint', quantity: 12, unit: 'kg', price: 'LKR 8.10/kg', total: 'LKR 97.20' },
+        { product: 'Fresh Dill', quantity: 10, unit: 'kg', price: 'LKR 9.50/kg', total: 'LKR 95.00' }
       ]
     },
     {
@@ -195,16 +200,16 @@ const OrdersManagement = () => {
       customer: 'Wholesome Foods Co-op',
       buyer: 'Samantha Green',
       date: '2023-06-16',
-      total: '$362.30',
+      total: 'LKR 362.30',
       items: 4,
       status: 'Delivered',
       paymentStatus: 'Paid',
       deliveryDate: '2023-06-18',
       transport: 'Rural Routes Delivery',
       orderDetails: [
-        { product: 'Local Honey', quantity: 15, unit: 'liter', price: '$12.50/liter', total: '$187.50' },
-        { product: 'Maple Syrup', quantity: 10, unit: 'liter', price: '$14.80/liter', total: '$148.00' },
-        { product: 'Beeswax', quantity: 5, unit: 'kg', price: '$5.40/kg', total: '$27.00' }
+        { product: 'Local Honey', quantity: 15, unit: 'liter', price: 'LKR 12.50/liter', total: 'LKR 187.50' },
+        { product: 'Maple Syrup', quantity: 10, unit: 'liter', price: 'LKR 14.80/liter', total: 'LKR 148.00' },
+        { product: 'Beeswax', quantity: 5, unit: 'kg', price: 'LKR 5.40/kg', total: 'LKR 27.00' }
       ]
     }
   ];
@@ -394,60 +399,74 @@ const OrdersManagement = () => {
     );
   };
 
+  // Handle view order
+  const handleViewOrder = (order) => {
+    setSelectedOrder(order);
+    setShowViewModal(true);
+  };
+  // Handle edit order
+  const handleEditOrder = (order) => {
+    setSelectedOrder(order);
+    setShowEditModal(true);
+  };
+  // Handle delete order
+  const handleDeleteOrder = (order) => {
+    setSelectedOrder(order);
+    setShowDeleteModal(true);
+  };
+
   // Table columns
   const columns = [
-    { key: 'id', header: 'Order ID' },
+    { accessor: 'id', header: 'Order ID' },
     { 
-      key: 'customer', 
+      accessor: 'customer', 
       header: 'Customer',
-      render: (value, row) => (
+      cell: (row) => (
         <div>
-          <div className="font-medium">{value}</div>
+          <div className="font-medium">{row.customer}</div>
           <div className="text-xs text-dashboard-text-light">{row.buyer}</div>
         </div>
       )
     },
-    { key: 'date', header: 'Order Date' },
+    { accessor: 'date', header: 'Order Date' },
     { 
-      key: 'total', 
+      accessor: 'total', 
       header: 'Total',
-      render: (value) => <span className="font-medium">{value}</span>
+      cell: (row) => <span className="font-medium">{row.total}</span>
     },
-    { key: 'items', header: 'Items' },
+    { accessor: 'items', header: 'Items' },
     { 
-      key: 'status', 
+      accessor: 'status', 
       header: 'Status',
-      render: (value) => <OrderStatusBadge status={value} />
+      cell: (row) => <OrderStatusBadge status={row.status} />
     },
-    { key: 'paymentStatus', header: 'Payment' },
-    { key: 'deliveryDate', header: 'Delivery Date' },
+    { accessor: 'paymentStatus', header: 'Payment' },
+    { accessor: 'deliveryDate', header: 'Delivery Date' },
     { 
-      key: 'actions', 
+      accessor: 'actions', 
       header: 'Actions',
-      render: (_, row) => (
+      cell: (row) => (
         <div className="flex space-x-2">
-          <button 
-            className={`text-blue-600 hover:text-blue-800 ${expandedOrderId === row.id ? 'text-blue-800' : ''}`}
-            title={expandedOrderId === row.id ? "Hide Details" : "View Details"}
-            onClick={(e) => {
-              e.stopPropagation();
-              setExpandedOrderId(expandedOrderId === row.id ? null : row.id);
-            }}
+          <button
+            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+            title="View Details"
+            onClick={e => { e.stopPropagation(); handleViewOrder(row); }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
           </button>
-          <button className="text-green-600 hover:text-green-800" title="Edit Order">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+          <button
+            className="p-1.5 text-green-600 hover:bg-green-50 rounded-md transition-colors"
+            title="Edit Order"
+            onClick={e => { e.stopPropagation(); handleEditOrder(row); }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
           </button>
-          <button className="text-indigo-600 hover:text-indigo-800" title="Print Invoice">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-            </svg>
+          <button
+            className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+            title="Delete Order"
+            onClick={e => { e.stopPropagation(); handleDeleteOrder(row); }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
       )
@@ -646,6 +665,65 @@ const OrdersManagement = () => {
           expandedRowId={expandedOrderId}
         />
       </Card>
+      {/* View Order Modal */}
+      {showViewModal && selectedOrder && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowViewModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-lg shadow-2xl">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Order Details</h3>
+                <button onClick={() => setShowViewModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <OrderDetails order={selectedOrder} />
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Edit Order Modal */}
+      {showEditModal && selectedOrder && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowEditModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-lg shadow-2xl">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Edit Order</h3>
+                <button onClick={() => setShowEditModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              {/* You can add an edit form here if needed */}
+              <OrderDetails order={selectedOrder} />
+              <div className="mt-4 flex justify-end">
+                <button onClick={() => setShowEditModal(false)} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Delete Order Modal */}
+      {showDeleteModal && selectedOrder && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-2xl">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-red-600">Delete Order</h3>
+                <button onClick={() => setShowDeleteModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <p className="mb-6 text-gray-700">Are you sure you want to delete order <span className="font-semibold">{selectedOrder.id}</span>? This action cannot be undone.</p>
+              <div className="flex space-x-3">
+                <button onClick={() => setShowDeleteModal(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">Cancel</button>
+                <button onClick={() => { setShowDeleteModal(false); /* Add delete logic here */ }} className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition-colors">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };
