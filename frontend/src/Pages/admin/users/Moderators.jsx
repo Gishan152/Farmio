@@ -8,6 +8,21 @@ const ModeratorIcon = () => (
   </svg>
 );
 
+// Sample activity logs
+const activityLogs = {
+  1: [
+    { date: "2023-06-10 13:45", action: "Content review", details: "Approved 12 product listings" },
+    { date: "2023-06-10 10:22", action: "User report", details: "Handled complaint against farmer ID F-1023" },
+    { date: "2023-06-09 15:30", action: "Content moderation", details: "Removed 3 inappropriate comments" },
+    { date: "2023-06-08 11:15", action: "Support", details: "Responded to 8 user inquiries" }
+  ],
+  2: [
+    { date: "2023-06-09 14:10", action: "Product review", details: "Verified 15 product specifications" },
+    { date: "2023-06-08 09:45", action: "Quality control", details: "Flagged 3 products for review" },
+    { date: "2023-06-07 16:20", action: "Product verification", details: "Approved 7 new product listings" }
+  ]
+};
+
 const ModeratorManagement = () => {
   // State for modals
   const [showAddModal, setShowAddModal] = useState(false);
@@ -44,21 +59,6 @@ const ModeratorManagement = () => {
     reports: { view: false },
     content: { view: false, edit: false, delete: false }
   });
-
-  // Sample activity logs
-  const activityLogs = {
-    1: [
-      { date: "2023-06-10 13:45", action: "Content review", details: "Approved 12 product listings" },
-      { date: "2023-06-10 10:22", action: "User report", details: "Handled complaint against farmer ID F-1023" },
-      { date: "2023-06-09 15:30", action: "Content moderation", details: "Removed 3 inappropriate comments" },
-      { date: "2023-06-08 11:15", action: "Support", details: "Responded to 8 user inquiries" }
-    ],
-    2: [
-      { date: "2023-06-09 14:10", action: "Product review", details: "Verified 15 product specifications" },
-      { date: "2023-06-08 09:45", action: "Quality control", details: "Flagged 3 products for review" },
-      { date: "2023-06-07 16:20", action: "Product verification", details: "Approved 7 new product listings" }
-    ]
-  };
 
   // Generate random password
   const generatePassword = () => {
@@ -212,9 +212,8 @@ const ModeratorManagement = () => {
       accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-          row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
           {row.status}
         </span>
       )

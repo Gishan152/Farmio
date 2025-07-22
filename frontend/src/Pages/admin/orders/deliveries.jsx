@@ -30,6 +30,125 @@ const MapIcon = () => (
   </svg>
 );
 
+// Sample delivery data
+const deliveries = [
+  {
+    id: 'DEL-5023',
+    orderId: 'ORD-10043',
+    customer: 'Wholesome Foods Co-op',
+    customerLocation: '123 Green St, Farmville',
+    driver: 'John Smith',
+    transport: 'Rural Routes Delivery',
+    vehicle: 'TRK-104 (Ford F-150)',
+    scheduledDate: '2023-06-22',
+    estimatedArrival: '10:30 AM',
+    status: 'In Transit',
+    trackingLink: 'https://track.ruralroutes.com/DEL-5023',
+    orderItems: [
+      { product: 'Strawberries', quantity: '20 kg' },
+      { product: 'Blueberries', quantity: '15 kg' },
+      { product: 'Blackberries', quantity: '10 kg' },
+      { product: 'Raspberries', quantity: '8 kg' }
+    ],
+    notes: 'Customer requested delivery at back entrance.'
+  },
+  {
+    id: 'DEL-5022',
+    orderId: 'ORD-10042',
+    customer: 'Green Smoothie Cafes',
+    customerLocation: '456 Orchard Ave, Greenfield',
+    driver: 'Maria Rodriguez',
+    transport: 'Fast Track Logistics',
+    vehicle: 'TRK-078 (Mercedes Sprinter)',
+    scheduledDate: '2023-06-21',
+    estimatedArrival: '9:15 AM',
+    status: 'Delivered',
+    trackingLink: 'https://track.fasttrack.com/DEL-5022',
+    orderItems: [
+      { product: 'Organic Spinach', quantity: '25 kg' },
+      { product: 'Kale', quantity: '15 kg' },
+      { product: 'Fresh Mint', quantity: '10 kg' }
+    ],
+    notes: 'Delivery confirmed and signed by manager Alex.'
+  },
+  {
+    id: 'DEL-5021',
+    orderId: 'ORD-10041',
+    customer: 'Sunrise Grocery Store',
+    customerLocation: '789 Market St, Harvest Hills',
+    driver: 'David Wilson',
+    transport: 'Swift Stream Logistics',
+    vehicle: 'TRK-112 (Isuzu NPR)',
+    scheduledDate: '2023-06-20',
+    estimatedArrival: '8:45 AM',
+    status: 'Delivered',
+    trackingLink: 'https://track.swiftstream.com/DEL-5021',
+    orderItems: [
+      { product: 'Various Vegetables', quantity: '15 items, 500 kg total' }
+    ],
+    notes: 'Delivery completed ahead of schedule. All items accepted.'
+  },
+  {
+    id: 'DEL-5024',
+    orderId: 'ORD-10044',
+    customer: 'Farm to Table Restaurants',
+    customerLocation: '321 Culinary Blvd, Tastytown',
+    driver: 'Robert Chen',
+    transport: 'Green Mile Transports',
+    vehicle: 'TRK-089 (Refrigerated Van)',
+    scheduledDate: '2023-06-24',
+    estimatedArrival: '11:00 AM',
+    status: 'Scheduled',
+    trackingLink: 'https://track.greenmile.com/DEL-5024',
+    orderItems: [
+      { product: 'Various Fresh Products', quantity: '7 items, 185 kg total' }
+    ],
+    notes: 'Temperature-controlled delivery required. Call customer 15 minutes before arrival.'
+  },
+  {
+    id: 'DEL-5025',
+    orderId: 'ORD-10045',
+    customer: 'Fresh Foods Market',
+    customerLocation: '567 Produce Lane, Freshville',
+    driver: 'To be assigned',
+    transport: 'Fast Track Logistics',
+    vehicle: 'Not assigned yet',
+    scheduledDate: '2023-06-25',
+    estimatedArrival: 'TBD',
+    status: 'Preparing',
+    trackingLink: 'https://track.fasttrack.com/DEL-5025',
+    orderItems: [
+      { product: 'Various Produce', quantity: '8 items, 395 kg total' }
+    ],
+    notes: 'Large order requires special handling. Waiting for warehouse confirmation.'
+  }
+];
+
+// Filter options
+const filters = [
+  {
+    name: 'transport',
+    label: 'Transport Provider',
+    options: [
+      { label: 'Fast Track Logistics', value: 'Fast Track Logistics' },
+      { label: 'Green Mile Transports', value: 'Green Mile Transports' },
+      { label: 'Rural Routes Delivery', value: 'Rural Routes Delivery' },
+      { label: 'Swift Stream Logistics', value: 'Swift Stream Logistics' }
+    ]
+  },
+  {
+    name: 'scheduledDate',
+    label: 'Delivery Date',
+    options: [
+      { label: '2023-06-20', value: '2023-06-20' },
+      { label: '2023-06-21', value: '2023-06-21' },
+      { label: '2023-06-22', value: '2023-06-22' },
+      { label: '2023-06-24', value: '2023-06-24' },
+      { label: '2023-06-25', value: '2023-06-25' }
+    ]
+  }
+];
+
 const Deliveries = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,100 +157,6 @@ const Deliveries = () => {
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [expandedDeliveryId, setExpandedDeliveryId] = useState(null);
   const [selectedTab, setSelectedTab] = useState('all');
-
-  // Sample delivery data
-  const deliveries = [
-    {
-      id: 'DEL-5023',
-      orderId: 'ORD-10043',
-      customer: 'Wholesome Foods Co-op',
-      customerLocation: '123 Green St, Farmville',
-      driver: 'John Smith',
-      transport: 'Rural Routes Delivery',
-      vehicle: 'TRK-104 (Ford F-150)',
-      scheduledDate: '2023-06-22',
-      estimatedArrival: '10:30 AM',
-      status: 'In Transit',
-      trackingLink: 'https://track.ruralroutes.com/DEL-5023',
-      orderItems: [
-        { product: 'Strawberries', quantity: '20 kg' },
-        { product: 'Blueberries', quantity: '15 kg' },
-        { product: 'Blackberries', quantity: '10 kg' },
-        { product: 'Raspberries', quantity: '8 kg' }
-      ],
-      notes: 'Customer requested delivery at back entrance.'
-    },
-    {
-      id: 'DEL-5022',
-      orderId: 'ORD-10042',
-      customer: 'Green Smoothie Cafes',
-      customerLocation: '456 Orchard Ave, Greenfield',
-      driver: 'Maria Rodriguez',
-      transport: 'Fast Track Logistics',
-      vehicle: 'TRK-078 (Mercedes Sprinter)',
-      scheduledDate: '2023-06-21',
-      estimatedArrival: '9:15 AM',
-      status: 'Delivered',
-      trackingLink: 'https://track.fasttrack.com/DEL-5022',
-      orderItems: [
-        { product: 'Organic Spinach', quantity: '25 kg' },
-        { product: 'Kale', quantity: '15 kg' },
-        { product: 'Fresh Mint', quantity: '10 kg' }
-      ],
-      notes: 'Delivery confirmed and signed by manager Alex.'
-    },
-    {
-      id: 'DEL-5021',
-      orderId: 'ORD-10041',
-      customer: 'Sunrise Grocery Store',
-      customerLocation: '789 Market St, Harvest Hills',
-      driver: 'David Wilson',
-      transport: 'Swift Stream Logistics',
-      vehicle: 'TRK-112 (Isuzu NPR)',
-      scheduledDate: '2023-06-20',
-      estimatedArrival: '8:45 AM',
-      status: 'Delivered',
-      trackingLink: 'https://track.swiftstream.com/DEL-5021',
-      orderItems: [
-        { product: 'Various Vegetables', quantity: '15 items, 500 kg total' }
-      ],
-      notes: 'Delivery completed ahead of schedule. All items accepted.'
-    },
-    {
-      id: 'DEL-5024',
-      orderId: 'ORD-10044',
-      customer: 'Farm to Table Restaurants',
-      customerLocation: '321 Culinary Blvd, Tastytown',
-      driver: 'Robert Chen',
-      transport: 'Green Mile Transports',
-      vehicle: 'TRK-089 (Refrigerated Van)',
-      scheduledDate: '2023-06-24',
-      estimatedArrival: '11:00 AM',
-      status: 'Scheduled',
-      trackingLink: 'https://track.greenmile.com/DEL-5024',
-      orderItems: [
-        { product: 'Various Fresh Products', quantity: '7 items, 185 kg total' }
-      ],
-      notes: 'Temperature-controlled delivery required. Call customer 15 minutes before arrival.'
-    },
-    {
-      id: 'DEL-5025',
-      orderId: 'ORD-10045',
-      customer: 'Fresh Foods Market',
-      customerLocation: '567 Produce Lane, Freshville',
-      driver: 'To be assigned',
-      transport: 'Fast Track Logistics',
-      vehicle: 'Not assigned yet',
-      scheduledDate: '2023-06-25',
-      estimatedArrival: 'TBD',
-      status: 'Preparing',
-      trackingLink: 'https://track.fasttrack.com/DEL-5025',
-      orderItems: [
-        { product: 'Various Produce', quantity: '8 items, 395 kg total' }
-      ],
-      notes: 'Large order requires special handling. Waiting for warehouse confirmation.'
-    }
-  ];
 
   // Simulate loading
   useEffect(() => {
@@ -146,9 +171,9 @@ const Deliveries = () => {
   // Handle search
   useEffect(() => {
     if (!deliveries) return;
-    
+
     let results = deliveries.filter(delivery => {
-      return Object.keys(delivery).some(key => 
+      return Object.keys(delivery).some(key =>
         typeof delivery[key] === 'string' && delivery[key].toLowerCase().includes(searchTerm.toLowerCase())
       );
     });
@@ -157,7 +182,7 @@ const Deliveries = () => {
     if (selectedTab !== 'all') {
       results = results.filter(delivery => delivery.status.toLowerCase().replace(' ', '-') === selectedTab);
     }
-    
+
     setFilteredData(results);
   }, [searchTerm, selectedTab, deliveries]);
 
@@ -174,31 +199,6 @@ const Deliveries = () => {
   };
 
   const statusCounts = getStatusCounts();
-
-  // Filter options
-  const filters = [
-    {
-      name: 'transport',
-      label: 'Transport Provider',
-      options: [
-        { label: 'Fast Track Logistics', value: 'Fast Track Logistics' },
-        { label: 'Green Mile Transports', value: 'Green Mile Transports' },
-        { label: 'Rural Routes Delivery', value: 'Rural Routes Delivery' },
-        { label: 'Swift Stream Logistics', value: 'Swift Stream Logistics' }
-      ]
-    },
-    {
-      name: 'scheduledDate',
-      label: 'Delivery Date',
-      options: [
-        { label: '2023-06-20', value: '2023-06-20' },
-        { label: '2023-06-21', value: '2023-06-21' },
-        { label: '2023-06-22', value: '2023-06-22' },
-        { label: '2023-06-24', value: '2023-06-24' },
-        { label: '2023-06-25', value: '2023-06-25' }
-      ]
-    }
-  ];
 
   // Handle filter changes
   const handleFilterChange = (filterName, value) => {
@@ -218,18 +218,18 @@ const Deliveries = () => {
       setFilteredData(filtered);
       return;
     }
-    
+
     let results = deliveries.filter(delivery => {
       const statusFilter = selectedTab === 'all' || delivery.status.toLowerCase().replace(' ', '-') === selectedTab;
-      
+
       const otherFilters = Object.entries(selectedFilters).every(([key, value]) => {
         if (!value || value === 'all') return true;
         return delivery[key] === value;
       });
-      
+
       return statusFilter && otherFilters;
     });
-    
+
     setFilteredData(results);
   }, [selectedFilters, selectedTab, deliveries]);
 
@@ -241,7 +241,7 @@ const Deliveries = () => {
       'Scheduled': 'bg-purple-100 text-purple-800',
       'Preparing': 'bg-pastel-yellow text-yellow-800',
     };
-    
+
     return (
       <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status] || 'bg-gray-200 text-gray-800'}`}>
         {status}
@@ -263,7 +263,7 @@ const Deliveries = () => {
             <DeliveryStatusBadge status={delivery.status} />
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <h5 className="text-xs font-medium text-gray-500 mb-2">DELIVERY INFO</h5>
@@ -291,11 +291,11 @@ const Deliveries = () => {
                 </tr>
               </tbody>
             </table>
-            
+
             {delivery.trackingLink && (
-              <a 
-                href={delivery.trackingLink} 
-                target="_blank" 
+              <a
+                href={delivery.trackingLink}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="mt-3 inline-flex items-center px-3 py-1 text-sm text-white bg-farmio rounded-md hover:bg-green-600"
               >
@@ -304,7 +304,7 @@ const Deliveries = () => {
               </a>
             )}
           </div>
-          
+
           <div>
             <h5 className="text-xs font-medium text-gray-500 mb-2">ORDER ITEMS</h5>
             <table className="min-w-full text-sm">
@@ -323,7 +323,7 @@ const Deliveries = () => {
                 ))}
               </tbody>
             </table>
-            
+
             <div className="mt-3">
               <p className="text-xs text-gray-500">Delivery Address:</p>
               <p className="text-sm font-medium">{delivery.customerLocation}</p>
@@ -358,7 +358,7 @@ const Deliveries = () => {
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className={`text-blue-600 hover:text-blue-800 ${expandedDeliveryId === row.id ? 'text-blue-800' : ''}`}
             title={expandedDeliveryId === row.id ? "Hide Details" : "View Details"}
             onClick={(e) => {
@@ -372,9 +372,9 @@ const Deliveries = () => {
             </svg>
           </button>
           {row.trackingLink && (
-            <a 
+            <a
               href={row.trackingLink}
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
               className="text-green-600 hover:text-green-800"
               title="Track Delivery"
@@ -400,7 +400,7 @@ const Deliveries = () => {
     >
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard 
+        <StatCard
           title="Total Deliveries"
           value={statusCounts.all.toString()}
           subtitle="This month"
@@ -408,7 +408,7 @@ const Deliveries = () => {
           color="blue"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="In Transit"
           value={statusCounts['in-transit'].toString()}
           subtitle="On the road"
@@ -416,7 +416,7 @@ const Deliveries = () => {
           color="blue"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Scheduled"
           value={statusCounts.scheduled.toString()}
           subtitle="Coming up"
@@ -424,7 +424,7 @@ const Deliveries = () => {
           color="purple"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Delivered"
           value={statusCounts.delivered.toString()}
           subtitle="Completed"
@@ -436,53 +436,48 @@ const Deliveries = () => {
 
       {/* Tabs */}
       <div className="flex flex-wrap border-b border-dashboard-border mb-6">
-        <button 
+        <button
           onClick={() => setSelectedTab('all')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
-            selectedTab === 'all' 
-              ? 'border-farmio text-farmio' 
-              : 'border-transparent text-dashboard-text-secondary hover:text-dashboard-text-primary'
-          }`}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${selectedTab === 'all'
+            ? 'border-farmio text-farmio'
+            : 'border-transparent text-dashboard-text-secondary hover:text-dashboard-text-primary'
+            }`}
         >
           All Deliveries ({statusCounts.all})
         </button>
-        <button 
+        <button
           onClick={() => setSelectedTab('in-transit')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
-            selectedTab === 'in-transit' 
-              ? 'border-farmio text-farmio' 
-              : 'border-transparent text-dashboard-text-secondary hover:text-dashboard-text-primary'
-          }`}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${selectedTab === 'in-transit'
+            ? 'border-farmio text-farmio'
+            : 'border-transparent text-dashboard-text-secondary hover:text-dashboard-text-primary'
+            }`}
         >
           In Transit ({statusCounts['in-transit']})
         </button>
-        <button 
+        <button
           onClick={() => setSelectedTab('scheduled')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
-            selectedTab === 'scheduled' 
-              ? 'border-farmio text-farmio' 
-              : 'border-transparent text-dashboard-text-secondary hover:text-dashboard-text-primary'
-          }`}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${selectedTab === 'scheduled'
+            ? 'border-farmio text-farmio'
+            : 'border-transparent text-dashboard-text-secondary hover:text-dashboard-text-primary'
+            }`}
         >
           Scheduled ({statusCounts.scheduled})
         </button>
-        <button 
+        <button
           onClick={() => setSelectedTab('preparing')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
-            selectedTab === 'preparing' 
-              ? 'border-farmio text-farmio' 
-              : 'border-transparent text-dashboard-text-secondary hover:text-dashboard-text-primary'
-          }`}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${selectedTab === 'preparing'
+            ? 'border-farmio text-farmio'
+            : 'border-transparent text-dashboard-text-secondary hover:text-dashboard-text-primary'
+            }`}
         >
           Preparing ({statusCounts.preparing})
         </button>
-        <button 
+        <button
           onClick={() => setSelectedTab('delivered')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
-            selectedTab === 'delivered' 
-              ? 'border-farmio text-farmio' 
-              : 'border-transparent text-dashboard-text-secondary hover:text-dashboard-text-primary'
-          }`}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${selectedTab === 'delivered'
+            ? 'border-farmio text-farmio'
+            : 'border-transparent text-dashboard-text-secondary hover:text-dashboard-text-primary'
+            }`}
         >
           Delivered ({statusCounts.delivered})
         </button>
@@ -506,7 +501,7 @@ const Deliveries = () => {
               </svg>
             </span>
           </div>
-          
+
           {/* Filter Button */}
           <button
             className="flex items-center text-sm py-2 px-4 rounded-md border border-dashboard-border hover:bg-gray-100"
@@ -546,9 +541,9 @@ const Deliveries = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-4 flex justify-end space-x-2">
-              <button 
+              <button
                 className="px-3 py-1 text-sm text-gray-600 border border-dashboard-border rounded-md hover:bg-gray-100"
                 onClick={() => setSelectedFilters({})}
               >
@@ -561,14 +556,14 @@ const Deliveries = () => {
 
       {/* Deliveries Table */}
       <Card
-        title={`${selectedTab === 'all' ? 'All Deliveries' : 
-                selectedTab === 'in-transit' ? 'In Transit Deliveries' :
-                selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1) + ' Deliveries'}`}
+        title={`${selectedTab === 'all' ? 'All Deliveries' :
+          selectedTab === 'in-transit' ? 'In Transit Deliveries' :
+            selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1) + ' Deliveries'}`}
         color={
-          selectedTab === 'in-transit' ? 'blue' : 
-          selectedTab === 'scheduled' ? 'purple' : 
-          selectedTab === 'preparing' ? 'yellow' : 
-          selectedTab === 'delivered' ? 'green' : 'blue'
+          selectedTab === 'in-transit' ? 'blue' :
+            selectedTab === 'scheduled' ? 'purple' :
+              selectedTab === 'preparing' ? 'yellow' :
+                selectedTab === 'delivered' ? 'green' : 'blue'
         }
         icon={<TruckIcon />}
         noPadding

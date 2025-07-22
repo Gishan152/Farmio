@@ -24,6 +24,120 @@ const FilterIcon = () => (
   </svg>
 );
 
+const routes = [
+  {
+    id: 'RT-1001',
+    name: 'Farmville to Central Market',
+    origin: 'Farmville Production Hub',
+    destination: 'Central City Market',
+    distance: '45 km',
+    estimatedTime: '1h 15m',
+    transportProvider: 'Green Mile Transports',
+    activeDrivers: 5,
+    averageLoad: '2.5 tons',
+    status: 'Active',
+    frequency: 'Daily',
+    popularProducts: ['Tomatoes', 'Lettuce', 'Carrots'],
+    routeDetails: [
+      { checkpoint: 'Farmville Loading Bay', time: '06:00 AM', activities: ['Loading', 'Quality Check'] },
+      { checkpoint: 'Highway 101 Junction', time: '06:45 AM', activities: ['Transit'] },
+      { checkpoint: 'Riverside Checkpoint', time: '07:15 AM', activities: ['Document Verification'] },
+      { checkpoint: 'Central City Entry', time: '07:30 AM', activities: ['Transit'] },
+      { checkpoint: 'Central Market Unloading', time: '07:45 AM', activities: ['Unloading', 'Delivery Confirmation'] }
+    ],
+    mapLink: 'https://maps.example.com/route/RT-1001'
+  },
+  {
+    id: 'RT-1002',
+    name: 'Greenfield to Urban Restaurants',
+    origin: 'Greenfield Farms Collective',
+    destination: 'Urban Restaurant District',
+    distance: '65 km',
+    estimatedTime: '1h 45m',
+    transportProvider: 'Fast Track Logistics',
+    activeDrivers: 3,
+    averageLoad: '1.8 tons',
+    status: 'Active',
+    frequency: 'Mon-Wed-Fri',
+    popularProducts: ['Organic Vegetables', 'Fresh Herbs', 'Specialty Greens'],
+    routeDetails: [
+      { checkpoint: 'Greenfield Collection Center', time: '05:30 AM', activities: ['Loading', 'Temperature Check'] },
+      { checkpoint: 'Highway 202 Junction', time: '06:15 AM', activities: ['Transit'] },
+      { checkpoint: 'Mountain Pass', time: '06:45 AM', activities: ['Rest Stop'] },
+      { checkpoint: 'Urban Perimeter', time: '07:15 AM', activities: ['Traffic Management'] },
+      { checkpoint: 'Restaurant District Hub', time: '07:45 AM', activities: ['Unloading', 'Delivery Confirmation'] }
+    ],
+    mapLink: 'https://maps.example.com/route/RT-1002'
+  },
+  {
+    id: 'RT-1003',
+    name: 'Orchard Hills to Processing Plant',
+    origin: 'Orchard Hills Fruit Farms',
+    destination: 'Valley Processing Facility',
+    distance: '30 km',
+    estimatedTime: '50m',
+    transportProvider: 'Rural Routes Delivery',
+    activeDrivers: 2,
+    averageLoad: '3.2 tons',
+    status: 'Inactive',
+    frequency: 'Seasonal (Summer)',
+    popularProducts: ['Apples', 'Pears', 'Peaches'],
+    routeDetails: [
+      { checkpoint: 'Orchard Collection Point', time: '07:00 AM', activities: ['Loading', 'Quality Inspection'] },
+      { checkpoint: 'Country Road 15', time: '07:30 AM', activities: ['Transit'] },
+      { checkpoint: 'Valley Entrance', time: '07:45 AM', activities: ['Transit'] },
+      { checkpoint: 'Processing Plant Delivery', time: '08:00 AM', activities: ['Unloading', 'Weight Verification'] }
+    ],
+    mapLink: 'https://maps.example.com/route/RT-1003'
+  },
+  {
+    id: 'RT-1004',
+    name: 'Riverside Farms to Wholesale Market',
+    origin: 'Riverside Agricultural Cooperative',
+    destination: 'Metropolitan Wholesale Market',
+    distance: '80 km',
+    estimatedTime: '2h 15m',
+    transportProvider: 'Swift Stream Logistics',
+    activeDrivers: 4,
+    averageLoad: '5.5 tons',
+    status: 'Active',
+    frequency: 'Twice Weekly',
+    popularProducts: ['Mixed Vegetables', 'Root Crops', 'Leafy Greens'],
+    routeDetails: [
+      { checkpoint: 'Riverside Collection Center', time: '04:00 AM', activities: ['Loading', 'Documentation'] },
+      { checkpoint: 'Highway 405 Entrance', time: '04:45 AM', activities: ['Transit'] },
+      { checkpoint: 'Rest Area 27', time: '05:45 AM', activities: ['Driver Break', 'Vehicle Inspection'] },
+      { checkpoint: 'Metropolitan Bypass', time: '06:15 AM', activities: ['Transit'] },
+      { checkpoint: 'Wholesale Market Entry', time: '06:45 AM', activities: ['Queue for Unloading'] },
+      { checkpoint: 'Wholesale Market Bay 12', time: '07:15 AM', activities: ['Unloading', 'Quality Verification'] }
+    ],
+    mapLink: 'https://maps.example.com/route/RT-1004'
+  },
+  {
+    id: 'RT-1005',
+    name: 'Highland Dairy to Urban Markets',
+    origin: 'Highland Dairy Cooperative',
+    destination: 'Multiple Urban Markets',
+    distance: '55 km',
+    estimatedTime: '1h 30m',
+    transportProvider: 'Cool Chain Logistics',
+    activeDrivers: 6,
+    averageLoad: '2.0 tons',
+    status: 'Active',
+    frequency: 'Daily',
+    popularProducts: ['Fresh Milk', 'Yogurt', 'Cheese'],
+    routeDetails: [
+      { checkpoint: 'Highland Dairy Cold Storage', time: '03:30 AM', activities: ['Loading', 'Temperature Verification'] },
+      { checkpoint: 'Mountain Highway', time: '04:00 AM', activities: ['Transit'] },
+      { checkpoint: 'Valley Junction', time: '04:30 AM', activities: ['Transit'] },
+      { checkpoint: 'Urban Market 1', time: '04:45 AM', activities: ['Partial Unloading'] },
+      { checkpoint: 'Urban Market 2', time: '05:15 AM', activities: ['Partial Unloading'] },
+      { checkpoint: 'Urban Market 3', time: '05:45 AM', activities: ['Final Unloading'] }
+    ],
+    mapLink: 'https://maps.example.com/route/RT-1005'
+  }
+];
+
 const TransportRoutes = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,121 +145,6 @@ const TransportRoutes = () => {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [expandedRouteId, setExpandedRouteId] = useState(null);
-
-  // Sample routes data
-  const routes = [
-    {
-      id: 'RT-1001',
-      name: 'Farmville to Central Market',
-      origin: 'Farmville Production Hub',
-      destination: 'Central City Market',
-      distance: '45 km',
-      estimatedTime: '1h 15m',
-      transportProvider: 'Green Mile Transports',
-      activeDrivers: 5,
-      averageLoad: '2.5 tons',
-      status: 'Active',
-      frequency: 'Daily',
-      popularProducts: ['Tomatoes', 'Lettuce', 'Carrots'],
-      routeDetails: [
-        { checkpoint: 'Farmville Loading Bay', time: '06:00 AM', activities: ['Loading', 'Quality Check'] },
-        { checkpoint: 'Highway 101 Junction', time: '06:45 AM', activities: ['Transit'] },
-        { checkpoint: 'Riverside Checkpoint', time: '07:15 AM', activities: ['Document Verification'] },
-        { checkpoint: 'Central City Entry', time: '07:30 AM', activities: ['Transit'] },
-        { checkpoint: 'Central Market Unloading', time: '07:45 AM', activities: ['Unloading', 'Delivery Confirmation'] }
-      ],
-      mapLink: 'https://maps.example.com/route/RT-1001'
-    },
-    {
-      id: 'RT-1002',
-      name: 'Greenfield to Urban Restaurants',
-      origin: 'Greenfield Farms Collective',
-      destination: 'Urban Restaurant District',
-      distance: '65 km',
-      estimatedTime: '1h 45m',
-      transportProvider: 'Fast Track Logistics',
-      activeDrivers: 3,
-      averageLoad: '1.8 tons',
-      status: 'Active',
-      frequency: 'Mon-Wed-Fri',
-      popularProducts: ['Organic Vegetables', 'Fresh Herbs', 'Specialty Greens'],
-      routeDetails: [
-        { checkpoint: 'Greenfield Collection Center', time: '05:30 AM', activities: ['Loading', 'Temperature Check'] },
-        { checkpoint: 'Highway 202 Junction', time: '06:15 AM', activities: ['Transit'] },
-        { checkpoint: 'Mountain Pass', time: '06:45 AM', activities: ['Rest Stop'] },
-        { checkpoint: 'Urban Perimeter', time: '07:15 AM', activities: ['Traffic Management'] },
-        { checkpoint: 'Restaurant District Hub', time: '07:45 AM', activities: ['Unloading', 'Delivery Confirmation'] }
-      ],
-      mapLink: 'https://maps.example.com/route/RT-1002'
-    },
-    {
-      id: 'RT-1003',
-      name: 'Orchard Hills to Processing Plant',
-      origin: 'Orchard Hills Fruit Farms',
-      destination: 'Valley Processing Facility',
-      distance: '30 km',
-      estimatedTime: '50m',
-      transportProvider: 'Rural Routes Delivery',
-      activeDrivers: 2,
-      averageLoad: '3.2 tons',
-      status: 'Inactive',
-      frequency: 'Seasonal (Summer)',
-      popularProducts: ['Apples', 'Pears', 'Peaches'],
-      routeDetails: [
-        { checkpoint: 'Orchard Collection Point', time: '07:00 AM', activities: ['Loading', 'Quality Inspection'] },
-        { checkpoint: 'Country Road 15', time: '07:30 AM', activities: ['Transit'] },
-        { checkpoint: 'Valley Entrance', time: '07:45 AM', activities: ['Transit'] },
-        { checkpoint: 'Processing Plant Delivery', time: '08:00 AM', activities: ['Unloading', 'Weight Verification'] }
-      ],
-      mapLink: 'https://maps.example.com/route/RT-1003'
-    },
-    {
-      id: 'RT-1004',
-      name: 'Riverside Farms to Wholesale Market',
-      origin: 'Riverside Agricultural Cooperative',
-      destination: 'Metropolitan Wholesale Market',
-      distance: '80 km',
-      estimatedTime: '2h 15m',
-      transportProvider: 'Swift Stream Logistics',
-      activeDrivers: 4,
-      averageLoad: '5.5 tons',
-      status: 'Active',
-      frequency: 'Twice Weekly',
-      popularProducts: ['Mixed Vegetables', 'Root Crops', 'Leafy Greens'],
-      routeDetails: [
-        { checkpoint: 'Riverside Collection Center', time: '04:00 AM', activities: ['Loading', 'Documentation'] },
-        { checkpoint: 'Highway 405 Entrance', time: '04:45 AM', activities: ['Transit'] },
-        { checkpoint: 'Rest Area 27', time: '05:45 AM', activities: ['Driver Break', 'Vehicle Inspection'] },
-        { checkpoint: 'Metropolitan Bypass', time: '06:15 AM', activities: ['Transit'] },
-        { checkpoint: 'Wholesale Market Entry', time: '06:45 AM', activities: ['Queue for Unloading'] },
-        { checkpoint: 'Wholesale Market Bay 12', time: '07:15 AM', activities: ['Unloading', 'Quality Verification'] }
-      ],
-      mapLink: 'https://maps.example.com/route/RT-1004'
-    },
-    {
-      id: 'RT-1005',
-      name: 'Highland Dairy to Urban Markets',
-      origin: 'Highland Dairy Cooperative',
-      destination: 'Multiple Urban Markets',
-      distance: '55 km',
-      estimatedTime: '1h 30m',
-      transportProvider: 'Cool Chain Logistics',
-      activeDrivers: 6,
-      averageLoad: '2.0 tons',
-      status: 'Active',
-      frequency: 'Daily',
-      popularProducts: ['Fresh Milk', 'Yogurt', 'Cheese'],
-      routeDetails: [
-        { checkpoint: 'Highland Dairy Cold Storage', time: '03:30 AM', activities: ['Loading', 'Temperature Verification'] },
-        { checkpoint: 'Mountain Highway', time: '04:00 AM', activities: ['Transit'] },
-        { checkpoint: 'Valley Junction', time: '04:30 AM', activities: ['Transit'] },
-        { checkpoint: 'Urban Market 1', time: '04:45 AM', activities: ['Partial Unloading'] },
-        { checkpoint: 'Urban Market 2', time: '05:15 AM', activities: ['Partial Unloading'] },
-        { checkpoint: 'Urban Market 3', time: '05:45 AM', activities: ['Final Unloading'] }
-      ],
-      mapLink: 'https://maps.example.com/route/RT-1005'
-    }
-  ];
 
   // Simulate loading
   useEffect(() => {
@@ -160,16 +159,16 @@ const TransportRoutes = () => {
   // Handle search
   useEffect(() => {
     if (!routes) return;
-    
+
     let results = routes.filter(route => {
-      return Object.keys(route).some(key => 
+      return Object.keys(route).some(key =>
         typeof route[key] === 'string' && route[key].toLowerCase().includes(searchTerm.toLowerCase())
-      ) || 
-      (route.popularProducts && route.popularProducts.some(product => 
-        product.toLowerCase().includes(searchTerm.toLowerCase())
-      ));
+      ) ||
+        (route.popularProducts && route.popularProducts.some(product =>
+          product.toLowerCase().includes(searchTerm.toLowerCase())
+        ));
     });
-    
+
     setFilteredData(results);
   }, [searchTerm, routes]);
 
@@ -220,14 +219,14 @@ const TransportRoutes = () => {
       setFilteredData(routes);
       return;
     }
-    
+
     let results = routes.filter(route => {
       return Object.entries(selectedFilters).every(([key, value]) => {
         if (!value || value === 'all') return true;
         return route[key] === value;
       });
     });
-    
+
     setFilteredData(results);
   }, [selectedFilters, routes]);
 
@@ -237,7 +236,7 @@ const TransportRoutes = () => {
       'Active': 'bg-pastel-green text-green-800',
       'Inactive': 'bg-pastel-red text-red-800',
     };
-    
+
     return (
       <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status] || 'bg-gray-200 text-gray-800'}`}>
         {status}
@@ -259,7 +258,7 @@ const TransportRoutes = () => {
             <StatusBadge status={route.status} />
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h5 className="text-xs font-medium text-gray-500 mb-2">ROUTE CHECKPOINTS</h5>
@@ -276,7 +275,7 @@ const TransportRoutes = () => {
               ))}
             </div>
           </div>
-          
+
           <div>
             <h5 className="text-xs font-medium text-gray-500 mb-2">ROUTE INFORMATION</h5>
             <div className="space-y-3">
@@ -311,11 +310,11 @@ const TransportRoutes = () => {
                 </div>
               </div>
             </div>
-            
+
             {route.mapLink && (
-              <a 
-                href={route.mapLink} 
-                target="_blank" 
+              <a
+                href={route.mapLink}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 inline-flex items-center px-3 py-1 text-sm text-white bg-farmio rounded-md hover:bg-green-600"
               >
@@ -332,8 +331,8 @@ const TransportRoutes = () => {
   // Table columns
   const columns = [
     { key: 'id', header: 'Route ID' },
-    { 
-      key: 'name', 
+    {
+      key: 'name',
       header: 'Route Name',
       render: (value) => (
         <div className="font-medium">{value}</div>
@@ -343,17 +342,17 @@ const TransportRoutes = () => {
     { key: 'estimatedTime', header: 'Est. Time' },
     { key: 'transportProvider', header: 'Provider' },
     { key: 'frequency', header: 'Frequency' },
-    { 
-      key: 'status', 
+    {
+      key: 'status',
       header: 'Status',
       render: (value) => <StatusBadge status={value} />
     },
-    { 
-      key: 'actions', 
+    {
+      key: 'actions',
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className={`text-blue-600 hover:text-blue-800 ${expandedRouteId === row.id ? 'text-blue-800' : ''}`}
             title={expandedRouteId === row.id ? "Hide Details" : "View Details"}
             onClick={(e) => {
@@ -367,9 +366,9 @@ const TransportRoutes = () => {
             </svg>
           </button>
           {row.mapLink && (
-            <a 
+            <a
               href={row.mapLink}
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
               className="text-green-600 hover:text-green-800"
               title="View Route Map"
@@ -395,7 +394,7 @@ const TransportRoutes = () => {
     >
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard 
+        <StatCard
           title="Active Routes"
           value={routes.filter(r => r.status === 'Active').length.toString()}
           subtitle="Operational"
@@ -403,7 +402,7 @@ const TransportRoutes = () => {
           color="green"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Total Distance"
           value="275 km"
           subtitle="All routes"
@@ -411,7 +410,7 @@ const TransportRoutes = () => {
           color="blue"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Transport Providers"
           value={new Set(routes.map(r => r.transportProvider)).size.toString()}
           subtitle="Partners"
@@ -419,7 +418,7 @@ const TransportRoutes = () => {
           color="purple"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Active Drivers"
           value={routes.reduce((sum, route) => sum + route.activeDrivers, 0).toString()}
           subtitle="On routes"
@@ -447,7 +446,7 @@ const TransportRoutes = () => {
               </svg>
             </span>
           </div>
-          
+
           {/* Filter Button */}
           <button
             className="flex items-center text-sm py-2 px-4 rounded-md border border-dashboard-border hover:bg-gray-100"
@@ -487,9 +486,9 @@ const TransportRoutes = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-4 flex justify-end space-x-2">
-              <button 
+              <button
                 className="px-3 py-1 text-sm text-gray-600 border border-dashboard-border rounded-md hover:bg-gray-100"
                 onClick={() => setSelectedFilters({})}
               >
