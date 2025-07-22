@@ -20,6 +20,11 @@ export default function BookingManagement() {
     const [filterStatus, setFilterStatus] = useState('all');
     const [loading, setLoading] = useState(false);
 
+    // Dialog states for approve/reject
+    const [showApproveDialog, setShowApproveDialog] = useState(false);
+    const [showRejectDialog, setShowRejectDialog] = useState(false);
+    const [actionBooking, setActionBooking] = useState(null);
+
     // Sample booking data
     const sampleBookings = [
         {
@@ -95,8 +100,6 @@ export default function BookingManagement() {
         setLoading(true);
         try {
             // TODO: Replace with actual API call
-            // const response = await fetch(`/api/bookings/warehouse/${warehouseId}`);
-            // const data = await response.json();
             setBookings(sampleBookings);
         } catch (error) {
             console.error('Error loading bookings:', error);
@@ -108,7 +111,6 @@ export default function BookingManagement() {
     const handleApproveBooking = async (bookingId) => {
         try {
             // TODO: Replace with actual API call
-            // await fetch(`/api/bookings/${bookingId}/approve`, { method: 'POST' });
             setBookings(prev => prev.map(booking => 
                 booking.id === bookingId 
                     ? { ...booking, status: 'approved' }
@@ -122,10 +124,6 @@ export default function BookingManagement() {
     const handleRejectBooking = async (bookingId, reason) => {
         try {
             // TODO: Replace with actual API call
-            // await fetch(`/api/bookings/${bookingId}/reject`, { 
-            //     method: 'POST',
-            //     body: JSON.stringify({ reason })
-            // });
             setBookings(prev => prev.map(booking => 
                 booking.id === bookingId 
                     ? { ...booking, status: 'rejected', rejectionReason: reason }
@@ -192,9 +190,9 @@ export default function BookingManagement() {
     });
 
     // Check if any modal is open
-    const isModalOpen = showDetailsModal || showEarlyRetrievalModal;
+    const isModalOpen = showDetailsModal || showEarlyRetrievalModal || showApproveDialog || showRejectDialog;
 
-        return (
+    return (
         <div className="p-6 bg-gradient-to-br white min-h-screen">
             <div className={`max-w-7xl mx-auto space-y-6 transition-all duration-300 ${isModalOpen ? 'backdrop-blur-sm' : ''}`}>
                 {/* Header */}
@@ -299,7 +297,10 @@ export default function BookingManagement() {
                                                 {booking.status === 'pending' && (
                                                     <>
                                                         <button
-                                                            onClick={() => handleApproveBooking(booking.id)}
+                                                            onClick={() => {
+                                                                setActionBooking(booking);
+                                                                setShowApproveDialog(true);
+                                                            }}
                                                             className="text-green-600 hover:text-green-900 p-1 rounded-md hover:bg-green-50 transition-all duration-200"
                                                             title="Approve"
                                                         >
@@ -307,8 +308,8 @@ export default function BookingManagement() {
                                                         </button>
                                                         <button
                                                             onClick={() => {
-                                                                const reason = prompt('Please provide a reason for rejection:');
-                                                                if (reason) handleRejectBooking(booking.id, reason);
+                                                                setActionBooking(booking);
+                                                                setShowRejectDialog(true);
                                                             }}
                                                             className="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50 transition-all duration-200"
                                                             title="Reject"
@@ -339,6 +340,80 @@ export default function BookingManagement() {
                     </div>
                 </div>
             </div>
+
+            {/* Approve Dialog */}
+            {showApproveDialog && actionBooking && (
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full border border-green-200 animate-scaleIn">
+                        <h3 className="text-lg font-semibold mb-4">Approve Booking</h3>
+                        <p>Are you sure you want to approve booking <span className="font-bold">{actionBooking.id}</span>?</p>
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button
+                                onClick={() => {
+                                    setShowApproveDialog(false);
+                                    setActionBooking(null);
+                                }}
+                                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    handleApproveBooking(actionBooking.id);
+                                    setShowApproveDialog(false);
+                                    setActionBooking(null);
+                                }}
+                                className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+                            >
+                                Accept
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showRejectDialog && actionBooking && (
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full border border-green-200 animate-scaleIn">
+                        <h3 className="text-lg font-semibold mb-4">Reject Booking</h3>
+                        <p>Are you sure you want to reject booking <span className="font-bold">{actionBooking.id}</span>?</p>
+                        <input
+                            type="text"
+                            placeholder="Reason for rejection"
+                            value={rejectionReason}
+                            onChange={e => setRejectionReason(e.target.value)}
+                            className="w-full mt-4 px-3 py-2 border rounded"
+                        />
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button
+                                onClick={() => {
+                                    setShowRejectDialog(false);
+                                    setActionBooking(null);
+                                    setRejectionReason('');
+                                }}
+                                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (rejectionReason.trim()) {
+                                        handleRejectBooking(actionBooking.id, rejectionReason);
+                                        setShowRejectDialog(false);
+                                        setActionBooking(null);
+                                        setRejectionReason('');
+                                    } else {
+                                        alert('Please provide a reason for rejection');
+                                    }
+                                }}
+                                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                            >
+                                Reject
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Booking Details Modal */}
             {showDetailsModal && selectedBooking && (
