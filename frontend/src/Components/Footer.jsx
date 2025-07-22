@@ -110,7 +110,7 @@ const Footer = () => {
                                     Get Started
                                 </Link>
                             </li>
-                            <li>
+                            {/* <li>
                                 <Link 
                                     to="/contact" 
                                     className="text-gray-400 hover:text-emerald-400 transition-colors duration-200 flex items-center group"
@@ -118,7 +118,7 @@ const Footer = () => {
                                     <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                                     Contact
                                 </Link>
-                            </li>
+                            </li> */}
                         </ul>
                     </div>
 

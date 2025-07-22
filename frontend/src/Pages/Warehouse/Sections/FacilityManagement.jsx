@@ -26,7 +26,10 @@ export default function FacilityManagement() {
             totalCapacity: 5000,
             pricePerKg: 25,
             certifications: "HACCP, ISO 22000",
-            status: "open"
+            status: "open",
+            keeperName: "John Perera",
+            keeperContact: "0771234567",
+            keeperEmail: "john@coldstorage.lk"
         },
         {
             id: 2,
@@ -42,7 +45,10 @@ export default function FacilityManagement() {
             totalCapacity: 4500,
             pricePerKg: 15,
             certifications: "Food Safety, GMP",
-            status: "open"
+            status: "open",
+            keeperName: "Saman Silva",
+            keeperContact: "0719876543",
+            keeperEmail: "saman@drystorage.lk"
         }
     ];
 
@@ -60,7 +66,10 @@ export default function FacilityManagement() {
         pricePerKg: '',
         certifications: '',
         photos: [],
-        status: 'open'
+        status: 'open',
+        keeperName: '',
+        keeperContact: '',
+        keeperEmail: ''
     });
 
     const handleInputChange = (e) => {
@@ -73,8 +82,12 @@ export default function FacilityManagement() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
-        if (!formData.name || !formData.address || !formData.latitude || !formData.longitude || !formData.totalSlots || !formData.totalCapacity || !formData.pricePerKg) {
+
+        if (
+            !formData.name || !formData.address || !formData.latitude || !formData.longitude ||
+            !formData.totalSlots || !formData.totalCapacity || !formData.pricePerKg ||
+            !formData.keeperName || !formData.keeperContact || !formData.keeperEmail
+        ) {
             alert('Please fill in all required fields');
             return;
         }
@@ -117,7 +130,10 @@ export default function FacilityManagement() {
             pricePerKg: '',
             certifications: '',
             photos: [],
-            status: 'open'
+            status: 'open',
+            keeperName: '',
+            keeperContact: '',
+            keeperEmail: ''
         });
     };
 
@@ -157,7 +173,7 @@ export default function FacilityManagement() {
 
     const isModalOpen = showForm || viewingWarehouse || deletingWarehouse;
 
-     return (
+    return (
         <div className="p-4 bg-gray-50 min-h-screen">
             <div className={`max-w-6xl mx-auto space-y-4 transition-all duration-300 ${isModalOpen ? 'backdrop-blur-sm' : ''}`}>
                 {/* Compact Header */}
@@ -325,10 +341,10 @@ export default function FacilityManagement() {
 
             {/* Add/Edit Warehouse Modal */}
             {showForm && (
-                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fadeIn">
-                    <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full">
+                <div className="fixed inset-0 backdrop-blur bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fadeIn overflow-auto">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col animate-scaleIn">
                         {/* Modal Header */}
-                        <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-5 rounded-t-2xl">
+                        <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-5 rounded-t-2xl flex-shrink-0">
                             <div className="flex justify-between items-center">
                                 <h2 className="text-xl font-semibold">
                                     {editingWarehouse ? 'Edit Warehouse' : 'Add New Warehouse'}
@@ -342,8 +358,8 @@ export default function FacilityManagement() {
                             </div>
                         </div>
 
-                        {/* Modal Body */}
-                        <div className="p-6">
+                        {/* Modal Body with Scroll */}
+                        <div className="p-6 overflow-y-auto flex-1">
                             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Warehouse Name *</label>
@@ -512,6 +528,44 @@ export default function FacilityManagement() {
                                     </select>
                                 </div>
 
+                                {/* Keeper Details */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Warehouse Keeper Name *</label>
+                                    <input
+                                        type="text"
+                                        name="keeperName"
+                                        value={formData.keeperName}
+                                        onChange={handleInputChange}
+                                        placeholder="Keeper's Name"
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Keeper Contact Number *</label>
+                                    <input
+                                        type="text"
+                                        name="keeperContact"
+                                        value={formData.keeperContact}
+                                        onChange={handleInputChange}
+                                        placeholder="Contact Number"
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Keeper Email *</label>
+                                    <input
+                                        type="email"
+                                        name="keeperEmail"
+                                        value={formData.keeperEmail}
+                                        onChange={handleInputChange}
+                                        placeholder="Email Address"
+                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
+                                        required
+                                    />
+                                </div>
+
                                 <div className="col-span-full flex gap-4 pt-4">
                                     <button
                                         type="submit"
@@ -535,9 +589,9 @@ export default function FacilityManagement() {
 
             {/* View Details Modal */}
             {viewingWarehouse && (
-                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fadeIn">
-                    <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full">
-                        <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-5 rounded-t-2xl">
+                <div className="fixed inset-0 backdrop-blur bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fadeIn overflow-auto">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col animate-scaleIn">
+                        <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-5 rounded-t-2xl flex-shrink-0">
                             <div className="flex justify-between items-center">
                                 <h3 className="text-xl font-semibold">Warehouse Details</h3>
                                 <button
@@ -548,50 +602,58 @@ export default function FacilityManagement() {
                                 </button>
                             </div>
                         </div>
-                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                                <p className="text-lg font-semibold text-gray-900">{viewingWarehouse.name}</p>
-                            </div>
-                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                                <p className="text-gray-900">{viewingWarehouse.address}</p>
-                            </div>
-                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">GPS Coordinates</label>
-                                <p className="text-gray-900">{viewingWarehouse.latitude}, {viewingWarehouse.longitude}</p>
-                            </div>
-                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Storage Type</label>
-                                <p className="text-gray-900">{viewingWarehouse.storageType}</p>
-                            </div>
-                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Temperature Range</label>
-                                <p className="text-gray-900">{viewingWarehouse.temperatureMin}°C - {viewingWarehouse.temperatureMax}°C</p>
-                            </div>
-                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Total Slots</label>
-                                <p className="text-lg font-semibold text-gray-900">{viewingWarehouse.totalSlots}</p>
-                            </div>
-                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Capacity per Slot</label>
-                                <p className="text-gray-900">{viewingWarehouse.capacityPerSlot} kg</p>
-                            </div>
-                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Total Capacity</label>
-                                <p className="text-lg font-semibold text-gray-900">{viewingWarehouse.totalCapacity} kg</p>
-                            </div>
-                            <div className="bg-green-50 p-3 rounded-lg border border-green-100">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Price per kg</label>
-                                <p className="text-lg font-semibold text-green-600">Rs{viewingWarehouse.pricePerKg}</p>
-                            </div>
-                            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                <p className="text-lg font-semibold text-gray-900 capitalize">{viewingWarehouse.status}</p>
-                            </div>
-                            <div className="md:col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Certifications</label>
-                                <p className="text-gray-900">{viewingWarehouse.certifications || 'None'}</p>
+                        <div className="p-6 overflow-y-auto flex-1">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                    <p className="text-lg font-semibold text-gray-900">{viewingWarehouse.name}</p>
+                                </div>
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                    <p className="text-gray-900">{viewingWarehouse.address}</p>
+                                </div>
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">GPS Coordinates</label>
+                                    <p className="text-gray-900">{viewingWarehouse.latitude}, {viewingWarehouse.longitude}</p>
+                                </div>
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Storage Type</label>
+                                    <p className="text-gray-900">{viewingWarehouse.storageType}</p>
+                                </div>
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Temperature Range</label>
+                                    <p className="text-gray-900">{viewingWarehouse.temperatureMin}°C - {viewingWarehouse.temperatureMax}°C</p>
+                                </div>
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Slots</label>
+                                    <p className="text-lg font-semibold text-gray-900">{viewingWarehouse.totalSlots}</p>
+                                </div>
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Capacity per Slot</label>
+                                    <p className="text-gray-900">{viewingWarehouse.capacityPerSlot} kg</p>
+                                </div>
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Capacity</label>
+                                    <p className="text-lg font-semibold text-gray-900">{viewingWarehouse.totalCapacity} kg</p>
+                                </div>
+                                <div className="bg-green-50 p-3 rounded-lg border border-green-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Price per kg</label>
+                                    <p className="text-lg font-semibold text-green-600">Rs{viewingWarehouse.pricePerKg}</p>
+                                </div>
+                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <p className="text-lg font-semibold text-gray-900 capitalize">{viewingWarehouse.status}</p>
+                                </div>
+                                <div className="md:col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Certifications</label>
+                                    <p className="text-gray-900">{viewingWarehouse.certifications || 'None'}</p>
+                                </div>
+                                <div className="md:col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Warehouse Keeper</label>
+                                    <p className="text-gray-900 font-semibold">{viewingWarehouse.keeperName || 'N/A'}</p>
+                                    <p className="text-gray-900 text-sm">{viewingWarehouse.keeperContact || 'N/A'}</p>
+                                    <p className="text-gray-900 text-sm">{viewingWarehouse.keeperEmail || 'N/A'}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -600,7 +662,7 @@ export default function FacilityManagement() {
 
             {/* Delete Confirmation Modal */}
             {deletingWarehouse && (
-                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fadeIn">
+                <div className="fixed inset-0 backdrop-blur bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fadeIn">
                     <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
                         <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-5 rounded-t-2xl">
                             <div className="flex justify-between items-center">
