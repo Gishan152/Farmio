@@ -73,20 +73,19 @@ export default function OrderDetails() {
 
     const handleCreateTransport = () => {
         console.log("Creating transport for order", orderId);
-        // call API or dispatch action...
-        updateOrder(orderId, { transport: "BY_BUYER_SYSTEM" })
-        addJob({
+        updateOrder(orderId, { transport: "BY_BUYER_SYSTEM" });
+        const job = {
             id: "TJ-10001",
             orderId,
             status: "PENDING",
             vehicleType: 'Small Van',
-            capacityRemaining: '30 kg',
             items: items.map(i => { i.load_id = "LD-1001"; i.pickup_confirmation = "PENDING"; return i }),
             createdAt: '2025-07-01',
             // pickupLocations: ["farm1", "farm2", "farm3"],
             pickupLocation: "farm location",
             dropOffLocation: "buyer location",
-        })
+        };
+        addJob(job);
         closeModal();
     };
 

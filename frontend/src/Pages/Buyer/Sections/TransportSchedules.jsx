@@ -196,10 +196,10 @@ export default function TransportJobs() {
 										<span>Job ID:</span>
 										<Link to={`/buyer/transport/schedules/${job.id}`} className="hover:underline font-medium text-green-700 dark:text-green-300">{job.id}</Link>
 									</div>
-									<div className="flex items-center gap-2 text-gray-500 dark:text-gray-300 text-sm">
+									{/* <div className="flex items-center gap-2 text-gray-500 dark:text-gray-300 text-sm">
 										<span>Remaining:</span>
 										<span className="font-semibold text-gray-700 dark:text-gray-100">{job.capacityRemaining} kg</span>
-									</div>
+									</div> */}
 								</div>
 								<div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-300">
 									<span>Pickup: <span className="font-medium text-gray-800 dark:text-gray-100">{job.pickupLocation}</span></span>
