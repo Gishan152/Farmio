@@ -24,6 +24,182 @@ const LocationIcon = () => (
   </svg>
 );
 
+// Sample warehouses data
+const warehouses = [
+  {
+    id: 'WH-001',
+    name: 'Central Distribution Warehouse',
+    location: 'Central City Industrial Park',
+    address: '123 Logistics Way, Central City, CC 10001',
+    owner: 'Farmio Logistics LLC',
+    contactPerson: 'James Wilson',
+    contactEmail: 'jwilson@farmio.com',
+    contactPhone: '+1 (555) 123-4567',
+    totalCapacity: '5,000 tons',
+    currentUtilization: '65%',
+    temperatureZones: ['Ambient', 'Refrigerated', 'Freezer'],
+    specialFeatures: ['HACCP Certified', 'Organic Certified', 'Solar Powered'],
+    status: 'Active',
+    warehouseDetails: {
+      temperatureZones: [
+        { type: 'Ambient', capacity: '2,000 tons', utilization: '70%', products: 'Dry goods, Root vegetables' },
+        { type: 'Refrigerated', capacity: '2,500 tons', utilization: '55%', products: 'Fresh produce, Dairy' },
+        { type: 'Freezer', capacity: '500 tons', utilization: '85%', products: 'Frozen fruits, Ice cream' }
+      ],
+      certifications: [
+        { name: 'HACCP', validUntil: '2024-06-30', status: 'Valid' },
+        { name: 'Organic', validUntil: '2024-03-15', status: 'Valid' },
+        { name: 'ISO 22000', validUntil: '2024-05-22', status: 'Valid' }
+      ],
+      operatingHours: 'Monday-Saturday: 6:00 AM - 10:00 PM, Sunday: 8:00 AM - 4:00 PM',
+      staffCount: 45,
+      avgDailyIntake: '120 tons',
+      avgDailyOutflow: '115 tons'
+    }
+  },
+  {
+    id: 'WH-002',
+    name: 'Riverside Cold Storage',
+    location: 'Riverside Industrial Zone',
+    address: '456 River Road, Riverside, RS 20002',
+    owner: 'CoolStore Partners',
+    contactPerson: 'Elena Rodriguez',
+    contactEmail: 'erodriguez@coolstore.com',
+    contactPhone: '+1 (555) 234-5678',
+    totalCapacity: '2,200 tons',
+    currentUtilization: '78%',
+    temperatureZones: ['Refrigerated', 'Freezer'],
+    specialFeatures: ['Advanced Cold Chain', 'Energy Efficient', '24/7 Monitoring'],
+    status: 'Active',
+    warehouseDetails: {
+      temperatureZones: [
+        { type: 'Refrigerated', capacity: '1,500 tons', utilization: '82%', products: 'Dairy, Meat, Seafood' },
+        { type: 'Freezer', capacity: '700 tons', utilization: '70%', products: 'Frozen products, Ice' }
+      ],
+      certifications: [
+        { name: 'HACCP', validUntil: '2025-01-15', status: 'Valid' },
+        { name: 'BRC', validUntil: '2024-09-30', status: 'Valid' }
+      ],
+      operatingHours: '24/7 Operation',
+      staffCount: 28,
+      avgDailyIntake: '85 tons',
+      avgDailyOutflow: '80 tons'
+    }
+  },
+  {
+    id: 'WH-003',
+    name: 'Greenfield Organic Storage',
+    location: 'Greenfield Agricultural Zone',
+    address: '789 Organic Lane, Greenfield, GF 30003',
+    owner: 'Eco Storage Solutions',
+    contactPerson: 'David Greenway',
+    contactEmail: 'dgreenway@ecostorage.com',
+    contactPhone: '+1 (555) 345-6789',
+    totalCapacity: '1,800 tons',
+    currentUtilization: '45%',
+    temperatureZones: ['Ambient', 'Refrigerated'],
+    specialFeatures: ['100% Renewable Energy', 'Organic Certified', 'Zero Waste'],
+    status: 'Active',
+    warehouseDetails: {
+      temperatureZones: [
+        { type: 'Ambient', capacity: '1,200 tons', utilization: '40%', products: 'Grains, Dried fruits, Nuts' },
+        { type: 'Refrigerated', capacity: '600 tons', utilization: '55%', products: 'Organic produce, Fresh herbs' }
+      ],
+      certifications: [
+        { name: 'Organic', validUntil: '2024-11-12', status: 'Valid' },
+        { name: 'LEED Platinum', validUntil: '2030-01-01', status: 'Valid' },
+        { name: 'Regenerative Organic', validUntil: '2024-08-18', status: 'Valid' }
+      ],
+      operatingHours: 'Monday-Friday: 7:00 AM - 8:00 PM',
+      staffCount: 22,
+      avgDailyIntake: '40 tons',
+      avgDailyOutflow: '35 tons'
+    }
+  },
+  {
+    id: 'WH-004',
+    name: 'Mountain Valley Storage',
+    location: 'Mountain Valley Region',
+    address: '101 Mountain Way, Valley Town, VT 40004',
+    owner: 'Highland Storage Co.',
+    contactPerson: 'Maria Lopez',
+    contactEmail: 'mlopez@highland.com',
+    contactPhone: '+1 (555) 456-7890',
+    totalCapacity: '1,500 tons',
+    currentUtilization: '90%',
+    temperatureZones: ['Ambient', 'Climate Controlled'],
+    specialFeatures: ['Altitude Optimized', 'Humidity Control', 'Local Farm Focus'],
+    status: 'Maintenance',
+    warehouseDetails: {
+      temperatureZones: [
+        { type: 'Ambient', capacity: '900 tons', utilization: '95%', products: 'Root vegetables, Local produce' },
+        { type: 'Climate Controlled', capacity: '600 tons', utilization: '82%', products: 'Specialty products, Apples' }
+      ],
+      certifications: [
+        { name: 'Local Farm Alliance', validUntil: '2024-12-31', status: 'Valid' },
+        { name: 'HACCP', validUntil: '2023-12-20', status: 'Expiring Soon' }
+      ],
+      operatingHours: 'Monday-Saturday: 6:00 AM - 9:00 PM',
+      staffCount: 18,
+      avgDailyIntake: '30 tons',
+      avgDailyOutflow: '28 tons'
+    }
+  },
+  {
+    id: 'WH-005',
+    name: 'Metro Express Distribution',
+    location: 'Metropolitan Area',
+    address: '202 Urban Blvd, Metro City, MC 50005',
+    owner: 'MetroEx Partners',
+    contactPerson: 'Robert Zhang',
+    contactEmail: 'rzhang@metroex.com',
+    contactPhone: '+1 (555) 567-8901',
+    totalCapacity: '3,800 tons',
+    currentUtilization: '85%',
+    temperatureZones: ['Ambient', 'Refrigerated', 'Freezer'],
+    specialFeatures: ['Rapid Distribution', 'Urban Last Mile', '24/7 Operation'],
+    status: 'Active',
+    warehouseDetails: {
+      temperatureZones: [
+        { type: 'Ambient', capacity: '1,800 tons', utilization: '90%', products: 'Packaged goods, Non-perishables' },
+        { type: 'Refrigerated', capacity: '1,500 tons', utilization: '80%', products: 'Urban market produce, Prepared foods' },
+        { type: 'Freezer', capacity: '500 tons', utilization: '85%', products: 'Frozen meals, Ice cream' }
+      ],
+      certifications: [
+        { name: 'HACCP', validUntil: '2024-09-15', status: 'Valid' },
+        { name: 'ISO 9001', validUntil: '2024-05-28', status: 'Valid' }
+      ],
+      operatingHours: '24/7 Operation',
+      staffCount: 65,
+      avgDailyIntake: '200 tons',
+      avgDailyOutflow: '195 tons'
+    }
+  }
+];
+
+// Filter options
+const filters = [
+  {
+    name: 'status',
+    label: 'Status',
+    options: [
+      { label: 'Active', value: 'Active' },
+      { label: 'Maintenance', value: 'Maintenance' },
+      { label: 'Inactive', value: 'Inactive' }
+    ]
+  },
+  {
+    name: 'temperatureZone',
+    label: 'Temperature Zone',
+    options: [
+      { label: 'Ambient', value: 'Ambient' },
+      { label: 'Refrigerated', value: 'Refrigerated' },
+      { label: 'Freezer', value: 'Freezer' },
+      { label: 'Climate Controlled', value: 'Climate Controlled' }
+    ]
+  }
+];
+
 const WarehouseManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,159 +207,6 @@ const WarehouseManagement = () => {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [expandedWarehouseId, setExpandedWarehouseId] = useState(null);
-
-  // Sample warehouses data
-  const warehouses = [
-    {
-      id: 'WH-001',
-      name: 'Central Distribution Warehouse',
-      location: 'Central City Industrial Park',
-      address: '123 Logistics Way, Central City, CC 10001',
-      owner: 'Farmio Logistics LLC',
-      contactPerson: 'James Wilson',
-      contactEmail: 'jwilson@farmio.com',
-      contactPhone: '+1 (555) 123-4567',
-      totalCapacity: '5,000 tons',
-      currentUtilization: '65%',
-      temperatureZones: ['Ambient', 'Refrigerated', 'Freezer'],
-      specialFeatures: ['HACCP Certified', 'Organic Certified', 'Solar Powered'],
-      status: 'Active',
-      warehouseDetails: {
-        temperatureZones: [
-          { type: 'Ambient', capacity: '2,000 tons', utilization: '70%', products: 'Dry goods, Root vegetables' },
-          { type: 'Refrigerated', capacity: '2,500 tons', utilization: '55%', products: 'Fresh produce, Dairy' },
-          { type: 'Freezer', capacity: '500 tons', utilization: '85%', products: 'Frozen fruits, Ice cream' }
-        ],
-        certifications: [
-          { name: 'HACCP', validUntil: '2024-06-30', status: 'Valid' },
-          { name: 'Organic', validUntil: '2024-03-15', status: 'Valid' },
-          { name: 'ISO 22000', validUntil: '2024-05-22', status: 'Valid' }
-        ],
-        operatingHours: 'Monday-Saturday: 6:00 AM - 10:00 PM, Sunday: 8:00 AM - 4:00 PM',
-        staffCount: 45,
-        avgDailyIntake: '120 tons',
-        avgDailyOutflow: '115 tons'
-      }
-    },
-    {
-      id: 'WH-002',
-      name: 'Riverside Cold Storage',
-      location: 'Riverside Industrial Zone',
-      address: '456 River Road, Riverside, RS 20002',
-      owner: 'CoolStore Partners',
-      contactPerson: 'Elena Rodriguez',
-      contactEmail: 'erodriguez@coolstore.com',
-      contactPhone: '+1 (555) 234-5678',
-      totalCapacity: '2,200 tons',
-      currentUtilization: '78%',
-      temperatureZones: ['Refrigerated', 'Freezer'],
-      specialFeatures: ['Advanced Cold Chain', 'Energy Efficient', '24/7 Monitoring'],
-      status: 'Active',
-      warehouseDetails: {
-        temperatureZones: [
-          { type: 'Refrigerated', capacity: '1,500 tons', utilization: '82%', products: 'Dairy, Meat, Seafood' },
-          { type: 'Freezer', capacity: '700 tons', utilization: '70%', products: 'Frozen products, Ice' }
-        ],
-        certifications: [
-          { name: 'HACCP', validUntil: '2025-01-15', status: 'Valid' },
-          { name: 'BRC', validUntil: '2024-09-30', status: 'Valid' }
-        ],
-        operatingHours: '24/7 Operation',
-        staffCount: 28,
-        avgDailyIntake: '85 tons',
-        avgDailyOutflow: '80 tons'
-      }
-    },
-    {
-      id: 'WH-003',
-      name: 'Greenfield Organic Storage',
-      location: 'Greenfield Agricultural Zone',
-      address: '789 Organic Lane, Greenfield, GF 30003',
-      owner: 'Eco Storage Solutions',
-      contactPerson: 'David Greenway',
-      contactEmail: 'dgreenway@ecostorage.com',
-      contactPhone: '+1 (555) 345-6789',
-      totalCapacity: '1,800 tons',
-      currentUtilization: '45%',
-      temperatureZones: ['Ambient', 'Refrigerated'],
-      specialFeatures: ['100% Renewable Energy', 'Organic Certified', 'Zero Waste'],
-      status: 'Active',
-      warehouseDetails: {
-        temperatureZones: [
-          { type: 'Ambient', capacity: '1,200 tons', utilization: '40%', products: 'Grains, Dried fruits, Nuts' },
-          { type: 'Refrigerated', capacity: '600 tons', utilization: '55%', products: 'Organic produce, Fresh herbs' }
-        ],
-        certifications: [
-          { name: 'Organic', validUntil: '2024-11-12', status: 'Valid' },
-          { name: 'LEED Platinum', validUntil: '2030-01-01', status: 'Valid' },
-          { name: 'Regenerative Organic', validUntil: '2024-08-18', status: 'Valid' }
-        ],
-        operatingHours: 'Monday-Friday: 7:00 AM - 8:00 PM',
-        staffCount: 22,
-        avgDailyIntake: '40 tons',
-        avgDailyOutflow: '35 tons'
-      }
-    },
-    {
-      id: 'WH-004',
-      name: 'Mountain Valley Storage',
-      location: 'Mountain Valley Region',
-      address: '101 Mountain Way, Valley Town, VT 40004',
-      owner: 'Highland Storage Co.',
-      contactPerson: 'Maria Lopez',
-      contactEmail: 'mlopez@highland.com',
-      contactPhone: '+1 (555) 456-7890',
-      totalCapacity: '1,500 tons',
-      currentUtilization: '90%',
-      temperatureZones: ['Ambient', 'Climate Controlled'],
-      specialFeatures: ['Altitude Optimized', 'Humidity Control', 'Local Farm Focus'],
-      status: 'Maintenance',
-      warehouseDetails: {
-        temperatureZones: [
-          { type: 'Ambient', capacity: '900 tons', utilization: '95%', products: 'Root vegetables, Local produce' },
-          { type: 'Climate Controlled', capacity: '600 tons', utilization: '82%', products: 'Specialty products, Apples' }
-        ],
-        certifications: [
-          { name: 'Local Farm Alliance', validUntil: '2024-12-31', status: 'Valid' },
-          { name: 'HACCP', validUntil: '2023-12-20', status: 'Expiring Soon' }
-        ],
-        operatingHours: 'Monday-Saturday: 6:00 AM - 9:00 PM',
-        staffCount: 18,
-        avgDailyIntake: '30 tons',
-        avgDailyOutflow: '28 tons'
-      }
-    },
-    {
-      id: 'WH-005',
-      name: 'Metro Express Distribution',
-      location: 'Metropolitan Area',
-      address: '202 Urban Blvd, Metro City, MC 50005',
-      owner: 'MetroEx Partners',
-      contactPerson: 'Robert Zhang',
-      contactEmail: 'rzhang@metroex.com',
-      contactPhone: '+1 (555) 567-8901',
-      totalCapacity: '3,800 tons',
-      currentUtilization: '85%',
-      temperatureZones: ['Ambient', 'Refrigerated', 'Freezer'],
-      specialFeatures: ['Rapid Distribution', 'Urban Last Mile', '24/7 Operation'],
-      status: 'Active',
-      warehouseDetails: {
-        temperatureZones: [
-          { type: 'Ambient', capacity: '1,800 tons', utilization: '90%', products: 'Packaged goods, Non-perishables' },
-          { type: 'Refrigerated', capacity: '1,500 tons', utilization: '80%', products: 'Urban market produce, Prepared foods' },
-          { type: 'Freezer', capacity: '500 tons', utilization: '85%', products: 'Frozen meals, Ice cream' }
-        ],
-        certifications: [
-          { name: 'HACCP', validUntil: '2024-09-15', status: 'Valid' },
-          { name: 'ISO 9001', validUntil: '2024-05-28', status: 'Valid' }
-        ],
-        operatingHours: '24/7 Operation',
-        staffCount: 65,
-        avgDailyIntake: '200 tons',
-        avgDailyOutflow: '195 tons'
-      }
-    }
-  ];
 
   // Simulate loading
   useEffect(() => {
@@ -198,44 +221,21 @@ const WarehouseManagement = () => {
   // Handle search
   useEffect(() => {
     if (!warehouses) return;
-    
+
     let results = warehouses.filter(warehouse => {
-      return Object.keys(warehouse).some(key => 
+      return Object.keys(warehouse).some(key =>
         typeof warehouse[key] === 'string' && warehouse[key].toLowerCase().includes(searchTerm.toLowerCase())
-      ) || 
-      (warehouse.temperatureZones && warehouse.temperatureZones.some(zone => 
-        zone.toLowerCase().includes(searchTerm.toLowerCase())
-      )) ||
-      (warehouse.specialFeatures && warehouse.specialFeatures.some(feature => 
-        feature.toLowerCase().includes(searchTerm.toLowerCase())
-      ));
+      ) ||
+        (warehouse.temperatureZones && warehouse.temperatureZones.some(zone =>
+          zone.toLowerCase().includes(searchTerm.toLowerCase())
+        )) ||
+        (warehouse.specialFeatures && warehouse.specialFeatures.some(feature =>
+          feature.toLowerCase().includes(searchTerm.toLowerCase())
+        ));
     });
-    
+
     setFilteredData(results);
   }, [searchTerm, warehouses]);
-
-  // Filter options
-  const filters = [
-    {
-      name: 'status',
-      label: 'Status',
-      options: [
-        { label: 'Active', value: 'Active' },
-        { label: 'Maintenance', value: 'Maintenance' },
-        { label: 'Inactive', value: 'Inactive' }
-      ]
-    },
-    {
-      name: 'temperatureZone',
-      label: 'Temperature Zone',
-      options: [
-        { label: 'Ambient', value: 'Ambient' },
-        { label: 'Refrigerated', value: 'Refrigerated' },
-        { label: 'Freezer', value: 'Freezer' },
-        { label: 'Climate Controlled', value: 'Climate Controlled' }
-      ]
-    }
-  ];
 
   // Handle filter changes
   const handleFilterChange = (filterName, value) => {
@@ -251,20 +251,20 @@ const WarehouseManagement = () => {
       setFilteredData(warehouses);
       return;
     }
-    
+
     let results = warehouses.filter(warehouse => {
       return Object.entries(selectedFilters).every(([key, value]) => {
         if (!value || value === 'all') return true;
-        
+
         // Special case for temperatureZone
         if (key === 'temperatureZone') {
           return warehouse.temperatureZones && warehouse.temperatureZones.includes(value);
         }
-        
+
         return warehouse[key] === value;
       });
     });
-    
+
     setFilteredData(results);
   }, [selectedFilters, warehouses]);
 
@@ -275,7 +275,7 @@ const WarehouseManagement = () => {
       'Maintenance': 'bg-pastel-yellow text-yellow-800',
       'Inactive': 'bg-pastel-red text-red-800',
     };
-    
+
     return (
       <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status] || 'bg-gray-200 text-gray-800'}`}>
         {status}
@@ -302,7 +302,7 @@ const WarehouseManagement = () => {
             <StatusBadge status={warehouse.status} />
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h5 className="text-xs font-medium text-gray-500 mb-2">WAREHOUSE INFORMATION</h5>
@@ -345,7 +345,7 @@ const WarehouseManagement = () => {
               </div>
             </div>
           </div>
-          
+
           <div>
             <h5 className="text-xs font-medium text-gray-500 mb-2">TEMPERATURE ZONES</h5>
             <div className="space-y-3">
@@ -360,7 +360,7 @@ const WarehouseManagement = () => {
                 </div>
               ))}
             </div>
-            
+
             <h5 className="text-xs font-medium text-gray-500 mt-4 mb-2">CERTIFICATIONS</h5>
             <div className="space-y-2">
               {warehouse.warehouseDetails.certifications.map((cert, idx) => (
@@ -372,7 +372,7 @@ const WarehouseManagement = () => {
                 </div>
               ))}
             </div>
-            
+
             <h5 className="text-xs font-medium text-gray-500 mt-4 mb-2">SPECIAL FEATURES</h5>
             <div className="flex flex-wrap gap-2">
               {warehouse.specialFeatures.map((feature, idx) => (
@@ -390,8 +390,8 @@ const WarehouseManagement = () => {
   // Table columns
   const columns = [
     { key: 'id', header: 'ID' },
-    { 
-      key: 'name', 
+    {
+      key: 'name',
       header: 'Name',
       render: (value) => (
         <div className="font-medium">{value}</div>
@@ -400,8 +400,8 @@ const WarehouseManagement = () => {
     { key: 'location', header: 'Location' },
     { key: 'totalCapacity', header: 'Capacity' },
     { key: 'currentUtilization', header: 'Utilization' },
-    { 
-      key: 'temperatureZones', 
+    {
+      key: 'temperatureZones',
       header: 'Temp. Zones',
       render: (value) => (
         <div className="flex flex-wrap gap-1">
@@ -413,17 +413,17 @@ const WarehouseManagement = () => {
         </div>
       )
     },
-    { 
-      key: 'status', 
+    {
+      key: 'status',
       header: 'Status',
       render: (value) => <StatusBadge status={value} />
     },
-    { 
-      key: 'actions', 
+    {
+      key: 'actions',
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className={`text-blue-600 hover:text-blue-800 ${expandedWarehouseId === row.id ? 'text-blue-800' : ''}`}
             title={expandedWarehouseId === row.id ? "Hide Details" : "View Details"}
             onClick={(e) => {
@@ -454,7 +454,7 @@ const WarehouseManagement = () => {
     >
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard 
+        <StatCard
           title="Total Warehouses"
           value={warehouses.length.toString()}
           subtitle="All locations"
@@ -462,7 +462,7 @@ const WarehouseManagement = () => {
           color="blue"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Total Capacity"
           value="14,300 tons"
           subtitle="Combined storage"
@@ -470,7 +470,7 @@ const WarehouseManagement = () => {
           color="green"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Average Utilization"
           value="72.6%"
           subtitle="Across all warehouses"
@@ -478,7 +478,7 @@ const WarehouseManagement = () => {
           color="purple"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Cold Storage"
           value="5,800 tons"
           subtitle="Refrigerated & freezer"
@@ -506,7 +506,7 @@ const WarehouseManagement = () => {
               </svg>
             </span>
           </div>
-          
+
           {/* Filter Button */}
           <button
             className="flex items-center text-sm py-2 px-4 rounded-md border border-dashboard-border hover:bg-gray-100"
@@ -546,9 +546,9 @@ const WarehouseManagement = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-4 flex justify-end space-x-2">
-              <button 
+              <button
                 className="px-3 py-1 text-sm text-gray-600 border border-dashboard-border rounded-md hover:bg-gray-100"
                 onClick={() => setSelectedFilters({})}
               >

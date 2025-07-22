@@ -8,95 +8,95 @@ const WarehouseIcon = () => (
   </svg>
 );
 
+// Sample warehouse photos data
+const warehousePhotos = {
+  1: [
+    "https://i.ibb.co/3BnCPb1/warehouse-exterior.jpg",
+    "https://i.ibb.co/CPtm2X5/warehouse-interior.jpg",
+    "https://i.ibb.co/wCYkFcM/cold-storage.jpg"
+  ],
+  2: [
+    "https://i.ibb.co/MGcmDB6/dambulla-warehouse.jpg",
+    "https://i.ibb.co/dJXPVTJ/humidity-control.jpg"
+  ],
+  3: [
+    "https://i.ibb.co/Gd8bS7M/port-storage.jpg",
+    "https://i.ibb.co/6YSG2bL/freezer-room.jpg",
+    "https://i.ibb.co/RQjQT8g/blast-chiller.jpg"
+  ],
+  4: [
+    "https://i.ibb.co/Qm6pY8w/distribution-center.jpg",
+    "https://i.ibb.co/ww8k2fK/loading-dock.jpg"
+  ],
+  5: [
+    "https://i.ibb.co/8zS287h/eco-warehouse.jpg",
+    "https://i.ibb.co/BjcxDwf/solar-panels.jpg"
+  ]
+};
+
+// Sample warehouse keepers data
+const warehouseKeepers = {
+  1: [
+    { name: "Anura Perera", position: "Head Supervisor", experience: "10 years", phone: "+94 77 234 5678" },
+    { name: "Chaminda Silva", position: "Inventory Manager", experience: "8 years", phone: "+94 71 345 6789" },
+    { name: "Kushani Fernando", position: "Cold Storage Specialist", experience: "6 years", phone: "+94 76 456 7890" },
+    { name: "Prasad Jayawardena", position: "Security Supervisor", experience: "12 years", phone: "+94 70 567 8901" }
+  ],
+  2: [
+    { name: "Indika Gunaratne", position: "Facility Manager", experience: "7 years", phone: "+94 77 678 9012" },
+    { name: "Samanthi Perera", position: "Agricultural Specialist", experience: "5 years", phone: "+94 71 789 0123" }
+  ],
+  3: [
+    { name: "Ruwan Senanayake", position: "Cold Chain Manager", experience: "9 years", phone: "+94 76 890 1234" },
+    { name: "Nilanthi Dissanayake", position: "Quality Control", experience: "8 years", phone: "+94 70 901 2345" },
+    { name: "Jagath Bandara", position: "Shift Supervisor", experience: "6 years", phone: "+94 77 012 3456" }
+  ],
+  4: [
+    { name: "Duminda Ratnayake", position: "Operations Director", experience: "15 years", phone: "+94 71 123 4567" },
+    { name: "Surangi Jayasuriya", position: "Logistics Coordinator", experience: "7 years", phone: "+94 76 234 5678" },
+    { name: "Lahiru Perera", position: "Dock Manager", experience: "5 years", phone: "+94 70 345 6789" },
+    { name: "Thilini Weerasinghe", position: "Inventory Control", experience: "6 years", phone: "+94 77 456 7890" }
+  ],
+  5: [
+    { name: "Upul Abeysekera", position: "Sustainability Manager", experience: "8 years", phone: "+94 71 567 8901" },
+    { name: "Dilhani Jayamaha", position: "Inventory Specialist", experience: "4 years", phone: "+94 76 678 9012" }
+  ]
+};
+
+// Sample warehouse facilities data
+const warehouseFacilities = {
+  1: [
+    { type: "Cold Storage", capacity: "10,000 sq ft", temperature: "-5°C to +4°C", products: "Dairy, Meat, Fruits" },
+    { type: "Climate Controlled", capacity: "12,000 sq ft", temperature: "15°C to 20°C", products: "Vegetables, Grains" },
+    { type: "Loading Bay", capacity: "3,000 sq ft", features: "4 Docks, Automated Doors", vehicles: "Up to 6 trucks simultaneously" }
+  ],
+  2: [
+    { type: "Humidity Controlled", capacity: "8,000 sq ft", humidity: "60-65%", products: "Fresh Produce, Spices" },
+    { type: "Standard Storage", capacity: "4,500 sq ft", features: "Racking System", products: "Packaged Goods" }
+  ],
+  3: [
+    { type: "Freezer Storage", capacity: "7,500 sq ft", temperature: "-20°C", products: "Seafood, Ice Cream" },
+    { type: "Blast Chillers", capacity: "2,500 sq ft", features: "Rapid cooling", products: "Fresh Catch, Hot Prepared Foods" },
+    { type: "Dry Storage", capacity: "8,000 sq ft", features: "Temperature Controlled", products: "Packaged Goods, Spices" }
+  ],
+  4: [
+    { type: "Loading Docks", capacity: "5,000 sq ft", features: "8 Docks with Levelers", vehicles: "Up to 10 trucks simultaneously" },
+    { type: "Sorting Area", capacity: "10,000 sq ft", features: "Automated Conveyor System", throughput: "5,000 packages per hour" },
+    { type: "Standard Storage", capacity: "15,000 sq ft", features: "High Bay Racking", products: "Mixed Goods" }
+  ],
+  5: [
+    { type: "Solar Powered Storage", capacity: "5,000 sq ft", features: "Off-Grid Capability", products: "Mixed Goods" },
+    { type: "Waste Management", capacity: "3,000 sq ft", features: "Composting, Recycling", sustainability: "Zero-waste certified" }
+  ]
+};
+
 const WarehouseOwnerManagement = () => {
   // State for modals
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [activeTab, setActiveTab] = useState('details');
-  
-  // Sample warehouse photos data
-  const warehousePhotos = {
-    1: [
-      "https://i.ibb.co/3BnCPb1/warehouse-exterior.jpg",
-      "https://i.ibb.co/CPtm2X5/warehouse-interior.jpg",
-      "https://i.ibb.co/wCYkFcM/cold-storage.jpg"
-    ],
-    2: [
-      "https://i.ibb.co/MGcmDB6/dambulla-warehouse.jpg",
-      "https://i.ibb.co/dJXPVTJ/humidity-control.jpg"
-    ],
-    3: [
-      "https://i.ibb.co/Gd8bS7M/port-storage.jpg",
-      "https://i.ibb.co/6YSG2bL/freezer-room.jpg",
-      "https://i.ibb.co/RQjQT8g/blast-chiller.jpg"
-    ],
-    4: [
-      "https://i.ibb.co/Qm6pY8w/distribution-center.jpg",
-      "https://i.ibb.co/ww8k2fK/loading-dock.jpg"
-    ],
-    5: [
-      "https://i.ibb.co/8zS287h/eco-warehouse.jpg",
-      "https://i.ibb.co/BjcxDwf/solar-panels.jpg"
-    ]
-  };
-  
-  // Sample warehouse keepers data
-  const warehouseKeepers = {
-    1: [
-      { name: "Anura Perera", position: "Head Supervisor", experience: "10 years", phone: "+94 77 234 5678" },
-      { name: "Chaminda Silva", position: "Inventory Manager", experience: "8 years", phone: "+94 71 345 6789" },
-      { name: "Kushani Fernando", position: "Cold Storage Specialist", experience: "6 years", phone: "+94 76 456 7890" },
-      { name: "Prasad Jayawardena", position: "Security Supervisor", experience: "12 years", phone: "+94 70 567 8901" }
-    ],
-    2: [
-      { name: "Indika Gunaratne", position: "Facility Manager", experience: "7 years", phone: "+94 77 678 9012" },
-      { name: "Samanthi Perera", position: "Agricultural Specialist", experience: "5 years", phone: "+94 71 789 0123" }
-    ],
-    3: [
-      { name: "Ruwan Senanayake", position: "Cold Chain Manager", experience: "9 years", phone: "+94 76 890 1234" },
-      { name: "Nilanthi Dissanayake", position: "Quality Control", experience: "8 years", phone: "+94 70 901 2345" },
-      { name: "Jagath Bandara", position: "Shift Supervisor", experience: "6 years", phone: "+94 77 012 3456" }
-    ],
-    4: [
-      { name: "Duminda Ratnayake", position: "Operations Director", experience: "15 years", phone: "+94 71 123 4567" },
-      { name: "Surangi Jayasuriya", position: "Logistics Coordinator", experience: "7 years", phone: "+94 76 234 5678" },
-      { name: "Lahiru Perera", position: "Dock Manager", experience: "5 years", phone: "+94 70 345 6789" },
-      { name: "Thilini Weerasinghe", position: "Inventory Control", experience: "6 years", phone: "+94 77 456 7890" }
-    ],
-    5: [
-      { name: "Upul Abeysekera", position: "Sustainability Manager", experience: "8 years", phone: "+94 71 567 8901" },
-      { name: "Dilhani Jayamaha", position: "Inventory Specialist", experience: "4 years", phone: "+94 76 678 9012" }
-    ]
-  };
-  
-  // Sample warehouse facilities data
-  const warehouseFacilities = {
-    1: [
-      { type: "Cold Storage", capacity: "10,000 sq ft", temperature: "-5°C to +4°C", products: "Dairy, Meat, Fruits" },
-      { type: "Climate Controlled", capacity: "12,000 sq ft", temperature: "15°C to 20°C", products: "Vegetables, Grains" },
-      { type: "Loading Bay", capacity: "3,000 sq ft", features: "4 Docks, Automated Doors", vehicles: "Up to 6 trucks simultaneously" }
-    ],
-    2: [
-      { type: "Humidity Controlled", capacity: "8,000 sq ft", humidity: "60-65%", products: "Fresh Produce, Spices" },
-      { type: "Standard Storage", capacity: "4,500 sq ft", features: "Racking System", products: "Packaged Goods" }
-    ],
-    3: [
-      { type: "Freezer Storage", capacity: "7,500 sq ft", temperature: "-20°C", products: "Seafood, Ice Cream" },
-      { type: "Blast Chillers", capacity: "2,500 sq ft", features: "Rapid cooling", products: "Fresh Catch, Hot Prepared Foods" },
-      { type: "Dry Storage", capacity: "8,000 sq ft", features: "Temperature Controlled", products: "Packaged Goods, Spices" }
-    ],
-    4: [
-      { type: "Loading Docks", capacity: "5,000 sq ft", features: "8 Docks with Levelers", vehicles: "Up to 10 trucks simultaneously" },
-      { type: "Sorting Area", capacity: "10,000 sq ft", features: "Automated Conveyor System", throughput: "5,000 packages per hour" },
-      { type: "Standard Storage", capacity: "15,000 sq ft", features: "High Bay Racking", products: "Mixed Goods" }
-    ],
-    5: [
-      { type: "Solar Powered Storage", capacity: "5,000 sq ft", features: "Off-Grid Capability", products: "Mixed Goods" },
-      { type: "Waste Management", capacity: "3,000 sq ft", features: "Composting, Recycling", sustainability: "Zero-waste certified" }
-    ]
-  };
-  
+
   // Handle view warehouse details
   const handleViewWarehouse = (warehouse) => {
     setSelectedWarehouse(warehouse);
@@ -203,23 +203,22 @@ const WarehouseOwnerManagement = () => {
     { accessor: 'email', header: 'Email' },
     { accessor: 'phone', header: 'Phone' },
     { accessor: 'location', header: 'Location' },
-    { 
-      accessor: 'status', 
+    {
+      accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-          row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
           {row.status}
         </span>
       )
     },
-    { 
-      accessor: 'actions', 
+    {
+      accessor: 'actions',
       header: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className="text-blue-600 hover:text-blue-800"
             onClick={(e) => {
               e.stopPropagation();
@@ -231,7 +230,7 @@ const WarehouseOwnerManagement = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
           </button>
-          <button 
+          <button
             className="text-red-600 hover:text-red-800"
             onClick={(e) => {
               e.stopPropagation();
@@ -277,7 +276,7 @@ const WarehouseOwnerManagement = () => {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-medium text-gray-900">Warehouse Details: {selectedWarehouse.name}</h3>
-              <button 
+              <button
                 onClick={() => setShowViewModal(false)}
                 className="text-gray-400 hover:text-gray-500"
               >
@@ -292,41 +291,37 @@ const WarehouseOwnerManagement = () => {
               <nav className="flex -mb-px">
                 <button
                   onClick={() => setActiveTab('details')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    activeTab === 'details'
+                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'details'
                       ? 'border-b-2 border-farmio text-farmio-dark'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Details
                 </button>
                 <button
                   onClick={() => setActiveTab('photos')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    activeTab === 'photos'
+                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'photos'
                       ? 'border-b-2 border-farmio text-farmio-dark'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Photos ({warehousePhotos[selectedWarehouse.id]?.length || 0})
                 </button>
                 <button
                   onClick={() => setActiveTab('facilities')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    activeTab === 'facilities'
+                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'facilities'
                       ? 'border-b-2 border-farmio text-farmio-dark'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Facilities ({warehouseFacilities[selectedWarehouse.id]?.length || 0})
                 </button>
                 <button
                   onClick={() => setActiveTab('keepers')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    activeTab === 'keepers'
+                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'keepers'
                       ? 'border-b-2 border-farmio text-farmio-dark'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Keepers ({warehouseKeepers[selectedWarehouse.id]?.length || 0})
                 </button>
@@ -376,9 +371,8 @@ const WarehouseOwnerManagement = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500">Status</p>
                     <p className="mt-1">
-                      <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-                        selectedWarehouse.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${selectedWarehouse.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
                         {selectedWarehouse.status}
                       </span>
                     </p>

@@ -17,6 +17,77 @@ const FilterIcon = () => (
   </svg>
 );
 
+// Sample order data - only pending orders
+const orders = [
+  {
+    id: 'ORD-10045',
+    customer: 'Fresh Foods Market',
+    buyer: 'Emily Clark',
+    date: '2023-06-20',
+    total: '$1,245.80',
+    items: 8,
+    status: 'Pending',
+    paymentStatus: 'Paid',
+    deliveryDate: '2023-06-25',
+    transport: 'Fast Track Logistics',
+    orderDetails: [
+      { product: 'Organic Tomatoes', quantity: 50, unit: 'kg', price: '$4.50/kg', total: '$225.00' },
+      { product: 'Fresh Lettuce', quantity: 40, unit: 'kg', price: '$3.20/kg', total: '$128.00' },
+      { product: 'Carrots', quantity: 60, unit: 'kg', price: '$2.75/kg', total: '$165.00' },
+      { product: 'Red Onions', quantity: 45, unit: 'kg', price: '$3.10/kg', total: '$139.50' },
+      { product: 'Bell Peppers', quantity: 35, unit: 'kg', price: '$4.80/kg', total: '$168.00' },
+      { product: 'Cucumbers', quantity: 55, unit: 'kg', price: '$2.90/kg', total: '$159.50' },
+      { product: 'Potatoes', quantity: 80, unit: 'kg', price: '$1.95/kg', total: '$156.00' },
+      { product: 'Green Beans', quantity: 30, unit: 'kg', price: '$3.50/kg', total: '$105.00' }
+    ],
+    priority: 'High',
+    expectedProcessingDate: '2023-06-21'
+  },
+  {
+    id: 'ORD-10046',
+    customer: 'Green Market Co-op',
+    buyer: 'Michael Johnson',
+    date: '2023-06-20',
+    total: '$876.40',
+    items: 6,
+    status: 'Pending',
+    paymentStatus: 'Paid',
+    deliveryDate: '2023-06-26',
+    transport: 'Rural Routes Delivery',
+    orderDetails: [
+      { product: 'Organic Apples', quantity: 40, unit: 'kg', price: '$3.80/kg', total: '$152.00' },
+      { product: 'Organic Bananas', quantity: 35, unit: 'kg', price: '$2.95/kg', total: '$103.25' },
+      { product: 'Organic Oranges', quantity: 45, unit: 'kg', price: '$3.50/kg', total: '$157.50' },
+      { product: 'Organic Grapes', quantity: 30, unit: 'kg', price: '$4.95/kg', total: '$148.50' },
+      { product: 'Organic Berries', quantity: 25, unit: 'kg', price: '$7.80/kg', total: '$195.00' },
+      { product: 'Organic Melons', quantity: 30, unit: 'kg', price: '$4.00/kg', total: '$120.00' }
+    ],
+    priority: 'Medium',
+    expectedProcessingDate: '2023-06-22'
+  },
+  {
+    id: 'ORD-10047',
+    customer: 'Healthy Eats Cafe',
+    buyer: 'Sarah Williams',
+    date: '2023-06-21',
+    total: '$436.25',
+    items: 4,
+    status: 'Pending',
+    paymentStatus: 'Unpaid',
+    deliveryDate: '2023-06-25',
+    transport: 'Swift Stream Logistics',
+    orderDetails: [
+      { product: 'Organic Spinach', quantity: 15, unit: 'kg', price: '$5.50/kg', total: '$82.50' },
+      { product: 'Organic Kale', quantity: 12, unit: 'kg', price: '$6.25/kg', total: '$75.00' },
+      { product: 'Organic Arugula', quantity: 10, unit: 'kg', price: '$7.80/kg', total: '$78.00' },
+      { product: 'Organic Mixed Greens', quantity: 25, unit: 'kg', price: '$8.00/kg', total: '$200.00' }
+    ],
+    priority: 'Low',
+    expectedProcessingDate: '2023-06-22'
+  }
+];
+
+
 const PendingOrders = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,76 +95,6 @@ const PendingOrders = () => {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [expandedOrderId, setExpandedOrderId] = useState(null);
-
-  // Sample order data - only pending orders
-  const orders = [
-    {
-      id: 'ORD-10045',
-      customer: 'Fresh Foods Market',
-      buyer: 'Emily Clark',
-      date: '2023-06-20',
-      total: '$1,245.80',
-      items: 8,
-      status: 'Pending',
-      paymentStatus: 'Paid',
-      deliveryDate: '2023-06-25',
-      transport: 'Fast Track Logistics',
-      orderDetails: [
-        { product: 'Organic Tomatoes', quantity: 50, unit: 'kg', price: '$4.50/kg', total: '$225.00' },
-        { product: 'Fresh Lettuce', quantity: 40, unit: 'kg', price: '$3.20/kg', total: '$128.00' },
-        { product: 'Carrots', quantity: 60, unit: 'kg', price: '$2.75/kg', total: '$165.00' },
-        { product: 'Red Onions', quantity: 45, unit: 'kg', price: '$3.10/kg', total: '$139.50' },
-        { product: 'Bell Peppers', quantity: 35, unit: 'kg', price: '$4.80/kg', total: '$168.00' },
-        { product: 'Cucumbers', quantity: 55, unit: 'kg', price: '$2.90/kg', total: '$159.50' },
-        { product: 'Potatoes', quantity: 80, unit: 'kg', price: '$1.95/kg', total: '$156.00' },
-        { product: 'Green Beans', quantity: 30, unit: 'kg', price: '$3.50/kg', total: '$105.00' }
-      ],
-      priority: 'High',
-      expectedProcessingDate: '2023-06-21'
-    },
-    {
-      id: 'ORD-10046',
-      customer: 'Green Market Co-op',
-      buyer: 'Michael Johnson',
-      date: '2023-06-20',
-      total: '$876.40',
-      items: 6,
-      status: 'Pending',
-      paymentStatus: 'Paid',
-      deliveryDate: '2023-06-26',
-      transport: 'Rural Routes Delivery',
-      orderDetails: [
-        { product: 'Organic Apples', quantity: 40, unit: 'kg', price: '$3.80/kg', total: '$152.00' },
-        { product: 'Organic Bananas', quantity: 35, unit: 'kg', price: '$2.95/kg', total: '$103.25' },
-        { product: 'Organic Oranges', quantity: 45, unit: 'kg', price: '$3.50/kg', total: '$157.50' },
-        { product: 'Organic Grapes', quantity: 30, unit: 'kg', price: '$4.95/kg', total: '$148.50' },
-        { product: 'Organic Berries', quantity: 25, unit: 'kg', price: '$7.80/kg', total: '$195.00' },
-        { product: 'Organic Melons', quantity: 30, unit: 'kg', price: '$4.00/kg', total: '$120.00' }
-      ],
-      priority: 'Medium',
-      expectedProcessingDate: '2023-06-22'
-    },
-    {
-      id: 'ORD-10047',
-      customer: 'Healthy Eats Cafe',
-      buyer: 'Sarah Williams',
-      date: '2023-06-21',
-      total: '$436.25',
-      items: 4,
-      status: 'Pending',
-      paymentStatus: 'Unpaid',
-      deliveryDate: '2023-06-25',
-      transport: 'Swift Stream Logistics',
-      orderDetails: [
-        { product: 'Organic Spinach', quantity: 15, unit: 'kg', price: '$5.50/kg', total: '$82.50' },
-        { product: 'Organic Kale', quantity: 12, unit: 'kg', price: '$6.25/kg', total: '$75.00' },
-        { product: 'Organic Arugula', quantity: 10, unit: 'kg', price: '$7.80/kg', total: '$78.00' },
-        { product: 'Organic Mixed Greens', quantity: 25, unit: 'kg', price: '$8.00/kg', total: '$200.00' }
-      ],
-      priority: 'Low',
-      expectedProcessingDate: '2023-06-22'
-    }
-  ];
 
   // Simulate loading
   useEffect(() => {
@@ -108,13 +109,13 @@ const PendingOrders = () => {
   // Handle search
   useEffect(() => {
     if (!orders) return;
-    
+
     let results = orders.filter(order => {
-      return Object.keys(order).some(key => 
+      return Object.keys(order).some(key =>
         order[key].toString().toLowerCase().includes(searchTerm.toLowerCase())
       );
     });
-    
+
     setFilteredData(results);
   }, [searchTerm, orders]);
 
@@ -164,14 +165,14 @@ const PendingOrders = () => {
       setFilteredData(orders);
       return;
     }
-    
+
     let results = orders.filter(order => {
       return Object.entries(selectedFilters).every(([key, value]) => {
         if (!value || value === 'all') return true;
         return order[key] === value;
       });
     });
-    
+
     setFilteredData(results);
   }, [selectedFilters, orders]);
 
@@ -206,7 +207,7 @@ const PendingOrders = () => {
             <OrderStatusBadge status={order.status} />
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
@@ -244,8 +245,8 @@ const PendingOrders = () => {
   // Table columns
   const columns = [
     { key: 'id', header: 'Order ID' },
-    { 
-      key: 'customer', 
+    {
+      key: 'customer',
       header: 'Customer',
       render: (value, row) => (
         <div>
@@ -255,14 +256,14 @@ const PendingOrders = () => {
       )
     },
     { key: 'date', header: 'Order Date' },
-    { 
-      key: 'total', 
+    {
+      key: 'total',
       header: 'Total',
       render: (value) => <span className="font-medium">{value}</span>
     },
     { key: 'items', header: 'Items' },
-    { 
-      key: 'priority', 
+    {
+      key: 'priority',
       header: 'Priority',
       render: (value) => {
         const priorityStyles = {
@@ -270,7 +271,7 @@ const PendingOrders = () => {
           'Medium': 'bg-yellow-100 text-yellow-800',
           'Low': 'bg-blue-100 text-blue-800',
         };
-        
+
         return (
           <span className={`px-2 py-1 text-xs rounded-full ${priorityStyles[value] || 'bg-gray-200 text-gray-800'}`}>
             {value}
@@ -280,12 +281,12 @@ const PendingOrders = () => {
     },
     { key: 'paymentStatus', header: 'Payment' },
     { key: 'expectedProcessingDate', header: 'Process By' },
-    { 
-      key: 'actions', 
+    {
+      key: 'actions',
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className={`text-blue-600 hover:text-blue-800 ${expandedOrderId === row.id ? 'text-blue-800' : ''}`}
             title={expandedOrderId === row.id ? "Hide Details" : "View Details"}
             onClick={(e) => {
@@ -321,7 +322,7 @@ const PendingOrders = () => {
     >
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <StatCard 
+        <StatCard
           title="Pending Orders"
           value={orders.length.toString()}
           subtitle="Awaiting processing"
@@ -329,7 +330,7 @@ const PendingOrders = () => {
           color="yellow"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="High Priority"
           value={orders.filter(o => o.priority === 'High').length.toString()}
           subtitle="Need immediate attention"
@@ -337,7 +338,7 @@ const PendingOrders = () => {
           color="red"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Average Processing Time"
           value="1.2 days"
           subtitle="For this month"
@@ -365,7 +366,7 @@ const PendingOrders = () => {
               </svg>
             </span>
           </div>
-          
+
           {/* Filter Button */}
           <button
             className="flex items-center text-sm py-2 px-4 rounded-md border border-dashboard-border hover:bg-gray-100"
@@ -405,9 +406,9 @@ const PendingOrders = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-4 flex justify-end space-x-2">
-              <button 
+              <button
                 className="px-3 py-1 text-sm text-gray-600 border border-dashboard-border rounded-md hover:bg-gray-100"
                 onClick={() => setSelectedFilters({})}
               >

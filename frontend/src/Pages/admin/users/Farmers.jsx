@@ -8,96 +8,96 @@ const FarmerIcon = () => (
   </svg>
 );
 
+// Sample data for farmer's listing history
+const farmerListingHistory = [
+  { product: 'Organic Rice', date: '2025-06-15', quantity: '250 kg', price: 'LKR 45,000', status: 'Active' },
+  { product: 'Fresh Vegetables Mix', date: '2025-06-10', quantity: '100 kg', price: 'LKR 18,000', status: 'Sold Out' },
+  { product: 'Organic Onions', date: '2025-06-01', quantity: '75 kg', price: 'LKR 11,250', status: 'Active' },
+  { product: 'Banana', date: '2025-05-25', quantity: '120 kg', price: 'LKR 18,000', status: 'Active' },
+  { product: 'Fresh Coconut', date: '2025-05-20', quantity: '200 units', price: 'LKR 40,000', status: 'Sold Out' }
+];
+
+// Sample data for farmer's activities
+const farmerActivities = [
+  { type: 'listing', description: 'Added new listing for Organic Rice', date: '2025-06-15', time: '09:45 AM' },
+  { type: 'price', description: 'Updated price for Fresh Vegetables Mix', date: '2025-06-12', time: '03:20 PM' },
+  { type: 'order', description: 'Received order #ORD-2546 for Fresh Vegetables Mix', date: '2025-06-11', time: '10:15 AM' },
+  { type: 'listing', description: 'Added new listing for Organic Onions', date: '2025-06-01', time: '02:30 PM' },
+  { type: 'order', description: 'Completed delivery for order #ORD-2498', date: '2025-05-28', time: '04:45 PM' },
+  { type: 'listing', description: 'Added new listing for Banana', date: '2025-05-25', time: '11:20 AM' }
+];
+
+// Sample farmer data for demonstration
+const farmers = [
+  {
+    id: 1,
+    name: "Sunil Rathnayake",
+    email: "sunil.rathnayake@farm.lk",
+    phone: "+94 77 234 5678",
+    location: "Anuradhapura",
+    farmSize: "15 acres",
+    crops: "Rice, Vegetables",
+    status: "Active",
+    joinDate: "2023-01-15",
+    lastActive: "2023-06-10"
+  },
+  {
+    id: 2,
+    name: "Priyanka Dissanayake",
+    email: "priyanka@greenvalley.lk",
+    phone: "+94 71 987 6543",
+    location: "Nuwara Eliya",
+    farmSize: "8 acres",
+    crops: "Tea, Vegetables",
+    status: "Active",
+    joinDate: "2022-08-22",
+    lastActive: "2023-06-08"
+  },
+  {
+    id: 3,
+    name: "Malith Fernando",
+    email: "malith@fernandofarms.lk",
+    phone: "+94 76 555 1234",
+    location: "Polonnaruwa",
+    farmSize: "20 acres",
+    crops: "Rice, Maize",
+    status: "Inactive",
+    joinDate: "2022-03-10",
+    lastActive: "2023-02-15"
+  },
+  {
+    id: 4,
+    name: "Kumari Rajapakse",
+    email: "kumari@organicfarms.lk",
+    phone: "+94 70 876 5432",
+    location: "Kandy",
+    farmSize: "5 acres",
+    crops: "Organic Vegetables, Herbs",
+    status: "Active",
+    joinDate: "2023-04-02",
+    lastActive: "2023-06-09"
+
+  },
+  {
+    id: 5,
+    name: "Asanka Weerasinghe",
+    email: "asanka@familyfarm.lk",
+    phone: "+94 75 345 6789",
+    location: "Hambantota",
+    farmSize: "12 acres",
+    crops: "Rice, Beans, Coconut",
+    status: "Active",
+    joinDate: "2022-11-30",
+    lastActive: "2023-06-07"
+  }
+];
+
 const FarmerManagement = () => {
   // State for modals
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedFarmer, setSelectedFarmer] = useState(null);
   const [activeTab, setActiveTab] = useState('profile');
-
-  // Sample data for farmer's listing history
-  const farmerListingHistory = [
-    { product: 'Organic Rice', date: '2025-06-15', quantity: '250 kg', price: 'LKR 45,000', status: 'Active' },
-    { product: 'Fresh Vegetables Mix', date: '2025-06-10', quantity: '100 kg', price: 'LKR 18,000', status: 'Sold Out' },
-    { product: 'Organic Onions', date: '2025-06-01', quantity: '75 kg', price: 'LKR 11,250', status: 'Active' },
-    { product: 'Banana', date: '2025-05-25', quantity: '120 kg', price: 'LKR 18,000', status: 'Active' },
-    { product: 'Fresh Coconut', date: '2025-05-20', quantity: '200 units', price: 'LKR 40,000', status: 'Sold Out' }
-  ];
-  
-  // Sample data for farmer's activities
-  const farmerActivities = [
-    { type: 'listing', description: 'Added new listing for Organic Rice', date: '2025-06-15', time: '09:45 AM' },
-    { type: 'price', description: 'Updated price for Fresh Vegetables Mix', date: '2025-06-12', time: '03:20 PM' },
-    { type: 'order', description: 'Received order #ORD-2546 for Fresh Vegetables Mix', date: '2025-06-11', time: '10:15 AM' },
-    { type: 'listing', description: 'Added new listing for Organic Onions', date: '2025-06-01', time: '02:30 PM' },
-    { type: 'order', description: 'Completed delivery for order #ORD-2498', date: '2025-05-28', time: '04:45 PM' },
-    { type: 'listing', description: 'Added new listing for Banana', date: '2025-05-25', time: '11:20 AM' }
-  ];
-
-  // Sample farmer data for demonstration
-  const farmers = [
-    {
-      id: 1,
-      name: "Sunil Rathnayake",
-      email: "sunil.rathnayake@farm.lk",
-      phone: "+94 77 234 5678",
-      location: "Anuradhapura",
-      farmSize: "15 acres",
-      crops: "Rice, Vegetables",
-      status: "Active",
-      joinDate: "2023-01-15",
-      lastActive: "2023-06-10"
-    },
-    {
-      id: 2,
-      name: "Priyanka Dissanayake",
-      email: "priyanka@greenvalley.lk",
-      phone: "+94 71 987 6543",
-      location: "Nuwara Eliya",
-      farmSize: "8 acres",
-      crops: "Tea, Vegetables",
-      status: "Active",
-      joinDate: "2022-08-22",
-      lastActive: "2023-06-08"
-    },
-    {
-      id: 3,
-      name: "Malith Fernando",
-      email: "malith@fernandofarms.lk",
-      phone: "+94 76 555 1234",
-      location: "Polonnaruwa",
-      farmSize: "20 acres",
-      crops: "Rice, Maize",
-      status: "Inactive",
-      joinDate: "2022-03-10",
-      lastActive: "2023-02-15"
-    },
-    {
-      id: 4,
-      name: "Kumari Rajapakse",
-      email: "kumari@organicfarms.lk",
-      phone: "+94 70 876 5432",
-      location: "Kandy",
-      farmSize: "5 acres",
-      crops: "Organic Vegetables, Herbs",
-      status: "Active",
-      joinDate: "2023-04-02",
-      lastActive: "2023-06-09"
-     
-    },
-    {
-      id: 5,
-      name: "Asanka Weerasinghe",
-      email: "asanka@familyfarm.lk",
-      phone: "+94 75 345 6789",
-      location: "Hambantota",
-      farmSize: "12 acres",
-      crops: "Rice, Beans, Coconut",
-      status: "Active",
-      joinDate: "2022-11-30",
-      lastActive: "2023-06-07"
-    }
-  ];
 
   // Handle view farmer details
   const handleViewFarmer = (farmer) => {
@@ -125,25 +125,24 @@ const FarmerManagement = () => {
     { accessor: 'email', header: 'Email' },
     { accessor: 'phone', header: 'Phone' },
     { accessor: 'location', header: 'Location' },
-   
+
     { accessor: 'crops', header: 'Crops' },
-    { 
-      accessor: 'status', 
+    {
+      accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-          row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
           {row.status}
         </span>
       )
     },
-    
-    { 
-      accessor: 'actions',      header: 'Actions',
+
+    {
+      accessor: 'actions', header: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className="text-blue-600 hover:text-blue-800"
             onClick={(e) => {
               e.stopPropagation();
@@ -155,7 +154,7 @@ const FarmerManagement = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
           </button>
-          <button 
+          <button
             className="text-red-600 hover:text-red-800"
             onClick={(e) => {
               e.stopPropagation();
@@ -212,7 +211,7 @@ const FarmerManagement = () => {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl overflow-hidden max-h-[90vh]">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-lg font-medium text-gray-900">Farmer Details: {selectedFarmer.name}</h3>
-              <button 
+              <button
                 onClick={() => setShowViewModal(false)}
                 className="text-gray-400 hover:text-gray-500"
               >
@@ -221,33 +220,31 @@ const FarmerManagement = () => {
                 </svg>
               </button>
             </div>
-            
+
             {/* Tabs */}
             <div className="border-b border-gray-200">
               <nav className="-mb-px flex" aria-label="Tabs">
                 <button
                   onClick={() => setActiveTab('profile')}
-                  className={`${
-                    activeTab === 'profile' 
-                      ? 'border-farmio text-farmio' 
+                  className={`${activeTab === 'profile'
+                      ? 'border-farmio text-farmio'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  } w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm`}
+                    } w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm`}
                 >
                   Profile Details
                 </button>
                 <button
                   onClick={() => setActiveTab('history')}
-                  className={`${
-                    activeTab === 'history' 
-                      ? 'border-farmio text-farmio' 
+                  className={`${activeTab === 'history'
+                      ? 'border-farmio text-farmio'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  } w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm`}
+                    } w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm`}
                 >
                   Listing History & Activities
                 </button>
               </nav>
             </div>
-            
+
             {/* Tab Content */}
             <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-14rem)]">
               {activeTab === 'profile' && (
@@ -279,9 +276,8 @@ const FarmerManagement = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500">Status</p>
                     <p className="mt-1">
-                      <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-                        selectedFarmer.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${selectedFarmer.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
                         {selectedFarmer.status}
                       </span>
                     </p>
@@ -296,7 +292,7 @@ const FarmerManagement = () => {
                   </div>
                 </div>
               )}
-              
+
               {activeTab === 'history' && (
                 <div>
                   <h4 className="font-medium text-lg mb-4">Product Listings</h4>
@@ -319,11 +315,10 @@ const FarmerManagement = () => {
                             <td className="px-3 py-2 whitespace-nowrap text-sm">{item.quantity}</td>
                             <td className="px-3 py-2 whitespace-nowrap text-sm">{item.price}</td>
                             <td className="px-3 py-2 whitespace-nowrap text-sm">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                item.status === 'Active' ? 'bg-green-100 text-green-800' : 
-                                item.status === 'Sold Out' ? 'bg-gray-100 text-gray-800' :
-                                'bg-yellow-100 text-yellow-800'
-                              }`}>
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.status === 'Active' ? 'bg-green-100 text-green-800' :
+                                  item.status === 'Sold Out' ? 'bg-gray-100 text-gray-800' :
+                                    'bg-yellow-100 text-yellow-800'
+                                }`}>
                                 {item.status}
                               </span>
                             </td>
@@ -332,18 +327,17 @@ const FarmerManagement = () => {
                       </tbody>
                     </table>
                   </div>
-                  
+
                   <h4 className="font-medium text-lg mb-4 mt-8">Recent Activities</h4>
                   <div className="overflow-y-auto max-h-64 pr-2">
                     <div className="space-y-3">
                       {farmerActivities.map((activity, index) => (
                         <div key={index} className="flex items-start border-b border-gray-100 pb-2">
-                          <div className={`mt-1.5 h-2.5 w-2.5 rounded-full flex-shrink-0 ${
-                            activity.type === 'listing' ? 'bg-green-500' : 
-                            activity.type === 'order' ? 'bg-blue-500' : 
-                            activity.type === 'price' ? 'bg-yellow-500' : 
-                            'bg-gray-500'
-                          }`}></div>
+                          <div className={`mt-1.5 h-2.5 w-2.5 rounded-full flex-shrink-0 ${activity.type === 'listing' ? 'bg-green-500' :
+                              activity.type === 'order' ? 'bg-blue-500' :
+                                activity.type === 'price' ? 'bg-yellow-500' :
+                                  'bg-gray-500'
+                            }`}></div>
                           <div className="ml-3">
                             <p className="text-sm text-gray-700">{activity.description}</p>
                             <p className="text-xs text-gray-500">{activity.date} • {activity.time}</p>
@@ -355,7 +349,7 @@ const FarmerManagement = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="px-6 py-3 bg-gray-50 text-right">
               <button
                 onClick={() => setShowViewModal(false)}

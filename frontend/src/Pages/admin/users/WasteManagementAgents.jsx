@@ -8,170 +8,170 @@ const WasteManagementIcon = () => (
   </svg>
 );
 
+// Sample processing technology data
+const processingTechnologies = {
+  1: [
+    {
+      name: "Aerobic Composting System",
+      description: "Large-scale aerobic composting using temperature and moisture control systems",
+      capacity: "50 tons per day",
+      outputProducts: "Organic compost, soil amendments",
+      certifications: "CEA Approved"
+    },
+    {
+      name: "Recyclables Sorting Line",
+      description: "Automated sorting line for separating plastics, paper, and metals",
+      capacity: "40 tons per day",
+      outputProducts: "Sorted recyclable materials",
+      certifications: "ISO 9001"
+    }
+  ],
+  2: [
+    {
+      name: "Biogas Digester System",
+      description: "Anaerobic digestion system for converting organic waste to biogas",
+      capacity: "60 tons per day",
+      outputProducts: "Biogas, liquid fertilizer",
+      certifications: "ISO 14001, Renewable Energy Certified"
+    },
+    {
+      name: "Upcycling Workshop",
+      description: "Manual and semi-automated processing of waste into value-added products",
+      capacity: "15 tons per day",
+      outputProducts: "Crafts, building materials, consumer products",
+      certifications: "Fair Trade Certified"
+    }
+  ],
+  3: [
+    {
+      name: "Specialized Organic Matter Processor",
+      description: "Temperature-controlled composting for specific plant materials",
+      capacity: "30 tons per day",
+      outputProducts: "Premium organic compost, specialized soil mixes",
+      certifications: "Organic Certified, SLSI Certified"
+    }
+  ],
+  4: [
+    {
+      name: "Integrated Waste Processing Facility",
+      description: "Combined treatment facility with multiple processing technologies",
+      capacity: "100 tons per day",
+      outputProducts: "Compost, recyclables, biogas, animal feed",
+      certifications: "ISO 14001, Carbon Trust Standard"
+    },
+    {
+      name: "Advanced Sorting System",
+      description: "AI-powered sorting technology for maximum resource recovery",
+      capacity: "50 tons per day",
+      outputProducts: "Precisely sorted materials for specialized recycling",
+      certifications: "ISO 9001"
+    }
+  ],
+  5: [
+    {
+      name: "Biogas and Fertilizer Plant",
+      description: "Two-stage anaerobic digestion with fertilizer production",
+      capacity: "75 tons per day",
+      outputProducts: "Biogas for electricity, liquid and solid bio-fertilizers",
+      certifications: "Renewable Energy Certified, CEA Approved"
+    },
+    {
+      name: "Animal Feed Processing Unit",
+      description: "Processing of suitable organic waste into animal feed",
+      capacity: "20 tons per day",
+      outputProducts: "Processed animal feed supplements",
+      certifications: "Animal Feed Quality Standard"
+    }
+  ]
+};
+
+// Sample collection history data
+const collectionHistory = {
+  1: [
+    { date: "2023-06-10", farmerId: "F-1023", location: "Jaffna Central", wasteType: "Vegetable trimmings", quantity: "3.5 tons", processingMethod: "Composting" },
+    { date: "2023-06-03", farmerId: "F-1045", location: "Jaffna East", wasteType: "Fruit peels", quantity: "2.8 tons", processingMethod: "Composting" },
+    { date: "2023-05-27", farmerId: "F-1078", location: "Jaffna North", wasteType: "Packaging materials", quantity: "1.2 tons", processingMethod: "Recycling" },
+    { date: "2023-05-20", farmerId: "F-1107", location: "Jaffna West", wasteType: "Mixed vegetable waste", quantity: "4.1 tons", processingMethod: "Composting" }
+  ],
+  2: [
+    { date: "2023-06-08", farmerId: "F-2023", location: "Batticaloa Central", wasteType: "Mixed agricultural waste", quantity: "5.2 tons", processingMethod: "Biogas Production" },
+    { date: "2023-06-01", farmerId: "F-2056", location: "Batticaloa South", wasteType: "Crop residues", quantity: "4.7 tons", processingMethod: "Biogas Production" },
+    { date: "2023-05-25", farmerId: "F-2089", location: "Batticaloa North", wasteType: "Fruit waste", quantity: "3.4 tons", processingMethod: "Upcycling" }
+  ],
+  3: [
+    { date: "2023-05-01", farmerId: "F-3012", location: "Matara East", wasteType: "Plant material", quantity: "2.6 tons", processingMethod: "Specialized Composting" },
+    { date: "2023-04-24", farmerId: "F-3034", location: "Matara Central", wasteType: "Green waste", quantity: "3.1 tons", processingMethod: "Specialized Composting" },
+    { date: "2023-04-17", farmerId: "F-3078", location: "Matara West", wasteType: "Plant trimmings", quantity: "2.8 tons", processingMethod: "Specialized Composting" }
+  ],
+  4: [
+    { date: "2023-06-09", farmerId: "F-4056", location: "Kurunegala Central", wasteType: "Mixed agricultural waste", quantity: "6.3 tons", processingMethod: "Full Spectrum Processing" },
+    { date: "2023-06-02", farmerId: "F-4078", location: "Kurunegala North", wasteType: "Vegetable waste", quantity: "4.8 tons", processingMethod: "Full Spectrum Processing" },
+    { date: "2023-05-26", farmerId: "F-4102", location: "Kurunegala East", wasteType: "Fruit waste", quantity: "5.1 tons", processingMethod: "Full Spectrum Processing" },
+    { date: "2023-05-19", farmerId: "F-4115", location: "Kurunegala South", wasteType: "Crop residues", quantity: "7.2 tons", processingMethod: "Full Spectrum Processing" }
+  ],
+  5: [
+    { date: "2023-06-07", farmerId: "F-5023", location: "Anuradhapura Central", wasteType: "Organic waste", quantity: "4.5 tons", processingMethod: "Biogas Production" },
+    { date: "2023-06-01", farmerId: "F-5045", location: "Anuradhapura East", wasteType: "Animal waste", quantity: "3.2 tons", processingMethod: "Biogas Production" },
+    { date: "2023-05-25", farmerId: "F-5067", location: "Anuradhapura North", wasteType: "Mixed organic waste", quantity: "4.9 tons", processingMethod: "Fertilizer Production" }
+  ]
+};
+
+// Sample environmental metrics data
+const environmentalMetrics = {
+  1: {
+    emissionsReduction: "120 tons CO2e/month",
+    waterSaved: "850,000 liters/month",
+    landfillDiverted: "95 tons/month",
+    energyProduced: "0 kWh/month",
+    carbonFootprint: "Low - 0.2 kg CO2e per kg processed",
+    certifications: ["CEA Certified", "Green Business"],
+    complianceStatus: "Full compliance - last audit May 2023"
+  },
+  2: {
+    emissionsReduction: "180 tons CO2e/month",
+    waterSaved: "620,000 liters/month",
+    landfillDiverted: "72 tons/month",
+    energyProduced: "45,000 kWh/month",
+    carbonFootprint: "Very Low - 0.1 kg CO2e per kg processed",
+    certifications: ["ISO 14001"],
+    complianceStatus: "Full compliance - last audit April 2023"
+  },
+  3: {
+    emissionsReduction: "60 tons CO2e/month",
+    waterSaved: "320,000 liters/month",
+    landfillDiverted: "30 tons/month",
+    energyProduced: "0 kWh/month",
+    carbonFootprint: "Low - 0.25 kg CO2e per kg processed",
+    certifications: ["Organic Certified"],
+    complianceStatus: "Partial compliance - remediation plan in progress"
+  },
+  4: {
+    emissionsReduction: "210 tons CO2e/month",
+    waterSaved: "980,000 liters/month",
+    landfillDiverted: "115 tons/month",
+    energyProduced: "60,000 kWh/month",
+    carbonFootprint: "Very Low - 0.15 kg CO2e per kg processed",
+    certifications: ["ISO 14001", "Carbon Trust"],
+    complianceStatus: "Full compliance - last audit June 2023"
+  },
+  5: {
+    emissionsReduction: "155 tons CO2e/month",
+    waterSaved: "750,000 liters/month",
+    landfillDiverted: "82 tons/month",
+    energyProduced: "70,000 kWh/month",
+    carbonFootprint: "Very Low - 0.12 kg CO2e per kg processed",
+    certifications: ["Renewable Energy Certified"],
+    complianceStatus: "Full compliance - last audit May 2023"
+  }
+};
+
 const WasteManagementAgentManagement = () => {
   // State for modals
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [activeTab, setActiveTab] = useState('details');
-  
-  // Sample processing technology data
-  const processingTechnologies = {
-    1: [
-      { 
-        name: "Aerobic Composting System", 
-        description: "Large-scale aerobic composting using temperature and moisture control systems",
-        capacity: "50 tons per day",
-        outputProducts: "Organic compost, soil amendments",
-        certifications: "CEA Approved"
-      },
-      {
-        name: "Recyclables Sorting Line",
-        description: "Automated sorting line for separating plastics, paper, and metals",
-        capacity: "40 tons per day",
-        outputProducts: "Sorted recyclable materials",
-        certifications: "ISO 9001"
-      }
-    ],
-    2: [
-      {
-        name: "Biogas Digester System",
-        description: "Anaerobic digestion system for converting organic waste to biogas",
-        capacity: "60 tons per day",
-        outputProducts: "Biogas, liquid fertilizer",
-        certifications: "ISO 14001, Renewable Energy Certified"
-      },
-      {
-        name: "Upcycling Workshop",
-        description: "Manual and semi-automated processing of waste into value-added products",
-        capacity: "15 tons per day",
-        outputProducts: "Crafts, building materials, consumer products",
-        certifications: "Fair Trade Certified"
-      }
-    ],
-    3: [
-      {
-        name: "Specialized Organic Matter Processor",
-        description: "Temperature-controlled composting for specific plant materials",
-        capacity: "30 tons per day",
-        outputProducts: "Premium organic compost, specialized soil mixes",
-        certifications: "Organic Certified, SLSI Certified"
-      }
-    ],
-    4: [
-      {
-        name: "Integrated Waste Processing Facility",
-        description: "Combined treatment facility with multiple processing technologies",
-        capacity: "100 tons per day",
-        outputProducts: "Compost, recyclables, biogas, animal feed",
-        certifications: "ISO 14001, Carbon Trust Standard"
-      },
-      {
-        name: "Advanced Sorting System",
-        description: "AI-powered sorting technology for maximum resource recovery",
-        capacity: "50 tons per day",
-        outputProducts: "Precisely sorted materials for specialized recycling",
-        certifications: "ISO 9001"
-      }
-    ],
-    5: [
-      {
-        name: "Biogas and Fertilizer Plant",
-        description: "Two-stage anaerobic digestion with fertilizer production",
-        capacity: "75 tons per day",
-        outputProducts: "Biogas for electricity, liquid and solid bio-fertilizers",
-        certifications: "Renewable Energy Certified, CEA Approved"
-      },
-      {
-        name: "Animal Feed Processing Unit",
-        description: "Processing of suitable organic waste into animal feed",
-        capacity: "20 tons per day",
-        outputProducts: "Processed animal feed supplements",
-        certifications: "Animal Feed Quality Standard"
-      }
-    ]
-  };
 
-  // Sample collection history data
-  const collectionHistory = {
-    1: [
-      { date: "2023-06-10", farmerId: "F-1023", location: "Jaffna Central", wasteType: "Vegetable trimmings", quantity: "3.5 tons", processingMethod: "Composting" },
-      { date: "2023-06-03", farmerId: "F-1045", location: "Jaffna East", wasteType: "Fruit peels", quantity: "2.8 tons", processingMethod: "Composting" },
-      { date: "2023-05-27", farmerId: "F-1078", location: "Jaffna North", wasteType: "Packaging materials", quantity: "1.2 tons", processingMethod: "Recycling" },
-      { date: "2023-05-20", farmerId: "F-1107", location: "Jaffna West", wasteType: "Mixed vegetable waste", quantity: "4.1 tons", processingMethod: "Composting" }
-    ],
-    2: [
-      { date: "2023-06-08", farmerId: "F-2023", location: "Batticaloa Central", wasteType: "Mixed agricultural waste", quantity: "5.2 tons", processingMethod: "Biogas Production" },
-      { date: "2023-06-01", farmerId: "F-2056", location: "Batticaloa South", wasteType: "Crop residues", quantity: "4.7 tons", processingMethod: "Biogas Production" },
-      { date: "2023-05-25", farmerId: "F-2089", location: "Batticaloa North", wasteType: "Fruit waste", quantity: "3.4 tons", processingMethod: "Upcycling" }
-    ],
-    3: [
-      { date: "2023-05-01", farmerId: "F-3012", location: "Matara East", wasteType: "Plant material", quantity: "2.6 tons", processingMethod: "Specialized Composting" },
-      { date: "2023-04-24", farmerId: "F-3034", location: "Matara Central", wasteType: "Green waste", quantity: "3.1 tons", processingMethod: "Specialized Composting" },
-      { date: "2023-04-17", farmerId: "F-3078", location: "Matara West", wasteType: "Plant trimmings", quantity: "2.8 tons", processingMethod: "Specialized Composting" }
-    ],
-    4: [
-      { date: "2023-06-09", farmerId: "F-4056", location: "Kurunegala Central", wasteType: "Mixed agricultural waste", quantity: "6.3 tons", processingMethod: "Full Spectrum Processing" },
-      { date: "2023-06-02", farmerId: "F-4078", location: "Kurunegala North", wasteType: "Vegetable waste", quantity: "4.8 tons", processingMethod: "Full Spectrum Processing" },
-      { date: "2023-05-26", farmerId: "F-4102", location: "Kurunegala East", wasteType: "Fruit waste", quantity: "5.1 tons", processingMethod: "Full Spectrum Processing" },
-      { date: "2023-05-19", farmerId: "F-4115", location: "Kurunegala South", wasteType: "Crop residues", quantity: "7.2 tons", processingMethod: "Full Spectrum Processing" }
-    ],
-    5: [
-      { date: "2023-06-07", farmerId: "F-5023", location: "Anuradhapura Central", wasteType: "Organic waste", quantity: "4.5 tons", processingMethod: "Biogas Production" },
-      { date: "2023-06-01", farmerId: "F-5045", location: "Anuradhapura East", wasteType: "Animal waste", quantity: "3.2 tons", processingMethod: "Biogas Production" },
-      { date: "2023-05-25", farmerId: "F-5067", location: "Anuradhapura North", wasteType: "Mixed organic waste", quantity: "4.9 tons", processingMethod: "Fertilizer Production" }
-    ]
-  };
-  
-  // Sample environmental metrics data
-  const environmentalMetrics = {
-    1: {
-      emissionsReduction: "120 tons CO2e/month",
-      waterSaved: "850,000 liters/month",
-      landfillDiverted: "95 tons/month",
-      energyProduced: "0 kWh/month",
-      carbonFootprint: "Low - 0.2 kg CO2e per kg processed",
-      certifications: ["CEA Certified", "Green Business"],
-      complianceStatus: "Full compliance - last audit May 2023"
-    },
-    2: {
-      emissionsReduction: "180 tons CO2e/month",
-      waterSaved: "620,000 liters/month",
-      landfillDiverted: "72 tons/month",
-      energyProduced: "45,000 kWh/month",
-      carbonFootprint: "Very Low - 0.1 kg CO2e per kg processed",
-      certifications: ["ISO 14001"],
-      complianceStatus: "Full compliance - last audit April 2023"
-    },
-    3: {
-      emissionsReduction: "60 tons CO2e/month",
-      waterSaved: "320,000 liters/month",
-      landfillDiverted: "30 tons/month",
-      energyProduced: "0 kWh/month",
-      carbonFootprint: "Low - 0.25 kg CO2e per kg processed",
-      certifications: ["Organic Certified"],
-      complianceStatus: "Partial compliance - remediation plan in progress"
-    },
-    4: {
-      emissionsReduction: "210 tons CO2e/month",
-      waterSaved: "980,000 liters/month",
-      landfillDiverted: "115 tons/month",
-      energyProduced: "60,000 kWh/month",
-      carbonFootprint: "Very Low - 0.15 kg CO2e per kg processed",
-      certifications: ["ISO 14001", "Carbon Trust"],
-      complianceStatus: "Full compliance - last audit June 2023"
-    },
-    5: {
-      emissionsReduction: "155 tons CO2e/month",
-      waterSaved: "750,000 liters/month",
-      landfillDiverted: "82 tons/month",
-      energyProduced: "70,000 kWh/month",
-      carbonFootprint: "Very Low - 0.12 kg CO2e per kg processed",
-      certifications: ["Renewable Energy Certified"],
-      complianceStatus: "Full compliance - last audit May 2023"
-    }
-  };
-  
   // Handle view agent details
   const handleViewAgent = (agent) => {
     setSelectedAgent(agent);
@@ -278,23 +278,22 @@ const WasteManagementAgentManagement = () => {
     { accessor: 'phone', header: 'Phone' },
     { accessor: 'location', header: 'Location' },
     { accessor: 'wasteTypes', header: 'Waste Types' },
-    { 
-      accessor: 'status', 
+    {
+      accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-          row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
           {row.status}
         </span>
       )
     },
-    { 
-      accessor: 'actions', 
+    {
+      accessor: 'actions',
       header: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className="text-blue-600 hover:text-blue-800"
             onClick={(e) => {
               e.stopPropagation();
@@ -306,7 +305,7 @@ const WasteManagementAgentManagement = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
           </button>
-          <button 
+          <button
             className="text-red-600 hover:text-red-800"
             onClick={(e) => {
               e.stopPropagation();
@@ -363,7 +362,7 @@ const WasteManagementAgentManagement = () => {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
               <h3 className="text-lg font-medium text-gray-900">Waste Management Agent Details: {selectedAgent.name}</h3>
-              <button 
+              <button
                 onClick={() => setShowViewModal(false)}
                 className="text-gray-400 hover:text-gray-500"
               >
@@ -378,41 +377,37 @@ const WasteManagementAgentManagement = () => {
               <nav className="flex -mb-px">
                 <button
                   onClick={() => setActiveTab('details')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    activeTab === 'details'
+                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'details'
                       ? 'border-b-2 border-farmio text-farmio-dark'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Details
                 </button>
                 <button
                   onClick={() => setActiveTab('technologies')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    activeTab === 'technologies'
+                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'technologies'
                       ? 'border-b-2 border-farmio text-farmio-dark'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Processing Technologies ({processingTechnologies[selectedAgent.id]?.length || 0})
                 </button>
                 <button
                   onClick={() => setActiveTab('collections')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    activeTab === 'collections'
+                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'collections'
                       ? 'border-b-2 border-farmio text-farmio-dark'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Collection History ({collectionHistory[selectedAgent.id]?.length || 0})
                 </button>
                 <button
                   onClick={() => setActiveTab('environmental')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    activeTab === 'environmental'
+                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'environmental'
                       ? 'border-b-2 border-farmio text-farmio-dark'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Environmental Metrics
                 </button>
@@ -462,9 +457,8 @@ const WasteManagementAgentManagement = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500">Status</p>
                     <p className="mt-1">
-                      <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-                        selectedAgent.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${selectedAgent.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
                         {selectedAgent.status}
                       </span>
                     </p>
@@ -600,7 +594,7 @@ const WasteManagementAgentManagement = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         <div>
                           <h5 className="font-medium text-gray-800">Energy Production</h5>
@@ -611,7 +605,7 @@ const WasteManagementAgentManagement = () => {
                           <p className="text-gray-600">{environmentalMetrics[selectedAgent.id].carbonFootprint}</p>
                         </div>
                       </div>
-                      
+
                       <div className="mt-4">
                         <h5 className="font-medium text-gray-800">Certifications</h5>
                         <div className="flex flex-wrap gap-2 mt-2">
@@ -622,7 +616,7 @@ const WasteManagementAgentManagement = () => {
                           ))}
                         </div>
                       </div>
-                      
+
                       <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                         <h5 className="font-medium text-gray-800">Compliance Status</h5>
                         <p className="text-gray-600 mt-1">{environmentalMetrics[selectedAgent.id].complianceStatus}</p>
@@ -632,7 +626,7 @@ const WasteManagementAgentManagement = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="px-6 py-3 bg-gray-50 text-right">
               <button
                 onClick={() => setShowViewModal(false)}

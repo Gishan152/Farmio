@@ -8,6 +8,21 @@ const ModeratorIcon = () => (
   </svg>
 );
 
+// Sample activity logs
+const activityLogs = {
+  1: [
+    { date: "2023-06-10 13:45", action: "Content review", details: "Approved 12 product listings" },
+    { date: "2023-06-10 10:22", action: "User report", details: "Handled complaint against farmer ID F-1023" },
+    { date: "2023-06-09 15:30", action: "Content moderation", details: "Removed 3 inappropriate comments" },
+    { date: "2023-06-08 11:15", action: "Support", details: "Responded to 8 user inquiries" }
+  ],
+  2: [
+    { date: "2023-06-09 14:10", action: "Product review", details: "Verified 15 product specifications" },
+    { date: "2023-06-08 09:45", action: "Quality control", details: "Flagged 3 products for review" },
+    { date: "2023-06-07 16:20", action: "Product verification", details: "Approved 7 new product listings" }
+  ]
+};
+
 const ModeratorManagement = () => {
   // State for modals
   const [showAddModal, setShowAddModal] = useState(false);
@@ -44,21 +59,6 @@ const ModeratorManagement = () => {
     reports: { view: false },
     content: { view: false, edit: false, delete: false }
   });
-
-  // Sample activity logs
-  const activityLogs = {
-    1: [
-      { date: "2023-06-10 13:45", action: "Content review", details: "Approved 12 product listings" },
-      { date: "2023-06-10 10:22", action: "User report", details: "Handled complaint against farmer ID F-1023" },
-      { date: "2023-06-09 15:30", action: "Content moderation", details: "Removed 3 inappropriate comments" },
-      { date: "2023-06-08 11:15", action: "Support", details: "Responded to 8 user inquiries" }
-    ],
-    2: [
-      { date: "2023-06-09 14:10", action: "Product review", details: "Verified 15 product specifications" },
-      { date: "2023-06-08 09:45", action: "Quality control", details: "Flagged 3 products for review" },
-      { date: "2023-06-07 16:20", action: "Product verification", details: "Approved 7 new product listings" }
-    ]
-  };
 
   // Generate random password
   const generatePassword = () => {
@@ -212,9 +212,8 @@ const ModeratorManagement = () => {
       accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-          row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
           {row.status}
         </span>
       )
@@ -341,31 +340,28 @@ const ModeratorManagement = () => {
               <nav className="flex -mb-px">
                 <button
                   onClick={() => setAddModalActiveTab('personal')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    addModalActiveTab === 'personal'
+                  className={`px-6 py-3 font-medium text-sm ${addModalActiveTab === 'personal'
                       ? 'border-b-2 border-indigo-600 text-indigo-600'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Personal Details
                 </button>
                 <button
                   onClick={() => setAddModalActiveTab('role')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    addModalActiveTab === 'role'
+                  className={`px-6 py-3 font-medium text-sm ${addModalActiveTab === 'role'
                       ? 'border-b-2 border-indigo-600 text-indigo-600'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Role Assignment
                 </button>
                 <button
                   onClick={() => setAddModalActiveTab('access')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    addModalActiveTab === 'access'
+                  className={`px-6 py-3 font-medium text-sm ${addModalActiveTab === 'access'
                       ? 'border-b-2 border-indigo-600 text-indigo-600'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Access Privileges
                 </button>
@@ -599,31 +595,28 @@ const ModeratorManagement = () => {
               <nav className="flex -mb-px">
                 <button
                   onClick={() => setActiveTab('details')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    activeTab === 'details'
+                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'details'
                       ? 'border-b-2 border-indigo-600 text-indigo-600'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Details
                 </button>
                 <button
                   onClick={() => setActiveTab('permissions')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    activeTab === 'permissions'
+                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'permissions'
                       ? 'border-b-2 border-indigo-600 text-indigo-600'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Access Permissions
                 </button>
                 <button
                   onClick={() => setActiveTab('activity')}
-                  className={`px-6 py-3 font-medium text-sm ${
-                    activeTab === 'activity'
+                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'activity'
                       ? 'border-b-2 border-indigo-600 text-indigo-600'
                       : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   Activity Log ({activityLogs[selectedModerator.id]?.length || 0})
                 </button>
@@ -668,9 +661,8 @@ const ModeratorManagement = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500">Status</p>
                     <p className="mt-1">
-                      <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-                        selectedModerator.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${selectedModerator.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
                         {selectedModerator.status}
                       </span>
                     </p>
