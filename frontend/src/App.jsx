@@ -43,6 +43,8 @@ import VehicleInfo from './Pages/transporter/Sections/VehicleInfo';
 import DeliveryHistory from './Pages/transporter/Sections/DeliveryHistory';
 import RatingsFeedback from './Pages/transporter/Sections/RatingsFeedback';
 import TransporterNotifications from './Pages/transporter/Sections/Notifications';
+
+
 //farmer
 import FarmerLayout from './Pages/Farmer/FarmerLayout';
 import FarmerCrops, { FarmercropsLoader } from './Pages/Farmer/Sections/Crops';
@@ -80,8 +82,8 @@ import SlotManagement from './Pages/Warehouse/Sections/SlotManagement';
 import BookingManagement from './Pages/Warehouse/Sections/BookingManagement';
 import PaymentManagement from './Pages/Warehouse/Sections/PaymentManagement';
 import WasteAgent from './Pages/Warehouse/Sections/WasteAgent';
-import WarehouseNotifications from './Pages/Warehouse/Sections/Notifications';
-import Analytics from './Pages/Warehouse/Sections/Analytics';
+// import WarehouseNotifications from './Pages/Warehouse/Sections/Notifications';
+// import Analytics from './Pages/Warehouse/Sections/Analytics';
 
 // Admin imports
 import AdminLogin from './Pages/admin/Login';
@@ -147,6 +149,7 @@ import transporterRoutes from './Routes/TransporterRoutes';
 import warehouseRoutes from './Routes/WarehouseRoutes';
 import adminRoutes from './Routes/AdminRoutes';
 import moderatorRoutes from './Routes/ModeratorRoutes';
+import { TempCommonProvider } from './Contexts/TempCommonContext';
 
 
 let router = createBrowserRouter([
@@ -179,9 +182,11 @@ let router = createBrowserRouter([
 function App() {
 	return (
 		<UserContextProvider>
-			<GoogleMapsProvider>
-				<RouterProvider router={router} />
-			</GoogleMapsProvider>
+			<TempCommonProvider>
+				<GoogleMapsProvider>
+					<RouterProvider router={router} />
+				</GoogleMapsProvider>
+			</TempCommonProvider>
 		</UserContextProvider>
 	)
 }

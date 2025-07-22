@@ -5,10 +5,18 @@ import { StarIcon, CheckBadgeIcon } from '@heroicons/react/24/solid';
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import wheat from "../../../Assets/Buyer/Crops/wheat.webp";
 import corn from "../../../Assets/Buyer/Crops/corn.jpeg";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLoaderData, useNavigate } from 'react-router-dom';
 import { useSavesContext } from '../../../Contexts/Buyer/SavesContext';
+import api from '@/API/client';
 
-export function cropsLoader() {
+export async function cropsLoader() {
+
+    const res = await api.post('/api/order/get-crops')
+    const crops = res.data;
+    console.log("Crops loaded: ", crops);
+
+    return crops;
+
     return [
         {
             id: 1,
@@ -99,8 +107,13 @@ export function cropsLoader() {
 }
 
 export default function Crops() {
-    // const crops = useLoaderData();
-    const allCrops = cropsLoader();
+    let allCrops = useLoaderData();
+    console.log("All crops : ", allCrops)
+    allCrops = allCrops.map(crop => {
+        crop.imageUrl = Math.random() >= 0.5 ? wheat : corn;
+        return crop;
+    });
+    // const allCrops = cropsLoader();
     const { items: savedItems, addItem: addItemToSaves, removeItem: removeItemFromSaves } = useSavesContext();
     const navigate = useNavigate();
 

@@ -3,14 +3,17 @@ import { useEffect, useState } from "react";
 import { CheckBadgeIcon, CheckCircleIcon, XMarkIcon, ShoppingCartIcon } from "@heroicons/react/24/solid";
 import { useToast } from "../../../Contexts/ToastContext";
 import { useOrderContext } from "../../../Contexts/Buyer/OrdersContexts";
+import api from "@/API/client";
 
 const FREE_SHIPPING_THRESHOLD = 85;
 
 const OrderConfirmation = () => {
 
     const [subtotal, setSubtotal] = useState(0);
-    const {orders, addOrder} = useOrderContext();
+    const {orders, addOrders} = useOrderContext();
     const [orderPlaced, setOrderPlaced] = useState(false)
+    const [loadingOrder, setLoadingOrder] = useState(false);
+    const [loadingPayment, setLoadingPayment] = useState(false);
     // const { items } = useSavesContext()
     const location = useLocation();
     console.log("location : ", location)
@@ -27,21 +30,49 @@ const OrderConfirmation = () => {
     const remaining = Math.max(FREE_SHIPPING_THRESHOLD - subtotal, 0);
 
     const handlePlaceOrder = () => {
-        addOrder({
-            id: String(orders.length),
-            status: "PENDING",
-            total: subtotal,
-            transport: "BY_BUYER",
-            items
+        setLoadingOrder(true);
+        console.log("items : ", items)
+        api.post('/api/order/create', {
+            items: items.map(item => ({ 
+                cropId: item.id,
+                quantity: item.quantity,
+                pricePerUnit: item.pricePerUnit,
+                unitMeasurement: item.unitMeasurement
+            }))
+        }).then(res => {
+            console.log("Order placed successfully: ", res.data);
+            addOrders(res.data)
+            push("⚡ Order placed")
+            setTimeout(() => {
+                setOrderPlaced(true)
+                setLoadingOrder(false);
+            }, 2000)
+        }).catch(err => {
+            console.error("Error placing order: ", err);
+            push("❌ Error placing order. Please try again.")
+            setLoadingOrder(false);
         })
-        push("⚡ Order placed")
-        setTimeout(() => {
-            setOrderPlaced(true)
-        }, 2000)
+            // return;
+        // addOrders({
+        //     id: String(orders.length),
+        //     status: "PENDING",
+        //     total: subtotal,
+        //     transport: "BY_BUYER",
+        //     items
+        // })
+        // push("⚡ Order placed")
+        // setTimeout(() => {
+        //     setOrderPlaced(true)
+        // }, 2000)
     }
 
     const handlePayment = () => {
-        // navigate("../transport-confirmation")
+        setLoadingPayment(true);
+        // Simulate payment process
+        setTimeout(() => {
+            setLoadingPayment(false);
+            // navigate("../transport-confirmation")
+        }, 2000);
     }
 
     return (
@@ -106,16 +137,24 @@ const OrderConfirmation = () => {
                         {orderPlaced ? (
                             <button
                                 onClick={handlePayment}
-                                className="mt-4 w-full py-3 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition"
+                                className={`mt-4 w-full py-3 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition flex items-center justify-center gap-2 ${loadingPayment ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                disabled={loadingPayment}
                             >
-                                Make Payment
+                                {loadingPayment && (
+                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                                )}
+                                {loadingPayment ? "Processing..." : "Make Payment"}
                             </button>
                         ) : (
                             <button
                                 onClick={handlePlaceOrder}
-                                className="mt-4 w-full py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                                className={`mt-4 w-full py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2 ${loadingOrder ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                disabled={loadingOrder}
                             >
-                                Place Order
+                                {loadingOrder && (
+                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                                )}
+                                {loadingOrder ? "Placing Order..." : "Place Order"}
                             </button>
                         )}
                     </div>

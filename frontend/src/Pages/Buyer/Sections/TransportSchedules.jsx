@@ -5,35 +5,44 @@ import CustomModal from '../../../Components/CustomModel';
 import { ChevronRightIcon, TruckIcon, CheckCircleIcon, ClockIcon, ExclamationCircleIcon } from '@heroicons/react/24/solid';
 import { useTransportsContext } from '../../../Contexts/Buyer/TransportContext';
 
+
 export default function TransportJobs() {
 	const { orderId } = useParams();
 	const { jobs, addJob } = useTransportsContext();
-	const [jobsFiltered, setJobsFiltered] = useState(jobs);
-
-	// Modal state
 	const [modalOpen, setModalOpen] = useState(false);
-const [newJob, setNewJob] = useState({
-	vehicleType: '',
-	pickupLocation: '',
-	dropOffLocation: '',
-	items: [
-		{ type: '', quantity: '' }
-	],
-});
+	const [newJob, setNewJob] = useState({
+		vehicleType: '',
+		pickupLocation: '',
+		dropOffLocation: '',
+		items: [ { type: '', quantity: '' } ],
+	});
+	const [filters, setFilters] = useState({
+		vehicleType: '',
+		status: '',
+		pickupLocation: '',
+		date: ''
+	});
 
-	useEffect(() => {
-		if (orderId) {
-			setJobsFiltered(jobs.filter(j => j.orderId === orderId));
-		} else {
-			setJobsFiltered(jobs);
-		}
-	}, [orderId, jobs]);
+	// Filtering logic
+	const jobsFiltered = jobs.filter(j => {
+		if (orderId && j.orderId !== orderId) return false;
+		if (filters.vehicleType && j.vehicleType !== filters.vehicleType) return false;
+		if (filters.status && j.status !== filters.status) return false;
+		if (filters.pickupLocation && j.pickupLocation !== filters.pickupLocation) return false;
+		if (filters.date && j.createdAt && !j.createdAt.startsWith(filters.date)) return false;
+		return true;
+	});
 
 	// Stat cards
 	const totalJobs = jobsFiltered.length;
 	const completed = jobsFiltered.filter(j => j.status === 'Completed').length;
 	const inProgress = jobsFiltered.filter(j => j.status === 'In Progress').length;
 	const pending = jobsFiltered.filter(j => j.status === 'Pending').length;
+
+	// Unique options for filters
+	const vehicleTypeOptions = Array.from(new Set(jobs.map(j => j.vehicleType).filter(Boolean)));
+	const statusOptions = Array.from(new Set(jobs.map(j => j.status).filter(Boolean)));
+	const pickupLocationOptions = Array.from(new Set(jobs.map(j => j.pickupLocation).filter(Boolean)));
 
 	return (
 		<div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
@@ -56,49 +65,106 @@ const [newJob, setNewJob] = useState({
 				</div>
 			</div>
 
-			{/* Stat cards styled like Orders.jsx */}
-			<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-				{/* Total Jobs */}
-				<div className="bg-white dark:bg-gray-900 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
-					<div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 dark:bg-green-900">
-						<TruckIcon className="w-6 h-6 text-green-600 dark:text-green-300" />
-					</div>
-					<div>
-						<div className="text-xs text-gray-500">Total Jobs</div>
-						<div className="text-xl font-bold text-green-700 dark:text-green-300">{totalJobs}</div>
-					</div>
+
+
+		{/* Stat cards styled like Orders.jsx */}
+		<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+			{/* Total Jobs */}
+			<div className="bg-white dark:bg-gray-900 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+				<div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 dark:bg-green-900">
+					<TruckIcon className="w-6 h-6 text-green-600 dark:text-green-300" />
 				</div>
-				{/* Completed */}
-				<div className="bg-white dark:bg-gray-900 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
-					<div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900">
-						<CheckCircleIcon className="w-6 h-6 text-blue-600 dark:text-blue-300" />
-					</div>
-					<div>
-						<div className="text-xs text-gray-500">Completed</div>
-						<div className="text-xl font-bold text-blue-700 dark:text-blue-300">{completed}</div>
-					</div>
-				</div>
-				{/* In Progress */}
-				<div className="bg-white dark:bg-gray-900 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
-					<div className="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900">
-						<ClockIcon className="w-6 h-6 text-yellow-600 dark:text-yellow-300" />
-					</div>
-					<div>
-						<div className="text-xs text-gray-500">In Progress</div>
-						<div className="text-xl font-bold text-yellow-600 dark:text-yellow-300">{inProgress}</div>
-					</div>
-				</div>
-				{/* Pending */}
-				<div className="bg-white dark:bg-gray-900 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
-					<div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800">
-						<ExclamationCircleIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
-					</div>
-					<div>
-						<div className="text-xs text-gray-500">Pending</div>
-						<div className="text-xl font-bold text-gray-700 dark:text-gray-300">{pending}</div>
-					</div>
+				<div>
+					<div className="text-xs text-gray-500">Total Jobs</div>
+					<div className="text-xl font-bold text-green-700 dark:text-green-300">{totalJobs}</div>
 				</div>
 			</div>
+			{/* Completed */}
+			<div className="bg-white dark:bg-gray-900 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+				<div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900">
+					<CheckCircleIcon className="w-6 h-6 text-blue-600 dark:text-blue-300" />
+				</div>
+				<div>
+					<div className="text-xs text-gray-500">Completed</div>
+					<div className="text-xl font-bold text-blue-700 dark:text-blue-300">{completed}</div>
+				</div>
+			</div>
+			{/* In Progress */}
+			<div className="bg-white dark:bg-gray-900 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+				<div className="flex items-center justify-center w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900">
+					<ClockIcon className="w-6 h-6 text-yellow-600 dark:text-yellow-300" />
+				</div>
+				<div>
+					<div className="text-xs text-gray-500">In Progress</div>
+					<div className="text-xl font-bold text-yellow-600 dark:text-yellow-300">{inProgress}</div>
+				</div>
+			</div>
+			{/* Pending */}
+			<div className="bg-white dark:bg-gray-900 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+				<div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800">
+					<ExclamationCircleIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+				</div>
+				<div>
+					<div className="text-xs text-gray-500">Pending</div>
+					<div className="text-xl font-bold text-gray-700 dark:text-gray-300">{pending}</div>
+				</div>
+			</div>
+		</div>
+
+		{/* Filters Card (moved below stat cards) */}
+		<div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+			<div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+				<div>
+					<label className="block text-xs font-medium text-gray-600 mb-1">Vehicle Type</label>
+					<select
+						value={filters.vehicleType}
+						onChange={e => setFilters(f => ({ ...f, vehicleType: e.target.value }))}
+						className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+					>
+						<option value="">All Types</option>
+						{vehicleTypeOptions.map(v => <option key={v} value={v}>{v}</option>)}
+					</select>
+				</div>
+				<div>
+					<label className="block text-xs font-medium text-gray-600 mb-1">Status</label>
+					<select
+						value={filters.status}
+						onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
+						className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+					>
+						<option value="">All Statuses</option>
+						{statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
+					</select>
+				</div>
+				<div>
+					<label className="block text-xs font-medium text-gray-600 mb-1">Pickup Location</label>
+					<select
+						value={filters.pickupLocation}
+						onChange={e => setFilters(f => ({ ...f, pickupLocation: e.target.value }))}
+						className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+					>
+						<option value="">All Locations</option>
+						{pickupLocationOptions.map(p => <option key={p} value={p}>{p}</option>)}
+					</select>
+				</div>
+				<div>
+					<label className="block text-xs font-medium text-gray-600 mb-1">Created Date</label>
+					<input
+						type="date"
+						value={filters.date}
+						onChange={e => setFilters(f => ({ ...f, date: e.target.value }))}
+						className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+					/>
+				</div>
+				<button
+					type="button"
+					onClick={() => setFilters({ vehicleType: '', status: '', pickupLocation: '', date: '' })}
+					className="ml-auto px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300 transition"
+				>
+					Clear Filters
+				</button>
+			</div>
+		</div>
 
 			{/* Jobs Table */}
 			<div className="space-y-4">
@@ -130,10 +196,10 @@ const [newJob, setNewJob] = useState({
 										<span>Job ID:</span>
 										<Link to={`/buyer/transport/schedules/${job.id}`} className="hover:underline font-medium text-green-700 dark:text-green-300">{job.id}</Link>
 									</div>
-									<div className="flex items-center gap-2 text-gray-500 dark:text-gray-300 text-sm">
+									{/* <div className="flex items-center gap-2 text-gray-500 dark:text-gray-300 text-sm">
 										<span>Remaining:</span>
 										<span className="font-semibold text-gray-700 dark:text-gray-100">{job.capacityRemaining} kg</span>
-									</div>
+									</div> */}
 								</div>
 								<div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-300">
 									<span>Pickup: <span className="font-medium text-gray-800 dark:text-gray-100">{job.pickupLocation}</span></span>

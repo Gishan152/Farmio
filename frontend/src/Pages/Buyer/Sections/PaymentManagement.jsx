@@ -176,15 +176,26 @@ export default function PaymentManagement() {
     const [showFilters, setShowFilters] = useState(false);
     const [filters, setFilters] = useState({
         status: 'all',
+        type: 'all',
+        minAmount: '',
+        maxAmount: '',
         startDate: '',
         endDate: '',
         search: ''
     });
 
-    // Filtering logic (simple for demo)
+    // Filtering logic (extended)
     const filteredPayments = payments.filter(payment => {
         if (filters.status !== 'all' && payment.status !== filters.status) return false;
-        if (filters.search && !payment.bookingId.toLowerCase().includes(filters.search.toLowerCase())) return false;
+        if (filters.type !== 'all' && payment.type !== filters.type) return false;
+        if (filters.minAmount && payment.totalAmount < Number(filters.minAmount)) return false;
+        if (filters.maxAmount && payment.totalAmount > Number(filters.maxAmount)) return false;
+        if (filters.startDate && payment.paymentDate < filters.startDate) return false;
+        if (filters.endDate && payment.paymentDate > filters.endDate) return false;
+        if (filters.search && !(
+            (payment.bookingId && payment.bookingId.toLowerCase().includes(filters.search.toLowerCase())) ||
+            (payment.orderId && payment.orderId.toLowerCase().includes(filters.search.toLowerCase()))
+        )) return false;
         return true;
     });
 
@@ -331,38 +342,96 @@ export default function PaymentManagement() {
                 </div>
             </CustomModal>
 
-                {/* Filters */}
-                {showFilters && (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                                <select
-                                    value={filters.status}
-                                    onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
-                                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                >
-                                    <option value="all">All Statuses</option>
-                                    <option value="settled">Settled</option>
-                                    <option value="refunded">Refunded</option>
-                                </select>
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Search</label>
-                                <div className="relative">
-                                    <MagnifyingGlassIcon className="h-4 w-4 text-gray-400 absolute left-2 top-1/2 transform -translate-y-1/2" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search by booking ID..."
-                                        value={filters.search}
-                                        onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
-                                        className="w-full pl-8 pr-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                    />
-                                </div>
+                {/* Filters Card */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-7 gap-3 items-end">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+                            <select
+                                value={filters.status}
+                                onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            >
+                                <option value="all">All Statuses</option>
+                                <option value="settled">Settled</option>
+                                <option value="refunded">Refunded</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
+                            <select
+                                value={filters.type}
+                                onChange={e => setFilters(f => ({ ...f, type: e.target.value }))}
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            >
+                                <option value="all">All Types</option>
+                                <option value="Warehouse Booking">Warehouse Booking</option>
+                                <option value="Warehouse Extension">Warehouse Extension</option>
+                                <option value="Order">Order</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Min Amount</label>
+                            <input
+                                type="number"
+                                value={filters.minAmount}
+                                onChange={e => setFilters(f => ({ ...f, minAmount: e.target.value }))}
+                                placeholder="Min"
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                min="0"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Max Amount</label>
+                            <input
+                                type="number"
+                                value={filters.maxAmount}
+                                onChange={e => setFilters(f => ({ ...f, maxAmount: e.target.value }))}
+                                placeholder="Max"
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                min="0"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Start Date</label>
+                            <input
+                                type="date"
+                                value={filters.startDate}
+                                onChange={e => setFilters(f => ({ ...f, startDate: e.target.value }))}
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">End Date</label>
+                            <input
+                                type="date"
+                                value={filters.endDate}
+                                onChange={e => setFilters(f => ({ ...f, endDate: e.target.value }))}
+                                className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                            />
+                        </div>
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Search</label>
+                            <div className="relative">
+                                <MagnifyingGlassIcon className="h-4 w-4 text-gray-400 absolute left-2 top-1/2 transform -translate-y-1/2" />
+                                <input
+                                    type="text"
+                                    placeholder="Search by booking/order ID..."
+                                    value={filters.search}
+                                    onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
+                                    className="w-full pl-8 pr-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                />
                             </div>
                         </div>
+                        <button
+                            type="button"
+                            onClick={() => setFilters({ status: 'all', type: 'all', minAmount: '', maxAmount: '', startDate: '', endDate: '', search: '' })}
+                            className="ml-auto px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300 transition"
+                        >
+                            Clear Filters
+                        </button>
                     </div>
-                )}
+                </div>
 
                 {/* Payment Table */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200">
