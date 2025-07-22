@@ -208,6 +208,7 @@ export default function Requests() {
                                             <th className="p-2 text-left font-semibold">Quantity</th>
                                             <th className="p-2 text-left font-semibold">Price Range</th>
                                             <th className="p-2 text-left font-semibold">Deadline</th>
+                                            <th className="p-2 text-left font-semibold">State</th>
                                             <th className="p-2 text-left font-semibold">Actions</th>
                                         </tr>
                                     </thead>
@@ -229,6 +230,9 @@ export default function Requests() {
                                                 <td className="p-2">{req.quantity} {req.unitMeasurement}</td>
                                                 <td className="p-2">Rs {req.priceRange?.min}–{req.priceRange?.max}/kg</td>
                                                 <td className="p-2">{req.deadline}</td>
+                                                <td className="p-2">
+                                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${req.state === 'OPEN' ? 'bg-green-100 text-green-700' : req.state === 'CLOSED' ? 'bg-gray-200 text-gray-700' : 'bg-red-100 text-red-700'}`}>{req.state}</span>
+                                                </td>
                                                 <td className="p-2">
                                                     <Link
                                                         to={`./${req.id}`}

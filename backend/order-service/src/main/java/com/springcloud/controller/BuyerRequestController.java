@@ -15,9 +15,13 @@ public class BuyerRequestController {
     @Autowired
     private BuyerRequestService service;
 
+
+    // Only show OPEN requests to buyers
     @GetMapping
     public List<BuyerRequestDto> getAll() {
-        return service.getAllRequests();
+        return service.getAllRequests().stream()
+                .filter(r -> "OPEN".equals(r.getState()))
+                .toList();
     }
 
     @GetMapping("/{id}")
@@ -57,6 +61,20 @@ public class BuyerRequestController {
                     .orElse(ResponseEntity.notFound().build());
         } catch (RuntimeException e) {
             return ResponseEntity.status(403).build();
+        }
+    }
+
+        // Cancel a buyer request (only if OPEN)
+    @PostMapping("/cancel/{id}")
+    public ResponseEntity<?> cancelRequest(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-Roles") String rolesCsv) {
+        try {
+            var canceled = service.cancelRequest(id, Long.valueOf(userId), rolesCsv);
+            return ResponseEntity.ok(canceled);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
         }
     }
 

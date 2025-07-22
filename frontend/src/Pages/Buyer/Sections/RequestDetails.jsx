@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useToast } from '../../../Contexts/ToastContext';
+import api from '../../../API/client';
 import { useRequestsContext } from '../../../Contexts/Buyer/BuyerRequestContext';
-import { ArchiveBoxIcon, CalendarIcon, ArrowPathIcon, EyeIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/solid';
+import { ArchiveBoxIcon, CalendarIcon, ArrowPathIcon, EyeIcon, ChatBubbleLeftRightIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/solid';
 // Mock bids data
 // src/data/sampleRequests.js
 export const sampleRequests = [
@@ -58,7 +59,7 @@ export const mockBids = [
 
 
 export default function RequestDetails() {
-    const {requests, requestBids, updateBids, loading} = useRequestsContext();
+    const {requests, requestBids, updateBids, loading, fetchBidsForRequest} = useRequestsContext();
     const { requestId } = useParams();
     const toast = useToast();
     const [req, setReq] = useState(null);
@@ -69,12 +70,19 @@ export default function RequestDetails() {
     const [filterDate, setFilterDate] = useState('');
     const navigate = useNavigate();
 
+    console.log("================ Requests : ", requests);
+    console.log("================ Request Bids : ", requestBids);
+
     useEffect(() => {
         const found = requests.find(r => String(r.id) === String(requestId));
         setReq(found);
-        updateBids(requestId, mockBids);
-        setBids(requestBids[requestId]);
-    }, [requestId, requests, requestBids, updateBids]);
+        if(found){
+            if (requestId && !requestBids[requestId]) {
+                fetchBidsForRequest(requestId);
+            }
+            setBids(requestBids[requestId] || []);
+        }
+    }, [requestId, requests, requestBids, fetchBidsForRequest]);
 
     if (loading) {
         return (
@@ -98,9 +106,32 @@ export default function RequestDetails() {
         return matchesProvider && matchesPriceMin && matchesPriceMax && matchesDate;
     });
 
-    const handleAccept = bid => {
-        toast.push(`✅ Accepted bid from ${bid.provider}`);
-        // TODO: API call
+
+    const handleAccept = async (bid) => {
+        try {
+            const res = await api.post(`/api/order/buyer-requests/bids/accept/${bid.id}`);
+            toast.push(`✅ Accepted bid from Farmer ID ${bid.farmerId}`);
+            // Update local state: set request to CLOSED and update bids
+            setReq(prev => prev ? { ...prev, state: 'CLOSED' } : prev);
+            setBids(prevBids => prevBids.map(b =>
+                b.id === bid.id
+                    ? { ...b, bidStatus: 'ACCEPTED' }
+                    : { ...b, bidStatus: 'REJECTED' }
+            ));
+        } catch (err) {
+            toast.push('❌ Failed to accept bid.');
+        }
+    };
+
+    const handleCancelRequest = async () => {
+        try {
+            await api.post(`/api/order/buyer-requests/cancel/${req.id}`);
+            toast.push('✅ Request canceled.');
+            setReq({ ...req, state: 'CANCELED' });
+        } catch (err) {
+
+            toast.push('❌ Failed to cancel request.');
+        }
     };
 
     return (
@@ -125,7 +156,7 @@ export default function RequestDetails() {
                 </div>
 
                 {/* Stat Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                     <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
                         <div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
                         <ArchiveBoxIcon className="h-7 w-7 text-green-500 mr-3 z-10" />
@@ -158,7 +189,26 @@ export default function RequestDetails() {
                             <p className="text-lg font-bold text-gray-900">Rs {req.priceMin || req.priceRange?.min}–{req.priceMax || req.priceRange?.max}/kg</p>
                         </div>
                     </div>
+                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+                        <div className={`absolute left-0 top-0 h-full w-1 ${req.state === 'OPEN' ? 'bg-green-500' : req.state === 'CLOSED' ? 'bg-gray-400' : 'bg-red-500'} rounded-l-lg`} />
+                        <span className={`h-7 w-7 mr-3 z-10 font-bold text-xl flex items-center justify-center ${req.state === 'OPEN' ? 'text-green-500' : req.state === 'CLOSED' ? 'text-gray-500' : 'text-red-500'}`}>S</span>
+                        <div className="z-10">
+                            <p className="text-xs font-medium text-gray-500">Request State</p>
+                            <p className={`text-lg font-bold ${req.state === 'OPEN' ? 'text-green-700' : req.state === 'CLOSED' ? 'text-gray-700' : 'text-red-700'}`}>{req.state}</p>
+                        </div>
+                    </div>
                 </div>
+                {/* State Card */}
+                {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-2 mb-2">
+                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+                        <div className={`absolute left-0 top-0 h-full w-1 ${req.state === 'OPEN' ? 'bg-green-500' : req.state === 'CLOSED' ? 'bg-gray-400' : 'bg-red-500'} rounded-l-lg`} />
+                        <span className={`h-7 w-7 mr-3 z-10 font-bold text-xl flex items-center justify-center ${req.state === 'OPEN' ? 'text-green-500' : req.state === 'CLOSED' ? 'text-gray-500' : 'text-red-500'}`}>S</span>
+                        <div className="z-10">
+                            <p className="text-xs font-medium text-gray-500">Request State</p>
+                            <p className={`text-lg font-bold ${req.state === 'OPEN' ? 'text-green-700' : req.state === 'CLOSED' ? 'text-gray-700' : 'text-red-700'}`}>{req.state}</p>
+                        </div>
+                    </div>
+                </div> */}
 
                 {/* Details Card */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col h-full p-6 relative group transition hover:shadow-lg mt-4">
@@ -179,6 +229,18 @@ export default function RequestDetails() {
                             Bids
                         </span>
                     </div>
+                    {/* Cancel button if request is OPEN */}
+                    {req.state === 'OPEN' && (
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={handleCancelRequest}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition shadow w-auto"
+                            >
+                                Cancel Request
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Bids Section */}
@@ -196,6 +258,7 @@ export default function RequestDetails() {
                                 className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-200"
                             />
                         </div>
+
                         <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">Min Price</label>
                             <input
@@ -241,27 +304,33 @@ export default function RequestDetails() {
                         </button>
                     </div>
                     {filteredBids.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-8">
-                            <p className="text-gray-600 dark:text-gray-300 text-lg">No bids found.</p>
+                        <div className="flex flex-col items-center justify-center py-12 text-gray-500 bg-white rounded-lg shadow-sm border border-gray-200">
+                            <ClipboardDocumentListIcon className="h-12 w-12 mb-2 text-gray-300" />
+                            <p className="text-lg font-semibold">No bids found</p>
+                            <p className="text-sm text-gray-400 mt-1">You haven't received any bids for this request yet.</p>
                         </div>
                     ) : (
                         <ul className="grid gap-4 md:grid-cols-1">
                             {filteredBids.map(bid => (
                                 <li key={bid.id} className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center group hover:shadow-lg transition">
                                     <div className="flex-1">
-                                        <p className="text-lg font-medium dark:text-gray-100">{bid.provider}</p>
+                                        <p className="text-lg font-medium dark:text-gray-100">Farmer ID: {bid.farmerId}</p>
                                         <div className="flex flex-wrap gap-2 text-sm mb-1 mt-1">
-                                            <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">Price: Rs {bid.price}</span>
-                                            <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">Delivery by: {bid.proposedDate}</span>
+                                            <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">Bid Price: Rs {bid.biddingPrice}</span>
+                                            <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">Delivery by: {bid.deadline}</span>
+                                            <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">Status: {bid.bidStatus}</span>
                                         </div>
                                         {bid.notes && <p className="text-gray-500 dark:text-gray-400 text-xs italic">Note: {bid.notes}</p>}
                                     </div>
-                                    <button
-                                        onClick={() => handleAccept(bid)}
-                                        className="mt-4 md:mt-0 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition shadow"
-                                    >
-                                        Accept Bid
-                                    </button>
+                                    {/* Only show Accept Bid if request is OPEN */}
+                                    {req.state === 'OPEN' && (
+                                        <button
+                                            onClick={() => handleAccept(bid)}
+                                            className="mt-4 md:mt-0 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition shadow"
+                                        >
+                                            Accept Bid
+                                        </button>
+                                    )}
                                 </li>
                             ))}
                         </ul>
