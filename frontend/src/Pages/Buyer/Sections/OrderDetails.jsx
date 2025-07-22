@@ -53,27 +53,39 @@ export default function OrderDetails() {
         );
     }
 
-    const handleMakePayment = () => {
-        updateOrder(orderId, { status: "PROCESSING" })
-        closeModal();
+    const handleMakePayment = async () => {
+        try {
+            // Call backend to make payment
+            const res = await api.post('/api/order/pay', { orderId });
+            // Update local state with new order status and paymentId if present
+            if (res.data) {
+                updateOrder(orderId, { status: res.data.status, paymentId: res.data.paymentId });
+            } else {
+                updateOrder(orderId, { status: "PROCESSING" });
+            }
+        } catch (err) {
+            console.error("Payment failed:", err);
+            // Optionally show error to user
+        } finally {
+            closeModal();
+        }
     }
 
     const handleCreateTransport = () => {
         console.log("Creating transport for order", orderId);
-        // call API or dispatch action...
-        updateOrder(orderId, { transport: "BY_BUYER_SYSTEM" })
-        addJob({
+        updateOrder(orderId, { transport: "BY_BUYER_SYSTEM" });
+        const job = {
             id: "TJ-10001",
             orderId,
             status: "PENDING",
             vehicleType: 'Small Van',
-            capacityRemaining: '30 kg',
             items: items.map(i => { i.load_id = "LD-1001"; i.pickup_confirmation = "PENDING"; return i }),
             createdAt: '2025-07-01',
             // pickupLocations: ["farm1", "farm2", "farm3"],
             pickupLocation: "farm location",
             dropOffLocation: "buyer location",
-        })
+        };
+        addJob(job);
         closeModal();
     };
 
