@@ -54,6 +54,32 @@ const AgentProfile = () => {
     serviceType: "Agricultural & Organic Waste Collection",
     serviceLicense: "WM-LK-2024-0587",
     yearsExperience: "7",
+    joinedDate: "2024-03-15",
+    contactPerson: "Chaminda Rathnayake",
+    contactPersonRole: "Operations Manager",
+    
+    // Processing Information
+    processingCapacityPerDay: "60",
+    certifications: ["ISO 14001", "Renewable Energy Certified", "Fair Trade Certified"],
+    serviceTypes: ["Biogas Production", "Upcycling", "Composting"],
+    processingTechnologies: [
+      {
+        id: 1,
+        name: "Biogas Digester System",
+        description: "Anaerobic digestion system for converting organic waste to biogas",
+        processingCapacity: "60 tons per day",
+        outputProducts: "Biogas, liquid fertilizer",
+        certifications: "ISO 14001, Renewable Energy Certified"
+      },
+      {
+        id: 2,
+        name: "Upcycling Workshop",
+        description: "Manual and semi-automated processing of waste into value-added products",
+        processingCapacity: "15 tons per day",
+        outputProducts: "Crafts, building materials, consumer products",
+        certifications: "Fair Trade Certified"
+      }
+    ],
     
     // Location Information
     address: "45/2 Kandy Road, Peradeniya, Kandy",
@@ -127,6 +153,56 @@ const AgentProfile = () => {
   ];
 
   const languages = ["English", "Sinhala", "Tamil"];
+
+  const serviceTypeOptions = [
+    "Biogas Production", "Upcycling", "Composting", "Recycling", 
+    "Waste-to-Energy", "Organic Fertilizer Production", "Anaerobic Digestion",
+    "Material Recovery", "Bio-char Production", "Liquid Fertilizer Production"
+  ];
+
+  const certificationOptions = [
+    "ISO 14001", "ISO 9001", "Renewable Energy Certified", "Fair Trade Certified",
+    "Organic Certification", "Environmental Management System", "SLSI Certification",
+    "Carbon Neutral Certified", "Green Building Certification", "Waste Management License"
+  ];
+
+  const processingTechnologyOptions = [
+    {
+      name: "Biogas Digester System",
+      description: "Anaerobic digestion system for converting organic waste to biogas",
+      defaultCapacity: "60 tons per day",
+      defaultOutputs: "Biogas, liquid fertilizer",
+      defaultCertifications: "ISO 14001, Renewable Energy Certified"
+    },
+    {
+      name: "Upcycling Workshop",
+      description: "Manual and semi-automated processing of waste into value-added products",
+      defaultCapacity: "15 tons per day",
+      defaultOutputs: "Crafts, building materials, consumer products",
+      defaultCertifications: "Fair Trade Certified"
+    },
+    {
+      name: "Composting Facility",
+      description: "Aerobic decomposition of organic waste into nutrient-rich compost",
+      defaultCapacity: "25 tons per day",
+      defaultOutputs: "Organic compost, soil conditioner",
+      defaultCertifications: "Organic Certification, ISO 14001"
+    },
+    {
+      name: "Recycling Plant",
+      description: "Processing facility for converting waste materials into reusable products",
+      defaultCapacity: "40 tons per day",
+      defaultOutputs: "Recycled materials, raw materials",
+      defaultCertifications: "ISO 9001, Environmental Management System"
+    },
+    {
+      name: "Pyrolysis Unit",
+      description: "Thermal decomposition of organic materials in oxygen-free environment",
+      defaultCapacity: "20 tons per day",
+      defaultOutputs: "Bio-oil, bio-char, syngas",
+      defaultCertifications: "Environmental Management System"
+    }
+  ];
 
   const handleInputChange = (field, value) => {
     setProfileData(prev => ({
@@ -413,10 +489,88 @@ const AgentProfile = () => {
                   onChange={(e) => handleInputChange('yearsExperience', e.target.value)}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="joinedDate">Joined Date</Label>
+                <Input
+                  id="joinedDate"
+                  type="date"
+                  value={profileData.joinedDate}
+                  onChange={(e) => handleInputChange('joinedDate', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contactPerson">Contact Person</Label>
+                <Input
+                  id="contactPerson"
+                  value={profileData.contactPerson}
+                  onChange={(e) => handleInputChange('contactPerson', e.target.value)}
+                  placeholder="Name of responsible person"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contactPersonRole">Contact Person Role</Label>
+                <Input
+                  id="contactPersonRole"
+                  value={profileData.contactPersonRole}
+                  onChange={(e) => handleInputChange('contactPersonRole', e.target.value)}
+                  placeholder="e.g., Operations Manager"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="processingCapacityPerDay">Processing Capacity Per Day (tons)</Label>
+                <Input
+                  id="processingCapacityPerDay"
+                  type="number"
+                  value={profileData.processingCapacityPerDay}
+                  onChange={(e) => handleInputChange('processingCapacityPerDay', e.target.value)}
+                  placeholder="e.g., 60"
+                />
+              </div>
+            </div>
+            
+            {/* Service Types */}
+            <div className="space-y-3 mt-5">
+              <span className='font-medium'>Service Types Offered</span>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {serviceTypeOptions.map((type) => (
+                  <div key={type} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`serviceType-${type}`}
+                      checked={profileData.serviceTypes.includes(type)}
+                      onCheckedChange={(checked) => 
+                        handleArrayChange('serviceTypes', type, checked)
+                      }
+                    />
+                    <Label htmlFor={`serviceType-${type}`} className="text-sm font-normal">
+                      {type}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Certifications */}
+            <div className="space-y-3 mt-8">
+              <span className='font-medium'>Certifications</span>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {certificationOptions.map((cert) => (
+                  <div key={cert} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`cert-${cert}`}
+                      checked={profileData.certifications.includes(cert)}
+                      onCheckedChange={(checked) => 
+                        handleArrayChange('certifications', cert, checked)
+                      }
+                    />
+                    <Label htmlFor={`cert-${cert}`} className="text-sm font-normal">
+                      {cert}
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
-
         {/* Financial Information */}
         <Card className="gap-3">
           <CardHeader>
@@ -502,6 +656,136 @@ const AgentProfile = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Processing Technologies */}
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle className="flex text-xl items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Processing Technologies
+            </CardTitle>
+            <CardDescription>
+              Details about your waste processing capabilities and technologies
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {profileData.processingTechnologies.map((tech, index) => (
+              <div key={tech.id} className="border rounded-lg p-4 space-y-4">
+                <div className="flex justify-between items-start">
+                  <h4 className="text-lg font-medium">{tech.name}</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const newTechnologies = profileData.processingTechnologies.filter(t => t.id !== tech.id);
+                      handleInputChange('processingTechnologies', newTechnologies);
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Technology Name</Label>
+                    <Input
+                      value={tech.name}
+                      onChange={(e) => {
+                        const updatedTechnologies = profileData.processingTechnologies.map(t =>
+                          t.id === tech.id ? { ...t, name: e.target.value } : t
+                        );
+                        handleInputChange('processingTechnologies', updatedTechnologies);
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Processing Capacity</Label>
+                    <Input
+                      value={tech.processingCapacity}
+                      onChange={(e) => {
+                        const updatedTechnologies = profileData.processingTechnologies.map(t =>
+                          t.id === tech.id ? { ...t, processingCapacity: e.target.value } : t
+                        );
+                        handleInputChange('processingTechnologies', updatedTechnologies);
+                      }}
+                      placeholder="e.g., 60 tons per day"
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Description</Label>
+                    <Textarea
+                      value={tech.description}
+                      onChange={(e) => {
+                        const updatedTechnologies = profileData.processingTechnologies.map(t =>
+                          t.id === tech.id ? { ...t, description: e.target.value } : t
+                        );
+                        handleInputChange('processingTechnologies', updatedTechnologies);
+                      }}
+                      placeholder="Describe the technology and its purpose"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Output Products</Label>
+                    <Input
+                      value={tech.outputProducts}
+                      onChange={(e) => {
+                        const updatedTechnologies = profileData.processingTechnologies.map(t =>
+                          t.id === tech.id ? { ...t, outputProducts: e.target.value } : t
+                        );
+                        handleInputChange('processingTechnologies', updatedTechnologies);
+                      }}
+                      placeholder="e.g., Biogas, liquid fertilizer"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Certifications</Label>
+                    <Input
+                      value={tech.certifications}
+                      onChange={(e) => {
+                        const updatedTechnologies = profileData.processingTechnologies.map(t =>
+                          t.id === tech.id ? { ...t, certifications: e.target.value } : t
+                        );
+                        handleInputChange('processingTechnologies', updatedTechnologies);
+                      }}
+                      placeholder="e.g., ISO 14001, Renewable Energy Certified"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {/* Add New Technology */}
+            <div className="border border-dashed rounded-lg p-6 text-center">
+              <p className="text-gray-500 mb-4">Add a new processing technology</p>
+              <Select onValueChange={(value) => {
+                const selectedTech = processingTechnologyOptions.find(t => t.name === value);
+                if (selectedTech) {
+                  const newTech = {
+                    id: Date.now(),
+                    name: selectedTech.name,
+                    description: selectedTech.description,
+                    processingCapacity: selectedTech.defaultCapacity,
+                    outputProducts: selectedTech.defaultOutputs,
+                    certifications: selectedTech.defaultCertifications
+                  };
+                  handleInputChange('processingTechnologies', [...profileData.processingTechnologies, newTech]);
+                }
+              }}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a processing technology" />
+                </SelectTrigger>
+                <SelectContent>
+                  {processingTechnologyOptions.map((tech) => (
+                    <SelectItem key={tech.name} value={tech.name}>
+                      {tech.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        
 
         {/* Location Information */}
         <Card className="lg:col-span-3">
