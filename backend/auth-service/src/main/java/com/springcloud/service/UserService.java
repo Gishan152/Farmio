@@ -1,9 +1,7 @@
 package com.springcloud.service;
 
 import com.springcloud.common.enums.Status;
-import com.springcloud.dto.AuthRequest;
-import com.springcloud.dto.AuthResponse;
-import com.springcloud.dto.RegisterRequest;
+import com.springcloud.dto.*;
 import com.springcloud.model.Role;
 import com.springcloud.model.User;
 import com.springcloud.repository.RoleRepository;
@@ -53,14 +51,14 @@ public class UserService {
     }
 
     public AuthResponse authenticate(AuthRequest request) {
+        var user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.username(),
+                        user.getUsername(),
                         request.password()
                 )
         );
-        var user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         if(user.getStatus().equals("PENDING")){
             Map<String, Object> extraClaims = new HashMap<>();
             extraClaims.put("isTemp", true);
@@ -69,5 +67,11 @@ public class UserService {
         }
         var jwtToken = jwtService.generateToken(user);
         return new AuthResponse(jwtToken);
+    }
+
+    public PublicUserData getUser(UserRequest request){
+        var user = userRepository.findByUsername(request.username())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return new PublicUserData(user.getUsername(), user.getId(), user.getEmail(), user.getStatus(), user.getPhoneNo());
     }
 }

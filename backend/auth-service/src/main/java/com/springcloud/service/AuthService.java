@@ -11,6 +11,7 @@ import com.springcloud.repository.UserRepository;
 import com.springcloud.config.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +32,16 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse register(RegisterRequest request) {
+
+        var existingUser = userRepository.findByEmail(request.email());
+        if(existingUser.isPresent()){
+            throw new RuntimeException("Account already exists with the provided email");
+        }
+
+        existingUser = userRepository.findByUsername(request.username());
+        if(existingUser.isPresent()){
+            throw new RuntimeException("Username is already in use");
+        }
 
         Role role = roleRepository.findByName(request.role().name());
 
@@ -53,14 +64,20 @@ public class AuthService {
     }
 
     public AuthResponse authenticate(AuthRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.username(),
-                        request.password()
-                )
-        );
-        var user = userRepository.findByUsername(request.username())
+        var user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        try{
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            user.getUsername(),
+                            request.password()
+                    )
+            );
+        }catch (BadCredentialsException ex) {
+            throw new RuntimeException("Invalid credentials");
+        }
+
         if(user.getStatus().equals("PENDING")){
             Map<String, Object> extraClaims = new HashMap<>();
             extraClaims.put("isTemp", true);

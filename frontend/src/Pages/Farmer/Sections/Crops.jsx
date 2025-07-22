@@ -1,0 +1,261 @@
+// src/buyer/pages/Crops.jsx
+import React, { useState } from 'react';
+// import { useLoaderData } from 'react-router-dom';
+import { StarIcon, CheckBadgeIcon } from '@heroicons/react/24/solid';
+import wheat from "../../../Assets/Farmer/Crops/wheat.webp";
+import corn from "../../../Assets/Farmer/Crops/corn.jpeg";
+import { Link } from 'react-router-dom';
+import { useSavesContext } from '../../../Contexts/Farmer/SavesContext';
+
+export function FarmercropsLoader() {
+    return [
+  {
+            id: 1,
+            type: 'Corn',
+            pricePerUnit: 120,
+            farm: 'Sunny Farm',
+            location: 'Iowa, USA',
+            rating: 4.5,
+            verified: true,
+            imageUrls: [corn],
+            badges: ['Organic', 'On Sale'],
+            measurement: 'kg',
+            stock: 100,
+            transport: 'Yes',
+            return:'No',
+        },
+        {
+            id: 2,
+            type: 'Wheat',
+            pricePerUnit: 175,
+            farm: 'Golden Fields',
+            location: 'Kansas, USA',
+            rating: 4.2,
+            verified: false,
+            imageUrls: [wheat],
+            badges: [],
+            measurement: 'kg',
+            stock: 50,
+            transport: 'No',
+            return:'Yes',
+        },
+        {
+            id: 3,
+            type: 'Rice',
+            pricePerUnit: 110,
+            farm: 'Green Valley',
+            location: 'Kandy, Sri Lanka',
+            rating: 4.7,
+            verified: true,
+            imageUrls: [wheat],
+            badges: ['Organic'],
+            measurement: 'kg',
+            stock: 200,
+            transport: 'Yes',
+            return:'Yes',
+        },
+        {
+            id: 4,
+            type: 'Tomato',
+            pricePerUnit: 95,
+            farm: 'Highland Farms',
+            location: 'Nuwara Eliya, Sri Lanka',
+            rating: 4.0,
+            verified: false,
+            imageUrls: [wheat],
+            badges: ['On Sale'],
+            measurement: 'unit',
+            stock: 150,
+            transport: 'No',
+            return:'Yes',
+        },
+        {
+            id: 5,
+            type: 'Potato',
+            pricePerUnit: 80,
+            farm: 'Riverbend Farm',
+            location: 'Badulla, Sri Lanka',
+            rating: 4.3,
+            verified: true,
+            imageUrls: [wheat],
+            badges: [],
+            measurement: 'kg',
+            stock: 80,
+            transport: 'Yes',
+            return:'No',
+        },
+        {
+            id: 6,
+            type: 'Green Gram',
+            pricePerUnit: 210,
+            farm: 'AgroCare Co-op',
+            location: 'Kurunegala, Sri Lanka',
+            rating: 4.8,
+            verified: true,
+            imageUrls: [wheat],
+            badges: ['Organic', 'Certified'],
+            measurement: 'g',
+            stock: 300,
+            transport: 'Yes',
+            return:'Yes',
+        },
+    ];
+
+}
+
+export default function FarmerCrops() {
+    // const crops = useLoaderData();
+    const crops = FarmercropsLoader();
+
+    const [productNameFilter, setProductNameFilter] = useState('');
+    const [locationFilter, setLocationFilter] = useState('');
+    const [transportFilter, setTransportFilter] = useState('');
+    const [returnFilter, setReturnFilter] = useState('');
+
+    const [open, setOpen] = useState(false);
+    const [crop, setCrop] = useState(null);
+
+
+
+    return (
+        <section className="p-6">
+            <h1 className="text-2xl font-semibold mb-6 dark:text-gray-100">Market Research</h1>
+              <div className="flex flex-wrap gap-4 mb-6">
+                <div className="w-full sm:w-1/2 md:w-1/4">
+                    <label htmlFor="productName" className="block text-sm font-medium text-gray-700">Product Name</label>
+                    <input
+                        type="text"
+                        id="productName"
+                        value={productNameFilter}
+                        onChange={(e) => setProductNameFilter(e.target.value)}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    />
+                </div>
+                <div className="w-full sm:w-1/2 md:w-1/4">
+                    <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
+                    <input
+                        type="text"
+                        id="location"
+                        value={locationFilter}
+                        onChange={(e) => setLocationFilter(e.target.value)}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    />
+                </div>
+                 <div className="w-full sm:w-1/2 md:w-1/4">
+                    <label htmlFor="location" className="block text-sm font-medium text-gray-700">Farmer</label>
+                    <input
+                        type="text"
+                        id="location"
+                        value={locationFilter}
+                        onChange={(e) => setLocationFilter(e.target.value)}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    />
+                </div>
+                <div className="w-full sm:w-1/2 md:w-1/4">
+                    <label htmlFor="transport" className="block text-sm font-medium text-gray-700">Transport Provider</label>
+                    <select
+                        id="transport"
+                        value={transportFilter}
+                        onChange={(e) => setTransportFilter(e.target.value)}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    >
+                        <option value="">Any</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                <div className="w-full sm:w-1/2 md:w-1/4">
+                    <label htmlFor="return" className="block text-sm font-medium text-gray-700">Return Accepted</label>
+                    <select
+                        id="return"
+                        value={returnFilter}
+                        onChange={(e) => setReturnFilter(e.target.value)}
+                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    >
+                        <option value="">Any</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                 <div className="w-full sm:w-1/2 md:w-1/4 flex items-end">
+                    <button
+                        className="w-full py-2 bg-green-600 text-white rounded-md shadow-sm hover:bg-green-800 transition"
+                    >
+                        Filter
+                    </button>
+                </div>
+            </div>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {crops.map(crop => (
+                    <div
+                        key={crop.id}
+                        className="flex flex-col justify-between bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg overflow-hidden transition"
+                    >
+                        <div>
+                            <div className="relative h-48 bg-gray-200">
+                                <img
+                                    src={crop.imageUrls?.[0] || wheat} 
+                                    alt={crop.type}
+                                    className="object-cover w-full h-full"
+                                />
+                                {crop.verified && (
+                                    <div className="absolute top-2 right-2 bg-white p-1 border-none rounded-[50%]">
+                                        <CheckBadgeIcon className="h-6 w-6 text-green-500" />
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-4 space-y-2">
+                                <Link to={`./${21321}`}>
+                                    <h2 className="flex items-center text-xl font-bold dark:text-gray-100">
+                                        {crop.type}
+                                    </h2>
+                                </Link>
+                                <p className="text-lg dark:text-gray-200">Rs{crop.pricePerUnit.toFixed(2)} per {crop.measurement}</p>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="font-medium dark:text-gray-300">{crop.farm}</span>{' '}
+                                    • {crop.location}
+                                </div>
+
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="font-medium dark:text-gray-300">Transport Availability:</span>{' '}
+                                     {crop.transport}
+                                </div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="font-medium dark:text-gray-300">Return Accepted:</span>{' '}
+                                     {crop.return}
+                                </div>
+                                
+                                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="font-medium dark:text-gray-300">Total Stock:</span>{' '}
+                                     {crop.stock}
+                                </div>
+                                <div className="flex items-center text-gray-700 dark:text-gray-300">
+                                    <StarIcon className="h-5 w-5 text-yellow-500" />
+                                    <span className="ml-1">{crop.rating}</span>
+                                </div>
+
+                                {/* Additional badges */}
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {crop.badges.map(badge => (
+                                        <span
+                                            key={badge}
+                                            className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-green-800 dark:text-green-100"
+                                        >
+                                            {badge}
+                                        </span>
+                                    ))}
+                                </div>
+
+                            </div>
+                        </div>
+               
+                     
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+}
+
+

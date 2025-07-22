@@ -1,28 +1,51 @@
-import { ArrowRightStartOnRectangleIcon, Cog8ToothIcon, UserIcon } from '@heroicons/react/24/solid';
+import {
+  ArrowRightStartOnRectangleIcon,
+  Cog8ToothIcon,
+  UserIcon,
+  ShoppingBagIcon,
+  ClipboardDocumentListIcon,
+  HeartIcon,
+  CreditCardIcon,
+  BuildingStorefrontIcon,
+  MagnifyingGlassIcon,
+  ArchiveBoxIcon,
+  TruckIcon,
+  CalendarIcon,
+  HomeIcon
+} from '@heroicons/react/24/solid';
 import SidebarItem from './SidebarItem';
 
 const menu = [
-    { label: 'Crops', to: 'crops' },
-    { label: 'Requirements', to: 'requirements' },
-    { label: 'Saved items', to: 'saves' },
-    { label: 'Orders', to: 'orders' },
-    {
-        label: 'Warehouses',
-        children: [
-            { label: 'Warehouses', to: 'warehouses/all' },
-            { label: 'Reserved Storage Units', to: 'warehouses/reserved' },
-        ],
-    },
-    {
-        label: 'Transport',
-        children: [
-            { label: 'Transport Providers', to: 'transport/providers' },
-            { label: 'Transport Schedules', to: 'transport/schedules' },
-        ],
-    },
+  { label: 'Dashboard', to: 'dashboard', icon: HomeIcon },
+  { label: 'Crops', to: 'crops', icon: ShoppingBagIcon },
+  { label: 'Requests', to: 'requests', icon: ArchiveBoxIcon }, // ArchiveBoxIcon for requests
+  { label: 'Saved items', to: 'saves', icon: HeartIcon },
+  { label: 'Orders', to: 'orders', icon: ClipboardDocumentListIcon }, // ClipboardDocumentListIcon for orders
+  { label: 'Payments', to: 'payments', icon: CreditCardIcon }, // CreditCardIcon for payments
+  {
+    label: 'Warehouses',
+    icon: BuildingStorefrontIcon,
+    children: [
+    //   { label: 'Warehouses', to: 'warehouses/all', icon: ArchiveBoxIcon },
+      { label: 'Warehouses', to: 'warehouses/search', icon: MagnifyingGlassIcon },
+      { label: 'Reserved Storage Units', to: 'warehouses/reserved', icon: ArchiveBoxIcon },
+    ],
+  },
+  {
+    label: 'Transport',
+    icon: TruckIcon,
+    children: [
+    //   { label: 'Transport Providers', to: 'transport/providers', icon: TruckIcon },
+      { label: 'Transport Schedules', to: 'transport/schedules', icon: CalendarIcon },
+    ],
+  },
 ];
 
+
+import { useNavigate } from 'react-router-dom';
+
 export default function Sidebar() {
+    const navigate = useNavigate();
 
     return (
         <aside className="w-64 bg-white border-r border-gray-200 p-6 flex flex-col justify-between min-h-screen">
@@ -41,7 +64,7 @@ export default function Sidebar() {
                 <nav className="flex flex-col gap-2">
                     <ul>
                         {menu.map(item => (
-                            <SidebarItem key={item.label} {...item} />
+                            <SidebarItem key={item.label} {...item} currentPath={"/buyer"}/>
                         ))}
                     </ul>
                 </nav>
@@ -91,6 +114,7 @@ export default function Sidebar() {
                     <button
                         className="flex items-center gap-4 text-gray-700 hover:text-red-500 transition text-sm"
                         aria-label="Logout"
+                        onClick={() => navigate('/logout')}
                     >
                         <ArrowRightStartOnRectangleIcon className="h-7 w-8 flex-shrink-0" />
                         <span>Logout</span>

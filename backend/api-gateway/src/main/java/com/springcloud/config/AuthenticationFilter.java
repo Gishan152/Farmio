@@ -71,7 +71,8 @@ public class AuthenticationFilter implements WebFilter {
                 System.out.println("JWT roles : " + roles);
 
                 ServerHttpRequest mutated = req.mutate()
-                        .header("X-User-Id", claims.getSubject())
+                        .header("X-User-Name", claims.getSubject())
+                        .header("X-User-Id", String.valueOf(claims.get("userId")))
                         .header("X-Roles", rolesCsv)
                         .build();
                 exchange.getAttributes().put("roles", roles);

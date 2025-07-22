@@ -70,8 +70,8 @@ const SavesContextProvider = ({ children }) => {
 
     const removeItem = id => setItems(items.filter(i => i.id !== id));
 
-    const checkItem = id => setItems(items.map(i => i.id === id ? {...i, checked: true} : i))
-    const uncheckItem = id => setItems(items.map(i => i.id === id ? {...i, checked: false} : i))
+    const checkItem = id => setItems(items.map(i => i.id === id ? {...i, unchecked: false} : i))
+    const uncheckItem = id => setItems(items.map(i => i.id === id ? {...i, unchecked: true} : i))
     const changeTransport = id => setItems(items.map(i => i.id === id ? {...i, transpotationRequired: !i.transpotationRequired} : i))
 
     return (
