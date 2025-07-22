@@ -221,28 +221,28 @@ services:
 #      watch:
 #        - action: rebuild
 #          path: ./waste-service/target/*-SNAPSHOT.jar
-#  transport-service:
-#    build:
-#      context: ./
-#      dockerfile: ./transport-service/Dockerfile.dev
-#    container_name: transport-service
-#    depends_on:
-#      - eureka-server
-#      - rabbitmq
-#    environment:
-#      - SERVER_PORT=8089
-#      - SPRING_APPLICATION_NAME=transport-service
-#    ports:
-#      - "8089:8089"
-#    networks:
-#      - spring-net
-#    volumes:
-#      - ./transport-service:/app/service
-#    develop:
-#      watch:
-#        - action: rebuild
-#          path: ./transport-service/target/*-SNAPSHOT.jar
-#
+  transport-service:
+    build:
+      context: ./
+      dockerfile: ./transport-service/Dockerfile.dev
+    container_name: transport-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8089
+      - SPRING_APPLICATION_NAME=transport-service
+    ports:
+      - "8089:8089"
+    networks:
+      - spring-net
+    volumes:
+      - ./transport-service:/app/service
+    develop:
+      watch:
+        - action: rebuild
+          path: ./transport-service/target/*-SNAPSHOT.jar
+
 #  warehouse-service:
 #    build:
 #      context: ./

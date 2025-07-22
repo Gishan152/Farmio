@@ -8,29 +8,28 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/routes")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/transport")
 public class RouteController {
 
     @Autowired
     private RouteService routeService;
 
-    @PostMapping
+    @PostMapping("/createRoute")
     public Route createRoute(@RequestBody Route route) {
         return routeService.createRoute(route);
     }
 
-    @GetMapping
+    @GetMapping("/getRoute")
     public List<Route> getAllRoutes() {
         return routeService.getAllRoutes();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/editRoute/{id}")
     public Route updateRoute(@PathVariable Long id, @RequestBody Route route) {
         return routeService.updateRoute(id, route);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deleteRoute/{id}")
     public void deleteRoute(@PathVariable Long id) {
         routeService.deleteRoute(id);
     }
