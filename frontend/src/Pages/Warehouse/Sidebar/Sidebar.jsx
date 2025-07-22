@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import {
     ArrowRightStartOnRectangleIcon,
     Cog8ToothIcon,
@@ -48,27 +49,30 @@ export default function Sidebar() {
             </div>
             <div>
                 <div className="flex flex-col gap-2">
-                    <button
+                    <Link
+                        to="/warehouse/settings"
                         className="flex items-center gap-4 text-gray-700 hover:text-green-500 transition text-sm"
                         aria-label="Settings"
                     >
                         <Cog8ToothIcon className="h-7 w-8 flex-shrink-0" />
                         <span>Settings</span>
-                    </button>
-                    <button
+                    </Link>
+                    <Link
+                        to="/warehouse/profile"
                         className="flex items-center gap-4 text-gray-700 hover:text-green-500 transition text-sm"
                         aria-label="User Profile"
                     >
                         <UserIcon className="h-7 w-8 flex-shrink-0" />
                         <span>User</span>
-                    </button>
-                    <button
+                    </Link>
+                    <Link
+                        to="/logout"
                         className="flex items-center gap-4 text-gray-700 hover:text-red-500 transition text-sm"
                         aria-label="Logout"
                     >
                         <ArrowRightStartOnRectangleIcon className="h-7 w-8 flex-shrink-0" />
                         <span>Logout</span>
-                    </button>
+                    </Link>
                 </div>
             </div>
         </aside>

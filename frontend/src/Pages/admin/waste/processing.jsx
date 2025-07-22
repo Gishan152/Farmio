@@ -476,19 +476,19 @@ const WasteProcessing = () => {
 
   // Table columns
   const columns = [
-    { key: 'id', header: 'ID' },
+    { accessor: 'id', header: 'ID' },
     { 
-      key: 'name', 
+      accessor: 'name', 
       header: 'Facility Name',
       render: (value) => (
         <div className="font-medium">{value}</div>
       )
     },
-    { key: 'location', header: 'Location' },
-    { key: 'processingCapacity', header: 'Capacity' },
-    { key: 'currentUtilization', header: 'Utilization' },
+    { accessor: 'location', header: 'Location' },
+    { accessor: 'processingCapacity', header: 'Capacity' },
+    { accessor: 'currentUtilization', header: 'Utilization' },
     { 
-      key: 'outputProducts', 
+      accessor: 'outputProducts', 
       header: 'Output Products',
       render: (value) => (
         <div className="flex flex-wrap gap-1">
@@ -506,12 +506,12 @@ const WasteProcessing = () => {
       )
     },
     { 
-      key: 'status', 
+      accessor: 'status', 
       header: 'Status',
       render: (value) => <StatusBadge status={value} />
     },
     { 
-      key: 'actions', 
+      accessor: 'actions', 
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">

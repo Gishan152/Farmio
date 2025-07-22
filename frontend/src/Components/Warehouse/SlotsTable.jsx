@@ -31,13 +31,13 @@ export default function SlotsTable({ slots, getSlotStatusColor, getUsagePercenta
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {slot.capacity} kg
+                                        {slot.capacity} sqft
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {slot.used} kg
+                                        {slot.used} sqft
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
-                                        {slot.capacity - slot.used} kg
+                                        {slot.capacity - slot.used} sqft
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">

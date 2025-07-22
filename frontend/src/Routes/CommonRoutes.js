@@ -13,6 +13,8 @@ import Logout from '@/Pages/LoginRegister/Logout';
 import AboutUs from '../Pages/AboutUs';
 import FAQ from '../Pages/FAQ';
 import HowItWorks from '../Pages/HowItWorks';
+import TermsAndConditions from '../Pages/TermsAndConditions';
+
 
 
 const commonRoutes = [
@@ -92,7 +94,12 @@ const commonRoutes = [
     {
         path: 'settings',
         Component: SettingsPage
+    },
+    {
+        path: 'terms-and-conditions',
+        Component: TermsAndConditions
     }
+
 ]
 
 export default commonRoutes;

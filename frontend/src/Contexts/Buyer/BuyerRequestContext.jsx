@@ -72,6 +72,21 @@ const RequestsContextProvider = ({ children }) => {
         }
     }
 
+
+    // Fetch bids for a specific buyer request if not already present
+    const fetchBidsForRequest = async (reqId) => {
+        if (requestBids[reqId]) return; // Already fetched
+        setLoading(true);
+        try {
+            const res = await api.get(`/api/order/buyer-requests/bids/${reqId}`);
+            setRequestBids(b => ({ ...b, [reqId]: res.data }));
+        } catch (err) {
+            console.error('Failed to fetch bids for request', reqId, err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const updateBids = (reqId, bids) => {
         setRequestBids(b => {
             b[reqId] = bids
@@ -86,7 +101,7 @@ const RequestsContextProvider = ({ children }) => {
     }, []);
 
     return (
-        <requestsContext.Provider value={{ requests, addRequest, removeRequest, requestBids, updateBids, fetchRequests, loading }}>
+        <requestsContext.Provider value={{ requests, addRequest, removeRequest, requestBids, updateBids, fetchRequests, fetchBidsForRequest, loading }}>
             {children}
         </requestsContext.Provider>
     );

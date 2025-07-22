@@ -2,6 +2,7 @@ package com.springcloud.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.springcloud.common.enums.OrderStatus;
+import com.springcloud.common.enums.BuyerRequestState;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -34,6 +35,15 @@ public class BuyerRequest {
     private String visibility;
     private LocalDate date;
 
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BuyerRequestState state = BuyerRequestState.OPEN;
+
+    @OneToMany(mappedBy = "buyerRequest", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private java.util.List<FarmerBid> bids;
+
     // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -61,4 +71,7 @@ public class BuyerRequest {
     public void setVisibility(String visibility) { this.visibility = visibility; }
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
+
+    public BuyerRequestState getState() { return state; }
+    public void setState(BuyerRequestState state) { this.state = state; }
 }

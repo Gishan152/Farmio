@@ -1,4 +1,6 @@
 package com.springcloud.controller;
+import com.springcloud.dto.PaymentRequest;
+import com.springcloud.service.PaymentService;
 
 import com.springcloud.dto.CreateOrderRequest;
 import com.springcloud.model.CropInfo;
@@ -14,10 +16,29 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/order")
 //@RequiredArgsConstructor
+
 public class OrderController {
+
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private PaymentService paymentService;
+
+    /**
+     * Endpoint for buyer to make payment for an order
+     */
+    @PostMapping("/pay")
+    public ResponseEntity<Order> payForOrder(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Name") String username,
+            @RequestHeader("X-Roles") String rolesCsv,
+            @RequestBody PaymentRequest request
+    ) {
+        var order = paymentService.makePayment(Long.valueOf(userId), request);
+        return ResponseEntity.ok(order);
+    }
 
     @PostMapping("/create")
     public ResponseEntity<List<Order>> createOrder(
