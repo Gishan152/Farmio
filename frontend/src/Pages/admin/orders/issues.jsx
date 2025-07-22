@@ -429,32 +429,32 @@ const OrdersIssues = () => {
 
   // Table columns
   const columns = [
-    { key: 'id', header: 'Issue ID' },
-    { key: 'orderId', header: 'Order ID' },
-    {
-      key: 'customer',
+    { accessor: 'id', header: 'Issue ID' },
+    { accessor: 'orderId', header: 'Order ID' },
+    { 
+      accessor: 'customer', 
       header: 'Customer',
       render: (value) => (
         <div className="font-medium">{value}</div>
       )
     },
-    { key: 'issueType', header: 'Issue Type' },
-    {
-      key: 'priority',
+    { accessor: 'issueType', header: 'Issue Type' },
+    { 
+      accessor: 'priority', 
       header: 'Priority',
       render: (value) => <PriorityBadge priority={value} />
     },
     {
-      key: 'reportedDate',
+      accessor: 'reportedDate',
       header: 'Reported Date'
     },
-    {
-      key: 'status',
+    { 
+      accessor: 'status', 
       header: 'Status',
       render: (value) => <IssueStatusBadge status={value} />
     },
-    {
-      key: 'actions',
+    { 
+      accessor: 'actions', 
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">

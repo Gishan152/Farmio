@@ -330,7 +330,7 @@ services:
 #      watch:
 #        - action: rebuild
 #          path: ./payment-service/target/*-SNAPSHOT.jar
-
+#
 volumes:
   pgdata:
 

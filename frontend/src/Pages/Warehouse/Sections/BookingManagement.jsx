@@ -20,6 +20,11 @@ export default function BookingManagement() {
     const [filterStatus, setFilterStatus] = useState('all');
     const [loading, setLoading] = useState(false);
 
+    // Dialog states for approve/reject
+    const [showApproveDialog, setShowApproveDialog] = useState(false);
+    const [showRejectDialog, setShowRejectDialog] = useState(false);
+    const [actionBooking, setActionBooking] = useState(null);
+
     // Sample booking data
     const sampleBookings = [
         {
@@ -95,8 +100,6 @@ export default function BookingManagement() {
         setLoading(true);
         try {
             // TODO: Replace with actual API call
-            // const response = await fetch(`/api/bookings/warehouse/${warehouseId}`);
-            // const data = await response.json();
             setBookings(sampleBookings);
         } catch (error) {
             console.error('Error loading bookings:', error);
@@ -108,7 +111,6 @@ export default function BookingManagement() {
     const handleApproveBooking = async (bookingId) => {
         try {
             // TODO: Replace with actual API call
-            // await fetch(`/api/bookings/${bookingId}/approve`, { method: 'POST' });
             setBookings(prev => prev.map(booking => 
                 booking.id === bookingId 
                     ? { ...booking, status: 'approved' }
@@ -122,10 +124,6 @@ export default function BookingManagement() {
     const handleRejectBooking = async (bookingId, reason) => {
         try {
             // TODO: Replace with actual API call
-            // await fetch(`/api/bookings/${bookingId}/reject`, { 
-            //     method: 'POST',
-            //     body: JSON.stringify({ reason })
-            // });
             setBookings(prev => prev.map(booking => 
                 booking.id === bookingId 
                     ? { ...booking, status: 'rejected', rejectionReason: reason }
@@ -192,13 +190,13 @@ export default function BookingManagement() {
     });
 
     // Check if any modal is open
-    const isModalOpen = showDetailsModal || showEarlyRetrievalModal;
+    const isModalOpen = showDetailsModal || showEarlyRetrievalModal || showApproveDialog || showRejectDialog;
 
     return (
-        <div className="p-6 bg-gray-50 min-h-screen">
+        <div className="p-6 bg-gradient-to-br white min-h-screen">
             <div className={`max-w-7xl mx-auto space-y-6 transition-all duration-300 ${isModalOpen ? 'backdrop-blur-sm' : ''}`}>
                 {/* Header */}
-                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                <div className="bg-white rounded-lg shadow-md border border-green-200 p-6">
                     <div className="flex justify-between items-center">
                         <div>
                             <h1 className="text-3xl font-bold text-gray-900">Booking Management</h1>
@@ -208,7 +206,7 @@ export default function BookingManagement() {
                             <select
                                 value={filterStatus}
                                 onChange={(e) => setFilterStatus(e.target.value)}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                className="px-4 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white"
                             >
                                 <option value="all">All Bookings</option>
                                 <option value="pending">Pending</option>
@@ -221,22 +219,22 @@ export default function BookingManagement() {
                 </div>
 
                 {/* Bookings Table */}
-                <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                <div className="bg-white rounded-lg shadow-md border border-green-200 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-gray-50">
+                            <thead className="bg-gradient-to-r from-green-100 to-green-50">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking ID</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Farmer/Buyer</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produce</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slot</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Booking ID</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Farmer/Buyer</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Produce</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Quantity</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Duration</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Slot</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="bg-white divide-y divide-green-100">
                                 {loading ? (
                                     <tr>
                                         <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
@@ -251,7 +249,7 @@ export default function BookingManagement() {
                                     </tr>
                                 ) : (
                                     filteredBookings.map((booking) => (
-                                        <tr key={booking.id} className="hover:bg-gray-50 transition-colors duration-200">
+                                        <tr key={booking.id} className="hover:bg-green-50 transition-colors duration-200">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <span className="font-medium text-gray-900">{booking.id}</span>
@@ -275,7 +273,7 @@ export default function BookingManagement() {
                                                 {booking.duration} days
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
+                                                <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">
                                                     {booking.slotId}
                                                 </span>
                                             </td>
@@ -299,7 +297,10 @@ export default function BookingManagement() {
                                                 {booking.status === 'pending' && (
                                                     <>
                                                         <button
-                                                            onClick={() => handleApproveBooking(booking.id)}
+                                                            onClick={() => {
+                                                                setActionBooking(booking);
+                                                                setShowApproveDialog(true);
+                                                            }}
                                                             className="text-green-600 hover:text-green-900 p-1 rounded-md hover:bg-green-50 transition-all duration-200"
                                                             title="Approve"
                                                         >
@@ -307,8 +308,8 @@ export default function BookingManagement() {
                                                         </button>
                                                         <button
                                                             onClick={() => {
-                                                                const reason = prompt('Please provide a reason for rejection:');
-                                                                if (reason) handleRejectBooking(booking.id, reason);
+                                                                setActionBooking(booking);
+                                                                setShowRejectDialog(true);
                                                             }}
                                                             className="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50 transition-all duration-200"
                                                             title="Reject"
@@ -340,10 +341,84 @@ export default function BookingManagement() {
                 </div>
             </div>
 
+            {/* Approve Dialog */}
+            {showApproveDialog && actionBooking && (
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full border border-green-200 animate-scaleIn">
+                        <h3 className="text-lg font-semibold mb-4">Approve Booking</h3>
+                        <p>Are you sure you want to approve booking <span className="font-bold">{actionBooking.id}</span>?</p>
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button
+                                onClick={() => {
+                                    setShowApproveDialog(false);
+                                    setActionBooking(null);
+                                }}
+                                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    handleApproveBooking(actionBooking.id);
+                                    setShowApproveDialog(false);
+                                    setActionBooking(null);
+                                }}
+                                className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+                            >
+                                Accept
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showRejectDialog && actionBooking && (
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full border border-green-200 animate-scaleIn">
+                        <h3 className="text-lg font-semibold mb-4">Reject Booking</h3>
+                        <p>Are you sure you want to reject booking <span className="font-bold">{actionBooking.id}</span>?</p>
+                        <input
+                            type="text"
+                            placeholder="Reason for rejection"
+                            value={rejectionReason}
+                            onChange={e => setRejectionReason(e.target.value)}
+                            className="w-full mt-4 px-3 py-2 border rounded"
+                        />
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button
+                                onClick={() => {
+                                    setShowRejectDialog(false);
+                                    setActionBooking(null);
+                                    setRejectionReason('');
+                                }}
+                                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (rejectionReason.trim()) {
+                                        handleRejectBooking(actionBooking.id, rejectionReason);
+                                        setShowRejectDialog(false);
+                                        setActionBooking(null);
+                                        setRejectionReason('');
+                                    } else {
+                                        alert('Please provide a reason for rejection');
+                                    }
+                                }}
+                                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                            >
+                                Reject
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Booking Details Modal */}
             {showDetailsModal && selectedBooking && (
                 <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fadeIn">
-                    <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scaleIn border border-green-200">
                         <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-6 rounded-t-2xl">
                             <div className="flex justify-between items-center">
                                 <h3 className="text-xl font-semibold">Booking Details - {selectedBooking.id}</h3>
@@ -358,9 +433,9 @@ export default function BookingManagement() {
                         
                         <div className="p-6 space-y-6">
                             {/* Contact Information */}
-                            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                                 <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                                    <UserIcon className="h-5 w-5 text-blue-600 mr-2" />
+                                    <UserIcon className="h-5 w-5 text-green-600 mr-2" />
                                     Contact Information
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -368,11 +443,11 @@ export default function BookingManagement() {
                                         <span className="font-medium">Name:</span> {selectedBooking.farmerName}
                                     </div>
                                     <div className="flex items-center">
-                                        <PhoneIcon className="h-4 w-4 text-gray-500 mr-2" />
+                                        <PhoneIcon className="h-4 w-4 text-green-500 mr-2" />
                                         {selectedBooking.farmerPhone}
                                     </div>
                                     <div className="flex items-center md:col-span-2">
-                                        <EnvelopeIcon className="h-4 w-4 text-gray-500 mr-2" />
+                                        <EnvelopeIcon className="h-4 w-4 text-green-500 mr-2" />
                                         {selectedBooking.farmerEmail}
                                     </div>
                                 </div>
@@ -381,7 +456,7 @@ export default function BookingManagement() {
                             {/* Booking Information */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
-                                    <h4 className="font-semibold text-gray-900">Produce Details</h4>
+                                    <h4 className="font-semibold text-gray-900 text-green-800">Produce Details</h4>
                                     <div className="space-y-2 text-sm">
                                         <div><span className="font-medium">Crop Type:</span> {selectedBooking.cropType}</div>
                                         <div><span className="font-medium">Category:</span> {selectedBooking.produce}</div>
@@ -391,7 +466,7 @@ export default function BookingManagement() {
                                 </div>
                                 
                                 <div className="space-y-4">
-                                    <h4 className="font-semibold text-gray-900">Duration & Pricing</h4>
+                                    <h4 className="font-semibold text-green-800">Duration & Pricing</h4>
                                     <div className="space-y-2 text-sm">
                                         <div><span className="font-medium">Duration:</span> {selectedBooking.duration} days</div>
                                         <div><span className="font-medium">Start Date:</span> {selectedBooking.startDate}</div>
@@ -403,8 +478,8 @@ export default function BookingManagement() {
                             </div>
 
                             {/* Status Information */}
-                            <div className="bg-gray-50 rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">Status Information</h4>
+                            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                                <h4 className="font-semibold text-green-800 mb-2">Status Information</h4>
                                 <div className="flex items-center space-x-4">
                                     <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(selectedBooking.status)}`}>
                                         {selectedBooking.status.charAt(0).toUpperCase() + selectedBooking.status.slice(1)}
@@ -428,8 +503,8 @@ export default function BookingManagement() {
             {/* Early Retrieval Modal */}
             {showEarlyRetrievalModal && earlyRetrievalData && (
                 <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fadeIn">
-                    <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full animate-scaleIn">
-                        <div className="bg-gradient-to-r from-orange-600 to-orange-700 text-white p-6 rounded-t-2xl">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full animate-scaleIn border border-green-200">
+                        <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-6 rounded-t-2xl">
                             <div className="flex justify-between items-center">
                                 <h3 className="text-xl font-semibold">Early Retrieval Request</h3>
                                 <button
@@ -447,8 +522,8 @@ export default function BookingManagement() {
                                 <p className="text-gray-600">{earlyRetrievalData.farmerName}</p>
                             </div>
 
-                            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                                <h5 className="font-semibold text-gray-900 mb-2">Retrieval Details</h5>
+                            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                                <h5 className="font-semibold text-green-800 mb-2">Retrieval Details</h5>
                                 <div className="text-sm space-y-1">
                                     <div>Proposed End Date: {earlyRetrievalData.earlyRetrievalRequest.proposedEndDate}</div>
                                     <div>Days Used: {earlyRetrievalData.earlyRetrievalRequest.usedDays}</div>
@@ -456,8 +531,8 @@ export default function BookingManagement() {
                                 </div>
                             </div>
 
-                            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                                <h5 className="font-semibold text-gray-900 mb-2">Payment Breakdown</h5>
+                            <div className="bg-green-100 rounded-lg p-4 border border-green-300">
+                                <h5 className="font-semibold text-green-800 mb-2">Payment Breakdown</h5>
                                 <div className="text-sm space-y-1">
                                     <div className="flex justify-between">
                                         <span>Refund to Customer:</span>
@@ -475,7 +550,7 @@ export default function BookingManagement() {
                                     value={rejectionReason}
                                     onChange={(e) => setRejectionReason(e.target.value)}
                                     placeholder="Reason for rejection (optional)"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                    className="w-full px-3 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                                     rows="3"
                                 />
                                 

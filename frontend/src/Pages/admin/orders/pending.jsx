@@ -244,9 +244,9 @@ const PendingOrders = () => {
 
   // Table columns
   const columns = [
-    { key: 'id', header: 'Order ID' },
-    {
-      key: 'customer',
+    { accessor: 'id', header: 'Order ID' },
+    { 
+      accessor: 'customer', 
       header: 'Customer',
       render: (value, row) => (
         <div>
@@ -255,15 +255,15 @@ const PendingOrders = () => {
         </div>
       )
     },
-    { key: 'date', header: 'Order Date' },
-    {
-      key: 'total',
+    { accessor: 'date', header: 'Order Date' },
+    { 
+      accessor: 'total', 
       header: 'Total',
       render: (value) => <span className="font-medium">{value}</span>
     },
-    { key: 'items', header: 'Items' },
-    {
-      key: 'priority',
+    { accessor: 'items', header: 'Items' },
+    { 
+      accessor: 'priority', 
       header: 'Priority',
       render: (value) => {
         const priorityStyles = {
@@ -279,10 +279,10 @@ const PendingOrders = () => {
         );
       }
     },
-    { key: 'paymentStatus', header: 'Payment' },
-    { key: 'expectedProcessingDate', header: 'Process By' },
-    {
-      key: 'actions',
+    { accessor: 'paymentStatus', header: 'Payment' },
+    { accessor: 'expectedProcessingDate', header: 'Process By' },
+    { 
+      accessor: 'actions', 
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">

@@ -395,60 +395,74 @@ const OrdersManagement = () => {
     );
   };
 
+  // Handle view order
+  const handleViewOrder = (order) => {
+    setSelectedOrder(order);
+    setShowViewModal(true);
+  };
+  // Handle edit order
+  const handleEditOrder = (order) => {
+    setSelectedOrder(order);
+    setShowEditModal(true);
+  };
+  // Handle delete order
+  const handleDeleteOrder = (order) => {
+    setSelectedOrder(order);
+    setShowDeleteModal(true);
+  };
+
   // Table columns
   const columns = [
-    { key: 'id', header: 'Order ID' },
+    { accessor: 'id', header: 'Order ID' },
     { 
-      key: 'customer', 
+      accessor: 'customer', 
       header: 'Customer',
-      render: (value, row) => (
+      cell: (row) => (
         <div>
-          <div className="font-medium">{value}</div>
+          <div className="font-medium">{row.customer}</div>
           <div className="text-xs text-dashboard-text-light">{row.buyer}</div>
         </div>
       )
     },
-    { key: 'date', header: 'Order Date' },
+    { accessor: 'date', header: 'Order Date' },
     { 
-      key: 'total', 
+      accessor: 'total', 
       header: 'Total',
-      render: (value) => <span className="font-medium">{value}</span>
+      cell: (row) => <span className="font-medium">{row.total}</span>
     },
-    { key: 'items', header: 'Items' },
+    { accessor: 'items', header: 'Items' },
     { 
-      key: 'status', 
+      accessor: 'status', 
       header: 'Status',
-      render: (value) => <OrderStatusBadge status={value} />
+      cell: (row) => <OrderStatusBadge status={row.status} />
     },
-    { key: 'paymentStatus', header: 'Payment' },
-    { key: 'deliveryDate', header: 'Delivery Date' },
+    { accessor: 'paymentStatus', header: 'Payment' },
+    { accessor: 'deliveryDate', header: 'Delivery Date' },
     { 
-      key: 'actions', 
+      accessor: 'actions', 
       header: 'Actions',
-      render: (_, row) => (
+      cell: (row) => (
         <div className="flex space-x-2">
-          <button 
-            className={`text-blue-600 hover:text-blue-800 ${expandedOrderId === row.id ? 'text-blue-800' : ''}`}
-            title={expandedOrderId === row.id ? "Hide Details" : "View Details"}
-            onClick={(e) => {
-              e.stopPropagation();
-              setExpandedOrderId(expandedOrderId === row.id ? null : row.id);
-            }}
+          <button
+            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+            title="View Details"
+            onClick={e => { e.stopPropagation(); handleViewOrder(row); }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
           </button>
-          <button className="text-green-600 hover:text-green-800" title="Edit Order">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+          <button
+            className="p-1.5 text-green-600 hover:bg-green-50 rounded-md transition-colors"
+            title="Edit Order"
+            onClick={e => { e.stopPropagation(); handleEditOrder(row); }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
           </button>
-          <button className="text-indigo-600 hover:text-indigo-800" title="Print Invoice">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-            </svg>
+          <button
+            className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+            title="Delete Order"
+            onClick={e => { e.stopPropagation(); handleDeleteOrder(row); }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
       )
@@ -647,6 +661,65 @@ const OrdersManagement = () => {
           expandedRowId={expandedOrderId}
         />
       </Card>
+      {/* View Order Modal */}
+      {showViewModal && selectedOrder && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowViewModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-lg shadow-2xl">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Order Details</h3>
+                <button onClick={() => setShowViewModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <OrderDetails order={selectedOrder} />
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Edit Order Modal */}
+      {showEditModal && selectedOrder && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowEditModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-lg shadow-2xl">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Edit Order</h3>
+                <button onClick={() => setShowEditModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              {/* You can add an edit form here if needed */}
+              <OrderDetails order={selectedOrder} />
+              <div className="mt-4 flex justify-end">
+                <button onClick={() => setShowEditModal(false)} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Delete Order Modal */}
+      {showDeleteModal && selectedOrder && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-2xl">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-red-600">Delete Order</h3>
+                <button onClick={() => setShowDeleteModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <p className="mb-6 text-gray-700">Are you sure you want to delete order <span className="font-semibold">{selectedOrder.id}</span>? This action cannot be undone.</p>
+              <div className="flex space-x-3">
+                <button onClick={() => setShowDeleteModal(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">Cancel</button>
+                <button onClick={() => { setShowDeleteModal(false); /* Add delete logic here */ }} className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition-colors">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };

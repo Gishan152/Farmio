@@ -272,248 +272,256 @@ const WarehouseOwnerManagement = () => {
 
       {/* View Warehouse Details Modal */}
       {showViewModal && selectedWarehouse && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">Warehouse Details: {selectedWarehouse.name}</h3>
-              <button
-                onClick={() => setShowViewModal(false)}
-                className="text-gray-400 hover:text-gray-500"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowViewModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-lg font-medium text-gray-900">Warehouse Details: {selectedWarehouse.name}</h3>
+                <button 
+                  onClick={() => setShowViewModal(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
 
-            {/* Tabs Navigation */}
-            <div className="border-b border-gray-200">
-              <nav className="flex -mb-px">
-                <button
-                  onClick={() => setActiveTab('details')}
-                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'details'
-                      ? 'border-b-2 border-farmio text-farmio-dark'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              {/* Tabs Navigation */}
+              <div className="border-b border-gray-200">
+                <nav className="flex -mb-px">
+                  <button
+                    onClick={() => setActiveTab('details')}
+                    className={`px-6 py-3 font-medium text-sm ${
+                      activeTab === 'details'
+                        ? 'border-b-2 border-farmio text-farmio-dark'
+                        : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
-                >
-                  Details
-                </button>
-                <button
-                  onClick={() => setActiveTab('photos')}
-                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'photos'
-                      ? 'border-b-2 border-farmio text-farmio-dark'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('photos')}
+                    className={`px-6 py-3 font-medium text-sm ${
+                      activeTab === 'photos'
+                        ? 'border-b-2 border-farmio text-farmio-dark'
+                        : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
-                >
-                  Photos ({warehousePhotos[selectedWarehouse.id]?.length || 0})
-                </button>
-                <button
-                  onClick={() => setActiveTab('facilities')}
-                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'facilities'
-                      ? 'border-b-2 border-farmio text-farmio-dark'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  >
+                    Photos ({warehousePhotos[selectedWarehouse.id]?.length || 0})
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('facilities')}
+                    className={`px-6 py-3 font-medium text-sm ${
+                      activeTab === 'facilities'
+                        ? 'border-b-2 border-farmio text-farmio-dark'
+                        : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
-                >
-                  Facilities ({warehouseFacilities[selectedWarehouse.id]?.length || 0})
-                </button>
-                <button
-                  onClick={() => setActiveTab('keepers')}
-                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'keepers'
-                      ? 'border-b-2 border-farmio text-farmio-dark'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  >
+                    Facilities ({warehouseFacilities[selectedWarehouse.id]?.length || 0})
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('keepers')}
+                    className={`px-6 py-3 font-medium text-sm ${
+                      activeTab === 'keepers'
+                        ? 'border-b-2 border-farmio text-farmio-dark'
+                        : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
-                >
-                  Keepers ({warehouseKeepers[selectedWarehouse.id]?.length || 0})
-                </button>
-              </nav>
-            </div>
+                  >
+                    Keepers ({warehouseKeepers[selectedWarehouse.id]?.length || 0})
+                  </button>
+                </nav>
+              </div>
 
-            <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-14rem)]">
-              {/* Details Tab */}
-              {activeTab === 'details' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Facility Name</p>
-                    <p className="mt-1">{selectedWarehouse.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Contact Person</p>
-                    <p className="mt-1">{selectedWarehouse.contactPerson}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Email</p>
-                    <p className="mt-1">{selectedWarehouse.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Phone</p>
-                    <p className="mt-1">{selectedWarehouse.phone}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Location</p>
-                    <p className="mt-1">{selectedWarehouse.location}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Warehouse Size</p>
-                    <p className="mt-1">{selectedWarehouse.warehouseSize}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Special Features</p>
-                    <p className="mt-1">{selectedWarehouse.specialFeatures}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Certification</p>
-                    <p className="mt-1">{selectedWarehouse.certification}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Capacity Used</p>
-                    <p className="mt-1">{selectedWarehouse.capacityUsed}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Status</p>
-                    <p className="mt-1">
-                      <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${selectedWarehouse.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-14rem)]">
+                {/* Details Tab */}
+                {activeTab === 'details' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Facility Name</p>
+                      <p className="mt-1">{selectedWarehouse.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Contact Person</p>
+                      <p className="mt-1">{selectedWarehouse.contactPerson}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Email</p>
+                      <p className="mt-1">{selectedWarehouse.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Phone</p>
+                      <p className="mt-1">{selectedWarehouse.phone}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Location</p>
+                      <p className="mt-1">{selectedWarehouse.location}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Warehouse Size</p>
+                      <p className="mt-1">{selectedWarehouse.warehouseSize}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Special Features</p>
+                      <p className="mt-1">{selectedWarehouse.specialFeatures}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Certification</p>
+                      <p className="mt-1">{selectedWarehouse.certification}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Capacity Used</p>
+                      <p className="mt-1">{selectedWarehouse.capacityUsed}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Status</p>
+                      <p className="mt-1">
+                        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
+                          selectedWarehouse.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
-                        {selectedWarehouse.status}
-                      </span>
-                    </p>
+                          {selectedWarehouse.status}
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Join Date</p>
+                      <p className="mt-1">{selectedWarehouse.joinDate}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Last Update</p>
+                      <p className="mt-1">{selectedWarehouse.lastUpdate}</p>
+                    </div>
                   </div>
+                )}
+
+                {/* Photos Tab */}
+                {activeTab === 'photos' && (
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Join Date</p>
-                    <p className="mt-1">{selectedWarehouse.joinDate}</p>
+                    <h4 className="text-md font-semibold text-gray-800 mb-4">Warehouse Photos</h4>
+                    {warehousePhotos[selectedWarehouse.id]?.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {warehousePhotos[selectedWarehouse.id]?.map((photo, index) => (
+                          <div key={index} className="relative">
+                            <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-md">
+                              <img src={photo} alt={`Warehouse Photo ${index + 1}`} className="object-cover w-full h-full" />
+                            </div>
+                            <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 text-white px-2 py-1 text-xs rounded-tr-md rounded-bl-lg">
+                              Photo {index + 1}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic">No photos available for this warehouse.</p>
+                    )}
                   </div>
+                )}
+
+                {/* Facilities Tab */}
+                {activeTab === 'facilities' && (
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Last Update</p>
-                    <p className="mt-1">{selectedWarehouse.lastUpdate}</p>
+                    <h4 className="text-md font-semibold text-gray-800 mb-4">Warehouse Facilities</h4>
+                    {warehouseFacilities[selectedWarehouse.id]?.length > 0 ? (
+                      <div className="space-y-4">
+                        {warehouseFacilities[selectedWarehouse.id]?.map((facility, index) => (
+                          <div key={index} className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                            <h5 className="text-md font-medium text-gray-800">{facility.type}</h5>
+                            <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <div>
+                                <p className="text-sm font-medium text-gray-600">Capacity</p>
+                                <p className="text-sm text-gray-700">{facility.capacity}</p>
+                              </div>
+                              {facility.temperature && (
+                                <div>
+                                  <p className="text-sm font-medium text-gray-600">Temperature Range</p>
+                                  <p className="text-sm text-gray-700">{facility.temperature}</p>
+                                </div>
+                              )}
+                              {facility.humidity && (
+                                <div>
+                                  <p className="text-sm font-medium text-gray-600">Humidity</p>
+                                  <p className="text-sm text-gray-700">{facility.humidity}</p>
+                                </div>
+                              )}
+                              {facility.features && (
+                                <div>
+                                  <p className="text-sm font-medium text-gray-600">Features</p>
+                                  <p className="text-sm text-gray-700">{facility.features}</p>
+                                </div>
+                              )}
+                              {facility.vehicles && (
+                                <div>
+                                  <p className="text-sm font-medium text-gray-600">Vehicle Capacity</p>
+                                  <p className="text-sm text-gray-700">{facility.vehicles}</p>
+                                </div>
+                              )}
+                              {facility.products && (
+                                <div>
+                                  <p className="text-sm font-medium text-gray-600">Suitable Products</p>
+                                  <p className="text-sm text-gray-700">{facility.products}</p>
+                                </div>
+                              )}
+                              {facility.sustainability && (
+                                <div>
+                                  <p className="text-sm font-medium text-gray-600">Sustainability</p>
+                                  <p className="text-sm text-gray-700">{facility.sustainability}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic">No facility information available.</p>
+                    )}
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Photos Tab */}
-              {activeTab === 'photos' && (
-                <div>
-                  <h4 className="text-md font-semibold text-gray-800 mb-4">Warehouse Photos</h4>
-                  {warehousePhotos[selectedWarehouse.id]?.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {warehousePhotos[selectedWarehouse.id]?.map((photo, index) => (
-                        <div key={index} className="relative">
-                          <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-md">
-                            <img src={photo} alt={`Warehouse Photo ${index + 1}`} className="object-cover w-full h-full" />
-                          </div>
-                          <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 text-white px-2 py-1 text-xs rounded-tr-md rounded-bl-lg">
-                            Photo {index + 1}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 italic">No photos available for this warehouse.</p>
-                  )}
-                </div>
-              )}
-
-              {/* Facilities Tab */}
-              {activeTab === 'facilities' && (
-                <div>
-                  <h4 className="text-md font-semibold text-gray-800 mb-4">Warehouse Facilities</h4>
-                  {warehouseFacilities[selectedWarehouse.id]?.length > 0 ? (
-                    <div className="space-y-4">
-                      {warehouseFacilities[selectedWarehouse.id]?.map((facility, index) => (
-                        <div key={index} className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-                          <h5 className="text-md font-medium text-gray-800">{facility.type}</h5>
-                          <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <div>
-                              <p className="text-sm font-medium text-gray-600">Capacity</p>
-                              <p className="text-sm text-gray-700">{facility.capacity}</p>
-                            </div>
-                            {facility.temperature && (
-                              <div>
-                                <p className="text-sm font-medium text-gray-600">Temperature Range</p>
-                                <p className="text-sm text-gray-700">{facility.temperature}</p>
+                {/* Keepers Tab */}
+                {activeTab === 'keepers' && (
+                  <div>
+                    <h4 className="text-md font-semibold text-gray-800 mb-4">Warehouse Keepers & Staff</h4>
+                    {warehouseKeepers[selectedWarehouse.id]?.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {warehouseKeepers[selectedWarehouse.id]?.map((keeper, index) => (
+                          <div key={index} className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                            <div className="flex items-start">
+                              <div className="flex-shrink-0 bg-gray-100 rounded-full p-2">
+                                <svg className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
                               </div>
-                            )}
-                            {facility.humidity && (
-                              <div>
-                                <p className="text-sm font-medium text-gray-600">Humidity</p>
-                                <p className="text-sm text-gray-700">{facility.humidity}</p>
-                              </div>
-                            )}
-                            {facility.features && (
-                              <div>
-                                <p className="text-sm font-medium text-gray-600">Features</p>
-                                <p className="text-sm text-gray-700">{facility.features}</p>
-                              </div>
-                            )}
-                            {facility.vehicles && (
-                              <div>
-                                <p className="text-sm font-medium text-gray-600">Vehicle Capacity</p>
-                                <p className="text-sm text-gray-700">{facility.vehicles}</p>
-                              </div>
-                            )}
-                            {facility.products && (
-                              <div>
-                                <p className="text-sm font-medium text-gray-600">Suitable Products</p>
-                                <p className="text-sm text-gray-700">{facility.products}</p>
-                              </div>
-                            )}
-                            {facility.sustainability && (
-                              <div>
-                                <p className="text-sm font-medium text-gray-600">Sustainability</p>
-                                <p className="text-sm text-gray-700">{facility.sustainability}</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 italic">No facility information available.</p>
-                  )}
-                </div>
-              )}
-
-              {/* Keepers Tab */}
-              {activeTab === 'keepers' && (
-                <div>
-                  <h4 className="text-md font-semibold text-gray-800 mb-4">Warehouse Keepers & Staff</h4>
-                  {warehouseKeepers[selectedWarehouse.id]?.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {warehouseKeepers[selectedWarehouse.id]?.map((keeper, index) => (
-                        <div key={index} className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-                          <div className="flex items-start">
-                            <div className="flex-shrink-0 bg-gray-100 rounded-full p-2">
-                              <svg className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                              </svg>
-                            </div>
-                            <div className="ml-3">
-                              <h5 className="text-sm font-medium text-gray-800">{keeper.name}</h5>
-                              <p className="text-xs text-green-600 font-medium">{keeper.position}</p>
-                              <div className="mt-2 space-y-1">
-                                <p className="text-xs text-gray-600">
-                                  <span className="font-medium">Experience:</span> {keeper.experience}
-                                </p>
-                                <p className="text-xs text-gray-600">
-                                  <span className="font-medium">Contact:</span> {keeper.phone}
-                                </p>
+                              <div className="ml-3">
+                                <h5 className="text-sm font-medium text-gray-800">{keeper.name}</h5>
+                                <p className="text-xs text-green-600 font-medium">{keeper.position}</p>
+                                <div className="mt-2 space-y-1">
+                                  <p className="text-xs text-gray-600">
+                                    <span className="font-medium">Experience:</span> {keeper.experience}
+                                  </p>
+                                  <p className="text-xs text-gray-600">
+                                    <span className="font-medium">Contact:</span> {keeper.phone}
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 italic">No keeper information available.</p>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="px-6 py-3 bg-gray-50 text-right">
-              <button
-                onClick={() => setShowViewModal(false)}
-                className="px-4 py-2 bg-farmio text-white rounded hover:bg-farmio-dark focus:outline-none"
-              >
-                Close
-              </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic">No keeper information available.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="px-6 py-3 bg-gray-50 text-right">
+                <button
+                  onClick={() => setShowViewModal(false)}
+                  className="px-4 py-2 bg-farmio text-white rounded hover:bg-farmio-dark focus:outline-none"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>

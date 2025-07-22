@@ -391,19 +391,19 @@ const CollectionPoints = () => {
 
   // Table columns
   const columns = [
-    { key: 'id', header: 'ID' },
-    {
-      key: 'name',
+    { accessor: 'id', header: 'ID' },
+    { 
+      accessor: 'name', 
       header: 'Collection Point',
       render: (value) => (
         <div className="font-medium">{value}</div>
       )
     },
-    { key: 'location', header: 'Location' },
-    { key: 'capacity', header: 'Capacity' },
-    { key: 'currentLoad', header: 'Current Load' },
-    {
-      key: 'wasteTypes',
+    { accessor: 'location', header: 'Location' },
+    { accessor: 'capacity', header: 'Capacity' },
+    { accessor: 'currentLoad', header: 'Current Load' },
+    { 
+      accessor: 'wasteTypes', 
       header: 'Waste Types',
       render: (value) => (
         <div className="flex flex-wrap gap-1">
@@ -420,13 +420,13 @@ const CollectionPoints = () => {
         </div>
       )
     },
-    {
-      key: 'status',
+    { 
+      accessor: 'status', 
       header: 'Status',
       render: (value) => <StatusBadge status={value} />
     },
-    {
-      key: 'actions',
+    { 
+      accessor: 'actions', 
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">

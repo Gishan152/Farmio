@@ -336,25 +336,25 @@ const Deliveries = () => {
 
   // Table columns
   const columns = [
-    { key: 'id', header: 'Delivery ID' },
-    { key: 'orderId', header: 'Order ID' },
-    {
-      key: 'customer',
+    { accessor: 'id', header: 'Delivery ID' },
+    { accessor: 'orderId', header: 'Order ID' },
+    { 
+      accessor: 'customer', 
       header: 'Customer',
       render: (value) => (
         <div className="font-medium">{value}</div>
       )
     },
-    { key: 'transport', header: 'Transport' },
-    { key: 'scheduledDate', header: 'Delivery Date' },
-    { key: 'estimatedArrival', header: 'ETA' },
-    {
-      key: 'status',
+    { accessor: 'transport', header: 'Transport' },
+    { accessor: 'scheduledDate', header: 'Delivery Date' },
+    { accessor: 'estimatedArrival', header: 'ETA' },
+    { 
+      accessor: 'status', 
       header: 'Status',
       render: (value) => <DeliveryStatusBadge status={value} />
     },
-    {
-      key: 'actions',
+    { 
+      accessor: 'actions', 
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">

@@ -43,6 +43,8 @@ import VehicleInfo from './Pages/transporter/Sections/VehicleInfo';
 import DeliveryHistory from './Pages/transporter/Sections/DeliveryHistory';
 import RatingsFeedback from './Pages/transporter/Sections/RatingsFeedback';
 import TransporterNotifications from './Pages/transporter/Sections/Notifications';
+
+
 //farmer
 import FarmerLayout from './Pages/Farmer/FarmerLayout';
 import FarmerCrops, { FarmercropsLoader } from './Pages/Farmer/Sections/Crops';

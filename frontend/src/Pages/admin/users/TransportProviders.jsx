@@ -450,287 +450,297 @@ const TransportProviderManagement = () => {
 
       {/* View Transport Provider Details Modal */}
       {showViewModal && selectedProvider && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl overflow-hidden max-h-[90vh]">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
-              <h3 className="text-lg font-medium text-gray-900">Transport Provider: {selectedProvider.name}</h3>
-              <button
-                onClick={() => setShowViewModal(false)}
-                className="text-gray-400 hover:text-gray-500"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Tabs */}
-            <div className="border-b border-gray-200">
-              <nav className="-mb-px flex flex-wrap" aria-label="Tabs">
-                <button
-                  onClick={() => setActiveTab('provider')}
-                  className={`${activeTab === 'provider'
-                      ? 'border-farmio text-farmio'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    } py-4 px-1 text-center border-b-2 font-medium text-sm flex-1`}
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowViewModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 className="text-lg font-medium text-gray-900">Transport Provider: {selectedProvider.name}</h3>
+                <button 
+                  onClick={() => setShowViewModal(false)}
+                  className="text-gray-400 hover:text-gray-500"
                 >
-                  Provider Details
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
-                <button
-                  onClick={() => setActiveTab('drivers')}
-                  className={`${activeTab === 'drivers'
-                      ? 'border-farmio text-farmio'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              </div>
+              
+              {/* Tabs */}
+              <div className="border-b border-gray-200">
+                <nav className="-mb-px flex flex-wrap" aria-label="Tabs">
+                  <button
+                    onClick={() => setActiveTab('provider')}
+                    className={`${
+                      activeTab === 'provider' 
+                        ? 'border-farmio text-farmio' 
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     } py-4 px-1 text-center border-b-2 font-medium text-sm flex-1`}
-                >
-                  Driver Details
-                </button>
-                <button
-                  onClick={() => setActiveTab('vehicles')}
-                  className={`${activeTab === 'vehicles'
-                      ? 'border-farmio text-farmio'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  >
+                    Provider Details
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('drivers')}
+                    className={`${
+                      activeTab === 'drivers' 
+                        ? 'border-farmio text-farmio' 
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     } py-4 px-1 text-center border-b-2 font-medium text-sm flex-1`}
-                >
-                  Vehicle Information
-                </button>
-                <button
-                  onClick={() => setActiveTab('deliveries')}
-                  className={`${activeTab === 'deliveries'
-                      ? 'border-farmio text-farmio'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  >
+                    Driver Details
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('vehicles')}
+                    className={`${
+                      activeTab === 'vehicles' 
+                        ? 'border-farmio text-farmio' 
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     } py-4 px-1 text-center border-b-2 font-medium text-sm flex-1`}
-                >
-                  Delivery History
-                </button>
-              </nav>
-            </div>
-
-            {/* Tab Content - Scrollable container */}
-            <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-14rem)]">
-              {/* Provider Details */}
-              {activeTab === 'provider' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Name</p>
-                    <p className="mt-1">{selectedProvider.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Contact Person</p>
-                    <p className="mt-1">{selectedProvider.contactPerson}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Email</p>
-                    <p className="mt-1">{selectedProvider.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Phone</p>
-                    <p className="mt-1">{selectedProvider.phone}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Location</p>
-                    <p className="mt-1">{selectedProvider.location}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Fleet Size</p>
-                    <p className="mt-1">{selectedProvider.fleetSize}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Vehicle Types</p>
-                    <p className="mt-1">{selectedProvider.vehicleTypes}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Service Area</p>
-                    <p className="mt-1">{selectedProvider.serviceArea}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Certification</p>
-                    <p className="mt-1">{selectedProvider.certification}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Status</p>
-                    <p className="mt-1">
-                      <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${selectedProvider.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  >
+                    Vehicle Information
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('deliveries')}
+                    className={`${
+                      activeTab === 'deliveries' 
+                        ? 'border-farmio text-farmio' 
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    } py-4 px-1 text-center border-b-2 font-medium text-sm flex-1`}
+                  >
+                    Delivery History
+                  </button>
+                </nav>
+              </div>
+              
+              {/* Tab Content - Scrollable container */}
+              <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-14rem)]">
+                {/* Provider Details */}
+                {activeTab === 'provider' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Name</p>
+                      <p className="mt-1">{selectedProvider.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Contact Person</p>
+                      <p className="mt-1">{selectedProvider.contactPerson}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Email</p>
+                      <p className="mt-1">{selectedProvider.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Phone</p>
+                      <p className="mt-1">{selectedProvider.phone}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Location</p>
+                      <p className="mt-1">{selectedProvider.location}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Fleet Size</p>
+                      <p className="mt-1">{selectedProvider.fleetSize}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Vehicle Types</p>
+                      <p className="mt-1">{selectedProvider.vehicleTypes}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Service Area</p>
+                      <p className="mt-1">{selectedProvider.serviceArea}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Certification</p>
+                      <p className="mt-1">{selectedProvider.certification}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Status</p>
+                      <p className="mt-1">
+                        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
+                          selectedProvider.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
-                        {selectedProvider.status}
-                      </span>
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Join Date</p>
-                    <p className="mt-1">{selectedProvider.joinDate}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Driver Details */}
-              {activeTab === 'drivers' && (
-                <div className="space-y-6">
-                  {driversData[selectedProvider.id]?.map((driver) => (
-                    <div key={driver.id} className="border rounded-lg overflow-hidden shadow-sm">
-                      <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
-                        <h4 className="font-medium text-lg">{driver.name}</h4>
-                        <span className="text-sm text-gray-500">ID: {driver.id}</span>
-                      </div>
-                      <div className="p-4">
-                        <div className="flex flex-col md:flex-row">
-                          <div className="md:w-1/3 mb-4 md:mb-0">
-                            <div className="rounded-lg overflow-hidden max-w-[200px] mx-auto">
-                              <img
-                                src={driver.photo}
-                                alt={`Driver ${driver.name}`}
-                                className="w-full h-auto object-cover"
-                              />
-                            </div>
-                            <div className="mt-4 text-center md:text-left">
-                              <h5 className="text-sm font-medium text-gray-500">Contact Information</h5>
-                              <p className="mt-1">{driver.phone}</p>
-                              <p className="mt-1">{driver.email}</p>
-                              <p className="mt-1">{driver.address}</p>
-                            </div>
-                          </div>
-                          <div className="md:w-2/3 md:pl-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <h5 className="text-sm font-medium text-gray-500">License Information</h5>
-                                <p className="mt-1"><span className="font-medium">Number:</span> {driver.licenseNumber}</p>
-                                <p className="mt-1"><span className="font-medium">Expiry:</span> {driver.licenseExpiry}</p>
-                              </div>
-                              <div>
-                                <h5 className="text-sm font-medium text-gray-500">Experience</h5>
-                                <p className="mt-1">{driver.experience}</p>
-                              </div>
-                              <div>
-                                <h5 className="text-sm font-medium text-gray-500">Join Date</h5>
-                                <p className="mt-1">{driver.joinDate}</p>
-                              </div>
-                              <div>
-                                <h5 className="text-sm font-medium text-gray-500">Specializations</h5>
-                                <p className="mt-1">{driver.specializations}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Vehicle Information */}
-              {activeTab === 'vehicles' && (
-                <div className="space-y-6">
-                  {vehiclesData[selectedProvider.id]?.map((vehicle) => (
-                    <div key={vehicle.id} className="border rounded-lg overflow-hidden shadow-sm">
-                      <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
-                        <h4 className="font-medium text-lg">{vehicle.type} - {vehicle.id}</h4>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${vehicle.refrigeration === 'Yes' ?
-                            'bg-blue-100 text-blue-800' :
-                            vehicle.refrigeration === 'Partial' ?
-                              'bg-teal-100 text-teal-800' :
-                              'bg-gray-100 text-gray-800'
-                          }`}>
-                          {vehicle.refrigeration === 'Yes' ? 'Refrigerated' :
-                            vehicle.refrigeration === 'Partial' ? 'Partially Refrigerated' :
-                              'Non-Refrigerated'}
+                          {selectedProvider.status}
                         </span>
-                      </div>
-                      <div className="p-4">
-                        <div className="flex flex-col md:flex-row">
-                          <div className="md:w-2/5 mb-4 md:mb-0">
-                            <div className="grid grid-cols-1 gap-2">
-                              {vehicle.photos.map((photo, index) => (
-                                <div key={index} className="rounded-lg overflow-hidden border">
-                                  <img
-                                    src={photo}
-                                    alt={`${vehicle.type} ${index + 1}`}
-                                    className="w-full h-auto object-cover"
-                                  />
-                                </div>
-                              ))}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Join Date</p>
+                      <p className="mt-1">{selectedProvider.joinDate}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Driver Details */}
+                {activeTab === 'drivers' && (
+                  <div className="space-y-6">
+                    {driversData[selectedProvider.id]?.map((driver) => (
+                      <div key={driver.id} className="border rounded-lg overflow-hidden shadow-sm">
+                        <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
+                          <h4 className="font-medium text-lg">{driver.name}</h4>
+                          <span className="text-sm text-gray-500">ID: {driver.id}</span>
+                        </div>
+                        <div className="p-4">
+                          <div className="flex flex-col md:flex-row">
+                            <div className="md:w-1/3 mb-4 md:mb-0">
+                              <div className="rounded-lg overflow-hidden max-w-[200px] mx-auto">
+                                <img 
+                                  src={driver.photo} 
+                                  alt={`Driver ${driver.name}`} 
+                                  className="w-full h-auto object-cover" 
+                                />
+                              </div>
+                              <div className="mt-4 text-center md:text-left">
+                                <h5 className="text-sm font-medium text-gray-500">Contact Information</h5>
+                                <p className="mt-1">{driver.phone}</p>
+                                <p className="mt-1">{driver.email}</p>
+                                <p className="mt-1">{driver.address}</p>
+                              </div>
                             </div>
-                          </div>
-                          <div className="md:w-3/5 md:pl-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <h5 className="text-sm font-medium text-gray-500">Make & Model</h5>
-                                <p className="mt-1">{vehicle.make} {vehicle.model} ({vehicle.year})</p>
-                              </div>
-                              <div>
-                                <h5 className="text-sm font-medium text-gray-500">Plate Number</h5>
-                                <p className="mt-1">{vehicle.plateNumber}</p>
-                              </div>
-                              <div>
-                                <h5 className="text-sm font-medium text-gray-500">Capacity</h5>
-                                <p className="mt-1">{vehicle.capacity}</p>
-                              </div>
-                              <div>
-                                <h5 className="text-sm font-medium text-gray-500">Last Maintenance</h5>
-                                <p className="mt-1">{vehicle.lastMaintenance}</p>
+                            <div className="md:w-2/3 md:pl-6">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <h5 className="text-sm font-medium text-gray-500">License Information</h5>
+                                  <p className="mt-1"><span className="font-medium">Number:</span> {driver.licenseNumber}</p>
+                                  <p className="mt-1"><span className="font-medium">Expiry:</span> {driver.licenseExpiry}</p>
+                                </div>
+                                <div>
+                                  <h5 className="text-sm font-medium text-gray-500">Experience</h5>
+                                  <p className="mt-1">{driver.experience}</p>
+                                </div>
+                                <div>
+                                  <h5 className="text-sm font-medium text-gray-500">Join Date</h5>
+                                  <p className="mt-1">{driver.joinDate}</p>
+                                </div>
+                                <div>
+                                  <h5 className="text-sm font-medium text-gray-500">Specializations</h5>
+                                  <p className="mt-1">{driver.specializations}</p>
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Delivery History */}
-              {activeTab === 'deliveries' && (
-                <div>
-                  <h4 className="font-medium text-lg mb-4">Recent Deliveries</h4>
-                  <div className="overflow-x-auto max-h-96 shadow border-b border-gray-200 rounded-lg">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50 sticky top-0">
-                        <tr>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weight</th>
-                          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {deliveryData[selectedProvider.id]?.map((delivery) => (
-                          <tr key={delivery.id} className="hover:bg-gray-50">
-                            <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-blue-600">{delivery.id}</td>
-                            <td className="px-3 py-2 whitespace-nowrap text-sm">{delivery.date}</td>
-                            <td className="px-3 py-2 whitespace-nowrap text-sm">{delivery.driver}</td>
-                            <td className="px-3 py-2 whitespace-nowrap text-sm">{delivery.vehicle}</td>
-                            <td className="px-3 py-2 whitespace-nowrap text-sm">{delivery.route}</td>
-                            <td className="px-3 py-2 whitespace-nowrap text-sm">{delivery.products}</td>
-                            <td className="px-3 py-2 whitespace-nowrap text-sm">{delivery.weight}</td>
-                            <td className="px-3 py-2 whitespace-nowrap text-sm">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${delivery.status === 'Completed'
-                                  ? 'bg-green-100 text-green-800'
-                                  : delivery.status === 'In Progress'
+                    ))}
+                  </div>
+                )}
+                
+                {/* Vehicle Information */}
+                {activeTab === 'vehicles' && (
+                  <div className="space-y-6">
+                    {vehiclesData[selectedProvider.id]?.map((vehicle) => (
+                      <div key={vehicle.id} className="border rounded-lg overflow-hidden shadow-sm">
+                        <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
+                          <h4 className="font-medium text-lg">{vehicle.type} - {vehicle.id}</h4>
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            vehicle.refrigeration === 'Yes' ? 
+                            'bg-blue-100 text-blue-800' : 
+                            vehicle.refrigeration === 'Partial' ?
+                            'bg-teal-100 text-teal-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {vehicle.refrigeration === 'Yes' ? 'Refrigerated' : 
+                             vehicle.refrigeration === 'Partial' ? 'Partially Refrigerated' : 
+                             'Non-Refrigerated'}
+                          </span>
+                        </div>
+                        <div className="p-4">
+                          <div className="flex flex-col md:flex-row">
+                            <div className="md:w-2/5 mb-4 md:mb-0">
+                              <div className="grid grid-cols-1 gap-2">
+                                {vehicle.photos.map((photo, index) => (
+                                  <div key={index} className="rounded-lg overflow-hidden border">
+                                    <img 
+                                      src={photo} 
+                                      alt={`${vehicle.type} ${index + 1}`} 
+                                      className="w-full h-auto object-cover" 
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="md:w-3/5 md:pl-6">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <h5 className="text-sm font-medium text-gray-500">Make & Model</h5>
+                                  <p className="mt-1">{vehicle.make} {vehicle.model} ({vehicle.year})</p>
+                                </div>
+                                <div>
+                                  <h5 className="text-sm font-medium text-gray-500">Plate Number</h5>
+                                  <p className="mt-1">{vehicle.plateNumber}</p>
+                                </div>
+                                <div>
+                                  <h5 className="text-sm font-medium text-gray-500">Capacity</h5>
+                                  <p className="mt-1">{vehicle.capacity}</p>
+                                </div>
+                                <div>
+                                  <h5 className="text-sm font-medium text-gray-500">Last Maintenance</h5>
+                                  <p className="mt-1">{vehicle.lastMaintenance}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Delivery History */}
+                {activeTab === 'deliveries' && (
+                  <div>
+                    <h4 className="font-medium text-lg mb-4">Recent Deliveries</h4>
+                    <div className="overflow-x-auto max-h-96 shadow border-b border-gray-200 rounded-lg">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50 sticky top-0">
+                          <tr>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weight</th>
+                            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {deliveryData[selectedProvider.id]?.map((delivery) => (
+                            <tr key={delivery.id} className="hover:bg-gray-50">
+                              <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-blue-600">{delivery.id}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm">{delivery.date}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm">{delivery.driver}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm">{delivery.vehicle}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm">{delivery.route}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm">{delivery.products}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm">{delivery.weight}</td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                  delivery.status === 'Completed' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : delivery.status === 'In Progress'
                                     ? 'bg-blue-100 text-blue-800'
                                     : 'bg-yellow-100 text-yellow-800'
                                 }`}>
-                                {delivery.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                                  {delivery.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-
-            <div className="px-6 py-3 bg-gray-50 text-right">
-              <button
-                onClick={() => setShowViewModal(false)}
-                className="px-4 py-2 bg-farmio text-white rounded hover:bg-farmio-dark focus:outline-none"
-              >
-                Close
-              </button>
+                )}
+              </div>
+              
+              <div className="px-6 py-3 bg-gray-50 text-right">
+                <button
+                  onClick={() => setShowViewModal(false)}
+                  className="px-4 py-2 bg-farmio text-white rounded hover:bg-farmio-dark focus:outline-none"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -738,29 +748,32 @@ const TransportProviderManagement = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedProvider && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Confirm Delete</h3>
-            </div>
-            <div className="px-6 py-4">
-              <p className="text-gray-700">
-                Are you sure you want to delete transport provider <span className="font-medium">{selectedProvider.name}</span>? This action cannot be undone.
-              </p>
-            </div>
-            <div className="px-6 py-3 bg-gray-50 flex justify-end space-x-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 focus:outline-none"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDeleteProvider}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none"
-              >
-                Delete
-              </button>
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Confirm Delete</h3>
+              </div>
+              <div className="px-6 py-4">
+                <p className="text-gray-700">
+                  Are you sure you want to delete transport provider <span className="font-medium">{selectedProvider.name}</span>? This action cannot be undone.
+                </p>
+              </div>
+              <div className="px-6 py-3 bg-gray-50 flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 focus:outline-none"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteProvider}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>

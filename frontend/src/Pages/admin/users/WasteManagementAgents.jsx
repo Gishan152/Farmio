@@ -358,282 +358,290 @@ const WasteManagementAgentManagement = () => {
 
       {/* View Agent Details Modal */}
       {showViewModal && selectedAgent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-              <h3 className="text-lg font-medium text-gray-900">Waste Management Agent Details: {selectedAgent.name}</h3>
-              <button
-                onClick={() => setShowViewModal(false)}
-                className="text-gray-400 hover:text-gray-500"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowViewModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-lg font-medium text-gray-900">Waste Management Agent Details: {selectedAgent.name}</h3>
+                <button 
+                  onClick={() => setShowViewModal(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
 
-            {/* Tabs Navigation */}
-            <div className="border-b border-gray-200">
-              <nav className="flex -mb-px">
-                <button
-                  onClick={() => setActiveTab('details')}
-                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'details'
-                      ? 'border-b-2 border-farmio text-farmio-dark'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              {/* Tabs Navigation */}
+              <div className="border-b border-gray-200">
+                <nav className="flex -mb-px">
+                  <button
+                    onClick={() => setActiveTab('details')}
+                    className={`px-6 py-3 font-medium text-sm ${
+                      activeTab === 'details'
+                        ? 'border-b-2 border-farmio text-farmio-dark'
+                        : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
-                >
-                  Details
-                </button>
-                <button
-                  onClick={() => setActiveTab('technologies')}
-                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'technologies'
-                      ? 'border-b-2 border-farmio text-farmio-dark'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('technologies')}
+                    className={`px-6 py-3 font-medium text-sm ${
+                      activeTab === 'technologies'
+                        ? 'border-b-2 border-farmio text-farmio-dark'
+                        : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
-                >
-                  Processing Technologies ({processingTechnologies[selectedAgent.id]?.length || 0})
-                </button>
-                <button
-                  onClick={() => setActiveTab('collections')}
-                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'collections'
-                      ? 'border-b-2 border-farmio text-farmio-dark'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  >
+                    Processing Technologies ({processingTechnologies[selectedAgent.id]?.length || 0})
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('collections')}
+                    className={`px-6 py-3 font-medium text-sm ${
+                      activeTab === 'collections'
+                        ? 'border-b-2 border-farmio text-farmio-dark'
+                        : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
-                >
-                  Collection History ({collectionHistory[selectedAgent.id]?.length || 0})
-                </button>
-                <button
-                  onClick={() => setActiveTab('environmental')}
-                  className={`px-6 py-3 font-medium text-sm ${activeTab === 'environmental'
-                      ? 'border-b-2 border-farmio text-farmio-dark'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  >
+                    Collection History ({collectionHistory[selectedAgent.id]?.length || 0})
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('environmental')}
+                    className={`px-6 py-3 font-medium text-sm ${
+                      activeTab === 'environmental'
+                        ? 'border-b-2 border-farmio text-farmio-dark'
+                        : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`}
-                >
-                  Environmental Metrics
-                </button>
-              </nav>
-            </div>
+                  >
+                    Environmental Metrics
+                  </button>
+                </nav>
+              </div>
 
-            <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-14rem)]">
-              {/* Details Tab */}
-              {activeTab === 'details' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Company Name</p>
-                    <p className="mt-1">{selectedAgent.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Contact Person</p>
-                    <p className="mt-1">{selectedAgent.contactPerson}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Email</p>
-                    <p className="mt-1">{selectedAgent.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Phone</p>
-                    <p className="mt-1">{selectedAgent.phone}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Location</p>
-                    <p className="mt-1">{selectedAgent.location}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Service Types</p>
-                    <p className="mt-1">{selectedAgent.serviceTypes}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Processing Capacity</p>
-                    <p className="mt-1">{selectedAgent.capacity}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Waste Types Handled</p>
-                    <p className="mt-1">{selectedAgent.wasteTypes}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Certifications</p>
-                    <p className="mt-1">{selectedAgent.certifications}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Status</p>
-                    <p className="mt-1">
-                      <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${selectedAgent.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-14rem)]">
+                {/* Details Tab */}
+                {activeTab === 'details' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Company Name</p>
+                      <p className="mt-1">{selectedAgent.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Contact Person</p>
+                      <p className="mt-1">{selectedAgent.contactPerson}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Email</p>
+                      <p className="mt-1">{selectedAgent.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Phone</p>
+                      <p className="mt-1">{selectedAgent.phone}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Location</p>
+                      <p className="mt-1">{selectedAgent.location}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Service Types</p>
+                      <p className="mt-1">{selectedAgent.serviceTypes}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Processing Capacity</p>
+                      <p className="mt-1">{selectedAgent.capacity}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Waste Types Handled</p>
+                      <p className="mt-1">{selectedAgent.wasteTypes}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Certifications</p>
+                      <p className="mt-1">{selectedAgent.certifications}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Status</p>
+                      <p className="mt-1">
+                        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
+                          selectedAgent.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
-                        {selectedAgent.status}
-                      </span>
-                    </p>
+                          {selectedAgent.status}
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Join Date</p>
+                      <p className="mt-1">{selectedAgent.joinDate}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Last Collection Date</p>
+                      <p className="mt-1">{selectedAgent.lastCollection}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Join Date</p>
-                    <p className="mt-1">{selectedAgent.joinDate}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Last Collection Date</p>
-                    <p className="mt-1">{selectedAgent.lastCollection}</p>
-                  </div>
-                </div>
-              )}
+                )}
 
-              {/* Technologies Tab */}
-              {activeTab === 'technologies' && (
-                <div>
-                  <h4 className="text-md font-semibold text-gray-800 mb-4">Processing Technologies</h4>
-                  {processingTechnologies[selectedAgent.id]?.length > 0 ? (
-                    <div className="space-y-4">
-                      {processingTechnologies[selectedAgent.id]?.map((tech, index) => (
-                        <div key={index} className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-                          <h5 className="text-md font-medium text-gray-800">{tech.name}</h5>
-                          <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <div>
-                              <p className="text-sm font-medium text-gray-600">Description</p>
-                              <p className="text-sm text-gray-700">{tech.description}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-600">Processing Capacity</p>
-                              <p className="text-sm text-gray-700">{tech.capacity}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-600">Output Products</p>
-                              <p className="text-sm text-gray-700">{tech.outputProducts}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-600">Certifications</p>
-                              <p className="text-sm text-gray-700">{tech.certifications}</p>
+                {/* Technologies Tab */}
+                {activeTab === 'technologies' && (
+                  <div>
+                    <h4 className="text-md font-semibold text-gray-800 mb-4">Processing Technologies</h4>
+                    {processingTechnologies[selectedAgent.id]?.length > 0 ? (
+                      <div className="space-y-4">
+                        {processingTechnologies[selectedAgent.id]?.map((tech, index) => (
+                          <div key={index} className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                            <h5 className="text-md font-medium text-gray-800">{tech.name}</h5>
+                            <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+                              <div>
+                                <p className="text-sm font-medium text-gray-600">Description</p>
+                                <p className="text-sm text-gray-700">{tech.description}</p>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-600">Processing Capacity</p>
+                                <p className="text-sm text-gray-700">{tech.capacity}</p>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-600">Output Products</p>
+                                <p className="text-sm text-gray-700">{tech.outputProducts}</p>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-gray-600">Certifications</p>
+                                <p className="text-sm text-gray-700">{tech.certifications}</p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 italic">No technology information available.</p>
-                  )}
-                </div>
-              )}
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic">No technology information available.</p>
+                    )}
+                  </div>
+                )}
 
-              {/* Collection History Tab */}
-              {activeTab === 'collections' && (
-                <div>
-                  <h4 className="text-md font-semibold text-gray-800 mb-4">Recent Collection History</h4>
-                  {collectionHistory[selectedAgent.id]?.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Farmer ID</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waste Type</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Processing Method</th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {collectionHistory[selectedAgent.id]?.map((collection, index) => (
-                            <tr key={index}>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collection.date}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collection.farmerId}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collection.location}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collection.wasteType}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collection.quantity}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collection.processingMethod}</td>
+                {/* Collection History Tab */}
+                {activeTab === 'collections' && (
+                  <div>
+                    <h4 className="text-md font-semibold text-gray-800 mb-4">Recent Collection History</h4>
+                    {collectionHistory[selectedAgent.id]?.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Farmer ID</th>
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waste Type</th>
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Processing Method</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 italic">No collection history available.</p>
-                  )}
-                </div>
-              )}
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {collectionHistory[selectedAgent.id]?.map((collection, index) => (
+                              <tr key={index}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collection.date}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collection.farmerId}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collection.location}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collection.wasteType}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collection.quantity}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{collection.processingMethod}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic">No collection history available.</p>
+                    )}
+                  </div>
+                )}
 
-              {/* Environmental Metrics Tab */}
-              {activeTab === 'environmental' && (
-                <div>
-                  <h4 className="text-md font-semibold text-gray-800 mb-4">Environmental Impact Metrics</h4>
-                  {environmentalMetrics[selectedAgent.id] && (
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 bg-green-100 rounded-full p-2">
-                              <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                              </svg>
+                {/* Environmental Metrics Tab */}
+                {activeTab === 'environmental' && (
+                  <div>
+                    <h4 className="text-md font-semibold text-gray-800 mb-4">Environmental Impact Metrics</h4>
+                    {environmentalMetrics[selectedAgent.id] && (
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 bg-green-100 rounded-full p-2">
+                                <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                              </div>
+                              <div className="ml-3">
+                                <h5 className="text-sm font-medium text-gray-900">Emissions Reduction</h5>
+                                <p className="mt-1 text-lg font-semibold text-green-600">{environmentalMetrics[selectedAgent.id].emissionsReduction}</p>
+                              </div>
                             </div>
-                            <div className="ml-3">
-                              <h5 className="text-sm font-medium text-gray-900">Emissions Reduction</h5>
-                              <p className="mt-1 text-lg font-semibold text-green-600">{environmentalMetrics[selectedAgent.id].emissionsReduction}</p>
+                          </div>
+                          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 bg-blue-100 rounded-full p-2">
+                                <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                              </div>
+                              <div className="ml-3">
+                                <h5 className="text-sm font-medium text-gray-900">Water Saved</h5>
+                                <p className="mt-1 text-lg font-semibold text-blue-600">{environmentalMetrics[selectedAgent.id].waterSaved}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 bg-yellow-100 rounded-full p-2">
+                                <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                              </div>
+                              <div className="ml-3">
+                                <h5 className="text-sm font-medium text-gray-900">Landfill Diverted</h5>
+                                <p className="mt-1 text-lg font-semibold text-yellow-600">{environmentalMetrics[selectedAgent.id].landfillDiverted}</p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 bg-blue-100 rounded-full p-2">
-                              <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                              </svg>
-                            </div>
-                            <div className="ml-3">
-                              <h5 className="text-sm font-medium text-gray-900">Water Saved</h5>
-                              <p className="mt-1 text-lg font-semibold text-blue-600">{environmentalMetrics[selectedAgent.id].waterSaved}</p>
-                            </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                          <div>
+                            <h5 className="font-medium text-gray-800">Energy Production</h5>
+                            <p className="text-gray-600">{environmentalMetrics[selectedAgent.id].energyProduced}</p>
+                          </div>
+                          <div>
+                            <h5 className="font-medium text-gray-800">Carbon Footprint</h5>
+                            <p className="text-gray-600">{environmentalMetrics[selectedAgent.id].carbonFootprint}</p>
                           </div>
                         </div>
-                        <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 bg-yellow-100 rounded-full p-2">
-                              <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                              </svg>
-                            </div>
-                            <div className="ml-3">
-                              <h5 className="text-sm font-medium text-gray-900">Landfill Diverted</h5>
-                              <p className="mt-1 text-lg font-semibold text-yellow-600">{environmentalMetrics[selectedAgent.id].landfillDiverted}</p>
-                            </div>
+                        
+                        <div className="mt-4">
+                          <h5 className="font-medium text-gray-800">Certifications</h5>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {environmentalMetrics[selectedAgent.id].certifications?.map((cert, index) => (
+                              <span key={index} className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">
+                                {cert}
+                              </span>
+                            ))}
                           </div>
                         </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <div>
-                          <h5 className="font-medium text-gray-800">Energy Production</h5>
-                          <p className="text-gray-600">{environmentalMetrics[selectedAgent.id].energyProduced}</p>
-                        </div>
-                        <div>
-                          <h5 className="font-medium text-gray-800">Carbon Footprint</h5>
-                          <p className="text-gray-600">{environmentalMetrics[selectedAgent.id].carbonFootprint}</p>
+                        
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                          <h5 className="font-medium text-gray-800">Compliance Status</h5>
+                          <p className="text-gray-600 mt-1">{environmentalMetrics[selectedAgent.id].complianceStatus}</p>
                         </div>
                       </div>
-
-                      <div className="mt-4">
-                        <h5 className="font-medium text-gray-800">Certifications</h5>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {environmentalMetrics[selectedAgent.id].certifications?.map((cert, index) => (
-                            <span key={index} className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">
-                              {cert}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                        <h5 className="font-medium text-gray-800">Compliance Status</h5>
-                        <p className="text-gray-600 mt-1">{environmentalMetrics[selectedAgent.id].complianceStatus}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="px-6 py-3 bg-gray-50 text-right">
-              <button
-                onClick={() => setShowViewModal(false)}
-                className="px-4 py-2 bg-farmio text-white rounded hover:bg-farmio-dark focus:outline-none"
-              >
-                Close
-              </button>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              <div className="px-6 py-3 bg-gray-50 text-right">
+                <button
+                  onClick={() => setShowViewModal(false)}
+                  className="px-4 py-2 bg-farmio text-white rounded hover:bg-farmio-dark focus:outline-none"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -641,29 +649,32 @@ const WasteManagementAgentManagement = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedAgent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Confirm Delete</h3>
-            </div>
-            <div className="px-6 py-4">
-              <p className="text-gray-700">
-                Are you sure you want to delete waste management agent <span className="font-medium">{selectedAgent.name}</span>? This action cannot be undone.
-              </p>
-            </div>
-            <div className="px-6 py-3 bg-gray-50 flex justify-end space-x-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 focus:outline-none"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDeleteAgent}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none"
-              >
-                Delete
-              </button>
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Confirm Delete</h3>
+              </div>
+              <div className="px-6 py-4">
+                <p className="text-gray-700">
+                  Are you sure you want to delete waste management agent <span className="font-medium">{selectedAgent.name}</span>? This action cannot be undone.
+                </p>
+              </div>
+              <div className="px-6 py-3 bg-gray-50 flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 focus:outline-none"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteAgent}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
