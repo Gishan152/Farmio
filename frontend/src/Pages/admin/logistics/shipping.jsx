@@ -31,6 +31,241 @@ const LocationIcon = () => (
   </svg>
 );
 
+const shipments = [
+  {
+    id: 'SHP-2023-1001',
+    orderId: 'ORD-10045',
+    customer: 'Fresh Foods Market',
+    origin: 'Farmville Production Hub',
+    destination: 'Central City Market',
+    carrier: 'Fast Track Logistics',
+    vehicle: 'Refrigerated Truck (M)',
+    shipDate: '2023-06-22',
+    estimatedDelivery: '2023-06-25',
+    status: 'In Transit',
+    distance: '45 km',
+    weight: '1.2 tons',
+    packageCount: 24,
+    temperature: '4°C',
+    trackingUrl: 'https://tracking.example.com/SHP-2023-1001',
+    shipmentDetails: {
+      items: [
+        { product: 'Organic Tomatoes', quantity: '50 kg', packaging: 'Crates' },
+        { product: 'Fresh Lettuce', quantity: '40 kg', packaging: 'Boxes' },
+        { product: 'Carrots', quantity: '60 kg', packaging: 'Bags' },
+        { product: 'Red Onions', quantity: '45 kg', packaging: 'Mesh Bags' },
+        { product: 'Bell Peppers', quantity: '35 kg', packaging: 'Crates' },
+        { product: 'Cucumbers', quantity: '55 kg', packaging: 'Boxes' },
+        { product: 'Potatoes', quantity: '80 kg', packaging: 'Bags' },
+        { product: 'Green Beans', quantity: '30 kg', packaging: 'Trays' }
+      ],
+      milestones: [
+        { name: 'Order Received', time: '2023-06-20 10:30 AM', completed: true },
+        { name: 'Processing Started', time: '2023-06-21 08:15 AM', completed: true },
+        { name: 'Packaging Complete', time: '2023-06-21 04:45 PM', completed: true },
+        { name: 'Loaded for Shipping', time: '2023-06-22 06:30 AM', completed: true },
+        { name: 'In Transit', time: '2023-06-22 07:15 AM', completed: true },
+        { name: 'Arrived at Distribution', time: 'Pending', completed: false },
+        { name: 'Out for Delivery', time: 'Pending', completed: false },
+        { name: 'Delivered', time: 'Pending', completed: false }
+      ],
+      driver: {
+        name: 'Michael Johnson',
+        phone: '+1 (555) 123-7890',
+        licenseNumber: 'DL-78901234'
+      },
+      notes: 'Handle with care. Temperature sensitive produce.'
+    }
+  },
+  {
+    id: 'SHP-2023-1002',
+    orderId: 'ORD-10046',
+    customer: 'Green Market Co-op',
+    origin: 'Orchard Hills Fruit Farms',
+    destination: 'Green Market Co-op Store',
+    carrier: 'Rural Routes Delivery',
+    vehicle: 'Refrigerated Van',
+    shipDate: '2023-06-21',
+    estimatedDelivery: '2023-06-26',
+    status: 'Processing',
+    distance: '30 km',
+    weight: '0.8 tons',
+    packageCount: 16,
+    temperature: '6°C',
+    trackingUrl: 'https://tracking.example.com/SHP-2023-1002',
+    shipmentDetails: {
+      items: [
+        { product: 'Organic Apples', quantity: '40 kg', packaging: 'Boxes' },
+        { product: 'Organic Bananas', quantity: '35 kg', packaging: 'Crates' },
+        { product: 'Organic Oranges', quantity: '45 kg', packaging: 'Boxes' },
+        { product: 'Organic Grapes', quantity: '30 kg', packaging: 'Crates' },
+        { product: 'Organic Berries', quantity: '25 kg', packaging: 'Trays' },
+        { product: 'Organic Melons', quantity: '30 kg', packaging: 'Boxes' }
+      ],
+      milestones: [
+        { name: 'Order Received', time: '2023-06-20 11:45 AM', completed: true },
+        { name: 'Processing Started', time: '2023-06-21 09:30 AM', completed: true },
+        { name: 'Packaging Complete', time: 'Pending', completed: false },
+        { name: 'Loaded for Shipping', time: 'Pending', completed: false },
+        { name: 'In Transit', time: 'Pending', completed: false },
+        { name: 'Arrived at Distribution', time: 'Pending', completed: false },
+        { name: 'Out for Delivery', time: 'Pending', completed: false },
+        { name: 'Delivered', time: 'Pending', completed: false }
+      ],
+      driver: {
+        name: 'David Lee',
+        phone: '+1 (555) 234-5678',
+        licenseNumber: 'DL-56781234'
+      },
+      notes: 'Organic certified products. Keep separated from non-organic items.'
+    }
+  },
+  {
+    id: 'SHP-2023-1003',
+    orderId: 'ORD-10047',
+    customer: 'Healthy Eats Cafe',
+    origin: 'Riverside Agricultural Cooperative',
+    destination: 'Healthy Eats Cafe',
+    carrier: 'Swift Stream Logistics',
+    vehicle: 'Electric Delivery Van',
+    shipDate: '2023-06-22',
+    estimatedDelivery: '2023-06-25',
+    status: 'Scheduled',
+    distance: '15 km',
+    weight: '0.4 tons',
+    packageCount: 8,
+    temperature: '5°C',
+    trackingUrl: 'https://tracking.example.com/SHP-2023-1003',
+    shipmentDetails: {
+      items: [
+        { product: 'Organic Spinach', quantity: '15 kg', packaging: 'Boxes' },
+        { product: 'Organic Kale', quantity: '12 kg', packaging: 'Crates' },
+        { product: 'Organic Arugula', quantity: '10 kg', packaging: 'Boxes' },
+        { product: 'Organic Mixed Greens', quantity: '25 kg', packaging: 'Trays' }
+      ],
+      milestones: [
+        { name: 'Order Received', time: '2023-06-21 10:15 AM', completed: true },
+        { name: 'Processing Started', time: 'Scheduled for 2023-06-22', completed: false },
+        { name: 'Packaging Complete', time: 'Pending', completed: false },
+        { name: 'Loaded for Shipping', time: 'Pending', completed: false },
+        { name: 'In Transit', time: 'Pending', completed: false },
+        { name: 'Arrived at Distribution', time: 'Pending', completed: false },
+        { name: 'Out for Delivery', time: 'Pending', completed: false },
+        { name: 'Delivered', time: 'Pending', completed: false }
+      ],
+      driver: {
+        name: 'Sarah Williams',
+        phone: '+1 (555) 345-6789',
+        licenseNumber: 'DL-34567890'
+      },
+      notes: 'Priority delivery for fresh greens. Maintain temperature at 5°C.'
+    }
+  },
+  {
+    id: 'SHP-2023-1000',
+    orderId: 'ORD-10044',
+    customer: 'Urban Grocery Alliance',
+    origin: 'Highland Dairy Cooperative',
+    destination: 'Urban Grocery Distribution Center',
+    carrier: 'Cool Chain Logistics',
+    vehicle: 'Refrigerated Truck (L)',
+    shipDate: '2023-06-19',
+    estimatedDelivery: '2023-06-22',
+    status: 'Delivered',
+    distance: '55 km',
+    weight: '2.0 tons',
+    packageCount: 40,
+    temperature: '2°C',
+    trackingUrl: 'https://tracking.example.com/SHP-2023-1000',
+    shipmentDetails: {
+      items: [
+        { product: 'Fresh Milk', quantity: '500 L', packaging: 'Containers' },
+        { product: 'Yogurt', quantity: '300 L', packaging: 'Boxes' },
+        { product: 'Cheese', quantity: '200 kg', packaging: 'Vacuum Sealed' }
+      ],
+      milestones: [
+        { name: 'Order Received', time: '2023-06-18 08:30 AM', completed: true },
+        { name: 'Processing Started', time: '2023-06-18 11:15 AM', completed: true },
+        { name: 'Packaging Complete', time: '2023-06-18 05:45 PM', completed: true },
+        { name: 'Loaded for Shipping', time: '2023-06-19 03:30 AM', completed: true },
+        { name: 'In Transit', time: '2023-06-19 04:15 AM', completed: true },
+        { name: 'Arrived at Distribution', time: '2023-06-19 06:45 AM', completed: true },
+        { name: 'Out for Delivery', time: '2023-06-22 05:15 AM', completed: true },
+        { name: 'Delivered', time: '2023-06-22 09:30 AM', completed: true }
+      ],
+      driver: {
+        name: 'Robert Chen',
+        phone: '+1 (555) 456-7890',
+        licenseNumber: 'DL-45678901'
+      },
+      notes: 'Delivered on time. All items in good condition.'
+    }
+  },
+  {
+    id: 'SHP-2023-1004',
+    orderId: 'ORD-10048',
+    customer: 'Farm to Table Restaurant',
+    origin: 'Greenfield Farms Collective',
+    destination: 'Farm to Table Restaurant',
+    carrier: 'Local Haul Co-op',
+    vehicle: 'Hybrid Delivery Van',
+    shipDate: '2023-06-23',
+    estimatedDelivery: '2023-06-23',
+    status: 'Scheduled',
+    distance: '8 km',
+    weight: '0.3 tons',
+    packageCount: 10,
+    temperature: 'Ambient',
+    trackingUrl: 'https://tracking.example.com/SHP-2023-1004',
+    shipmentDetails: {
+      items: [
+        { product: 'Fresh Herbs', quantity: '5 kg', packaging: 'Crates' },
+        { product: 'Specialty Greens', quantity: '8 kg', packaging: 'Boxes' },
+        { product: 'Edible Flowers', quantity: '2 kg', packaging: 'Trays' },
+        { product: 'Heirloom Vegetables', quantity: '15 kg', packaging: 'Baskets' }
+      ],
+      milestones: [
+        { name: 'Order Received', time: '2023-06-22 02:00 PM', completed: true },
+        { name: 'Processing Started', time: 'Scheduled for 2023-06-23 05:00 AM', completed: false },
+        { name: 'Packaging Complete', time: 'Pending', completed: false },
+        { name: 'Loaded for Shipping', time: 'Pending', completed: false },
+        { name: 'In Transit', time: 'Pending', completed: false },
+        { name: 'Delivered', time: 'Pending', completed: false }
+      ],
+      driver: {
+        name: 'Elena Martinez',
+        phone: '+1 (555) 567-8901',
+        licenseNumber: 'DL-56789012'
+      },
+      notes: 'Same day delivery for restaurant. Fresh-picked morning of delivery.'
+    }
+  }
+];
+
+const filters = [
+  {
+    name: 'status',
+    label: 'Status',
+    options: [
+      { label: 'Scheduled', value: 'Scheduled' },
+      { label: 'Processing', value: 'Processing' },
+      { label: 'In Transit', value: 'In Transit' },
+      { label: 'Delivered', value: 'Delivered' }
+    ]
+  },
+  {
+    name: 'carrier',
+    label: 'Carrier',
+    options: [
+      { label: 'Fast Track Logistics', value: 'Fast Track Logistics' },
+      { label: 'Rural Routes Delivery', value: 'Rural Routes Delivery' },
+      { label: 'Swift Stream Logistics', value: 'Swift Stream Logistics' },
+      { label: 'Cool Chain Logistics', value: 'Cool Chain Logistics' },
+      { label: 'Local Haul Co-op', value: 'Local Haul Co-op' }
+    ]
+  }
+];
+
 const ShippingManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,218 +273,6 @@ const ShippingManagement = () => {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [expandedShipmentId, setExpandedShipmentId] = useState(null);
-
-  // Sample shipping data
-  const shipments = [
-    {
-      id: 'SHP-2023-1001',
-      orderId: 'ORD-10045',
-      customer: 'Fresh Foods Market',
-      origin: 'Farmville Production Hub',
-      destination: 'Central City Market',
-      carrier: 'Fast Track Logistics',
-      vehicle: 'Refrigerated Truck (M)',
-      shipDate: '2023-06-22',
-      estimatedDelivery: '2023-06-25',
-      status: 'In Transit',
-      distance: '45 km',
-      weight: '1.2 tons',
-      packageCount: 24,
-      temperature: '4°C',
-      trackingUrl: 'https://tracking.example.com/SHP-2023-1001',
-      shipmentDetails: {
-        items: [
-          { product: 'Organic Tomatoes', quantity: '50 kg', packaging: 'Crates' },
-          { product: 'Fresh Lettuce', quantity: '40 kg', packaging: 'Boxes' },
-          { product: 'Carrots', quantity: '60 kg', packaging: 'Bags' },
-          { product: 'Red Onions', quantity: '45 kg', packaging: 'Mesh Bags' },
-          { product: 'Bell Peppers', quantity: '35 kg', packaging: 'Crates' },
-          { product: 'Cucumbers', quantity: '55 kg', packaging: 'Boxes' },
-          { product: 'Potatoes', quantity: '80 kg', packaging: 'Bags' },
-          { product: 'Green Beans', quantity: '30 kg', packaging: 'Trays' }
-        ],
-        milestones: [
-          { name: 'Order Received', time: '2023-06-20 10:30 AM', completed: true },
-          { name: 'Processing Started', time: '2023-06-21 08:15 AM', completed: true },
-          { name: 'Packaging Complete', time: '2023-06-21 04:45 PM', completed: true },
-          { name: 'Loaded for Shipping', time: '2023-06-22 06:30 AM', completed: true },
-          { name: 'In Transit', time: '2023-06-22 07:15 AM', completed: true },
-          { name: 'Arrived at Distribution', time: 'Pending', completed: false },
-          { name: 'Out for Delivery', time: 'Pending', completed: false },
-          { name: 'Delivered', time: 'Pending', completed: false }
-        ],
-        driver: {
-          name: 'Michael Johnson',
-          phone: '+1 (555) 123-7890',
-          licenseNumber: 'DL-78901234'
-        },
-        notes: 'Handle with care. Temperature sensitive produce.'
-      }
-    },
-    {
-      id: 'SHP-2023-1002',
-      orderId: 'ORD-10046',
-      customer: 'Green Market Co-op',
-      origin: 'Orchard Hills Fruit Farms',
-      destination: 'Green Market Co-op Store',
-      carrier: 'Rural Routes Delivery',
-      vehicle: 'Refrigerated Van',
-      shipDate: '2023-06-21',
-      estimatedDelivery: '2023-06-26',
-      status: 'Processing',
-      distance: '30 km',
-      weight: '0.8 tons',
-      packageCount: 16,
-      temperature: '6°C',
-      trackingUrl: 'https://tracking.example.com/SHP-2023-1002',
-      shipmentDetails: {
-        items: [
-          { product: 'Organic Apples', quantity: '40 kg', packaging: 'Boxes' },
-          { product: 'Organic Bananas', quantity: '35 kg', packaging: 'Crates' },
-          { product: 'Organic Oranges', quantity: '45 kg', packaging: 'Boxes' },
-          { product: 'Organic Grapes', quantity: '30 kg', packaging: 'Crates' },
-          { product: 'Organic Berries', quantity: '25 kg', packaging: 'Trays' },
-          { product: 'Organic Melons', quantity: '30 kg', packaging: 'Boxes' }
-        ],
-        milestones: [
-          { name: 'Order Received', time: '2023-06-20 11:45 AM', completed: true },
-          { name: 'Processing Started', time: '2023-06-21 09:30 AM', completed: true },
-          { name: 'Packaging Complete', time: 'Pending', completed: false },
-          { name: 'Loaded for Shipping', time: 'Pending', completed: false },
-          { name: 'In Transit', time: 'Pending', completed: false },
-          { name: 'Arrived at Distribution', time: 'Pending', completed: false },
-          { name: 'Out for Delivery', time: 'Pending', completed: false },
-          { name: 'Delivered', time: 'Pending', completed: false }
-        ],
-        driver: {
-          name: 'David Lee',
-          phone: '+1 (555) 234-5678',
-          licenseNumber: 'DL-56781234'
-        },
-        notes: 'Organic certified products. Keep separated from non-organic items.'
-      }
-    },
-    {
-      id: 'SHP-2023-1003',
-      orderId: 'ORD-10047',
-      customer: 'Healthy Eats Cafe',
-      origin: 'Riverside Agricultural Cooperative',
-      destination: 'Healthy Eats Cafe',
-      carrier: 'Swift Stream Logistics',
-      vehicle: 'Electric Delivery Van',
-      shipDate: '2023-06-22',
-      estimatedDelivery: '2023-06-25',
-      status: 'Scheduled',
-      distance: '15 km',
-      weight: '0.4 tons',
-      packageCount: 8,
-      temperature: '5°C',
-      trackingUrl: 'https://tracking.example.com/SHP-2023-1003',
-      shipmentDetails: {
-        items: [
-          { product: 'Organic Spinach', quantity: '15 kg', packaging: 'Boxes' },
-          { product: 'Organic Kale', quantity: '12 kg', packaging: 'Crates' },
-          { product: 'Organic Arugula', quantity: '10 kg', packaging: 'Boxes' },
-          { product: 'Organic Mixed Greens', quantity: '25 kg', packaging: 'Trays' }
-        ],
-        milestones: [
-          { name: 'Order Received', time: '2023-06-21 10:15 AM', completed: true },
-          { name: 'Processing Started', time: 'Scheduled for 2023-06-22', completed: false },
-          { name: 'Packaging Complete', time: 'Pending', completed: false },
-          { name: 'Loaded for Shipping', time: 'Pending', completed: false },
-          { name: 'In Transit', time: 'Pending', completed: false },
-          { name: 'Arrived at Distribution', time: 'Pending', completed: false },
-          { name: 'Out for Delivery', time: 'Pending', completed: false },
-          { name: 'Delivered', time: 'Pending', completed: false }
-        ],
-        driver: {
-          name: 'Sarah Williams',
-          phone: '+1 (555) 345-6789',
-          licenseNumber: 'DL-34567890'
-        },
-        notes: 'Priority delivery for fresh greens. Maintain temperature at 5°C.'
-      }
-    },
-    {
-      id: 'SHP-2023-1000',
-      orderId: 'ORD-10044',
-      customer: 'Urban Grocery Alliance',
-      origin: 'Highland Dairy Cooperative',
-      destination: 'Urban Grocery Distribution Center',
-      carrier: 'Cool Chain Logistics',
-      vehicle: 'Refrigerated Truck (L)',
-      shipDate: '2023-06-19',
-      estimatedDelivery: '2023-06-22',
-      status: 'Delivered',
-      distance: '55 km',
-      weight: '2.0 tons',
-      packageCount: 40,
-      temperature: '2°C',
-      trackingUrl: 'https://tracking.example.com/SHP-2023-1000',
-      shipmentDetails: {
-        items: [
-          { product: 'Fresh Milk', quantity: '500 L', packaging: 'Containers' },
-          { product: 'Yogurt', quantity: '300 L', packaging: 'Boxes' },
-          { product: 'Cheese', quantity: '200 kg', packaging: 'Vacuum Sealed' }
-        ],
-        milestones: [
-          { name: 'Order Received', time: '2023-06-18 08:30 AM', completed: true },
-          { name: 'Processing Started', time: '2023-06-18 11:15 AM', completed: true },
-          { name: 'Packaging Complete', time: '2023-06-18 05:45 PM', completed: true },
-          { name: 'Loaded for Shipping', time: '2023-06-19 03:30 AM', completed: true },
-          { name: 'In Transit', time: '2023-06-19 04:15 AM', completed: true },
-          { name: 'Arrived at Distribution', time: '2023-06-19 06:45 AM', completed: true },
-          { name: 'Out for Delivery', time: '2023-06-22 05:15 AM', completed: true },
-          { name: 'Delivered', time: '2023-06-22 09:30 AM', completed: true }
-        ],
-        driver: {
-          name: 'Robert Chen',
-          phone: '+1 (555) 456-7890',
-          licenseNumber: 'DL-45678901'
-        },
-        notes: 'Delivered on time. All items in good condition.'
-      }
-    },
-    {
-      id: 'SHP-2023-1004',
-      orderId: 'ORD-10048',
-      customer: 'Farm to Table Restaurant',
-      origin: 'Greenfield Farms Collective',
-      destination: 'Farm to Table Restaurant',
-      carrier: 'Local Haul Co-op',
-      vehicle: 'Hybrid Delivery Van',
-      shipDate: '2023-06-23',
-      estimatedDelivery: '2023-06-23',
-      status: 'Scheduled',
-      distance: '8 km',
-      weight: '0.3 tons',
-      packageCount: 10,
-      temperature: 'Ambient',
-      trackingUrl: 'https://tracking.example.com/SHP-2023-1004',
-      shipmentDetails: {
-        items: [
-          { product: 'Fresh Herbs', quantity: '5 kg', packaging: 'Crates' },
-          { product: 'Specialty Greens', quantity: '8 kg', packaging: 'Boxes' },
-          { product: 'Edible Flowers', quantity: '2 kg', packaging: 'Trays' },
-          { product: 'Heirloom Vegetables', quantity: '15 kg', packaging: 'Baskets' }
-        ],
-        milestones: [
-          { name: 'Order Received', time: '2023-06-22 02:00 PM', completed: true },
-          { name: 'Processing Started', time: 'Scheduled for 2023-06-23 05:00 AM', completed: false },
-          { name: 'Packaging Complete', time: 'Pending', completed: false },
-          { name: 'Loaded for Shipping', time: 'Pending', completed: false },
-          { name: 'In Transit', time: 'Pending', completed: false },
-          { name: 'Delivered', time: 'Pending', completed: false }
-        ],
-        driver: {
-          name: 'Elena Martinez',
-          phone: '+1 (555) 567-8901',
-          licenseNumber: 'DL-56789012'
-        },
-        notes: 'Same day delivery for restaurant. Fresh-picked morning of delivery.'
-      }
-    }
-  ];
 
   // Simulate loading
   useEffect(() => {
@@ -264,40 +287,15 @@ const ShippingManagement = () => {
   // Handle search
   useEffect(() => {
     if (!shipments) return;
-    
+
     let results = shipments.filter(shipment => {
-      return Object.keys(shipment).some(key => 
+      return Object.keys(shipment).some(key =>
         typeof shipment[key] === 'string' && shipment[key].toLowerCase().includes(searchTerm.toLowerCase())
       );
     });
-    
+
     setFilteredData(results);
   }, [searchTerm, shipments]);
-
-  // Filter options
-  const filters = [
-    {
-      name: 'status',
-      label: 'Status',
-      options: [
-        { label: 'Scheduled', value: 'Scheduled' },
-        { label: 'Processing', value: 'Processing' },
-        { label: 'In Transit', value: 'In Transit' },
-        { label: 'Delivered', value: 'Delivered' }
-      ]
-    },
-    {
-      name: 'carrier',
-      label: 'Carrier',
-      options: [
-        { label: 'Fast Track Logistics', value: 'Fast Track Logistics' },
-        { label: 'Rural Routes Delivery', value: 'Rural Routes Delivery' },
-        { label: 'Swift Stream Logistics', value: 'Swift Stream Logistics' },
-        { label: 'Cool Chain Logistics', value: 'Cool Chain Logistics' },
-        { label: 'Local Haul Co-op', value: 'Local Haul Co-op' }
-      ]
-    }
-  ];
 
   // Handle filter changes
   const handleFilterChange = (filterName, value) => {
@@ -313,14 +311,14 @@ const ShippingManagement = () => {
       setFilteredData(shipments);
       return;
     }
-    
+
     let results = shipments.filter(shipment => {
       return Object.entries(selectedFilters).every(([key, value]) => {
         if (!value || value === 'all') return true;
         return shipment[key] === value;
       });
     });
-    
+
     setFilteredData(results);
   }, [selectedFilters, shipments]);
 
@@ -332,7 +330,7 @@ const ShippingManagement = () => {
       'In Transit': 'bg-pastel-green text-green-800',
       'Delivered': 'bg-green-100 text-green-800',
     };
-    
+
     return (
       <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status] || 'bg-gray-200 text-gray-800'}`}>
         {status}
@@ -363,7 +361,7 @@ const ShippingManagement = () => {
             <StatusBadge status={shipment.status} />
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h5 className="text-xs font-medium text-gray-500 mb-2">SHIPMENT MILESTONES</h5>
@@ -376,7 +374,7 @@ const ShippingManagement = () => {
                 </div>
               ))}
             </div>
-            
+
             <h5 className="text-xs font-medium text-gray-500 mt-6 mb-2">DRIVER INFORMATION</h5>
             <div className="p-3 bg-white border border-gray-200 rounded-md">
               <div className="text-sm font-medium">{shipment.shipmentDetails.driver.name}</div>
@@ -384,7 +382,7 @@ const ShippingManagement = () => {
               <div className="text-xs text-gray-500">License: {shipment.shipmentDetails.driver.licenseNumber}</div>
             </div>
           </div>
-          
+
           <div>
             <h5 className="text-xs font-medium text-gray-500 mb-2">SHIPMENT DETAILS</h5>
             <div className="space-y-3">
@@ -412,13 +410,13 @@ const ShippingManagement = () => {
                 <span className="text-gray-500">Temperature:</span>
                 <span className="font-medium">{shipment.temperature}</span>
               </div>
-              
+
               <div className="mt-2">
                 <span className="text-xs font-medium text-gray-500 block mb-1">NOTES</span>
                 <p className="text-sm bg-gray-100 p-2 rounded">{shipment.shipmentDetails.notes}</p>
               </div>
             </div>
-            
+
             <h5 className="text-xs font-medium text-gray-500 mt-4 mb-2">ITEMS</h5>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -440,11 +438,11 @@ const ShippingManagement = () => {
                 </tbody>
               </table>
             </div>
-            
+
             {shipment.trackingUrl && (
-              <a 
-                href={shipment.trackingUrl} 
-                target="_blank" 
+              <a
+                href={shipment.trackingUrl}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 inline-flex items-center px-3 py-1 text-sm text-white bg-farmio rounded-md hover:bg-green-600"
               >
@@ -465,28 +463,28 @@ const ShippingManagement = () => {
     { key: 'id', header: 'Shipment ID' },
     { key: 'orderId', header: 'Order ID' },
     { key: 'customer', header: 'Customer' },
-    { 
-      key: 'shipDate', 
+    {
+      key: 'shipDate',
       header: 'Ship Date',
       render: (value) => <span>{value}</span>
     },
-    { 
-      key: 'estimatedDelivery', 
+    {
+      key: 'estimatedDelivery',
       header: 'Est. Delivery',
       render: (value) => <span>{value}</span>
     },
     { key: 'carrier', header: 'Carrier' },
-    { 
-      key: 'status', 
+    {
+      key: 'status',
       header: 'Status',
       render: (value) => <StatusBadge status={value} />
     },
-    { 
-      key: 'actions', 
+    {
+      key: 'actions',
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className={`text-blue-600 hover:text-blue-800 ${expandedShipmentId === row.id ? 'text-blue-800' : ''}`}
             title={expandedShipmentId === row.id ? "Hide Details" : "View Details"}
             onClick={(e) => {
@@ -500,9 +498,9 @@ const ShippingManagement = () => {
             </svg>
           </button>
           {row.trackingUrl && (
-            <a 
+            <a
               href={row.trackingUrl}
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
               className="text-green-600 hover:text-green-800"
               title="Track Shipment"
@@ -538,7 +536,7 @@ const ShippingManagement = () => {
     >
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard 
+        <StatCard
           title="Total Shipments"
           value={shipments.length.toString()}
           subtitle="All shipments"
@@ -546,7 +544,7 @@ const ShippingManagement = () => {
           color="blue"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="In Transit"
           value={countByStatus.InTransit.toString()}
           subtitle="Currently shipping"
@@ -554,7 +552,7 @@ const ShippingManagement = () => {
           color="green"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Processing"
           value={(countByStatus.Scheduled + countByStatus.Processing).toString()}
           subtitle="Preparing for shipping"
@@ -562,7 +560,7 @@ const ShippingManagement = () => {
           color="yellow"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Delivered"
           value={countByStatus.Delivered.toString()}
           subtitle="Completed shipments"
@@ -590,7 +588,7 @@ const ShippingManagement = () => {
               </svg>
             </span>
           </div>
-          
+
           {/* Filter Button */}
           <button
             className="flex items-center text-sm py-2 px-4 rounded-md border border-dashboard-border hover:bg-gray-100"
@@ -630,9 +628,9 @@ const ShippingManagement = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-4 flex justify-end space-x-2">
-              <button 
+              <button
                 className="px-3 py-1 text-sm text-gray-600 border border-dashboard-border rounded-md hover:bg-gray-100"
                 onClick={() => setSelectedFilters({})}
               >

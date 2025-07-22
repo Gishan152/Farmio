@@ -40,73 +40,66 @@ const DownloadIcon = () => (
   </svg>
 );
 
+
+// Move static data outside the component to avoid new reference on every render
+const activityData = {
+  totalActiveUsers: '8,452',
+  newUsers: '1,245',
+  avgSessionTime: '8m 32s',
+  retentionRate: '68.5%',
+  bounceRate: '32.4%'
+};
+const activeUsersData = {
+  month: {
+    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+    datasets: {
+      activeUsers: [7850, 8125, 8290, 8452],
+      newUsers: [320, 295, 310, 320]
+    }
+  },
+  quarter: {
+    labels: ['Jan', 'Feb', 'Mar'],
+    datasets: {
+      activeUsers: [7450, 7820, 8452],
+      newUsers: [850, 915, 1245]
+    }
+  },
+  year: {
+    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+    datasets: {
+      activeUsers: [6850, 7250, 7895, 8452],
+      newUsers: [2450, 2180, 2320, 2780]
+    }
+  }
+};
+const userTypesData = [
+  { type: 'Farmers', count: '2,854', percentage: '33.8%', active: '78.5%', newUsers: '345' },
+  { type: 'Buyers', count: '3,125', percentage: '37.0%', active: '82.3%', newUsers: '520' },
+  { type: 'Warehouse Owners', count: '845', percentage: '10.0%', active: '74.8%', newUsers: '126' },
+  { type: 'Transport Providers', count: '956', percentage: '11.3%', active: '68.2%', newUsers: '152' },
+  { type: 'Waste Mgmt. Agents', count: '672', percentage: '7.9%', active: '71.4%', newUsers: '102' }
+];
+const topFeaturesUsed = [
+  { feature: 'Product Search', usageCount: '45,680', userPercentage: '85.2%', trend: '+12.5%' },
+  { feature: 'Order Placement', usageCount: '28,945', userPercentage: '72.8%', trend: '+8.3%' },
+  { feature: 'Storage Booking', usageCount: '18,540', userPercentage: '54.6%', trend: '+15.7%' },
+  { feature: 'Transport Scheduling', usageCount: '12,835', userPercentage: '42.3%', trend: '+6.2%' },
+  { feature: 'Waste Collection Request', usageCount: '9,745', userPercentage: '32.8%', trend: '+9.8%' }
+];
+const userJourney = [
+  { step: 'Registration', completionRate: '100%', avgTime: '2m 15s', dropOff: '0%' },
+  { step: 'Profile Completion', completionRate: '82.5%', avgTime: '4m 35s', dropOff: '17.5%' },
+  { step: 'Product Browsing', completionRate: '76.8%', avgTime: '8m 45s', dropOff: '5.7%' },
+  { step: 'Cart Addition', completionRate: '58.4%', avgTime: '3m 20s', dropOff: '18.4%' },
+  { step: 'Checkout Process', completionRate: '42.3%', avgTime: '5m 10s', dropOff: '16.1%' },
+  { step: 'Order Completion', completionRate: '38.7%', avgTime: '2m 30s', dropOff: '3.6%' }
+];
+
 const UserActivity = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [timeRange, setTimeRange] = useState('month');
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [userTypeFilter, setUserTypeFilter] = useState('all');
-
-  // Mock user activity data
-  const activityData = {
-    totalActiveUsers: '8,452',
-    newUsers: '1,245',
-    avgSessionTime: '8m 32s',
-    retentionRate: '68.5%',
-    bounceRate: '32.4%'
-  };
-
-  // Mock active users data for chart
-  const activeUsersData = {
-    month: {
-      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-      datasets: {
-        activeUsers: [7850, 8125, 8290, 8452],
-        newUsers: [320, 295, 310, 320]
-      }
-    },
-    quarter: {
-      labels: ['Jan', 'Feb', 'Mar'],
-      datasets: {
-        activeUsers: [7450, 7820, 8452],
-        newUsers: [850, 915, 1245]
-      }
-    },
-    year: {
-      labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-      datasets: {
-        activeUsers: [6850, 7250, 7895, 8452],
-        newUsers: [2450, 2180, 2320, 2780]
-      }
-    }
-  };
-
-  // Mock user types data
-  const userTypesData = [
-    { type: 'Farmers', count: '2,854', percentage: '33.8%', active: '78.5%', newUsers: '345' },
-    { type: 'Buyers', count: '3,125', percentage: '37.0%', active: '82.3%', newUsers: '520' },
-    { type: 'Warehouse Owners', count: '845', percentage: '10.0%', active: '74.8%', newUsers: '126' },
-    { type: 'Transport Providers', count: '956', percentage: '11.3%', active: '68.2%', newUsers: '152' },
-    { type: 'Waste Mgmt. Agents', count: '672', percentage: '7.9%', active: '71.4%', newUsers: '102' }
-  ];
-
-  // Mock top features used
-  const topFeaturesUsed = [
-    { feature: 'Product Search', usageCount: '45,680', userPercentage: '85.2%', trend: '+12.5%' },
-    { feature: 'Order Placement', usageCount: '28,945', userPercentage: '72.8%', trend: '+8.3%' },
-    { feature: 'Storage Booking', usageCount: '18,540', userPercentage: '54.6%', trend: '+15.7%' },
-    { feature: 'Transport Scheduling', usageCount: '12,835', userPercentage: '42.3%', trend: '+6.2%' },
-    { feature: 'Waste Collection Request', usageCount: '9,745', userPercentage: '32.8%', trend: '+9.8%' }
-  ];
-
-  // Mock user journey data
-  const userJourney = [
-    { step: 'Registration', completionRate: '100%', avgTime: '2m 15s', dropOff: '0%' },
-    { step: 'Profile Completion', completionRate: '82.5%', avgTime: '4m 35s', dropOff: '17.5%' },
-    { step: 'Product Browsing', completionRate: '76.8%', avgTime: '8m 45s', dropOff: '5.7%' },
-    { step: 'Cart Addition', completionRate: '58.4%', avgTime: '3m 20s', dropOff: '18.4%' },
-    { step: 'Checkout Process', completionRate: '42.3%', avgTime: '5m 10s', dropOff: '16.1%' },
-    { step: 'Order Completion', completionRate: '38.7%', avgTime: '2m 30s', dropOff: '3.6%' }
-  ];
 
   return (
     <DashboardLayout>

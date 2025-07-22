@@ -8,96 +8,96 @@ const FarmerIcon = () => (
   </svg>
 );
 
+// Sample data for farmer's listing history
+const farmerListingHistory = [
+  { product: 'Organic Rice', date: '2025-06-15', quantity: '250 kg', price: 'LKR 45,000', status: 'Active' },
+  { product: 'Fresh Vegetables Mix', date: '2025-06-10', quantity: '100 kg', price: 'LKR 18,000', status: 'Sold Out' },
+  { product: 'Organic Onions', date: '2025-06-01', quantity: '75 kg', price: 'LKR 11,250', status: 'Active' },
+  { product: 'Banana', date: '2025-05-25', quantity: '120 kg', price: 'LKR 18,000', status: 'Active' },
+  { product: 'Fresh Coconut', date: '2025-05-20', quantity: '200 units', price: 'LKR 40,000', status: 'Sold Out' }
+];
+
+// Sample data for farmer's activities
+const farmerActivities = [
+  { type: 'listing', description: 'Added new listing for Organic Rice', date: '2025-06-15', time: '09:45 AM' },
+  { type: 'price', description: 'Updated price for Fresh Vegetables Mix', date: '2025-06-12', time: '03:20 PM' },
+  { type: 'order', description: 'Received order #ORD-2546 for Fresh Vegetables Mix', date: '2025-06-11', time: '10:15 AM' },
+  { type: 'listing', description: 'Added new listing for Organic Onions', date: '2025-06-01', time: '02:30 PM' },
+  { type: 'order', description: 'Completed delivery for order #ORD-2498', date: '2025-05-28', time: '04:45 PM' },
+  { type: 'listing', description: 'Added new listing for Banana', date: '2025-05-25', time: '11:20 AM' }
+];
+
+// Sample farmer data for demonstration
+const farmers = [
+  {
+    id: 1,
+    name: "Sunil Rathnayake",
+    email: "sunil.rathnayake@farm.lk",
+    phone: "+94 77 234 5678",
+    location: "Anuradhapura",
+    farmSize: "15 acres",
+    crops: "Rice, Vegetables",
+    status: "Active",
+    joinDate: "2023-01-15",
+    lastActive: "2023-06-10"
+  },
+  {
+    id: 2,
+    name: "Priyanka Dissanayake",
+    email: "priyanka@greenvalley.lk",
+    phone: "+94 71 987 6543",
+    location: "Nuwara Eliya",
+    farmSize: "8 acres",
+    crops: "Tea, Vegetables",
+    status: "Active",
+    joinDate: "2022-08-22",
+    lastActive: "2023-06-08"
+  },
+  {
+    id: 3,
+    name: "Malith Fernando",
+    email: "malith@fernandofarms.lk",
+    phone: "+94 76 555 1234",
+    location: "Polonnaruwa",
+    farmSize: "20 acres",
+    crops: "Rice, Maize",
+    status: "Inactive",
+    joinDate: "2022-03-10",
+    lastActive: "2023-02-15"
+  },
+  {
+    id: 4,
+    name: "Kumari Rajapakse",
+    email: "kumari@organicfarms.lk",
+    phone: "+94 70 876 5432",
+    location: "Kandy",
+    farmSize: "5 acres",
+    crops: "Organic Vegetables, Herbs",
+    status: "Active",
+    joinDate: "2023-04-02",
+    lastActive: "2023-06-09"
+
+  },
+  {
+    id: 5,
+    name: "Asanka Weerasinghe",
+    email: "asanka@familyfarm.lk",
+    phone: "+94 75 345 6789",
+    location: "Hambantota",
+    farmSize: "12 acres",
+    crops: "Rice, Beans, Coconut",
+    status: "Active",
+    joinDate: "2022-11-30",
+    lastActive: "2023-06-07"
+  }
+];
+
 const FarmerManagement = () => {
   // State for modals
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedFarmer, setSelectedFarmer] = useState(null);
   const [activeTab, setActiveTab] = useState('profile');
-
-  // Sample data for farmer's listing history
-  const farmerListingHistory = [
-    { product: 'Organic Rice', date: '2025-06-15', quantity: '250 kg', price: 'LKR 45,000', status: 'Active' },
-    { product: 'Fresh Vegetables Mix', date: '2025-06-10', quantity: '100 kg', price: 'LKR 18,000', status: 'Sold Out' },
-    { product: 'Organic Onions', date: '2025-06-01', quantity: '75 kg', price: 'LKR 11,250', status: 'Active' },
-    { product: 'Banana', date: '2025-05-25', quantity: '120 kg', price: 'LKR 18,000', status: 'Active' },
-    { product: 'Fresh Coconut', date: '2025-05-20', quantity: '200 units', price: 'LKR 40,000', status: 'Sold Out' }
-  ];
-  
-  // Sample data for farmer's activities
-  const farmerActivities = [
-    { type: 'listing', description: 'Added new listing for Organic Rice', date: '2025-06-15', time: '09:45 AM' },
-    { type: 'price', description: 'Updated price for Fresh Vegetables Mix', date: '2025-06-12', time: '03:20 PM' },
-    { type: 'order', description: 'Received order #ORD-2546 for Fresh Vegetables Mix', date: '2025-06-11', time: '10:15 AM' },
-    { type: 'listing', description: 'Added new listing for Organic Onions', date: '2025-06-01', time: '02:30 PM' },
-    { type: 'order', description: 'Completed delivery for order #ORD-2498', date: '2025-05-28', time: '04:45 PM' },
-    { type: 'listing', description: 'Added new listing for Banana', date: '2025-05-25', time: '11:20 AM' }
-  ];
-
-  // Sample farmer data for demonstration
-  const farmers = [
-    {
-      id: 1,
-      name: "Sunil Rathnayake",
-      email: "sunil.rathnayake@farm.lk",
-      phone: "+94 77 234 5678",
-      location: "Anuradhapura",
-      farmSize: "15 acres",
-      crops: "Rice, Vegetables",
-      status: "Active",
-      joinDate: "2023-01-15",
-      lastActive: "2023-06-10"
-    },
-    {
-      id: 2,
-      name: "Priyanka Dissanayake",
-      email: "priyanka@greenvalley.lk",
-      phone: "+94 71 987 6543",
-      location: "Nuwara Eliya",
-      farmSize: "8 acres",
-      crops: "Tea, Vegetables",
-      status: "Active",
-      joinDate: "2022-08-22",
-      lastActive: "2023-06-08"
-    },
-    {
-      id: 3,
-      name: "Malith Fernando",
-      email: "malith@fernandofarms.lk",
-      phone: "+94 76 555 1234",
-      location: "Polonnaruwa",
-      farmSize: "20 acres",
-      crops: "Rice, Maize",
-      status: "Inactive",
-      joinDate: "2022-03-10",
-      lastActive: "2023-02-15"
-    },
-    {
-      id: 4,
-      name: "Kumari Rajapakse",
-      email: "kumari@organicfarms.lk",
-      phone: "+94 70 876 5432",
-      location: "Kandy",
-      farmSize: "5 acres",
-      crops: "Organic Vegetables, Herbs",
-      status: "Active",
-      joinDate: "2023-04-02",
-      lastActive: "2023-06-09"
-     
-    },
-    {
-      id: 5,
-      name: "Asanka Weerasinghe",
-      email: "asanka@familyfarm.lk",
-      phone: "+94 75 345 6789",
-      location: "Hambantota",
-      farmSize: "12 acres",
-      crops: "Rice, Beans, Coconut",
-      status: "Active",
-      joinDate: "2022-11-30",
-      lastActive: "2023-06-07"
-    }
-  ];
 
   // Handle view farmer details
   const handleViewFarmer = (farmer) => {
@@ -125,25 +125,24 @@ const FarmerManagement = () => {
     { accessor: 'email', header: 'Email' },
     { accessor: 'phone', header: 'Phone' },
     { accessor: 'location', header: 'Location' },
-   
+
     { accessor: 'crops', header: 'Crops' },
-    { 
-      accessor: 'status', 
+    {
+      accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-          row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
           {row.status}
         </span>
       )
     },
-    
-    { 
-      accessor: 'actions',      header: 'Actions',
+
+    {
+      accessor: 'actions', header: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className="text-blue-600 hover:text-blue-800"
             onClick={(e) => {
               e.stopPropagation();
@@ -155,7 +154,7 @@ const FarmerManagement = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
           </button>
-          <button 
+          <button
             className="text-red-600 hover:text-red-800"
             onClick={(e) => {
               e.stopPropagation();

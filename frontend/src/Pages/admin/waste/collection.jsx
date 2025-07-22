@@ -24,6 +24,135 @@ const LocationIcon = () => (
   </svg>
 );
 
+// Sample collection points data
+const collectionPoints = [
+  {
+    id: 'CP-001',
+    name: 'Central Market Collection Hub',
+    location: 'Central City Market',
+    address: '123 Market St, Central City, CC 10001',
+    manager: 'Maria Garcia',
+    contact: '+1 (555) 123-4567',
+    email: 'mgarcia@wastesolutions.com',
+    capacity: '20 tons daily',
+    currentLoad: '65%',
+    status: 'Active',
+    wasteTypes: ['Organic', 'Packaging', 'Mixed'],
+    operatingHours: 'Mon-Sat: 6:00 AM - 6:00 PM',
+    pointDetails: {
+      containers: [
+        { type: 'Organic', capacity: '10 tons', currentFill: '70%', nextPickup: '2023-06-23' },
+        { type: 'Packaging', capacity: '8 tons', currentFill: '55%', nextPickup: '2023-06-24' },
+        { type: 'Mixed', capacity: '2 tons', currentFill: '45%', nextPickup: '2023-06-25' }
+      ],
+      pickupSchedule: 'Daily for organic waste, every other day for packaging',
+      processingFacility: 'Green Valley Recycling Center',
+      transportProvider: 'EcoHaul Waste Management',
+      notes: 'High-volume location serving the central market district. Priority for organic waste collection.'
+    }
+  },
+  {
+    id: 'CP-002',
+    name: 'Riverside Farm Collective Point',
+    location: 'Riverside Agricultural Zone',
+    address: '456 River Rd, Riverside, RS 20002',
+    manager: 'James Wilson',
+    contact: '+1 (555) 234-5678',
+    email: 'jwilson@greenfarms.org',
+    capacity: '8 tons daily',
+    currentLoad: '35%',
+    status: 'Active',
+    wasteTypes: ['Organic', 'Agricultural'],
+    operatingHours: 'Mon-Fri: 7:00 AM - 5:00 PM',
+    pointDetails: {
+      containers: [
+        { type: 'Organic', capacity: '5 tons', currentFill: '40%', nextPickup: '2023-06-23' },
+        { type: 'Agricultural', capacity: '3 tons', currentFill: '25%', nextPickup: '2023-06-25' }
+      ],
+      pickupSchedule: 'Three times weekly',
+      processingFacility: 'River Basin Composting Facility',
+      transportProvider: 'Farm Waste Solutions',
+      notes: 'Collection point primarily serving local organic farms. Specialized in agricultural waste for composting.'
+    }
+  },
+  {
+    id: 'CP-003',
+    name: 'Greenfield Distribution Center',
+    location: 'Greenfield Industrial Park',
+    address: '789 Industry Way, Greenfield, GF 30003',
+    manager: 'David Chen',
+    contact: '+1 (555) 345-6789',
+    email: 'dchen@wastesolutions.com',
+    capacity: '15 tons daily',
+    currentLoad: '80%',
+    status: 'Active',
+    wasteTypes: ['Packaging', 'Plastic', 'Cardboard', 'Mixed'],
+    operatingHours: 'Mon-Sun: 24 hours',
+    pointDetails: {
+      containers: [
+        { type: 'Packaging', capacity: '5 tons', currentFill: '85%', nextPickup: '2023-06-23' },
+        { type: 'Plastic', capacity: '3 tons', currentFill: '75%', nextPickup: '2023-06-23' },
+        { type: 'Cardboard', capacity: '5 tons', currentFill: '90%', nextPickup: '2023-06-23' },
+        { type: 'Mixed', capacity: '2 tons', currentFill: '50%', nextPickup: '2023-06-24' }
+      ],
+      pickupSchedule: 'Daily pickups, twice daily for cardboard',
+      processingFacility: 'Metro Recycling Industries',
+      transportProvider: 'RecycleHaul Inc.',
+      notes: 'High-volume packaging waste from distribution operations. Urgent need for additional cardboard capacity.'
+    }
+  },
+  {
+    id: 'CP-004',
+    name: 'Urban Restaurant District Point',
+    location: 'Downtown Culinary Quarter',
+    address: '101 Chef\'s Blvd, Metro City, MC 40004',
+    manager: 'Sophia Lee',
+    contact: '+1 (555) 456-7890',
+    email: 'slee@foodwaste.org',
+    capacity: '5 tons daily',
+    currentLoad: '90%',
+    status: 'At Capacity',
+    wasteTypes: ['Food Waste', 'Organic', 'Mixed'],
+    operatingHours: 'Mon-Sun: 5:00 AM - 1:00 AM',
+    pointDetails: {
+      containers: [
+        { type: 'Food Waste', capacity: '3 tons', currentFill: '95%', nextPickup: '2023-06-23' },
+        { type: 'Organic', capacity: '1.5 tons', currentFill: '85%', nextPickup: '2023-06-23' },
+        { type: 'Mixed', capacity: '0.5 tons', currentFill: '75%', nextPickup: '2023-06-24' }
+      ],
+      pickupSchedule: 'Twice daily for food waste, daily for others',
+      processingFacility: 'Urban Biogas Plant',
+      transportProvider: 'City Waste Services',
+      notes: 'Serving restaurant district with high volumes of food waste. Consider capacity expansion.'
+    }
+  },
+  {
+    id: 'CP-005',
+    name: 'Highland Community Collection',
+    location: 'Highland Valley Region',
+    address: '202 Mountain View Rd, Highland, HV 50005',
+    manager: 'Robert Martinez',
+    contact: '+1 (555) 567-8901',
+    email: 'rmartinez@communitywaste.org',
+    capacity: '3 tons daily',
+    currentLoad: '40%',
+    status: 'Maintenance',
+    wasteTypes: ['Organic', 'Mixed', 'Recyclables'],
+    operatingHours: 'Mon, Wed, Fri: 8:00 AM - 4:00 PM',
+    pointDetails: {
+      containers: [
+        { type: 'Organic', capacity: '1.5 tons', currentFill: '45%', nextPickup: '2023-06-24' },
+        { type: 'Mixed', capacity: '1 ton', currentFill: '35%', nextPickup: '2023-06-24' },
+        { type: 'Recyclables', capacity: '0.5 tons', currentFill: '30%', nextPickup: '2023-06-24' }
+      ],
+      pickupSchedule: 'Three times weekly',
+      processingFacility: 'Highland Recycling Cooperative',
+      transportProvider: 'Community Haul Volunteers',
+      notes: 'Community-run collection point. Currently undergoing maintenance on compactor system.'
+    }
+  }
+];
+
 const CollectionPoints = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,135 +160,6 @@ const CollectionPoints = () => {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [expandedPointId, setExpandedPointId] = useState(null);
-
-  // Sample collection points data
-  const collectionPoints = [
-    {
-      id: 'CP-001',
-      name: 'Central Market Collection Hub',
-      location: 'Central City Market',
-      address: '123 Market St, Central City, CC 10001',
-      manager: 'Maria Garcia',
-      contact: '+1 (555) 123-4567',
-      email: 'mgarcia@wastesolutions.com',
-      capacity: '20 tons daily',
-      currentLoad: '65%',
-      status: 'Active',
-      wasteTypes: ['Organic', 'Packaging', 'Mixed'],
-      operatingHours: 'Mon-Sat: 6:00 AM - 6:00 PM',
-      pointDetails: {
-        containers: [
-          { type: 'Organic', capacity: '10 tons', currentFill: '70%', nextPickup: '2023-06-23' },
-          { type: 'Packaging', capacity: '8 tons', currentFill: '55%', nextPickup: '2023-06-24' },
-          { type: 'Mixed', capacity: '2 tons', currentFill: '45%', nextPickup: '2023-06-25' }
-        ],
-        pickupSchedule: 'Daily for organic waste, every other day for packaging',
-        processingFacility: 'Green Valley Recycling Center',
-        transportProvider: 'EcoHaul Waste Management',
-        notes: 'High-volume location serving the central market district. Priority for organic waste collection.'
-      }
-    },
-    {
-      id: 'CP-002',
-      name: 'Riverside Farm Collective Point',
-      location: 'Riverside Agricultural Zone',
-      address: '456 River Rd, Riverside, RS 20002',
-      manager: 'James Wilson',
-      contact: '+1 (555) 234-5678',
-      email: 'jwilson@greenfarms.org',
-      capacity: '8 tons daily',
-      currentLoad: '35%',
-      status: 'Active',
-      wasteTypes: ['Organic', 'Agricultural'],
-      operatingHours: 'Mon-Fri: 7:00 AM - 5:00 PM',
-      pointDetails: {
-        containers: [
-          { type: 'Organic', capacity: '5 tons', currentFill: '40%', nextPickup: '2023-06-23' },
-          { type: 'Agricultural', capacity: '3 tons', currentFill: '25%', nextPickup: '2023-06-25' }
-        ],
-        pickupSchedule: 'Three times weekly',
-        processingFacility: 'River Basin Composting Facility',
-        transportProvider: 'Farm Waste Solutions',
-        notes: 'Collection point primarily serving local organic farms. Specialized in agricultural waste for composting.'
-      }
-    },
-    {
-      id: 'CP-003',
-      name: 'Greenfield Distribution Center',
-      location: 'Greenfield Industrial Park',
-      address: '789 Industry Way, Greenfield, GF 30003',
-      manager: 'David Chen',
-      contact: '+1 (555) 345-6789',
-      email: 'dchen@wastesolutions.com',
-      capacity: '15 tons daily',
-      currentLoad: '80%',
-      status: 'Active',
-      wasteTypes: ['Packaging', 'Plastic', 'Cardboard', 'Mixed'],
-      operatingHours: 'Mon-Sun: 24 hours',
-      pointDetails: {
-        containers: [
-          { type: 'Packaging', capacity: '5 tons', currentFill: '85%', nextPickup: '2023-06-23' },
-          { type: 'Plastic', capacity: '3 tons', currentFill: '75%', nextPickup: '2023-06-23' },
-          { type: 'Cardboard', capacity: '5 tons', currentFill: '90%', nextPickup: '2023-06-23' },
-          { type: 'Mixed', capacity: '2 tons', currentFill: '50%', nextPickup: '2023-06-24' }
-        ],
-        pickupSchedule: 'Daily pickups, twice daily for cardboard',
-        processingFacility: 'Metro Recycling Industries',
-        transportProvider: 'RecycleHaul Inc.',
-        notes: 'High-volume packaging waste from distribution operations. Urgent need for additional cardboard capacity.'
-      }
-    },
-    {
-      id: 'CP-004',
-      name: 'Urban Restaurant District Point',
-      location: 'Downtown Culinary Quarter',
-      address: '101 Chef\'s Blvd, Metro City, MC 40004',
-      manager: 'Sophia Lee',
-      contact: '+1 (555) 456-7890',
-      email: 'slee@foodwaste.org',
-      capacity: '5 tons daily',
-      currentLoad: '90%',
-      status: 'At Capacity',
-      wasteTypes: ['Food Waste', 'Organic', 'Mixed'],
-      operatingHours: 'Mon-Sun: 5:00 AM - 1:00 AM',
-      pointDetails: {
-        containers: [
-          { type: 'Food Waste', capacity: '3 tons', currentFill: '95%', nextPickup: '2023-06-23' },
-          { type: 'Organic', capacity: '1.5 tons', currentFill: '85%', nextPickup: '2023-06-23' },
-          { type: 'Mixed', capacity: '0.5 tons', currentFill: '75%', nextPickup: '2023-06-24' }
-        ],
-        pickupSchedule: 'Twice daily for food waste, daily for others',
-        processingFacility: 'Urban Biogas Plant',
-        transportProvider: 'City Waste Services',
-        notes: 'Serving restaurant district with high volumes of food waste. Consider capacity expansion.'
-      }
-    },
-    {
-      id: 'CP-005',
-      name: 'Highland Community Collection',
-      location: 'Highland Valley Region',
-      address: '202 Mountain View Rd, Highland, HV 50005',
-      manager: 'Robert Martinez',
-      contact: '+1 (555) 567-8901',
-      email: 'rmartinez@communitywaste.org',
-      capacity: '3 tons daily',
-      currentLoad: '40%',
-      status: 'Maintenance',
-      wasteTypes: ['Organic', 'Mixed', 'Recyclables'],
-      operatingHours: 'Mon, Wed, Fri: 8:00 AM - 4:00 PM',
-      pointDetails: {
-        containers: [
-          { type: 'Organic', capacity: '1.5 tons', currentFill: '45%', nextPickup: '2023-06-24' },
-          { type: 'Mixed', capacity: '1 ton', currentFill: '35%', nextPickup: '2023-06-24' },
-          { type: 'Recyclables', capacity: '0.5 tons', currentFill: '30%', nextPickup: '2023-06-24' }
-        ],
-        pickupSchedule: 'Three times weekly',
-        processingFacility: 'Highland Recycling Cooperative',
-        transportProvider: 'Community Haul Volunteers',
-        notes: 'Community-run collection point. Currently undergoing maintenance on compactor system.'
-      }
-    }
-  ];
 
   // Simulate loading
   useEffect(() => {
@@ -174,16 +174,16 @@ const CollectionPoints = () => {
   // Handle search
   useEffect(() => {
     if (!collectionPoints) return;
-    
+
     let results = collectionPoints.filter(point => {
-      return Object.keys(point).some(key => 
+      return Object.keys(point).some(key =>
         typeof point[key] === 'string' && point[key].toLowerCase().includes(searchTerm.toLowerCase())
-      ) || 
-      (point.wasteTypes && point.wasteTypes.some(type => 
-        type.toLowerCase().includes(searchTerm.toLowerCase())
-      ));
+      ) ||
+        (point.wasteTypes && point.wasteTypes.some(type =>
+          type.toLowerCase().includes(searchTerm.toLowerCase())
+        ));
     });
-    
+
     setFilteredData(results);
   }, [searchTerm, collectionPoints]);
 
@@ -228,20 +228,20 @@ const CollectionPoints = () => {
       setFilteredData(collectionPoints);
       return;
     }
-    
+
     let results = collectionPoints.filter(point => {
       return Object.entries(selectedFilters).every(([key, value]) => {
         if (!value || value === 'all') return true;
-        
+
         // Special case for wasteType
         if (key === 'wasteType') {
           return point.wasteTypes && point.wasteTypes.includes(value);
         }
-        
+
         return point[key] === value;
       });
     });
-    
+
     setFilteredData(results);
   }, [selectedFilters, collectionPoints]);
 
@@ -252,7 +252,7 @@ const CollectionPoints = () => {
       'At Capacity': 'bg-pastel-yellow text-yellow-800',
       'Maintenance': 'bg-pastel-red text-red-800',
     };
-    
+
     return (
       <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status] || 'bg-gray-200 text-gray-800'}`}>
         {status}
@@ -279,7 +279,7 @@ const CollectionPoints = () => {
             <StatusBadge status={point.status} />
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h5 className="text-xs font-medium text-gray-500 mb-2">COLLECTION POINT INFORMATION</h5>
@@ -326,7 +326,7 @@ const CollectionPoints = () => {
               </div>
             </div>
           </div>
-          
+
           <div>
             <h5 className="text-xs font-medium text-gray-500 mb-2">WASTE CONTAINERS</h5>
             <div className="space-y-3">
@@ -350,7 +350,7 @@ const CollectionPoints = () => {
                   </div>
                   <div className="mt-2">
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className={`h-2 rounded-full ${parseInt(container.currentFill) > 80 ? 'bg-red-500' : parseInt(container.currentFill) > 50 ? 'bg-yellow-500' : 'bg-green-500'}`}
                         style={{ width: container.currentFill }}
                       ></div>
@@ -359,7 +359,7 @@ const CollectionPoints = () => {
                 </div>
               ))}
             </div>
-            
+
             <h5 className="text-xs font-medium text-gray-500 mt-4 mb-2">WASTE TYPES ACCEPTED</h5>
             <div className="flex flex-wrap gap-2">
               {point.wasteTypes.map((type, idx) => (
@@ -368,7 +368,7 @@ const CollectionPoints = () => {
                 </span>
               ))}
             </div>
-            
+
             <div className="mt-4 flex space-x-2">
               <button className="flex items-center text-sm py-1 px-3 rounded-md border border-farmio text-farmio hover:bg-farmio hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -430,7 +430,7 @@ const CollectionPoints = () => {
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className={`text-blue-600 hover:text-blue-800 ${expandedPointId === row.id ? 'text-blue-800' : ''}`}
             title={expandedPointId === row.id ? "Hide Details" : "View Details"}
             onClick={(e) => {
@@ -461,7 +461,7 @@ const CollectionPoints = () => {
     >
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard 
+        <StatCard
           title="Collection Points"
           value={collectionPoints.length.toString()}
           subtitle="Total locations"
@@ -469,7 +469,7 @@ const CollectionPoints = () => {
           color="green"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Total Capacity"
           value="51 tons"
           subtitle="Daily maximum"
@@ -477,7 +477,7 @@ const CollectionPoints = () => {
           color="blue"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Average Load"
           value="62%"
           subtitle="Current utilization"
@@ -485,7 +485,7 @@ const CollectionPoints = () => {
           color="yellow"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Points at Capacity"
           value="1"
           subtitle="Needs attention"
@@ -513,7 +513,7 @@ const CollectionPoints = () => {
               </svg>
             </span>
           </div>
-          
+
           {/* Filter Button */}
           <button
             className="flex items-center text-sm py-2 px-4 rounded-md border border-dashboard-border hover:bg-gray-100"
@@ -553,9 +553,9 @@ const CollectionPoints = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-4 flex justify-end space-x-2">
-              <button 
+              <button
                 className="px-3 py-1 text-sm text-gray-600 border border-dashboard-border rounded-md hover:bg-gray-100"
                 onClick={() => setSelectedFilters({})}
               >

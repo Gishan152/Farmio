@@ -25,7 +25,7 @@ class ErrorBoundary extends React.Component {
         <div className="p-4 m-4 bg-red-100 border border-red-400 text-red-700 rounded">
           <h2>Something went wrong</h2>
           <p>{this.state.error && this.state.error.toString()}</p>
-          <button 
+          <button
             onClick={() => this.setState({ hasError: false, error: null })}
             className="mt-2 px-4 py-2 bg-red-600 text-white rounded"
           >
@@ -82,6 +82,149 @@ const ViewIcon = () => (
   </svg>
 );
 
+// Sample product data
+const products = [
+  {
+    id: 'P1001',
+    name: 'Organic Tomatoes',
+    category: 'Vegetables',
+    farmer: 'Kumara Perera',
+    location: 'Nuwara Eliya',
+    price: '350/kg',
+    stock: 120,
+    unit: 'kg',
+    stockStatus: 'In Stock',
+    certifications: 'Organic',
+    harvested: '2023-06-10',
+    image: 'https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+    description: 'Fresh organic tomatoes grown using sustainable farming practices in the cool climate of Nuwara Eliya. Perfect for curries, salads, or cooking.',
+    lifespan: '7-10 days',
+    storageConditions: 'Store at room temperature away from direct sunlight. Refrigerate after ripening.'
+  },
+  {
+    id: 'P1002',
+    name: 'Free-Range Eggs',
+    category: 'Dairy & Eggs',
+    farmer: 'Malini Gunasekara',
+    location: 'Kandy',
+    price: '650/dozen',
+    stock: 80,
+    unit: 'dozen',
+    stockStatus: 'In Stock',
+    certifications: 'Free Range, Organic',
+    harvested: '2023-06-17',
+    image: 'https://images.unsplash.com/photo-1598965402089-897ce52e8355?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+    description: 'Free-range eggs from our happy, healthy chickens raised in the hills of Kandy. Each egg is collected daily and inspected for quality.',
+    lifespan: '3-4 weeks',
+    storageConditions: 'Refrigerate immediately. Keep in original carton to protect from odors and maintain humidity.'
+  },
+  {
+    id: 'P1003',
+    name: 'Local Beef',
+    category: 'Meat',
+    farmer: 'Asanka Fernando',
+    location: 'Ratnapura',
+    price: '1500/kg',
+    stock: 45,
+    unit: 'kg',
+    stockStatus: 'Low Stock',
+    certifications: 'Pasture-Raised',
+    harvested: '2023-06-14',
+    image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+    description: 'Premium cuts of grass-fed beef from cattle raised on open pastures. No hormones or antibiotics. Our beef is aged for tenderness and rich flavor.',
+    lifespan: 'Use within 3-5 days or freeze for up to 6 months',
+    storageConditions: 'Keep refrigerated at 40°F or below. Freeze for longer storage.'
+  },
+  {
+    id: 'P1004',
+    name: 'Kithul Honey',
+    category: 'Specialty',
+    farmer: 'Priyantha Weerasinghe',
+    location: 'Matara',
+    price: '1800/bottle',
+    stock: 30,
+    unit: 'bottle',
+    stockStatus: 'Low Stock',
+    certifications: 'Raw, Unfiltered',
+    harvested: '2023-05-20',
+    image: 'https://images.unsplash.com/photo-1587049352851-8d4e89133924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+    description: 'Pure, raw kithul treacle collected from the kithul palm trees in the southern region. This traditional Sri Lankan sweetener has a distinct smoky flavor.',
+    lifespan: '2+ years',
+    storageConditions: 'Store at room temperature. Crystallization is natural and can be reversed by gentle warming.'
+  },
+  {
+    id: 'P1005',
+    name: 'Organic Gotukola',
+    category: 'Vegetables',
+    farmer: 'Dinesh Rajapaksa',
+    location: 'Bandarawela',
+    price: '150/bundle',
+    stock: 0,
+    unit: 'bundle',
+    stockStatus: 'Out of Stock',
+    certifications: 'Organic',
+    harvested: '2023-05-25',
+    image: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+    description: 'Fresh organic gotukola (Centella asiatica), a traditional Sri Lankan leafy green herb. Perfect for sambols, mallums, or as a nutritious addition to your diet.',
+    lifespan: '5-7 days',
+    storageConditions: 'Refrigerate immediately. Keep in crisper drawer.'
+  },
+  {
+    id: 'P1006',
+    name: 'Fresh Milk',
+    category: 'Dairy & Eggs',
+    farmer: 'Emma Davis',
+    price: '$4.49/gallon',
+    stock: 65,
+    unit: 'gallon',
+    stockStatus: 'In Stock',
+    certifications: 'Hormone-Free',
+    rating: 4.7,
+    lastUpdated: '2023-06-19',
+    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+    description: 'Fresh whole milk from our hormone-free dairy cows. Pasteurized but not homogenized for a rich, creamy texture.',
+    harvested: '2023-06-18',
+    lifespan: '7-10 days',
+    storageConditions: 'Keep refrigerated at 40°F or below. Store in the back of the refrigerator, not the door.'
+  },
+  {
+    id: 'P1007',
+    name: 'Heirloom Carrots',
+    category: 'Vegetables',
+    farmer: 'John Smith',
+    price: '$3.49/bunch',
+    stock: 90,
+    unit: 'bunch',
+    stockStatus: 'In Stock',
+    certifications: 'Organic',
+    rating: 4.2,
+    lastUpdated: '2023-06-17',
+    image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+    description: 'Colorful mix of heirloom carrot varieties including purple, yellow, white, and orange. Sweet flavor and crisp texture.',
+    harvested: '2023-06-15',
+    lifespan: '2-3 weeks',
+    storageConditions: 'Refrigerate in a plastic bag in the crisper drawer. Remove tops if attached to extend freshness.'
+  },
+  {
+    id: 'P1008',
+    name: 'Organic Apples',
+    category: 'Fruits',
+    farmer: 'Sarah Williams',
+    price: '$1.99/lb',
+    stock: 15,
+    unit: 'lb',
+    stockStatus: 'Low Stock',
+    certifications: 'Organic',
+    rating: 4.4,
+    lastUpdated: '2023-06-12',
+    image: 'https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+    description: 'Crisp and juicy organic apples grown in our pesticide-free orchards. Perfect balance of sweet and tart flavors.',
+    harvested: '2023-06-08',
+    lifespan: '1-2 months',
+    storageConditions: 'Store in the refrigerator crisper drawer. Keep away from strong-smelling foods as apples absorb odors.'
+  }
+];
+
 const ProductsManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -96,149 +239,6 @@ const ProductsManagement = () => {
   const [editFormData, setEditFormData] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Sample product data
-  const products = [
-    {
-      id: 'P1001',
-      name: 'Organic Tomatoes',
-      category: 'Vegetables',
-      farmer: 'Kumara Perera',
-      location: 'Nuwara Eliya',
-      price: '350/kg',
-      stock: 120,
-      unit: 'kg',
-      stockStatus: 'In Stock',
-      certifications: 'Organic',
-      harvested: '2023-06-10',
-      image: 'https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-      description: 'Fresh organic tomatoes grown using sustainable farming practices in the cool climate of Nuwara Eliya. Perfect for curries, salads, or cooking.',
-      lifespan: '7-10 days',
-      storageConditions: 'Store at room temperature away from direct sunlight. Refrigerate after ripening.'
-    },
-    {
-      id: 'P1002',
-      name: 'Beans',
-      category: 'Vegetables',
-      farmer: 'Malini Gunasekara',
-      location: 'Kandy',
-      price: '280/kg',
-      stock: 80,
-      unit: 'kg',
-      stockStatus: 'In Stock',
-      certifications: 'Organic',
-      harvested: '2023-06-17',
-      image: 'https://images.unsplash.com/photo-1567375698348-5d9d5ae99de0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-      description: 'Fresh green beans grown in the fertile soils of Kandy. Crisp and tender, perfect for stir-fries, curries, and salads.',
-      lifespan: '1-2 weeks',
-      storageConditions: 'Refrigerate in a perforated plastic bag. For best quality, use within a week of purchase.'
-    },
-    {
-      id: 'P1003',
-      name: 'Local Beef',
-      category: 'Meat',
-      farmer: 'Asanka Fernando',
-      location: 'Ratnapura',
-      price: '1500/kg',
-      stock: 45,
-      unit: 'kg',
-      stockStatus: 'Low Stock',
-      certifications: 'Pasture-Raised',
-      harvested: '2023-06-14',
-      image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-      description: 'Premium cuts of grass-fed beef from cattle raised on open pastures. No hormones or antibiotics. Our beef is aged for tenderness and rich flavor.',
-      lifespan: 'Use within 3-5 days or freeze for up to 6 months',
-      storageConditions: 'Keep refrigerated at 40°F or below. Freeze for longer storage.'
-    },
-    {
-      id: 'P1004',
-      name: 'Kithul Honey',
-      category: 'Specialty',
-      farmer: 'Priyantha Weerasinghe',
-      location: 'Matara',
-      price: '1800/bottle',
-      stock: 30,
-      unit: 'bottle',
-      stockStatus: 'Low Stock',
-      certifications: 'Raw, Unfiltered',
-      harvested: '2023-05-20',
-      image: 'https://images.unsplash.com/photo-1587049352851-8d4e89133924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-      description: 'Pure, raw kithul treacle collected from the kithul palm trees in the southern region. This traditional Sri Lankan sweetener has a distinct smoky flavor.',
-      lifespan: '2+ years',
-      storageConditions: 'Store at room temperature. Crystallization is natural and can be reversed by gentle warming.'
-    },
-    {
-      id: 'P1005',
-      name: 'Organic Gotukola',
-      category: 'Vegetables',
-      farmer: 'Dinesh Rajapaksa',
-      location: 'Bandarawela',
-      price: '150/bundle',
-      stock: 0,
-      unit: 'bundle',
-      stockStatus: 'Out of Stock',
-      certifications: 'Organic',
-      harvested: '2023-05-25',
-      image: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-      description: 'Fresh organic gotukola (Centella asiatica), a traditional Sri Lankan leafy green herb. Perfect for sambols, mallums, or as a nutritious addition to your diet.',
-      lifespan: '5-7 days',
-      storageConditions: 'Refrigerate immediately. Keep in crisper drawer.'
-    },
-    {
-      id: 'P1006',
-      name: 'Fresh Milk',
-      category: 'Dairy & Eggs',
-      farmer: 'Emma Davis',
-      price: '$4.49/gallon',
-      stock: 65,
-      unit: 'gallon',
-      stockStatus: 'In Stock',
-      certifications: 'Hormone-Free',
-      rating: 4.7,
-      lastUpdated: '2023-06-19',
-      image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-      description: 'Fresh whole milk from our hormone-free dairy cows. Pasteurized but not homogenized for a rich, creamy texture.',
-      harvested: '2023-06-18',
-      lifespan: '7-10 days',
-      storageConditions: 'Keep refrigerated at 40°F or below. Store in the back of the refrigerator, not the door.'
-    },
-    {
-      id: 'P1007',
-      name: 'Heirloom Carrots',
-      category: 'Vegetables',
-      farmer: 'John Smith',
-      price: '$3.49/bunch',
-      stock: 90,
-      unit: 'bunch',
-      stockStatus: 'In Stock',
-      certifications: 'Organic',
-      rating: 4.2,
-      lastUpdated: '2023-06-17',
-      image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-      description: 'Colorful mix of heirloom carrot varieties including purple, yellow, white, and orange. Sweet flavor and crisp texture.',
-      harvested: '2023-06-15',
-      lifespan: '2-3 weeks',
-      storageConditions: 'Refrigerate in a plastic bag in the crisper drawer. Remove tops if attached to extend freshness.'
-    },
-    {
-      id: 'P1008',
-      name: 'Organic Apples',
-      category: 'Fruits',
-      farmer: 'Sarah Williams',
-      price: '$1.99/lb',
-      stock: 15,
-      unit: 'lb',
-      stockStatus: 'Low Stock',
-      certifications: 'Organic',
-      rating: 4.4,
-      lastUpdated: '2023-06-12',
-      image: 'https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-      description: 'Crisp and juicy organic apples grown in our pesticide-free orchards. Perfect balance of sweet and tart flavors.',
-      harvested: '2023-06-08',
-      lifespan: '1-2 months',
-      storageConditions: 'Store in the refrigerator crisper drawer. Keep away from strong-smelling foods as apples absorb odors.'
-    }
-  ];
-
   // Simulate loading
   useEffect(() => {
     setIsLoading(true);
@@ -251,15 +251,16 @@ const ProductsManagement = () => {
 
   // Handle search
   useEffect(() => {
-    if (!products) return;
-    
-    const results = products.filter(product => {
-      return Object.keys(product).some(key => 
-        product[key].toString().toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    });
-    
-    setFilteredData(results);
+    if (products) {
+      const results = products.filter(product => {
+        return Object.keys(product).some(key =>
+          product[key].toString().toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      });
+
+      setFilteredData(results);
+    }
+
   }, [searchTerm, products]);
 
   // Filter options
@@ -343,17 +344,17 @@ const ProductsManagement = () => {
       setFilteredData(products);
       return;
     }
-    
+
     const results = products.filter(product => {
       return Object.entries(selectedFilters).every(([key, value]) => {
         if (!value || value === 'all') return true;
-        
+
         // Special handling for date ranges
         if (key === 'harvested') {
           const productDate = new Date(product.harvested);
           const today = new Date();
-          
-          switch(value) {
+
+          switch (value) {
             case '7days':
               const sevenDaysAgo = new Date();
               sevenDaysAgo.setDate(today.getDate() - 7);
@@ -370,11 +371,11 @@ const ProductsManagement = () => {
               return true;
           }
         }
-        
+
         return product[key].includes(value);
       });
     });
-    
+
     setFilteredData(results);
   }, [selectedFilters, products]);
 
@@ -437,20 +438,20 @@ const ProductsManagement = () => {
   // Handle edit form submit
   const handleEditSubmit = (e) => {
     e.preventDefault();
-    
+
     // Here you would typically send the data to your backend API
     // For this example, we'll just simulate a successful update
-    
+
     // Update the product in filteredData
-    const updatedProducts = filteredData.map(p => 
+    const updatedProducts = filteredData.map(p =>
       p.id === selectedProduct.id ? { ...p, ...editFormData, lastUpdated: new Date().toISOString().split('T')[0] } : p
     );
-    
+
     setFilteredData(updatedProducts);
-    
+
     // Show success message
     setSuccessMessage('Product updated successfully');
-    
+
     // Close the modal after a delay
     setTimeout(() => {
       setShowEditModal(false);
@@ -462,13 +463,13 @@ const ProductsManagement = () => {
   const handleDeleteConfirm = () => {
     // Here you would typically send a request to your backend API to delete the product
     // For this example, we'll just simulate deletion by filtering it out
-    
+
     const updatedProducts = filteredData.filter(p => p.id !== selectedProduct.id);
     setFilteredData(updatedProducts);
-    
+
     // Show success message
     setSuccessMessage('Product deleted successfully');
-    
+
     // Close the modal after a delay
     setTimeout(() => {
       setShowDeleteModal(false);
@@ -483,7 +484,7 @@ const ProductsManagement = () => {
     if (showViewModal) console.log("View modal was open");
     if (showEditModal) console.log("Edit modal was open");
     if (showDeleteModal) console.log("Delete modal was open");
-    
+
     // Ensure we close everything with a slight delay for React to process
     setTimeout(() => {
       setShowViewModal(false);
@@ -504,11 +505,11 @@ const ProductsManagement = () => {
     return (
       <div className="flex">
         {[...Array(5)].map((_, i) => (
-          <svg 
-            key={i} 
-            xmlns="http://www.w3.org/2000/svg" 
+          <svg
+            key={i}
+            xmlns="http://www.w3.org/2000/svg"
             className={`h-4 w-4 ${i < Math.floor(rating) ? 'text-yellow-500' : 'text-gray-300'}`}
-            viewBox="0 0 20 20" 
+            viewBox="0 0 20 20"
             fill="currentColor"
           >
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -521,8 +522,8 @@ const ProductsManagement = () => {
 
   // Table columns
   const columns = [
-    { 
-      accessor: 'name', 
+    {
+      accessor: 'name',
       header: 'Product Name',
       cell: (row) => (
         <div>
@@ -533,34 +534,33 @@ const ProductsManagement = () => {
     },
     { accessor: 'farmer', header: 'Farmer' },
     { accessor: 'location', header: 'Location' },
-    { 
-      accessor: 'price', 
+    {
+      accessor: 'price',
       header: 'Price',
       cell: (row) => (
         <div className="font-medium">LKR {row.price}</div>
       )
     },
-    { 
-      accessor: 'stockStatus', 
+    {
+      accessor: 'stockStatus',
       header: 'Stock',
       cell: (row) => (
-        <span className={`px-2 py-1 text-xs rounded-full ${
-          row.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' : 
-          row.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' : 
-          'bg-red-100 text-red-800'
-        }`}>
+        <span className={`px-2 py-1 text-xs rounded-full ${row.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' :
+            row.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-red-100 text-red-800'
+          }`}>
           {row.stockStatus} {row.stockStatus !== 'Out of Stock' && `(${row.stock} ${row.unit})`}
         </span>
       )
     },
     { accessor: 'certifications', header: 'Certifications' },
-    { 
-      accessor: 'actions', 
+    {
+      accessor: 'actions',
       header: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
-          <button 
-            className="text-blue-600 hover:text-blue-800" 
+          <button
+            className="text-blue-600 hover:text-blue-800"
             onClick={() => handleViewProduct(row)}
             title="View Product Details"
           >
@@ -569,7 +569,7 @@ const ProductsManagement = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
           </button>
-          <button 
+          <button
             className="text-green-600 hover:text-green-800"
             onClick={() => handleEditProduct(row)}
             title="Edit Product"
@@ -578,7 +578,7 @@ const ProductsManagement = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           </button>
-          <button 
+          <button
             className="text-red-600 hover:text-red-800"
             onClick={() => handleDeleteProduct(row)}
             title="Delete Product"
@@ -597,16 +597,15 @@ const ProductsManagement = () => {
     return (
       <div className="bg-white rounded-lg border border-dashboard-border shadow-card hover:shadow-card-hover transition-all">
         <div className="relative h-40 overflow-hidden rounded-t-lg">
-          <img 
-            src={product.image} 
-            alt={product.name} 
+          <img
+            src={product.image}
+            alt={product.name}
             className="w-full h-full object-cover"
           />
-          <div className={`absolute top-2 right-2 px-2 py-1 text-xs font-medium rounded-full ${
-            product.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' : 
-            product.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' : 
-            'bg-red-100 text-red-800'
-          }`}>
+          <div className={`absolute top-2 right-2 px-2 py-1 text-xs font-medium rounded-full ${product.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' :
+              product.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+            }`}>
             {product.stockStatus}
           </div>
         </div>
@@ -627,7 +626,7 @@ const ProductsManagement = () => {
             <span className="ml-1">Harvested: {product.harvested}</span>
           </div>
           <div className="mt-3 flex justify-between">
-            <button 
+            <button
               onClick={() => handleViewProduct(product)}
               className="text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm flex items-center"
             >
@@ -635,7 +634,7 @@ const ProductsManagement = () => {
               <span className="ml-1">View</span>
             </button>
             <div className="flex space-x-1">
-              <button 
+              <button
                 className="text-green-600 hover:text-green-800 p-1"
                 onClick={() => handleEditProduct(product)}
                 title="Edit Product"
@@ -644,7 +643,7 @@ const ProductsManagement = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
               </button>
-              <button 
+              <button
                 className="text-red-600 hover:text-red-800 p-1"
                 onClick={() => handleDeleteProduct(product)}
                 title="Delete Product"
@@ -708,7 +707,7 @@ const ProductsManagement = () => {
     >
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <StatCard 
+        <StatCard
           title="Total Products"
           value={products.length.toString()}
           subtitle="Across all categories"
@@ -716,7 +715,7 @@ const ProductsManagement = () => {
           color="blue"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Low Stock Items"
           value={products.filter(p => p.stockStatus === 'Low Stock').length.toString()}
           subtitle="Need attention"
@@ -724,7 +723,7 @@ const ProductsManagement = () => {
           color="yellow"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Out of Stock Items"
           value={products.filter(p => p.stockStatus === 'Out of Stock').length.toString()}
           subtitle="Require reordering"
@@ -775,9 +774,9 @@ const ProductsManagement = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-4 flex justify-end space-x-2">
-              <button 
+              <button
                 className="px-3 py-1 text-sm text-gray-600 border border-dashboard-border rounded-md hover:bg-gray-100"
                 onClick={() => setSelectedFilters({})}
               >
@@ -807,9 +806,9 @@ const ProductsManagement = () => {
           <div className="p-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredData.map(product => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
+                <ProductCard
+                  key={product.id}
+                  product={product}
                 />
               ))}
             </div>

@@ -2,6 +2,7 @@ package com.springcloud.controller;
 
 import com.springcloud.dto.BuyerRequestDto;
 import com.springcloud.service.BuyerRequestService;
+import com.springcloud.service.FarmerBidService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,9 @@ import java.util.List;
 public class BuyerRequestController {
     @Autowired
     private BuyerRequestService service;
+
+    @Autowired
+    private FarmerBidService farmerBidService;
 
 
     // Only show OPEN requests to buyers
@@ -71,7 +75,9 @@ public class BuyerRequestController {
             @RequestHeader("X-User-Id") String userId,
             @RequestHeader("X-Roles") String rolesCsv) {
         try {
+
             var canceled = service.cancelRequest(id, Long.valueOf(userId), rolesCsv);
+            farmerBidService.rejectAll(id); // Reject all bids for this request
             return ResponseEntity.ok(canceled);
         } catch (RuntimeException e) {
             return ResponseEntity.status(400).body(e.getMessage());

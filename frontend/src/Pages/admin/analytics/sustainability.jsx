@@ -34,131 +34,128 @@ const DownloadIcon = () => (
   </svg>
 );
 
+// Static mock data moved outside component to prevent re-render issues
+const metrics = {
+  wasteRecycled: '78.4%',
+  waterConservation: '345,670 liters',
+  carbonFootprint: '-18.5%',
+  organicPractices: '84.2%',
+  sustainableFarms: '142'
+};
+
+const wasteData = [
+  {
+    id: 1,
+    category: 'Organic Waste',
+    totalAmount: '12,450 kg',
+    recycledAmount: '11,205 kg',
+    recyclingRate: '90%',
+    trend: '+5.2%'
+  },
+  {
+    id: 2,
+    category: 'Packaging',
+    totalAmount: '8,320 kg',
+    recycledAmount: '5,824 kg',
+    recyclingRate: '70%',
+    trend: '+12.8%'
+  },
+  {
+    id: 3,
+    category: 'Plastics',
+    totalAmount: '4,570 kg',
+    recycledAmount: '2,742 kg',
+    recyclingRate: '60%',
+    trend: '+8.4%'
+  },
+  {
+    id: 4,
+    category: 'Paper/Cardboard',
+    totalAmount: '6,890 kg',
+    recycledAmount: '6,339 kg',
+    recyclingRate: '92%',
+    trend: '+3.1%'
+  }
+];
+
+const waterUsageData = [
+  {
+    id: 1,
+    farm: 'Highveld Organics',
+    location: 'Mpumalanga',
+    cropType: 'Mixed Vegetables',
+    waterUsage: '237,450 liters',
+    efficiency: '92%',
+    savings: '+18.4%'
+  },
+  {
+    id: 2,
+    farm: 'Green Valley Farm',
+    location: 'Western Cape',
+    cropType: 'Fruit Trees',
+    waterUsage: '342,780 liters',
+    efficiency: '85%',
+    savings: '+12.7%'
+  },
+  {
+    id: 3,
+    farm: 'Sunrise Farms',
+    location: 'KwaZulu-Natal',
+    cropType: 'Root Vegetables',
+    waterUsage: '185,320 liters',
+    efficiency: '94%',
+    savings: '+22.3%'
+  }
+];
+
+const sustainablePractices = [
+  {
+    id: 1,
+    practice: 'Organic Farming',
+    adoption: '78%',
+    impact: 'High',
+    farmCount: '112',
+    growth: '+14.5%'
+  },
+  {
+    id: 2,
+    practice: 'Water Conservation',
+    adoption: '84%',
+    impact: 'High',
+    farmCount: '128',
+    growth: '+9.2%'
+  },
+  {
+    id: 3,
+    practice: 'Renewable Energy',
+    adoption: '52%',
+    impact: 'Medium',
+    farmCount: '74',
+    growth: '+22.8%'
+  },
+  {
+    id: 4,
+    practice: 'Biodiversity Preservation',
+    adoption: '67%',
+    impact: 'High',
+    farmCount: '96',
+    growth: '+8.4%'
+  },
+  {
+    id: 5,
+    practice: 'No-Till Farming',
+    adoption: '45%',
+    impact: 'Medium',
+    farmCount: '64',
+    growth: '+15.2%'
+  }
+];
+
 const SustainabilityAnalytics = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [timeRange, setTimeRange] = useState('month');
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('all');
-
-  // Mock sustainability metrics
-  const metrics = {
-    wasteRecycled: '78.4%',
-    waterConservation: '345,670 liters',
-    carbonFootprint: '-18.5%',
-    organicPractices: '84.2%',
-    sustainableFarms: '142'
-  };
-
-  // Mock waste management data
-  const wasteData = [
-    {
-      id: 1,
-      category: 'Organic Waste',
-      totalAmount: '12,450 kg',
-      recycledAmount: '11,205 kg',
-      recyclingRate: '90%',
-      trend: '+5.2%'
-    },
-    {
-      id: 2,
-      category: 'Packaging',
-      totalAmount: '8,320 kg',
-      recycledAmount: '5,824 kg',
-      recyclingRate: '70%',
-      trend: '+12.8%'
-    },
-    {
-      id: 3,
-      category: 'Plastics',
-      totalAmount: '4,570 kg',
-      recycledAmount: '2,742 kg',
-      recyclingRate: '60%',
-      trend: '+8.4%'
-    },
-    {
-      id: 4,
-      category: 'Paper/Cardboard',
-      totalAmount: '6,890 kg',
-      recycledAmount: '6,339 kg',
-      recyclingRate: '92%',
-      trend: '+3.1%'
-    }
-  ];
-
-  // Mock water usage data
-  const waterUsageData = [
-    {
-      id: 1,
-      farm: 'Highveld Organics',
-      location: 'Mpumalanga',
-      cropType: 'Mixed Vegetables',
-      waterUsage: '237,450 liters',
-      efficiency: '92%',
-      savings: '+18.4%'
-    },
-    {
-      id: 2,
-      farm: 'Green Valley Farm',
-      location: 'Western Cape',
-      cropType: 'Fruit Trees',
-      waterUsage: '342,780 liters',
-      efficiency: '85%',
-      savings: '+12.7%'
-    },
-    {
-      id: 3,
-      farm: 'Sunrise Farms',
-      location: 'KwaZulu-Natal',
-      cropType: 'Root Vegetables',
-      waterUsage: '185,320 liters',
-      efficiency: '94%',
-      savings: '+22.3%'
-    }
-  ];
-
-  // Mock sustainable practices data
-  const sustainablePractices = [
-    {
-      id: 1,
-      practice: 'Organic Farming',
-      adoption: '78%',
-      impact: 'High',
-      farmCount: '112',
-      growth: '+14.5%'
-    },
-    {
-      id: 2,
-      practice: 'Water Conservation',
-      adoption: '84%',
-      impact: 'High',
-      farmCount: '128',
-      growth: '+9.2%'
-    },
-    {
-      id: 3,
-      practice: 'Renewable Energy',
-      adoption: '52%',
-      impact: 'Medium',
-      farmCount: '74',
-      growth: '+22.8%'
-    },
-    {
-      id: 4,
-      practice: 'Biodiversity Preservation',
-      adoption: '67%',
-      impact: 'High',
-      farmCount: '96',
-      growth: '+8.4%'
-    },
-    {
-      id: 5,
-      practice: 'No-Till Farming',
-      adoption: '45%',
-      impact: 'Medium',
-      farmCount: '64',
-      growth: '+15.2%'
-    }
-  ];
 
   return (
     <DashboardLayout title="Sustainability Analytics">

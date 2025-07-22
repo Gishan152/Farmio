@@ -74,6 +74,23 @@ const MockChart = ({ type, height, color }) => {
   );
 };
 
+// Move static data objects outside the component to avoid new reference on every render
+const salesData = {
+  week: '$24,586.45',
+  month: '$102,345.78',
+  year: '$1,245,675.90'
+};
+const growthData = {
+  week: '+8.2%',
+  month: '+12.5%',
+  year: '+32.8%'
+};
+const ordersData = {
+  week: '184',
+  month: '723',
+  year: '9,584'
+};
+
 const AnalyticsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [timeFrame, setTimeFrame] = useState('week');
@@ -84,25 +101,7 @@ const AnalyticsPage = () => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
-
-  // Generate some mock data based on the timeframe
-  const salesData = {
-    week: '$24,586.45',
-    month: '$102,345.78',
-    year: '$1,245,675.90'
-  };
-
-  const growthData = {
-    week: '+8.2%',
-    month: '+12.5%',
-    year: '+32.8%'
-  };
-
-  const ordersData = {
-    week: '184',
-    month: '723',
-    year: '9,584'
-  };
+  // ...existing code...
 
   return (
     <DashboardLayout

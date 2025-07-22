@@ -8,106 +8,106 @@ const BuyerIcon = () => (
   </svg>
 );
 
+// Sample transaction data for buyers
+const buyerTransactions = [
+  { id: 'TRX-5821', date: '2025-06-20', farmer: 'Sunil Rathnayake', products: 'Organic Rice, Vegetables', amount: 'LKR 65,500', status: 'Complete' },
+  { id: 'TRX-5743', date: '2025-06-15', farmer: 'Priyanka Dissanayake', products: 'Premium Tea, Organic Vegetables', amount: 'LKR 32,800', status: 'Complete' },
+  { id: 'TRX-5689', date: '2025-06-08', farmer: 'Kumari Rajapakse', products: 'Fresh Herbs, Organic Vegetables', amount: 'LKR 18,500', status: 'Complete' },
+  { id: 'TRX-5612', date: '2025-05-25', farmer: 'Asanka Weerasinghe', products: 'Rice, Coconut', amount: 'LKR 42,000', status: 'Complete' },
+  { id: 'TRX-5598', date: '2025-05-18', farmer: 'Malith Fernando', products: 'Maize, Rice', amount: 'LKR 29,500', status: 'Complete' }
+];
+
+// Sample buyer activities
+const buyerActivities = [
+  { type: 'order', description: 'Placed bulk order for organic rice', date: '2025-06-20', time: '10:15 AM' },
+  { type: 'payment', description: 'Payment completed for order #TRX-5821', date: '2025-06-20', time: '10:30 AM' },
+  { type: 'delivery', description: 'Scheduled delivery for order #TRX-5821', date: '2025-06-22', time: '09:00 AM' },
+  { type: 'order', description: 'Placed order for premium tea', date: '2025-06-15', time: '02:45 PM' },
+  { type: 'payment', description: 'Payment completed for order #TRX-5743', date: '2025-06-15', time: '03:00 PM' },
+  { type: 'delivery', description: 'Received delivery for order #TRX-5743', date: '2025-06-17', time: '11:30 AM' },
+  { type: 'review', description: 'Left 5-star review for Kumari Rajapakse', date: '2025-06-10', time: '04:15 PM' }
+];
+
+// Sample buyer data for demonstration
+const buyers = [
+  {
+    id: 1,
+    name: "Colombo Fresh Foods Market",
+    contactPerson: "Dilshan Silva",
+    email: "orders@freshfoods.lk",
+    phone: "+94 77 222 3333",
+    location: "Colombo",
+    type: "Retailer",
+    purchaseVolume: "High",
+    preferredProducts: "Organic Vegetables",
+    status: "Active",
+    joinDate: "2022-09-15",
+    lastPurchase: "2023-06-05"
+  },
+  {
+    id: 2,
+    name: "Ceylon Table Restaurants",
+    contactPerson: "Thilini Gunawardena",
+    email: "purchasing@ceylontable.lk",
+    phone: "+94 71 444 5555",
+    location: "Negombo",
+    type: "Restaurant Chain",
+    purchaseVolume: "Medium",
+    preferredProducts: "Premium Fruits, Herbs",
+    status: "Active",
+    joinDate: "2023-02-20",
+    lastPurchase: "2023-06-08"
+  },
+  {
+    id: 3,
+    name: "Kandy Wholesome Foods Co-op",
+    contactPerson: "Samanthi Perera",
+    email: "sam@wholesomecoop.lk",
+    phone: "+94 76 666 7777",
+    location: "Kandy",
+    type: "Cooperative",
+    purchaseVolume: "Medium",
+    preferredProducts: "Mixed Produce",
+    status: "Active",
+    joinDate: "2022-07-11",
+    lastPurchase: "2023-06-02"
+  },
+  {
+    id: 4,
+    name: "Ella Green Smoothie Cafes",
+    contactPerson: "Danushka Rajapakse",
+    email: "supplies@greensmoothie.lk",
+    phone: "+94 70 888 9999",
+    location: "Ella",
+    type: "Cafe Chain",
+    purchaseVolume: "Low",
+    preferredProducts: "Leafy Greens, Fruits",
+    status: "Inactive",
+    joinDate: "2022-11-05",
+    lastPurchase: "2023-03-15"
+  },
+  {
+    id: 5,
+    name: "Galle Sunrise Grocery Store",
+    contactPerson: "Jeevani Wickramasinghe",
+    email: "jeevani@sunrisegrocery.lk",
+    phone: "+94 75 111 2222",
+    location: "Galle",
+    type: "Grocery Store",
+    purchaseVolume: "High",
+    preferredProducts: "Full Range",
+    status: "Active",
+    joinDate: "2022-05-30",
+    lastPurchase: "2023-06-09"
+  }
+];
+
 const BuyerManagement = () => {
   // State for modals
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedBuyer, setSelectedBuyer] = useState(null);
   const [activeTab, setActiveTab] = useState('profile');
-
-  // Sample transaction data for buyers
-  const buyerTransactions = [
-    { id: 'TRX-5821', date: '2025-06-20', farmer: 'Sunil Rathnayake', products: 'Organic Rice, Vegetables', amount: 'LKR 65,500', status: 'Complete' },
-    { id: 'TRX-5743', date: '2025-06-15', farmer: 'Priyanka Dissanayake', products: 'Premium Tea, Organic Vegetables', amount: 'LKR 32,800', status: 'Complete' },
-    { id: 'TRX-5689', date: '2025-06-08', farmer: 'Kumari Rajapakse', products: 'Fresh Herbs, Organic Vegetables', amount: 'LKR 18,500', status: 'Complete' },
-    { id: 'TRX-5612', date: '2025-05-25', farmer: 'Asanka Weerasinghe', products: 'Rice, Coconut', amount: 'LKR 42,000', status: 'Complete' },
-    { id: 'TRX-5598', date: '2025-05-18', farmer: 'Malith Fernando', products: 'Maize, Rice', amount: 'LKR 29,500', status: 'Complete' }
-  ];
-  
-  // Sample buyer activities
-  const buyerActivities = [
-    { type: 'order', description: 'Placed bulk order for organic rice', date: '2025-06-20', time: '10:15 AM' },
-    { type: 'payment', description: 'Payment completed for order #TRX-5821', date: '2025-06-20', time: '10:30 AM' },
-    { type: 'delivery', description: 'Scheduled delivery for order #TRX-5821', date: '2025-06-22', time: '09:00 AM' },
-    { type: 'order', description: 'Placed order for premium tea', date: '2025-06-15', time: '02:45 PM' },
-    { type: 'payment', description: 'Payment completed for order #TRX-5743', date: '2025-06-15', time: '03:00 PM' },
-    { type: 'delivery', description: 'Received delivery for order #TRX-5743', date: '2025-06-17', time: '11:30 AM' },
-    { type: 'review', description: 'Left 5-star review for Kumari Rajapakse', date: '2025-06-10', time: '04:15 PM' }
-  ];
-
-  // Sample buyer data for demonstration
-  const buyers = [
-    {
-      id: 1,
-      name: "Colombo Fresh Foods Market",
-      contactPerson: "Dilshan Silva",
-      email: "orders@freshfoods.lk",
-      phone: "+94 77 222 3333",
-      location: "Colombo",
-      type: "Retailer",
-      purchaseVolume: "High",
-      preferredProducts: "Organic Vegetables",
-      status: "Active",
-      joinDate: "2022-09-15",
-      lastPurchase: "2023-06-05"
-    },
-    {
-      id: 2,
-      name: "Ceylon Table Restaurants",
-      contactPerson: "Thilini Gunawardena",
-      email: "purchasing@ceylontable.lk",
-      phone: "+94 71 444 5555",
-      location: "Negombo",
-      type: "Restaurant Chain",
-      purchaseVolume: "Medium",
-      preferredProducts: "Premium Fruits, Herbs",
-      status: "Active",
-      joinDate: "2023-02-20",
-      lastPurchase: "2023-06-08"
-    },
-    {
-      id: 3,
-      name: "Kandy Wholesome Foods Co-op",
-      contactPerson: "Samanthi Perera",
-      email: "sam@wholesomecoop.lk",
-      phone: "+94 76 666 7777",
-      location: "Kandy",
-      type: "Cooperative",
-      purchaseVolume: "Medium",
-      preferredProducts: "Mixed Produce",
-      status: "Active",
-      joinDate: "2022-07-11",
-      lastPurchase: "2023-06-02"
-    },
-    {
-      id: 4,
-      name: "Ella Green Smoothie Cafes",
-      contactPerson: "Danushka Rajapakse",
-      email: "supplies@greensmoothie.lk",
-      phone: "+94 70 888 9999",
-      location: "Ella",
-      type: "Cafe Chain",
-      purchaseVolume: "Low",
-      preferredProducts: "Leafy Greens, Fruits",
-      status: "Inactive",
-      joinDate: "2022-11-05",
-      lastPurchase: "2023-03-15"
-    },
-    {
-      id: 5,
-      name: "Galle Sunrise Grocery Store",
-      contactPerson: "Jeevani Wickramasinghe",
-      email: "jeevani@sunrisegrocery.lk",
-      phone: "+94 75 111 2222",
-      location: "Galle",
-      type: "Grocery Store",
-      purchaseVolume: "High",
-      preferredProducts: "Full Range",
-      status: "Active",
-      joinDate: "2022-05-30",
-      lastPurchase: "2023-06-09"
-    }
-  ];
 
   // Handle view buyer details
   const handleViewBuyer = (buyer) => {
@@ -137,23 +137,22 @@ const BuyerManagement = () => {
     { accessor: 'phone', header: 'Phone' },
     { accessor: 'location', header: 'Location' },
     { accessor: 'preferredProducts', header: 'Preferred Products' },
-    { 
-      accessor: 'status', 
+    {
+      accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-          row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
           {row.status}
         </span>
       )
     },
-    { 
-      accessor: 'actions', 
+    {
+      accessor: 'actions',
       header: 'Actions',
       cell: (row) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className="text-blue-600 hover:text-blue-800"
             onClick={(e) => {
               e.stopPropagation();
@@ -165,7 +164,7 @@ const BuyerManagement = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
           </button>
-          <button 
+          <button
             className="text-red-600 hover:text-red-800"
             onClick={(e) => {
               e.stopPropagation();
@@ -248,7 +247,7 @@ const BuyerManagement = () => {
           <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl overflow-hidden max-h-[90vh]">
             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-lg font-medium text-gray-900">Buyer Details: {selectedBuyer.name}</h3>
-              <button 
+              <button
                 onClick={() => setShowViewModal(false)}
                 className="text-gray-400 hover:text-gray-500"
               >
@@ -257,33 +256,31 @@ const BuyerManagement = () => {
                 </svg>
               </button>
             </div>
-            
+
             {/* Tabs */}
             <div className="border-b border-gray-200">
               <nav className="-mb-px flex" aria-label="Tabs">
                 <button
                   onClick={() => setActiveTab('profile')}
-                  className={`${
-                    activeTab === 'profile' 
-                      ? 'border-farmio text-farmio' 
+                  className={`${activeTab === 'profile'
+                      ? 'border-farmio text-farmio'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  } w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm`}
+                    } w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm`}
                 >
                   Profile Details
                 </button>
                 <button
                   onClick={() => setActiveTab('transactions')}
-                  className={`${
-                    activeTab === 'transactions' 
-                      ? 'border-farmio text-farmio' 
+                  className={`${activeTab === 'transactions'
+                      ? 'border-farmio text-farmio'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  } w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm`}
+                    } w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm`}
                 >
                   Transactions & Activities
                 </button>
               </nav>
             </div>
-            
+
             {/* Tab Content */}
             <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-14rem)]">
               {activeTab === 'profile' && (
@@ -311,9 +308,8 @@ const BuyerManagement = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500">Status</p>
                     <p className="mt-1">
-                      <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-                        selectedBuyer.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${selectedBuyer.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
                         {selectedBuyer.status}
                       </span>
                     </p>
@@ -324,7 +320,7 @@ const BuyerManagement = () => {
                   </div>
                 </div>
               )}
-              
+
               {activeTab === 'transactions' && (
                 <div>
                   <h4 className="font-medium text-lg mb-4">Transaction History</h4>
@@ -358,19 +354,18 @@ const BuyerManagement = () => {
                       </tbody>
                     </table>
                   </div>
-                  
+
                   <h4 className="font-medium text-lg mb-4 mt-8">Recent Activities</h4>
                   <div className="overflow-y-auto max-h-64 pr-2">
                     <div className="space-y-3">
                       {buyerActivities.map((activity, index) => (
                         <div key={index} className="flex items-start border-b border-gray-100 pb-2">
-                          <div className={`mt-1.5 h-2.5 w-2.5 rounded-full flex-shrink-0 ${
-                            activity.type === 'order' ? 'bg-blue-500' : 
-                            activity.type === 'payment' ? 'bg-green-500' : 
-                            activity.type === 'delivery' ? 'bg-yellow-500' : 
-                            activity.type === 'review' ? 'bg-purple-500' : 
-                            'bg-gray-500'
-                          }`}></div>
+                          <div className={`mt-1.5 h-2.5 w-2.5 rounded-full flex-shrink-0 ${activity.type === 'order' ? 'bg-blue-500' :
+                              activity.type === 'payment' ? 'bg-green-500' :
+                                activity.type === 'delivery' ? 'bg-yellow-500' :
+                                  activity.type === 'review' ? 'bg-purple-500' :
+                                    'bg-gray-500'
+                            }`}></div>
                           <div className="ml-3">
                             <p className="text-sm text-gray-700">{activity.description}</p>
                             <p className="text-xs text-gray-500">{activity.date} • {activity.time}</p>
@@ -382,7 +377,7 @@ const BuyerManagement = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="px-6 py-3 bg-gray-50 text-right">
               <button
                 onClick={() => setShowViewModal(false)}
