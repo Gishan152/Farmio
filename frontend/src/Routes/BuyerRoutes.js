@@ -1,5 +1,5 @@
 import BuyerLayout from '../Pages/Buyer/BuyerLayout';
-import Crops from '../Pages/Buyer/Sections/Crops';
+import Crops, { cropsLoader } from '../Pages/Buyer/Sections/Crops';
 import Warehouses from '../Pages/Buyer/Sections/Warehouses';
 import ReservedStorage, { reservedLoader } from '../Pages/Buyer/Sections/ReservedStorage';
 import TransportProviders, { transportProvidersLoader } from '../Pages/Buyer/Sections/TransportProviders';
@@ -17,6 +17,9 @@ import RequestDetails from '../Pages/Buyer/Sections/RequestDetails';
 import WarehouseReservationDetails, { warehouseReservationLoader } from '../Pages/Buyer/Sections/ReservedStorageDetails';
 import TransportJobDetails from '../Pages/Buyer/Sections/TransportJobDetails';
 import WarehouseSearch from '../Pages/Buyer/Sections/WarehouseSearch';
+import Dashboard from '../Pages/Buyer/Sections/Dashboard';
+import PaymentManagement from '../Pages/Buyer/Sections/PaymentManagement';
+import ReservationConfirmation from '@/Pages/Buyer/Sections/ReservationConfirmation';
 
 
 const buyerRoutes = {
@@ -25,11 +28,16 @@ const buyerRoutes = {
     children: [
         {
             index: true,
-            Component: Crops
+            Component: Dashboard
+        },
+        {
+            path: 'dashboard',
+            Component: Dashboard
         },
         {
             path: 'crops',
-            Component: Crops
+            Component: Crops,
+            loader: cropsLoader
         },
         {
             path: "crops/:cropId",
@@ -61,6 +69,10 @@ const buyerRoutes = {
             Component: Requests
         },
         {
+            path: "payments",
+            Component: PaymentManagement
+        },
+        {
             path: "requests/:requestId",
             Component: RequestDetails
         },
@@ -79,6 +91,10 @@ const buyerRoutes = {
                     path: 'reserved',
                     Component: ReservedStorage,
                     loader: reservedLoader
+                },
+                {
+                    path: 'reservation-confirmation',
+                    Component: ReservationConfirmation,
                 },
                 {
                     path: "all/:warehouseId",

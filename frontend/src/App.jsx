@@ -149,6 +149,7 @@ import transporterRoutes from './Routes/TransporterRoutes';
 import warehouseRoutes from './Routes/WarehouseRoutes';
 import adminRoutes from './Routes/AdminRoutes';
 import moderatorRoutes from './Routes/ModeratorRoutes';
+import { TempCommonProvider } from './Contexts/TempCommonContext';
 
 
 let router = createBrowserRouter([
@@ -181,9 +182,11 @@ let router = createBrowserRouter([
 function App() {
 	return (
 		<UserContextProvider>
-			<GoogleMapsProvider>
-				<RouterProvider router={router} />
-			</GoogleMapsProvider>
+			<TempCommonProvider>
+				<GoogleMapsProvider>
+					<RouterProvider router={router} />
+				</GoogleMapsProvider>
+			</TempCommonProvider>
 		</UserContextProvider>
 	)
 }
