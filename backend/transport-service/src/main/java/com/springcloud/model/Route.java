@@ -1,4 +1,4 @@
-package com.springcloud.transport.route.model;
+package com.springcloud.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;

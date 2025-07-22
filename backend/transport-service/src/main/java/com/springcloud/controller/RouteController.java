@@ -1,7 +1,7 @@
-package com.springcloud.transport.route.controller;
+package com.springcloud.controller;
 
-import com.springcloud.transport.route.model.Route;
-import com.springcloud.transport.route.service.RouteService;
+import com.springcloud.model.Route;
+import com.springcloud.service.RouteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,7 +1,7 @@
-package com.springcloud.transport.route.service;
+package com.springcloud.service;
 
-import com.springcloud.transport.route.model.Route;
-import com.springcloud.transport.route.repository.RouteRepository;
+import com.springcloud.model.Route;
+import com.springcloud.repository.RouteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

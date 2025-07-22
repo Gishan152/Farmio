@@ -1,6 +1,6 @@
-package com.springcloud.transport.route.service;
+package com.springcloud.service;
 
-import com.springcloud.transport.route.model.Route;
+import com.springcloud.model.Route;
 import java.util.List;
 
 public interface RouteService {
