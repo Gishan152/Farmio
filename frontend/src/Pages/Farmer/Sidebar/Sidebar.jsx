@@ -1,7 +1,7 @@
 import { ArrowRightStartOnRectangleIcon, Cog8ToothIcon, UserIcon } from '@heroicons/react/24/solid';
 import SidebarItem from './SidebarItem';
 import Profilepicture from "../../../Assets/Farmer/Profile Pictures/2.1.jpg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 
 const menu = [
@@ -40,6 +40,7 @@ const menu = [
 ];
 
 export default function Sidebar() {
+    const navigate = useNavigate();
 
     return (
         <aside className="w-64 bg-white border-r border-gray-200 p-6 flex flex-col justify-between min-h-screen">
@@ -105,6 +106,7 @@ export default function Sidebar() {
                     <button
                         className="flex items-center gap-4 text-gray-700 hover:text-red-500 transition text-sm"
                         aria-label="Logout"
+                        onClick={() => navigate('/logout')}
                     >
                         <ArrowRightStartOnRectangleIcon className="h-7 w-8 flex-shrink-0" />
                         <span>Logout</span>

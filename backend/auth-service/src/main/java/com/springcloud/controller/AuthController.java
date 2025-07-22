@@ -4,6 +4,7 @@ import com.springcloud.dto.AuthRequest;
 import com.springcloud.dto.AuthResponse;
 import com.springcloud.dto.RegisterRequest;
 import com.springcloud.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

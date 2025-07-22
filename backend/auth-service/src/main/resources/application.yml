@@ -27,9 +27,12 @@ spring:
 #    open-in-view: false
 
   datasource:
-    url: jdbc:postgresql://pg-349c31eb-gishan768-629b.e.aivencloud.com:15794/userdb?sslmode=require
-    username: avnadmin
-    password: AVNS_W5zTqR7lJoTKHHmmmKQ
+#    url: jdbc:postgresql://pg-349c31eb-gishan768-629b.e.aivencloud.com:15794/userdb?sslmode=require
+#    username: avnadmin
+#    password: AVNS_W5zTqR7lJoTKHHmmmKQ
+    url: jdbc:postgresql://ep-dry-snow-a1szex24-pooler.ap-southeast-1.aws.neon.tech/userdb?sslmode=require&channelBinding=require
+    username: neondb_owner
+    password: npg_l2wurAbES8Cq
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
