@@ -1,155 +1,264 @@
-import { useState, useEffect } from "react";
-import { PlusIcon, MinusIcon, TrashIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
+import { useState, useEffect, useRef } from "react";
+import { PlusIcon, MinusIcon, TrashIcon, ChevronRightIcon, ClipboardDocumentListIcon, CurrencyDollarIcon, CheckBadgeIcon, ClockIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import wheat from "../../../Assets/Buyer/Crops/wheat.webp";
 import { Link } from "react-router-dom";
 import { useSavesContext } from "../../../Contexts/Buyer/SavesContext";
 import { useOrderContext } from "../../../Contexts/Buyer/OrdersContexts";
+import { initial } from "lodash";
 
 export default function Orders() {
-    const {
-        orders,
-    } = useOrderContext();
-
-    const [subtotal, setSubtotal] = useState(0);
-    const [openOrderIds, setOpenOrderIds] = useState([]);
-    const [modalOpenOrderId, setModalOpenOrderId] = useState(null);
-
-    const toggleOrder = (orderId) =>
-        setOpenOrderIds((ids) =>
-            ids.includes(orderId)
-                ? ids.filter((id) => id !== orderId)
-                : [...ids, orderId]
-        );
-
-    const openModalFor = (orderId) => setModalOpenOrderId(orderId);
-    const closeModal = () => setModalOpenOrderId(null);
-
-    const handleCreateTransport = (orderId, items) => {
-        console.log("Creating transport for order", orderId, items);
-        // call API or dispatch action...
+    const { orders, getOrders, loading } = useOrderContext();
+    // Filters
+    const [filterOrderId, setFilterOrderId] = useState('');
+    const [filterStatus, setFilterStatus] = useState('');
+    const [filterAmountMin, setFilterAmountMin] = useState('');
+    const [filterAmountMax, setFilterAmountMax] = useState('');
+    // Stat cards
+    const stats = {
+        totalOrders: orders.length,
+        totalAmount: orders.reduce((sum, o) => sum + o.items.reduce((s, i) => s + i.pricePerUnit * i.quantity, 0), 0),
+        delivered: orders.filter(o => o.status === 'Delivered').length,
+        pending: orders.filter(o => o.status !== 'Delivered').length
     };
 
+    // Filtering logic
+    const filteredOrders = (orders || []).filter(order => {
+        const orderTotal = order.items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0);
+        const matchesOrderId = filterOrderId === '' || String(order.id).toLowerCase().includes(filterOrderId.toLowerCase());
+        const matchesStatus = filterStatus === '' || (order.status && order.status.toLowerCase() === filterStatus.toLowerCase());
+        const matchesAmountMin = filterAmountMin === '' || orderTotal >= Number(filterAmountMin);
+        const matchesAmountMax = filterAmountMax === '' || orderTotal <= Number(filterAmountMax);
+        return matchesOrderId && matchesStatus && matchesAmountMin && matchesAmountMax;
+    });
+
+    // useEffect(() => {
+    //     if (orders.length > 0) {
+    //         setLoading(false);
+    //     }else{
+    //         getOrders();
+    //         setLoading(true);
+    //     }
+    // }, [orders]);
+
+    // useEffect(() => {
+    //     // Simulate loading effect (replace with real fetch if needed)
+    //     setTimeout(() => {
+    //         if (orders.length > 0) {
+    //             setLoading(false);
+    //         } else {
+    //             setLoading(true);
+    //         }
+    //     }, 2000);
+    // }, [orders]);
+
     return (
-        <div className="container mx-auto p-6 space-y-6">
-            <h1 className="text-3xl font-bold">Orders Placed</h1>
-            <div className="space-y-4">
-                {orders.map((order) => (
-                    <div key={order.id} className="bg-white dark:bg-gray-800 rounded-lg shadow">
-                        <div className="flex justify-between gap-10 items-center w-full p-4">
-                            <div className="flex items-center gap-10">
-                                <Link to={`./${order.id}`} className="text-m font-medium">Order {order.id}</Link>
-                                <span className="text-m font-medium">{order.status}</span>
-                                <span className="text-m font-medium">Rs. {order.items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0)}</span>
-                            </div>
-                            <div className="flex items-center gap-10">
-                                {/* <button className="bg-green-500 hover:bg-green-300 text-white p-2 rounded-xl">Confirm Delivery</button>
-                                <button className="bg-green-500 hover:bg-green-300 text-white p-2 rounded-xl" onClick={() => openModalFor(order.id)}>Add transport</button> */}
-                                <button
-                                    onClick={() => toggleOrder(order.id)}
-                                    className="p-4"
-                                >
-                                    <ChevronRightIcon className={`w-8 h-8 ml-2 transform transition ${openOrderIds.includes(order.id) ? 'rotate-90' : ''}`} />
-                                </button>
-                            </div>
+        <div className="bg-gray-50 min-h-screen">
+            <div className="max-w-7xl mx-auto space-y-4 p-4">
+                {/* Header */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-2">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900">Orders Placed</h1>
+                            <p className="text-gray-600 mt-1 text-sm">View your order history and details</p>
                         </div>
+                        <button
+                            onClick={() => { getOrders(); }}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-medium text-sm transition disabled:opacity-60"
+                            disabled={loading}
+                            title="Reload orders"
+                        >
+                            <ArrowPathIcon className={`h-5 w-5 text-blue-500${loading ? ' animate-spin' : ''}`} />
+                            <span className="hidden sm:inline">Reload</span>
+                        </button>
+                    </div>
+                </div>
 
-                        {modalOpenOrderId && (
-                            <TransportJobModal
-                                isOpen={modalOpenOrderId === order.id}
-                                onClose={closeModal}
-                                order={orders.find(o => o.id === modalOpenOrderId)}
-                                onCreate={handleCreateTransport}
+                {/* Stats Cards (Crops style) */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {/* Total Orders */}
+                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+                        <div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
+                        <ClipboardDocumentListIcon className="h-7 w-7 text-green-500 mr-3 z-10" />
+                        <div className="z-10">
+                            <p className="text-xs font-medium text-gray-500">Total Orders</p>
+                            <p className="text-lg font-bold text-gray-900">{stats.totalOrders}</p>
+                        </div>
+                    </div>
+                    {/* Total Amount */}
+                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+                        <div className="absolute left-0 top-0 h-full w-1 bg-yellow-500 rounded-l-lg" />
+                        <CurrencyDollarIcon className="h-7 w-7 text-yellow-500 mr-3 z-10" />
+                        <div className="z-10">
+                            <p className="text-xs font-medium text-gray-500">Total Amount</p>
+                            <p className="text-lg font-bold text-gray-900">Rs. {stats.totalAmount.toLocaleString()}</p>
+                        </div>
+                    </div>
+                    {/* Delivered */}
+                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+                        <div className="absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-l-lg" />
+                        <CheckBadgeIcon className="h-7 w-7 text-blue-500 mr-3 z-10" />
+                        <div className="z-10">
+                            <p className="text-xs font-medium text-gray-500">Delivered</p>
+                            <p className="text-lg font-bold text-gray-900">{stats.delivered}</p>
+                        </div>
+                    </div>
+                    {/* Pending */}
+                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+                        <div className="absolute left-0 top-0 h-full w-1 bg-gray-400 rounded-l-lg" />
+                        <ClockIcon className="h-7 w-7 text-gray-500 mr-3 z-10" />
+                        <div className="z-10">
+                            <p className="text-xs font-medium text-gray-500">Pending</p>
+                            <p className="text-lg font-bold text-gray-900">{stats.pending}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Filters Card */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+                    <div className="flex flex-wrap gap-3 items-end">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Order ID</label>
+                            <input
+                                type="text"
+                                value={filterOrderId}
+                                onChange={e => setFilterOrderId(e.target.value)}
+                                placeholder="Search order ID"
+                                className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-200"
                             />
-                        )}
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Status</label>
+                            <select
+                                value={filterStatus}
+                                onChange={e => setFilterStatus(e.target.value)}
+                                className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-200"
+                            >
+                                <option value="">All</option>
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Min Amount</label>
+                            <input
+                                type="number"
+                                value={filterAmountMin}
+                                onChange={e => setFilterAmountMin(e.target.value)}
+                                placeholder="Min"
+                                className="border border-gray-300 rounded px-2 py-1 text-sm w-20 focus:outline-none focus:ring-2 focus:ring-green-200"
+                                min="0"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Max Amount</label>
+                            <input
+                                type="number"
+                                value={filterAmountMax}
+                                onChange={e => setFilterAmountMax(e.target.value)}
+                                placeholder="Max"
+                                className="border border-gray-300 rounded px-2 py-1 text-sm w-20 focus:outline-none focus:ring-2 focus:ring-green-200"
+                                min="0"
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setFilterOrderId('');
+                                setFilterStatus('');
+                                setFilterAmountMin('');
+                                setFilterAmountMax('');
+                            }}
+                            className="ml-auto px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300 transition"
+                        >
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
 
-                        {openOrderIds.includes(order.id) && (
-                            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-                                <table className="w-full table-auto border-separate border-spacing-y-4">
-                                    <thead className="text-left text-gray-600">
-                                        <tr>
-                                            <th>Product</th>
-                                            <th>Price</th>
-                                            <th>Quantity (Kg)</th>
-                                            <th>Total</th>
-                                            <th>Transport</th>
-                                            <th>Actions</th>
+                {/* Orders Table with loading spinner */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="p-4 border-b border-gray-200">
+                        <h2 className="text-lg font-semibold text-gray-900">Order History</h2>
+                    </div>
+                    {loading ? (
+                        <div className="p-8 text-center">
+                            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                            <p className="mt-2 text-gray-600 text-sm">Loading orders...</p>
+                        </div>
+                    ) : (
+                        <div className="p-4 overflow-x-auto">
+                            {filteredOrders.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                                    <ClipboardDocumentListIcon className="h-12 w-12 mb-2 text-gray-300" />
+                                    <p className="text-lg font-semibold">No orders found</p>
+                                    <p className="text-sm text-gray-400 mt-1">You haven't placed any orders yet.</p>
+                                </div>
+                            ) : (
+                                <table className="min-w-full text-sm">
+                                    <thead>
+                                        <tr className="bg-gray-100">
+                                            <th className="p-2 text-left font-semibold">Order ID</th>
+                                            <th className="p-2 text-left font-semibold">Status</th>
+                                            <th className="p-2 text-left font-semibold">Total</th>
+                                            <th className="p-2 text-left font-semibold">Items</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {order.items.map((item) => (
-                                            <tr key={item.id} className="bg-white dark:bg-gray-800 rounded-lg">
-                                                <td className="flex items-center space-x-4 p-4">
-                                                    <img
-                                                        src={item.imageUrl}
-                                                        alt=""
-                                                        className="w-20 h-20 object-cover rounded"
-                                                    />
-                                                    <div>
-                                                        <p className="font-medium">{item.type}</p>
-                                                        <p className="text-sm text-gray-500">
-                                                            Farm: {item.farm}
-                                                        </p>
-                                                        <p className="text-sm text-gray-500">
-                                                            Location: {item.location}
-                                                        </p>
-                                                    </div>
+                                        {filteredOrders.map(order => (
+                                            <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                                <td className="p-2">
+                                                    <Link to={`./${order.id}`} className="text-green-700 font-medium underline">
+                                                        Order {order.id}
+                                                    </Link>
+                                                    {order.new && <span className={`ml-4 px-5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800}`}>New</span>}
                                                 </td>
-                                                <td className="p-4">Rs. {item.pricePerUnit.toFixed(2)}</td>
-                                                <td className="p-4">
-                                                    <span className="px-2">{item.quantity}</span>
+                                                <td className="p-2">
+                                                    {(() => {
+                                                        // Color badge logic similar to Crops.jsx
+                                                        let badgeClass = 'bg-gray-100 text-gray-700';
+                                                        let status = order.status?.toUpperCase();
+                                                        if (status === 'DELIVERED') badgeClass = 'bg-blue-100 text-blue-800';
+                                                        else if (status === 'PENDING') badgeClass = 'bg-yellow-100 text-yellow-800';
+                                                        else if (status === 'PROCESSING') badgeClass = 'bg-orange-100 text-orange-800';
+                                                        else if (status === 'CANCELLED') badgeClass = 'bg-red-100 text-red-800';
+                                                        else if (status === 'COMPLETED') badgeClass = 'bg-green-100 text-green-800';
+                                                        // Humanize status: e.g. 'AWAITING_PICKUP' -> 'Awaiting Pickup'
+                                                        let displayStatus = order.status
+                                                            ? order.status
+                                                                .toLowerCase()
+                                                                .split('_')
+                                                                .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                                                                .join(' ')
+                                                            : '';
+                                                        return (
+                                                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badgeClass}`}>{displayStatus}</span>
+                                                        );
+                                                    })()}
                                                 </td>
-                                                <td className="p-4 font-semibold">
-                                                    Rs. {(item.pricePerUnit * item.quantity).toFixed(2)}
-                                                </td>
-                                                <td className="p-4">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={item.transportationRequired}
-                                                        onChange={() => changeTransport(item.id)}
-                                                    />
-                                                </td>
-                                                <td className="p-4">
-                                                    <button
-                                                        onClick={() => removeItem(item.id)}
-                                                        className="text-red-500 hover:text-red-700"
-                                                    >
-                                                        <TrashIcon className="w-5 h-5" />
-                                                    </button>
-                                                </td>
+                                                <td className="p-2 font-semibold">Rs. {order.items.reduce((sum, i) => sum + i.pricePerUnit * i.quantity, 0).toLocaleString()}</td>
+                                                <td className="p-2">{order.items.length}</td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
+                            )}
+                        </div>
+                    )}
+                </div>
 
-            < div className="flex flex-col lg:flex-row justify-between items-start lg:items-center">
-                <Link
-                    to="../crops"
-                    className="underline text-gray-600 hover:text-gray-800"
-                >
-                    CONTINUE SEARCHING
-                </Link>
-                {/* <div className="mt-4 lg:mt-0 bg-white dark:bg-gray-800 p-6 rounded-lg shadow w-full lg:w-auto">
-                    <p className="text-lg text-gray-600 dark:text-gray-300">
-                        Sub Total:{" "}
-                        <span className="font-semibold">Rs. {subtotal.toFixed(2)}</span>
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Excl. Delivery charges
-                    </p>
+                {/* <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mt-6">
                     <Link
-                        to="../order-confirmation"
-                        className="block text-center mt-4 w-full py-3 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                        to="../crops"
+                        className="underline text-gray-600 hover:text-gray-800"
                     >
-                        GO TO CHECKOUT
+                        CONTINUE SEARCHING
                     </Link>
                 </div> */}
             </div>
-        </div >
+        </div>
     );
 }
 

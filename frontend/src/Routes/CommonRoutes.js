@@ -9,6 +9,7 @@ import TransportProviderRegistration, { TransportProviderRegistrationAction, Tra
 import WasteAgentRegistration, { WasteAgentRegistrationAction, WasteAgentRegistrationLoader } from '../Pages/LoginRegister/WasteAgentRegistration';
 import ProductPage from '../Pages/ProductsPage';
 import SettingsPage from '../Pages/SettingsPage';
+import Logout from '@/Pages/LoginRegister/Logout';
 import AboutUs from '../Pages/AboutUs';
 import FAQ from '../Pages/FAQ';
 import HowItWorks from '../Pages/HowItWorks';
@@ -20,8 +21,8 @@ const commonRoutes = [
     {
         index: true,
         Component: LandingPage
-    },    
-      {
+    },
+     {
         path: "/about",
         Component: AboutUs,
       },
@@ -38,6 +39,10 @@ const commonRoutes = [
         loader: loginLoader,
         action: loginAction,
         Component: Login
+    },
+    {
+        path: "/logout",
+        Component: Logout
     },
     {
         path: "/register",
