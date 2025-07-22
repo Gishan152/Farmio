@@ -148,11 +148,11 @@ export default function SlotManagement() {
                             </div>
                             <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 text-center">
                                 <div className="text-xl font-bold text-gray-700">{selectedWarehouse.totalCapacity}</div>
-                                <div className="text-xs text-gray-600 font-medium">Capacity (kg)</div>
+                                <div className="text-xs text-gray-600 font-medium">Capacity (sqft)</div>
                             </div>
                             <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 text-center">
                                 <div className="text-xl font-bold text-gray-700">{selectedWarehouse.occupiedCapacity}</div>
-                                <div className="text-xs text-gray-600 font-medium">Used (kg)</div>
+                                <div className="text-xs text-gray-600 font-medium">Used (sqft)</div>
                             </div>
                             <div className="bg-green-100 rounded-lg p-3 border border-green-200 text-center">
                                 <div className="text-xl font-bold text-green-800">{occupancyRate}%</div>
