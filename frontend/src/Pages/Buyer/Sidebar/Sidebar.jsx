@@ -57,8 +57,8 @@ export default function Sidebar() {
                 <div className="flex items-center mb-8">
                     <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="profile" className="w-10 h-10 rounded-full mr-3" />
                     <div>
-                        <div className="font-semibold">Hanifa Maulina <span className="bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded ml-1">Pro</span></div>
-                        <div className="text-xs text-gray-500">Hanifa@gmail.com</div>
+                        <div className="font-semibold">Gishan Maduranga <span className="bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded ml-1">Pro</span></div>
+                        <div className="text-xs text-gray-500">gishan@gmail.com</div>
                     </div>
                 </div>
                 <nav className="flex flex-col gap-2">
