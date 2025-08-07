@@ -103,20 +103,20 @@ const products = [
   },
   {
     id: 'P1002',
-    name: 'Free-Range Eggs',
-    category: 'Dairy & Eggs',
+    name: 'Beans',
+    category: 'Vegetables',
     farmer: 'Malini Gunasekara',
     location: 'Kandy',
-    price: '650/dozen',
+    price: '280/kg',
     stock: 80,
-    unit: 'dozen',
+    unit: 'kg',
     stockStatus: 'In Stock',
-    certifications: 'Free Range, Organic',
+    certifications: 'Organic',
     harvested: '2023-06-17',
-    image: 'https://images.unsplash.com/photo-1598965402089-897ce52e8355?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Free-range eggs from our happy, healthy chickens raised in the hills of Kandy. Each egg is collected daily and inspected for quality.',
-    lifespan: '3-4 weeks',
-    storageConditions: 'Refrigerate immediately. Keep in original carton to protect from odors and maintain humidity.'
+    image: 'https://images.unsplash.com/photo-1567375698348-5d9d5ae99de0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+    description: 'Fresh green beans grown in the fertile soils of Kandy. Crisp and tender, perfect for stir-fries, curries, and salads.',
+    lifespan: '1-2 weeks',
+    storageConditions: 'Refrigerate in a perforated plastic bag. For best quality, use within a week of purchase.'
   },
   {
     id: 'P1003',
@@ -546,8 +546,8 @@ const ProductsManagement = () => {
       header: 'Stock',
       cell: (row) => (
         <span className={`px-2 py-1 text-xs rounded-full ${row.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' :
-            row.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
-              'bg-red-100 text-red-800'
+          row.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
+            'bg-red-100 text-red-800'
           }`}>
           {row.stockStatus} {row.stockStatus !== 'Out of Stock' && `(${row.stock} ${row.unit})`}
         </span>
@@ -603,8 +603,8 @@ const ProductsManagement = () => {
             className="w-full h-full object-cover"
           />
           <div className={`absolute top-2 right-2 px-2 py-1 text-xs font-medium rounded-full ${product.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' :
-              product.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
+            product.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-red-100 text-red-800'
             }`}>
             {product.stockStatus}
           </div>
@@ -830,14 +830,14 @@ const ProductsManagement = () => {
                   </svg>
                 </button>
               </div>
-              
+
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <div className="rounded-lg overflow-hidden border border-dashboard-border h-56">
-                      <img 
-                        src={selectedProduct.image} 
-                        alt={selectedProduct.name} 
+                      <img
+                        src={selectedProduct.image}
+                        alt={selectedProduct.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -852,22 +852,21 @@ const ProductsManagement = () => {
                     </div>
 
                     <div className="mt-4">
-                      <span className={`px-3 py-1.5 text-sm rounded-full ${
-                        selectedProduct.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' : 
-                        selectedProduct.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' : 
-                        'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`px-3 py-1.5 text-sm rounded-full ${selectedProduct.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' :
+                          selectedProduct.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                        }`}>
                         {selectedProduct.stockStatus} {selectedProduct.stockStatus !== 'Out of Stock' && `(${selectedProduct.stock} ${selectedProduct.unit})`}
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Description</h4>
                       <p className="text-dashboard-text-secondary">{selectedProduct.description}</p>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Listed By</h4>
@@ -886,12 +885,12 @@ const ProductsManagement = () => {
                         <p className="text-dashboard-text-secondary">{selectedProduct.certifications}</p>
                       </div>
                     </div>
-                    
+
                     <div>
                       <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Storage Conditions</h4>
                       <p className="text-dashboard-text-secondary">{selectedProduct.storageConditions}</p>
                     </div>
-                    
+
                     <div>
                       <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Shelf Life</h4>
                       <p className="text-dashboard-text-secondary">{selectedProduct.lifespan}</p>
@@ -899,7 +898,7 @@ const ProductsManagement = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
                 <button
                   onClick={handleCloseModal}
@@ -945,7 +944,7 @@ const ProductsManagement = () => {
                   </svg>
                 </button>
               </div>
-              
+
               {successMessage && (
                 <div className="mx-6 mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
                   <div className="flex">
@@ -960,15 +959,15 @@ const ProductsManagement = () => {
                   </div>
                 </div>
               )}
-              
+
               <form onSubmit={handleEditSubmit} className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700">Product Name</label>
-                      <input 
-                        type="text" 
-                        id="name" 
+                      <input
+                        type="text"
+                        id="name"
                         name="name"
                         value={editFormData.name || ''}
                         onChange={handleInputChange}
@@ -976,11 +975,11 @@ const ProductsManagement = () => {
                         required
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
-                      <select 
-                        id="category" 
+                      <select
+                        id="category"
                         name="category"
                         value={editFormData.category || ''}
                         onChange={handleInputChange}
@@ -995,16 +994,16 @@ const ProductsManagement = () => {
                         <option value="Specialty">Specialty</option>
                       </select>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price (LKR)</label>
                       <div className="relative mt-1">
                         <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
                           LKR
                         </span>
-                        <input 
-                          type="text" 
-                          id="price" 
+                        <input
+                          type="text"
+                          id="price"
                           name="price"
                           value={editFormData.price || ''}
                           onChange={handleInputChange}
@@ -1014,13 +1013,13 @@ const ProductsManagement = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="stock" className="block text-sm font-medium text-gray-700">Stock</label>
-                        <input 
-                          type="number" 
-                          id="stock" 
+                        <input
+                          type="number"
+                          id="stock"
                           name="stock"
                           value={editFormData.stock || ''}
                           onChange={handleInputChange}
@@ -1030,9 +1029,9 @@ const ProductsManagement = () => {
                       </div>
                       <div>
                         <label htmlFor="unit" className="block text-sm font-medium text-gray-700">Unit</label>
-                        <input 
-                          type="text" 
-                          id="unit" 
+                        <input
+                          type="text"
+                          id="unit"
                           name="unit"
                           value={editFormData.unit || ''}
                           onChange={handleInputChange}
@@ -1041,12 +1040,12 @@ const ProductsManagement = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="certifications" className="block text-sm font-medium text-gray-700">Certifications</label>
-                      <input 
-                        type="text" 
-                        id="certifications" 
+                      <input
+                        type="text"
+                        id="certifications"
                         name="certifications"
                         value={editFormData.certifications || ''}
                         onChange={handleInputChange}
@@ -1054,13 +1053,13 @@ const ProductsManagement = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <label htmlFor="image" className="block text-sm font-medium text-gray-700">Image URL</label>
-                      <input 
-                        type="url" 
-                        id="image" 
+                      <input
+                        type="url"
+                        id="image"
                         name="image"
                         value={editFormData.image || ''}
                         onChange={handleInputChange}
@@ -1072,11 +1071,11 @@ const ProductsManagement = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     <div>
                       <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-                      <textarea 
-                        id="description" 
+                      <textarea
+                        id="description"
                         name="description"
                         value={editFormData.description || ''}
                         onChange={handleInputChange}
@@ -1085,35 +1084,35 @@ const ProductsManagement = () => {
                         required
                       ></textarea>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="harvested" className="block text-sm font-medium text-gray-700">Harvest Date</label>
-                      <input 
-                        type="date" 
-                        id="harvested" 
+                      <input
+                        type="date"
+                        id="harvested"
                         name="harvested"
                         value={editFormData.harvested || ''}
                         onChange={handleInputChange}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="lifespan" className="block text-sm font-medium text-gray-700">Shelf Life</label>
-                      <input 
-                        type="text" 
-                        id="lifespan" 
+                      <input
+                        type="text"
+                        id="lifespan"
                         name="lifespan"
                         value={editFormData.lifespan || ''}
                         onChange={handleInputChange}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="storageConditions" className="block text-sm font-medium text-gray-700">Storage Conditions</label>
-                      <textarea 
-                        id="storageConditions" 
+                      <textarea
+                        id="storageConditions"
                         name="storageConditions"
                         value={editFormData.storageConditions || ''}
                         onChange={handleInputChange}
@@ -1121,12 +1120,12 @@ const ProductsManagement = () => {
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                       ></textarea>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
-                      <input 
-                        type="text" 
-                        id="location" 
+                      <input
+                        type="text"
+                        id="location"
                         name="location"
                         value={editFormData.location || ''}
                         onChange={handleInputChange}
@@ -1136,7 +1135,7 @@ const ProductsManagement = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mt-6 flex justify-end space-x-3">
                   <button
                     type="button"
@@ -1172,7 +1171,7 @@ const ProductsManagement = () => {
                   </svg>
                 </button>
               </div>
-              
+
               {successMessage && (
                 <div className="mx-6 mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
                   <div className="flex">
@@ -1187,7 +1186,7 @@ const ProductsManagement = () => {
                   </div>
                 </div>
               )}
-              
+
               <div className="p-6">
                 <div className="flex items-center mb-4">
                   <div className="flex-shrink-0 bg-red-100 rounded-full p-2">
@@ -1200,7 +1199,7 @@ const ProductsManagement = () => {
                     <p className="text-sm text-gray-500">Are you sure you want to delete "{selectedProduct.name}"? This action cannot be undone.</p>
                   </div>
                 </div>
-                
+
                 <div className="mt-4 flex justify-end space-x-3">
                   <button
                     onClick={handleCloseModal}

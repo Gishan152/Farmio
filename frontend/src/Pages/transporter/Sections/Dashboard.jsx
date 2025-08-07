@@ -54,7 +54,7 @@ export default function Dashboard() {
         {/* Header */}
         <div className="text-left">
           <h1 className="text-3xl font-bold text-gray-800">
-            Welcome back, Hanifa 👋
+            Welcome back, Chamath 👋
           </h1>
           <p className="text-gray-600 mt-1">
             Overview of your transport operations
