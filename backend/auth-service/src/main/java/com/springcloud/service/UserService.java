@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -73,5 +74,31 @@ public class UserService {
         var user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return new PublicUserData(user.getUsername(), user.getId(), user.getEmail(), user.getStatus(), user.getPhoneNo());
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public List<UserDTO> getAllUsersDTO() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(user -> {
+                    UserDTO dto = new UserDTO(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getStatus(),
+                        user.getPhoneNo(),
+                        user.getNic()
+                    );
+                    // Convert roles to string set
+                    Set<String> roleNames = user.getRoles().stream()
+                        .map(role -> role.getName())
+                        .collect(java.util.stream.Collectors.toSet());
+                    dto.setRoles(roleNames);
+                    return dto;
+                })
+                .collect(java.util.stream.Collectors.toList());
     }
 }

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserManagement from '../../../components/templates/UserManagement';
+import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES } from '../../../Utils/roleUtils';
 
 // Farmer icon
 const FarmerIcon = () => (
@@ -28,7 +29,7 @@ const farmerActivities = [
 ];
 
 // Sample farmer data for demonstration
-const farmers = [
+const sampleFarmers = [
   {
     id: 1,
     name: "Sunil Rathnayake",
@@ -52,43 +53,6 @@ const farmers = [
     status: "Active",
     joinDate: "2022-08-22",
     lastActive: "2023-06-08"
-  },
-  {
-    id: 3,
-    name: "Malith Fernando",
-    email: "malith@fernandofarms.lk",
-    phone: "+94 76 555 1234",
-    location: "Polonnaruwa",
-    farmSize: "20 acres",
-    crops: "Rice, Maize",
-    status: "Inactive",
-    joinDate: "2022-03-10",
-    lastActive: "2023-02-15"
-  },
-  {
-    id: 4,
-    name: "Kumari Rajapakse",
-    email: "kumari@organicfarms.lk",
-    phone: "+94 70 876 5432",
-    location: "Kandy",
-    farmSize: "5 acres",
-    crops: "Organic Vegetables, Herbs",
-    status: "Active",
-    joinDate: "2023-04-02",
-    lastActive: "2023-06-09"
-
-  },
-  {
-    id: 5,
-    name: "Asanka Weerasinghe",
-    email: "asanka@familyfarm.lk",
-    phone: "+94 75 345 6789",
-    location: "Hambantota",
-    farmSize: "12 acres",
-    crops: "Rice, Beans, Coconut",
-    status: "Active",
-    joinDate: "2022-11-30",
-    lastActive: "2023-06-07"
   }
 ];
 
@@ -98,6 +62,35 @@ const FarmerManagement = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedFarmer, setSelectedFarmer] = useState(null);
   const [activeTab, setActiveTab] = useState('profile');
+  
+  // State for API data
+  const [farmers, setFarmers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch farmers data from API
+  useEffect(() => {
+    const fetchFarmers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const usersData = await fetchUsersByRole(ROLES.FARMER);
+        const transformedFarmers = transformApiUsers(usersData);
+        
+        setFarmers(transformedFarmers);
+      } catch (err) {
+        console.error('Error fetching farmers:', err);
+        setError(err.message);
+        // Fallback to sample data on error
+        setFarmers(getSampleDataByRole(ROLES.FARMER));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFarmers();
+  }, []);
 
   // Handle view farmer details
   const handleViewFarmer = (farmer) => {
@@ -119,20 +112,23 @@ const FarmerManagement = () => {
     setShowDeleteModal(false);
     // In a real app, you would update the state or call an API
   };
-  // Table columns
+  // Table columns - updated to show API data
   const columns = [
     { accessor: 'name', header: 'Name' },
     { accessor: 'email', header: 'Email' },
     { accessor: 'phone', header: 'Phone' },
-    { accessor: 'location', header: 'Location' },
-
-    { accessor: 'crops', header: 'Crops' },
+    { accessor: 'nic', header: 'NIC' },
     {
       accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
+          row.status === 'APPROVED' || row.status === 'Active' 
+            ? 'bg-green-100 text-green-800' 
+            : row.status === 'PENDING' 
+            ? 'bg-yellow-100 text-yellow-800'
+            : 'bg-red-100 text-red-800'
+        }`}>
           {row.status}
         </span>
       )
@@ -170,31 +166,68 @@ const FarmerManagement = () => {
     }
   ];
 
-  // Filter options
+  // Filter options - updated for API data
   const filters = [
     {
       name: 'status',
       label: 'Status',
       options: [
-        { label: 'Active', value: 'Active' },
-        { label: 'Inactive', value: 'Inactive' }
-      ]
-    },
-    {
-      name: 'location',
-      label: 'Location',
-      options: [
-        { label: 'Anuradhapura', value: 'Anuradhapura' },
-        { label: 'Nuwara Eliya', value: 'Nuwara Eliya' },
-        { label: 'Polonnaruwa', value: 'Polonnaruwa' },
-        { label: 'Kandy', value: 'Kandy' },
-        { label: 'Hambantota', value: 'Hambantota' }
+        { label: 'Approved', value: 'APPROVED' },
+        { label: 'Pending', value: 'PENDING' },
+        { label: 'Rejected', value: 'REJECTED' }
       ]
     }
   ];
 
+  // Loading and error states
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-farmio"></div>
+      </div>
+    );
+  }
+
+  if (error && farmers.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-red-600 mb-4">
+          <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load farmers data</h3>
+        <p className="text-gray-500 mb-4">Error: {error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="bg-farmio text-white px-4 py-2 rounded hover:bg-farmio-dark"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
+      {/* API Status Notification */}
+      {error && farmers.length > 0 && (
+        <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                API connection failed. Showing sample data. Error: {error}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <UserManagement
         userType="Farmers"
         userTypePath="farmers"
@@ -266,22 +299,22 @@ const FarmerManagement = () => {
                       <p className="mt-1">{selectedFarmer.phone}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Location</p>
-                      <p className="mt-1">{selectedFarmer.location}</p>
+                      <p className="text-sm font-medium text-gray-500">NIC</p>
+                      <p className="mt-1">{selectedFarmer.nic}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Farm Size</p>
-                      <p className="mt-1">{selectedFarmer.farmSize}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Crops</p>
-                      <p className="mt-1">{selectedFarmer.crops}</p>
+                      <p className="text-sm font-medium text-gray-500">Roles</p>
+                      <p className="mt-1">{selectedFarmer.roles}</p>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Status</p>
                       <p className="mt-1">
                         <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-                          selectedFarmer.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          selectedFarmer.status === 'APPROVED' || selectedFarmer.status === 'Active' 
+                            ? 'bg-green-100 text-green-800' 
+                            : selectedFarmer.status === 'PENDING' 
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
                         }`}>
                           {selectedFarmer.status}
                         </span>

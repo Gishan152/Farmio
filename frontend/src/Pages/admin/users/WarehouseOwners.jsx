@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserManagement from '../../../components/templates/UserManagement';
+import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES } from '../../../Utils/roleUtils';
 
 // Warehouse icon
 const WarehouseIcon = () => (
@@ -96,6 +97,35 @@ const WarehouseOwnerManagement = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [activeTab, setActiveTab] = useState('details');
+  
+  // State for API data
+  const [warehouseOwners, setWarehouseOwners] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch warehouse owners data from API
+  useEffect(() => {
+    const fetchWarehouseOwners = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const usersData = await fetchUsersByRole(ROLES.WAREHOUSE);
+        const transformedWarehouseOwners = transformApiUsers(usersData);
+        
+        setWarehouseOwners(transformedWarehouseOwners);
+      } catch (err) {
+        console.error('Error fetching warehouse owners:', err);
+        setError(err.message);
+        // Fallback to sample data on error
+        setWarehouseOwners(getSampleDataByRole(ROLES.WAREHOUSE));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWarehouseOwners();
+  }, []);
 
   // Handle view warehouse details
   const handleViewWarehouse = (warehouse) => {
@@ -118,97 +148,24 @@ const WarehouseOwnerManagement = () => {
     // In a real app, you would update the state or call an API
   };
 
-  // Sample warehouse owner data for demonstration
-  const warehouseOwners = [
-    {
-      id: 1,
-      name: "Colombo Central Storage Solutions",
-      contactPerson: "Roshan Perera",
-      email: "admin@centralstorage.lk",
-      phone: "+94 77 111 3333",
-      location: "Colombo Industrial Zone",
-      warehouseSize: "25,000 sq ft",
-      specialFeatures: "Climate Controlled, Cold Storage",
-      certification: "ISO 22000",
-      capacityUsed: "75%",
-      status: "Active",
-      joinDate: "2022-08-12",
-      lastUpdate: "2023-06-07"
-    },
-    {
-      id: 2,
-      name: "Dambulla Fresh Warehousing",
-      contactPerson: "Amara Kulatunga",
-      email: "operations@dambullafresh.lk",
-      phone: "+94 71 222 4444",
-      location: "Dambulla Economic Center",
-      warehouseSize: "12,500 sq ft",
-      specialFeatures: "Humidity Controlled",
-      certification: "Organic Certified",
-      capacityUsed: "60%",
-      status: "Active",
-      joinDate: "2023-02-15",
-      lastUpdate: "2023-06-09"
-    },
-    {
-      id: 3,
-      name: "Galle Port Cold Storage",
-      contactPerson: "Dinesh Wickramasinghe",
-      email: "dinesh@gallecold.lk",
-      phone: "+94 76 334 5566",
-      location: "Galle Port Area",
-      warehouseSize: "18,000 sq ft",
-      specialFeatures: "Freezers, Blast Chillers",
-      certification: "HACCP",
-      capacityUsed: "90%",
-      status: "Active",
-      joinDate: "2022-05-20",
-      lastUpdate: "2023-06-10"
-    },
-    {
-      id: 4,
-      name: "Colombo Metro Distribution Center",
-      contactPerson: "Lakmini Fernando",
-      email: "logistics@colmdc.lk",
-      phone: "+94 77 456 7890",
-      location: "Peliyagoda",
-      warehouseSize: "30,000 sq ft",
-      specialFeatures: "Loading Docks, Sorting Area",
-      certification: "ISO 9001",
-      capacityUsed: "65%",
-      status: "Inactive",
-      joinDate: "2022-11-08",
-      lastUpdate: "2023-04-15"
-    },
-    {
-      id: 5,
-      name: "Eco-Store Kaduwela",
-      contactPerson: "Malith De Silva",
-      email: "facilities@ecostorelk.org",
-      phone: "+94 71 567 8901",
-      location: "Kaduwela Industrial Park",
-      warehouseSize: "8,000 sq ft",
-      specialFeatures: "Solar Powered, Waste Reduction",
-      certification: "Green Business Certified",
-      capacityUsed: "40%",
-      status: "Active",
-      joinDate: "2023-03-01",
-      lastUpdate: "2023-06-08"
-    }
-  ];
-
-  // Table columns - removed certification, size, and contact person columns
+  // Table columns - updated to show API data
   const columns = [
-    { accessor: 'name', header: 'Facility Name' },
+    { accessor: 'name', header: 'Name' },
     { accessor: 'email', header: 'Email' },
     { accessor: 'phone', header: 'Phone' },
-    { accessor: 'location', header: 'Location' },
+    { accessor: 'nic', header: 'NIC' },
+    
     {
       accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
+          row.status === 'APPROVED' || row.status === 'Active' 
+            ? 'bg-green-100 text-green-800' 
+            : row.status === 'PENDING' 
+            ? 'bg-yellow-100 text-yellow-800'
+            : 'bg-red-100 text-red-800'
+        }`}>
           {row.status}
         </span>
       )
@@ -246,20 +203,68 @@ const WarehouseOwnerManagement = () => {
     }
   ];
 
-  // Filter options - removed certification filter
+  // Filter options - updated for API data
   const filters = [
     {
       name: 'status',
       label: 'Status',
       options: [
-        { label: 'Active', value: 'Active' },
-        { label: 'Inactive', value: 'Inactive' }
+        { label: 'Approved', value: 'APPROVED' },
+        { label: 'Pending', value: 'PENDING' },
+        { label: 'Rejected', value: 'REJECTED' }
       ]
     }
   ];
 
+  // Loading and error states
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-farmio"></div>
+      </div>
+    );
+  }
+
+  if (error && warehouseOwners.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-red-600 mb-4">
+          <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load warehouse owners data</h3>
+        <p className="text-gray-500 mb-4">Error: {error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="bg-farmio text-white px-4 py-2 rounded hover:bg-farmio-dark"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
+      {/* API Status Notification */}
+      {error && warehouseOwners.length > 0 && (
+        <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                API connection failed. Showing sample data. Error: {error}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <UserManagement
         userType="Warehouse Owners"
         userTypePath="warehouse-owners"

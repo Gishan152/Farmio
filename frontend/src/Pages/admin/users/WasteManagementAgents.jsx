@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserManagement from '../../../components/templates/UserManagement';
+import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES } from '../../../Utils/roleUtils';
 
 // Waste Management icon
 const WasteManagementIcon = () => (
@@ -172,6 +173,65 @@ const WasteManagementAgentManagement = () => {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [activeTab, setActiveTab] = useState('details');
 
+  // State for API data
+  const [wasteAgents, setWasteAgents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch waste management agents data from API
+  useEffect(() => {
+    const fetchWasteAgents = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const usersData = await fetchUsersByRole(ROLES.WASTE);
+        const transformedAgents = transformApiUsers(usersData).map(user => ({
+          ...user,
+          // Map API fields to waste management specific fields
+          contactPerson: user.name,
+          serviceTypes: "Waste Management",
+          capacity: "N/A",
+          certifications: "N/A",
+          wasteTypes: "Agricultural Waste",
+          lastCollection: "N/A"
+        }));
+        
+        setWasteAgents(transformedAgents);
+      } catch (err) {
+        console.error('Error fetching waste management agents:', err);
+        setError(err.message);
+        // Fallback to sample data on error
+        setWasteAgents(getSampleWasteAgents());
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWasteAgents();
+  }, []);
+
+  // Sample data fallback
+  const getSampleWasteAgents = () => [
+    {
+      id: 1,
+      name: "Green Lanka Recycling",
+      contactPerson: "Sample Agent",
+      email: "waste@example.com",
+      phone: "+94 77 123 4567",
+      location: "Sample Location",
+      serviceTypes: "Composting, Recycling",
+      capacity: "100 tons/day",
+      certifications: "CEA Certified",
+      wasteTypes: "Organic, Packaging",
+      status: "Active",
+      nic: "123456789V",
+      roles: "ROLE_WASTE",
+      joinDate: "2022-07-14",
+      lastCollection: "2023-06-10"
+    }
+  ];
+
   // Handle view agent details
   const handleViewAgent = (agent) => {
     setSelectedAgent(agent);
@@ -192,98 +252,23 @@ const WasteManagementAgentManagement = () => {
     setShowDeleteModal(false);
     // In a real app, you would update the state or call an API
   };
-  // Sample waste management agent data for demonstration
-  const wasteManagementAgents = [
-    {
-      id: 1,
-      name: "Green Lanka Recycling",
-      contactPerson: "Ruwan Bandara",
-      email: "operations@greenlanka.lk",
-      phone: "+94 77 123 4567",
-      location: "Jaffna",
-      serviceTypes: "Composting, Recycling",
-      capacity: "100 tons/day",
-      certifications: "CEA Certified, Green Business",
-      wasteTypes: "Organic, Packaging",
-      status: "Active",
-      joinDate: "2022-07-14",
-      lastCollection: "2023-06-10"
-    },
-    {
-      id: 2,
-      name: "Eco Circle Sri Lanka",
-      contactPerson: "Sameera Jayawardena",
-      email: "sameera@ecocirclelk.com",
-      phone: "+94 76 234 5678",
-      location: "Batticaloa",
-      serviceTypes: "Upcycling, Biogas Production",
-      capacity: "75 tons/day",
-      certifications: "ISO 14001",
-      wasteTypes: "Mixed Agricultural",
-      status: "Active",
-      joinDate: "2023-01-20",
-      lastCollection: "2023-06-08"
-    },
-    {
-      id: 3,
-      name: "Compost Lanka Cooperative",
-      contactPerson: "Jehan Perera",
-      email: "info@compostlanka.org",
-      phone: "+94 71 345 6789",
-      location: "Matara",
-      serviceTypes: "Specialized Composting",
-      capacity: "30 tons/day",
-      certifications: "Organic Certified",
-      wasteTypes: "Plant Material Only",
-      status: "Inactive",
-      joinDate: "2022-09-15",
-      lastCollection: "2023-05-01"
-    },
-    {
-      id: 4,
-      name: "AgriWaste Solutions Kurunegala",
-      contactPerson: "Chamari Athapaththu",
-      email: "chamari@agriwastelk.com",
-      phone: "+94 70 456 7890",
-      location: "Kurunegala",
-      serviceTypes: "Full Spectrum Processing",
-      capacity: "120 tons/day",
-      certifications: "ISO 14001, Carbon Trust",
-      wasteTypes: "All Agricultural Waste",
-      status: "Active",
-      joinDate: "2022-04-12",
-      lastCollection: "2023-06-09"
-    },
-    {
-      id: 5,
-      name: "BioEnergy Lanka",
-      contactPerson: "Dilshan Gunawardena",
-      email: "operations@bioenergylk.com",
-      phone: "+94 77 567 8901",
-      location: "Anuradhapura",
-      serviceTypes: "Biogas, Fertilizer Production",
-      capacity: "85 tons/day",
-      certifications: "Renewable Energy Certified",
-      wasteTypes: "Organic, Animal Waste",
-      status: "Active",
-      joinDate: "2023-02-28",
-      lastCollection: "2023-06-07"
-    }
-  ];
-
-  // Table columns - simplified to match other user types
+  // Table columns - updated for API data
   const columns = [
-    { accessor: 'name', header: 'Company Name' },
+    { accessor: 'name', header: 'Name' },
     { accessor: 'email', header: 'Email' },
     { accessor: 'phone', header: 'Phone' },
-    { accessor: 'location', header: 'Location' },
-    { accessor: 'wasteTypes', header: 'Waste Types' },
+    { accessor: 'nic', header: 'NIC' },
     {
       accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
+          row.status === 'APPROVED' || row.status === 'Active' 
+            ? 'bg-green-100 text-green-800' 
+            : row.status === 'PENDING' 
+            ? 'bg-yellow-100 text-yellow-800'
+            : 'bg-red-100 text-red-800'
+        }`}>
           {row.status}
         </span>
       )
@@ -321,37 +306,74 @@ const WasteManagementAgentManagement = () => {
     }
   ];
 
-  // Filter options - simplified
+  // Filter options - updated for API data
   const filters = [
     {
       name: 'status',
       label: 'Status',
       options: [
-        { label: 'Active', value: 'Active' },
-        { label: 'Inactive', value: 'Inactive' }
-      ]
-    },
-    {
-      name: 'wasteTypes',
-      label: 'Waste Types',
-      options: [
-        { label: 'Organic, Packaging', value: 'Organic, Packaging' },
-        { label: 'Mixed Agricultural', value: 'Mixed Agricultural' },
-        { label: 'Plant Material Only', value: 'Plant Material Only' },
-        { label: 'All Agricultural Waste', value: 'All Agricultural Waste' },
-        { label: 'Organic, Animal Waste', value: 'Organic, Animal Waste' }
+        { label: 'Approved', value: 'APPROVED' },
+        { label: 'Pending', value: 'PENDING' },
+        { label: 'Rejected', value: 'REJECTED' }
       ]
     }
   ];
 
+  // Loading and error states
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-farmio"></div>
+      </div>
+    );
+  }
+
+  if (error && wasteAgents.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-red-600 mb-4">
+          <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load waste management agents data</h3>
+        <p className="text-gray-500 mb-4">Error: {error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="bg-farmio text-white px-4 py-2 rounded hover:bg-farmio-dark"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
+      {/* API Status Notification */}
+      {error && wasteAgents.length > 0 && (
+        <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                API connection failed. Showing sample data. Error: {error}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <UserManagement
         userType="Waste Management Agents"
         userTypePath="waste-management-agents"
         userIcon={<WasteManagementIcon />}
         columns={columns}
-        userData={wasteManagementAgents}
+        userData={wasteAgents}
         filters={filters}
         showAddButton={false}
       />

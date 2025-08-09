@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserManagement from '../../../components/templates/UserManagement';
+import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES } from '../../../Utils/roleUtils';
 
 // Buyer icon
 const BuyerIcon = () => (
@@ -108,6 +109,35 @@ const BuyerManagement = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedBuyer, setSelectedBuyer] = useState(null);
   const [activeTab, setActiveTab] = useState('profile');
+  
+  // State for API data
+  const [buyers, setBuyers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch buyers data from API
+  useEffect(() => {
+    const fetchBuyers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const usersData = await fetchUsersByRole(ROLES.BUYER);
+        const transformedBuyers = transformApiUsers(usersData);
+        
+        setBuyers(transformedBuyers);
+      } catch (err) {
+        console.error('Error fetching buyers:', err);
+        setError(err.message);
+        // Fallback to sample data on error
+        setBuyers(getSampleDataByRole(ROLES.BUYER));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBuyers();
+  }, []);
 
   // Handle view buyer details
   const handleViewBuyer = (buyer) => {
@@ -130,19 +160,24 @@ const BuyerManagement = () => {
     // In a real app, you would update the state or call an API
   };
 
-  // Table columns
+  // Table columns - updated to show API data
   const columns = [
     { accessor: 'name', header: 'Name' },
     { accessor: 'email', header: 'Email' },
     { accessor: 'phone', header: 'Phone' },
-    { accessor: 'location', header: 'Location' },
-    { accessor: 'preferredProducts', header: 'Preferred Products' },
+    { accessor: 'nic', header: 'NIC' },
+   
     {
       accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
+          row.status === 'APPROVED' || row.status === 'Active' 
+            ? 'bg-green-100 text-green-800' 
+            : row.status === 'PENDING' 
+            ? 'bg-yellow-100 text-yellow-800'
+            : 'bg-red-100 text-red-800'
+        }`}>
           {row.status}
         </span>
       )
@@ -180,36 +215,15 @@ const BuyerManagement = () => {
     }
   ];
 
-  // Filter options
+  // Filter options - updated for API data
   const filters = [
     {
       name: 'status',
       label: 'Status',
       options: [
-        { label: 'Active', value: 'Active' },
-        { label: 'Inactive', value: 'Inactive' }
-      ]
-    },
-    {
-      name: 'location',
-      label: 'Location',
-      options: [
-        { label: 'Colombo', value: 'Colombo' },
-        { label: 'Negombo', value: 'Negombo' },
-        { label: 'Kandy', value: 'Kandy' },
-        { label: 'Ella', value: 'Ella' },
-        { label: 'Galle', value: 'Galle' }
-      ]
-    },
-    {
-      name: 'preferredProducts',
-      label: 'Preferred Products',
-      options: [
-        { label: 'Organic Vegetables', value: 'Organic Vegetables' },
-        { label: 'Premium Fruits', value: 'Premium Fruits' },
-        { label: 'Mixed Produce', value: 'Mixed Produce' },
-        { label: 'Leafy Greens', value: 'Leafy Greens' },
-        { label: 'Full Range', value: 'Full Range' }
+        { label: 'Approved', value: 'APPROVED' },
+        { label: 'Pending', value: 'PENDING' },
+        { label: 'Rejected', value: 'REJECTED' }
       ]
     }
   ];
@@ -228,8 +242,55 @@ const BuyerManagement = () => {
     </div>
   );
 
+  // Loading and error states
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-farmio"></div>
+      </div>
+    );
+  }
+
+  if (error && buyers.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-red-600 mb-4">
+          <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load buyers data</h3>
+        <p className="text-gray-500 mb-4">Error: {error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="bg-farmio text-white px-4 py-2 rounded hover:bg-farmio-dark"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
+      {/* API Status Notification */}
+      {error && buyers.length > 0 && (
+        <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                API connection failed. Showing sample data. Error: {error}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <UserManagement
         userType="Buyers"
         userTypePath="buyers"

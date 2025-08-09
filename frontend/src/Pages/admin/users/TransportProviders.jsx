@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserManagement from '../../../components/templates/UserManagement';
+import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES } from '../../../Utils/roleUtils';
 
 // Transport Provider icon
 const TransportIcon = () => (
@@ -315,6 +316,35 @@ const TransportProviderManagement = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [activeTab, setActiveTab] = useState('provider');
+  
+  // State for API data
+  const [transportProviders, setTransportProviders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch transport providers data from API
+  useEffect(() => {
+    const fetchTransportProviders = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const usersData = await fetchUsersByRole(ROLES.TRANSPORT);
+        const transformedProviders = transformApiUsers(usersData);
+        
+        setTransportProviders(transformedProviders);
+      } catch (err) {
+        console.error('Error fetching transport providers:', err);
+        setError(err.message);
+        // Fallback to sample data on error
+        setTransportProviders(getSampleDataByRole(ROLES.TRANSPORT));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransportProviders();
+  }, []);
 
   // Handle view provider details
   const handleViewProvider = (provider) => {
