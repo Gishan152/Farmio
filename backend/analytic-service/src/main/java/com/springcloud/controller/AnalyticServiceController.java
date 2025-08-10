@@ -71,4 +71,11 @@ public class AnalyticServiceController {
         List<UserDTO> users = userAnalyticsService.fetchAllUsers();
         return ResponseEntity.ok(users);
     }
+
+    //deactivate the user
+    @PostMapping("/admin/users/deactivate")
+    public ResponseEntity<Void> deactivateUser(@RequestBody UserRequest request) {
+        userAnalyticsService.deactivateUser(request);
+        return ResponseEntity.noContent().build();
+    }
 }

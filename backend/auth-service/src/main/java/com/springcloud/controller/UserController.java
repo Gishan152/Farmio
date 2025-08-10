@@ -32,4 +32,11 @@ public class UserController {
     public ResponseEntity<List<UserDTO>> getAllUsersDTO() {
         return ResponseEntity.ok(userService.getAllUsersDTO());
     }
+
+    //deactivate the user
+    @PostMapping("/deactivate")
+    public ResponseEntity<Void> deactivateUser(@RequestBody UserRequest request) {
+        userService.deactivateUser(request);
+        return ResponseEntity.noContent().build();
+    }
 }

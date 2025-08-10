@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import UserManagement from '../../../components/templates/UserManagement';
-import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES } from '../../../Utils/roleUtils';
+import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES, deactivateUser } from '../../../Utils/roleUtils';
 
 // Farmer icon
 const FarmerIcon = () => (
@@ -106,11 +106,31 @@ const FarmerManagement = () => {
   };
 
   // Confirm delete farmer
-  const confirmDeleteFarmer = () => {
-    // Logic to delete farmer would go here
-    console.log(`Deleting farmer: ${selectedFarmer.name}`);
-    setShowDeleteModal(false);
-    // In a real app, you would update the state or call an API
+  const confirmDeleteFarmer = async () => {
+    try {
+      console.log(`Deactivating farmer: ${selectedFarmer.name} (ID: ${selectedFarmer.id})`);
+      
+      await deactivateUser(selectedFarmer.id);
+      
+      // Update the local state to reflect the change
+      setFarmers(prevFarmers => 
+        prevFarmers.map(farmer => 
+          farmer.id === selectedFarmer.id 
+            ? { ...farmer, status: 'REJECTED' }
+            : farmer
+        )
+      );
+      
+      setShowDeleteModal(false);
+      console.log('User deactivated successfully');
+      
+      // Optionally show a success message
+      alert('User deactivated successfully');
+      
+    } catch (error) {
+      console.error('Failed to deactivate user:', error);
+      alert('Failed to deactivate user. Please try again.');
+    }
   };
   // Table columns - updated to show API data
   const columns = [

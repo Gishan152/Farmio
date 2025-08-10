@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import UserManagement from '../../../components/templates/UserManagement';
-import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES } from '../../../Utils/roleUtils';
+import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES, deactivateUser } from '../../../Utils/roleUtils';
 
 // Buyer icon
 const BuyerIcon = () => (
@@ -153,11 +153,31 @@ const BuyerManagement = () => {
   };
 
   // Confirm delete buyer
-  const confirmDeleteBuyer = () => {
-    // Logic to delete buyer would go here
-    console.log(`Deleting buyer: ${selectedBuyer.name}`);
-    setShowDeleteModal(false);
-    // In a real app, you would update the state or call an API
+  const confirmDeleteBuyer = async () => {
+    try {
+      console.log(`Deactivating buyer: ${selectedBuyer.name} (ID: ${selectedBuyer.id})`);
+      
+      await deactivateUser(selectedBuyer.id);
+      
+      // Update the local state to reflect the change
+      setBuyers(prevBuyers => 
+        prevBuyers.map(buyer => 
+          buyer.id === selectedBuyer.id 
+            ? { ...buyer, status: 'REJECTED' }
+            : buyer
+        )
+      );
+      
+      setShowDeleteModal(false);
+      console.log('User deactivated successfully');
+      
+      // Optionally show a success message
+      alert('User deactivated successfully');
+      
+    } catch (error) {
+      console.error('Failed to deactivate user:', error);
+      alert('Failed to deactivate user. Please try again.');
+    }
   };
 
   // Table columns - updated to show API data

@@ -128,6 +128,34 @@ export const getRoleDisplayName = (role) => {
 };
 
 /**
+ * Deactivate a user by ID
+ * @param {number} userId - User ID to deactivate
+ * @returns {Promise<boolean>} True if successful
+ */
+export const deactivateUser = async (userId) => {
+  try {
+    const response = await fetch('http://localhost:8080/api/analytics/admin/users/deactivate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId: userId })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.text();
+    console.log('Deactivate response:', result);
+    return true;
+  } catch (error) {
+    console.error('Error deactivating user:', error);
+    throw error;
+  }
+};
+
+/**
  * Get sample data for a specific role (fallback when API fails)
  * @param {string} role - Role constant
  * @returns {Array} Sample user data

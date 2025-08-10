@@ -1,6 +1,7 @@
 package com.springcloud.service;
 
 import com.springcloud.dto.UserDTO;
+import com.springcloud.dto.UserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -61,6 +62,28 @@ public class UserAnalyticsService {
         return users.stream()
                 .filter(user -> user.getRoles() != null && user.getRoles().contains(role))
                 .collect(Collectors.toList());
+    }
+
+    public void deactivateUser(UserRequest request) {
+        try {
+            // First, find the user by ID to get the username
+            List<UserDTO> users = fetchAllUsers();
+            UserDTO user = users.stream()
+                    .filter(u -> u.getId().equals(request.userId()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("User with ID " + request.userId() + " not found"));
+            
+            // Create auth-service UserRequest with username
+            com.springcloud.dto.AuthUserRequest authRequest = new com.springcloud.dto.AuthUserRequest(user.getUsername());
+            
+            // Call the auth-service deactivate endpoint
+            String deactivateUrl = authServiceUrl.replace("/all-dto", "/deactivate");
+            restTemplate.postForEntity(deactivateUrl, authRequest, Void.class);
+            System.out.println("User deactivated successfully: " + user.getUsername());
+        } catch (RestClientException e) {
+            System.err.println("Error deactivating user: " + e.getMessage());
+            throw new RuntimeException("Failed to deactivate user", e);
+        }
     }
 
     public Map<String, Long> getUserCountByRole() {

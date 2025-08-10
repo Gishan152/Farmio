@@ -101,4 +101,13 @@ public class UserService {
                 })
                 .collect(java.util.stream.Collectors.toList());
     }
+
+    public void deactivateUser(UserRequest request) {
+        // TODO Auto-generated method stub
+        var user = userRepository.findByUsername(request.username())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setStatus("DEACTIVATED");
+        userRepository.save(user);
+        
+    }
 }

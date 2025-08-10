@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import UserManagement from '../../../components/templates/UserManagement';
-import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES } from '../../../Utils/roleUtils';
+import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES, deactivateUser } from '../../../Utils/roleUtils';
 
 // Waste Management icon
 const WasteManagementIcon = () => (
@@ -246,11 +246,31 @@ const WasteManagementAgentManagement = () => {
   };
 
   // Confirm delete agent
-  const confirmDeleteAgent = () => {
-    // Logic to delete agent would go here
-    console.log(`Deleting agent: ${selectedAgent.name}`);
-    setShowDeleteModal(false);
-    // In a real app, you would update the state or call an API
+  const confirmDeleteAgent = async () => {
+    try {
+      console.log(`Deactivating waste agent: ${selectedAgent.name} (ID: ${selectedAgent.id})`);
+      
+      await deactivateUser(selectedAgent.id);
+      
+      // Update the local state to reflect the change
+      setWasteAgents(prevAgents => 
+        prevAgents.map(agent => 
+          agent.id === selectedAgent.id 
+            ? { ...agent, status: 'REJECTED' }
+            : agent
+        )
+      );
+      
+      setShowDeleteModal(false);
+      console.log('User deactivated successfully');
+      
+      // Optionally show a success message
+      alert('User deactivated successfully');
+      
+    } catch (error) {
+      console.error('Failed to deactivate user:', error);
+      alert('Failed to deactivate user. Please try again.');
+    }
   };
   // Table columns - updated for API data
   const columns = [

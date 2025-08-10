@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import UserManagement from '../../../components/templates/UserManagement';
-import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES } from '../../../Utils/roleUtils';
+import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES, deactivateUser } from '../../../Utils/roleUtils';
 
 // Warehouse icon
 const WarehouseIcon = () => (
@@ -141,11 +141,31 @@ const WarehouseOwnerManagement = () => {
   };
 
   // Confirm delete warehouse
-  const confirmDeleteWarehouse = () => {
-    // Logic to delete warehouse would go here
-    console.log(`Deleting warehouse: ${selectedWarehouse.name}`);
-    setShowDeleteModal(false);
-    // In a real app, you would update the state or call an API
+  const confirmDeleteWarehouse = async () => {
+    try {
+      console.log(`Deactivating warehouse: ${selectedWarehouse.name} (ID: ${selectedWarehouse.id})`);
+      
+      await deactivateUser(selectedWarehouse.id);
+      
+      // Update the local state to reflect the change
+      setWarehouseOwners(prevOwners => 
+        prevOwners.map(owner => 
+          owner.id === selectedWarehouse.id 
+            ? { ...owner, status: 'REJECTED' }
+            : owner
+        )
+      );
+      
+      setShowDeleteModal(false);
+      console.log('User deactivated successfully');
+      
+      // Optionally show a success message
+      alert('User deactivated successfully');
+      
+    } catch (error) {
+      console.error('Failed to deactivate user:', error);
+      alert('Failed to deactivate user. Please try again.');
+    }
   };
 
   // Table columns - updated to show API data
