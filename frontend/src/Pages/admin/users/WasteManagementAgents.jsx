@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserManagement from '../../../components/templates/UserManagement';
+import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES, deactivateUser, approveUser } from '../../../Utils/roleUtils';
 
 // Waste Management icon
 const WasteManagementIcon = () => (
@@ -169,8 +170,88 @@ const WasteManagementAgentManagement = () => {
   // State for modals
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showApproveModal, setShowApproveModal] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [activeTab, setActiveTab] = useState('details');
+
+  // State for success/error messages
+  const [showMessage, setShowMessage] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('success');
+
+  // State for API data
+  const [wasteAgents, setWasteAgents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch waste management agents data from API
+  useEffect(() => {
+    const fetchWasteAgents = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const usersData = await fetchUsersByRole(ROLES.WASTE);
+        const transformedAgents = transformApiUsers(usersData).map(user => ({
+          ...user,
+          // Map API fields to waste management specific fields
+          contactPerson: user.name,
+          serviceTypes: "Waste Management",
+          capacity: "N/A",
+          certifications: "N/A",
+          wasteTypes: "Agricultural Waste",
+          lastCollection: "N/A"
+        }));
+        
+        setWasteAgents(transformedAgents);
+      } catch (err) {
+        console.error('Error fetching waste management agents:', err);
+        setError(err.message);
+        // Fallback to sample data on error
+        setWasteAgents(getSampleWasteAgents());
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWasteAgents();
+  }, []);
+
+  // Helper function to show messages
+  const showSuccessMessage = (msg) => {
+    setMessage(msg);
+    setMessageType('success');
+    setShowMessage(true);
+    setTimeout(() => setShowMessage(false), 3000);
+  };
+
+  const showErrorMessage = (msg) => {
+    setMessage(msg);
+    setMessageType('error');
+    setShowMessage(true);
+    setTimeout(() => setShowMessage(false), 5000);
+  };
+
+  // Sample data fallback
+  const getSampleWasteAgents = () => [
+    {
+      id: 1,
+      name: "Green Lanka Recycling",
+      contactPerson: "Sample Agent",
+      email: "waste@example.com",
+      phone: "+94 77 123 4567",
+      location: "Sample Location",
+      serviceTypes: "Composting, Recycling",
+      capacity: "100 tons/day",
+      certifications: "CEA Certified",
+      wasteTypes: "Organic, Packaging",
+      status: "Active",
+      nic: "123456789V",
+      roles: "ROLE_WASTE",
+      joinDate: "2022-07-14",
+      lastCollection: "2023-06-10"
+    }
+  ];
 
   // Handle view agent details
   const handleViewAgent = (agent) => {
@@ -186,104 +267,79 @@ const WasteManagementAgentManagement = () => {
   };
 
   // Confirm delete agent
-  const confirmDeleteAgent = () => {
-    // Logic to delete agent would go here
-    console.log(`Deleting agent: ${selectedAgent.name}`);
-    setShowDeleteModal(false);
-    // In a real app, you would update the state or call an API
-  };
-  // Sample waste management agent data for demonstration
-  const wasteManagementAgents = [
-    {
-      id: 1,
-      name: "Green Lanka Recycling",
-      contactPerson: "Ruwan Bandara",
-      email: "operations@greenlanka.lk",
-      phone: "+94 77 123 4567",
-      location: "Jaffna",
-      serviceTypes: "Composting, Recycling",
-      capacity: "100 tons/day",
-      certifications: "CEA Certified, Green Business",
-      wasteTypes: "Organic, Packaging",
-      status: "Active",
-      joinDate: "2022-07-14",
-      lastCollection: "2023-06-10"
-    },
-    {
-      id: 2,
-      name: "Eco Circle Sri Lanka",
-      contactPerson: "Sameera Jayawardena",
-      email: "sameera@ecocirclelk.com",
-      phone: "+94 76 234 5678",
-      location: "Batticaloa",
-      serviceTypes: "Upcycling, Biogas Production",
-      capacity: "75 tons/day",
-      certifications: "ISO 14001",
-      wasteTypes: "Mixed Agricultural",
-      status: "Active",
-      joinDate: "2023-01-20",
-      lastCollection: "2023-06-08"
-    },
-    {
-      id: 3,
-      name: "Compost Lanka Cooperative",
-      contactPerson: "Jehan Perera",
-      email: "info@compostlanka.org",
-      phone: "+94 71 345 6789",
-      location: "Matara",
-      serviceTypes: "Specialized Composting",
-      capacity: "30 tons/day",
-      certifications: "Organic Certified",
-      wasteTypes: "Plant Material Only",
-      status: "Inactive",
-      joinDate: "2022-09-15",
-      lastCollection: "2023-05-01"
-    },
-    {
-      id: 4,
-      name: "AgriWaste Solutions Kurunegala",
-      contactPerson: "Chamari Athapaththu",
-      email: "chamari@agriwastelk.com",
-      phone: "+94 70 456 7890",
-      location: "Kurunegala",
-      serviceTypes: "Full Spectrum Processing",
-      capacity: "120 tons/day",
-      certifications: "ISO 14001, Carbon Trust",
-      wasteTypes: "All Agricultural Waste",
-      status: "Active",
-      joinDate: "2022-04-12",
-      lastCollection: "2023-06-09"
-    },
-    {
-      id: 5,
-      name: "BioEnergy Lanka",
-      contactPerson: "Dilshan Gunawardena",
-      email: "operations@bioenergylk.com",
-      phone: "+94 77 567 8901",
-      location: "Anuradhapura",
-      serviceTypes: "Biogas, Fertilizer Production",
-      capacity: "85 tons/day",
-      certifications: "Renewable Energy Certified",
-      wasteTypes: "Organic, Animal Waste",
-      status: "Active",
-      joinDate: "2023-02-28",
-      lastCollection: "2023-06-07"
+  const confirmDeleteAgent = async () => {
+    try {
+      console.log(`Deactivating waste agent: ${selectedAgent.name} (ID: ${selectedAgent.id})`);
+      
+      await deactivateUser(selectedAgent.id);
+      
+      // Update the local state to reflect the change
+      setWasteAgents(prevAgents => 
+        prevAgents.map(agent => 
+          agent.id === selectedAgent.id 
+            ? { ...agent, status: 'DEACTIVATED' }
+            : agent
+        )
+      );
+      
+      setShowDeleteModal(false);
+      showSuccessMessage(`Waste management agent ${selectedAgent.name} has been deactivated successfully!`);
+      
+    } catch (error) {
+      console.error('Failed to deactivate user:', error);
+      showErrorMessage('Failed to deactivate waste management agent. Please try again.');
     }
-  ];
+  };
 
-  // Table columns - simplified to match other user types
+  // Handle approve agent action
+  const handleApproveAgent = (agent) => {
+    setSelectedAgent(agent);
+    setShowApproveModal(true);
+  };
+
+  // Confirm approve agent
+  const confirmApproveAgent = async () => {
+    try {
+      console.log(`Approving waste agent: ${selectedAgent.name} (ID: ${selectedAgent.id})`);
+      
+      await approveUser(selectedAgent.id);
+      
+      // Update the local state to reflect the change
+      setWasteAgents(prevAgents => 
+        prevAgents.map(agent => 
+          agent.id === selectedAgent.id 
+            ? { ...agent, status: 'APPROVED' }
+            : agent
+        )
+      );
+      
+      setShowApproveModal(false);
+      showSuccessMessage(`Waste management agent ${selectedAgent.name} has been approved successfully!`);
+      
+    } catch (error) {
+      console.error('Failed to approve user:', error);
+      showErrorMessage('Failed to approve waste management agent. Please try again.');
+    }
+  };
+  // Table columns - updated for API data
   const columns = [
-    { accessor: 'name', header: 'Company Name' },
+    { accessor: 'name', header: 'Name' },
     { accessor: 'email', header: 'Email' },
     { accessor: 'phone', header: 'Phone' },
-    { accessor: 'location', header: 'Location' },
-    { accessor: 'wasteTypes', header: 'Waste Types' },
+    { accessor: 'nic', header: 'NIC' },
     {
       accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
+          row.status === 'APPROVED' || row.status === 'Active' 
+            ? 'bg-green-100 text-green-800' 
+            : row.status === 'PENDING' 
+            ? 'bg-yellow-100 text-yellow-800'
+            : row.status === 'DEACTIVATED'
+            ? 'bg-gray-100 text-gray-800'
+            : 'bg-red-100 text-red-800'
+        }`}>
           {row.status}
         </span>
       )
@@ -305,53 +361,155 @@ const WasteManagementAgentManagement = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
           </button>
-          <button
-            className="text-red-600 hover:text-red-800"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteAgent(row);
-            }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+          {/* Approve button - only show for PENDING users */}
+          {row.status === 'PENDING' && (
+            <button
+              className="text-green-600 hover:text-green-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApproveAgent(row);
+              }}
+              title="Approve User"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
+          )}
+          {row.status === 'DEACTIVATED' ? (
+            <button
+              className="text-blue-600 hover:text-blue-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApproveAgent(row);
+              }}
+              title="Activate Agent"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </button>
+          ) : (
+            <button
+              className="text-red-600 hover:text-red-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteAgent(row);
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          )}
         </div>
       )
     }
   ];
 
-  // Filter options - simplified
+  // Filter options - updated for API data
   const filters = [
     {
       name: 'status',
       label: 'Status',
       options: [
-        { label: 'Active', value: 'Active' },
-        { label: 'Inactive', value: 'Inactive' }
-      ]
-    },
-    {
-      name: 'wasteTypes',
-      label: 'Waste Types',
-      options: [
-        { label: 'Organic, Packaging', value: 'Organic, Packaging' },
-        { label: 'Mixed Agricultural', value: 'Mixed Agricultural' },
-        { label: 'Plant Material Only', value: 'Plant Material Only' },
-        { label: 'All Agricultural Waste', value: 'All Agricultural Waste' },
-        { label: 'Organic, Animal Waste', value: 'Organic, Animal Waste' }
+        { label: 'Approved', value: 'APPROVED' },
+        { label: 'Pending', value: 'PENDING' },
+        { label: 'Rejected', value: 'REJECTED' },
+        { label: 'Deactivated', value: 'DEACTIVATED' }
       ]
     }
   ];
 
+  // Loading and error states
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-farmio"></div>
+      </div>
+    );
+  }
+
+  if (error && wasteAgents.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-red-600 mb-4">
+          <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load waste management agents data</h3>
+        <p className="text-gray-500 mb-4">Error: {error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="bg-farmio text-white px-4 py-2 rounded hover:bg-farmio-dark"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
+      {/* Success/Error Message Toast */}
+      {showMessage && (
+        <div className={`fixed top-4 right-4 z-50 max-w-md w-full ${
+          messageType === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white p-4 rounded-lg shadow-lg transition-all duration-300`}>
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              {messageType === 'success' ? (
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              )}
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">{message}</p>
+            </div>
+            <div className="ml-auto pl-3">
+              <button
+                onClick={() => setShowMessage(false)}
+                className="text-white hover:text-gray-200"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* API Status Notification */}
+      {error && wasteAgents.length > 0 && (
+        <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                API connection failed. Showing sample data. Error: {error}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <UserManagement
         userType="Waste Management Agents"
         userTypePath="waste-management-agents"
         userIcon={<WasteManagementIcon />}
         columns={columns}
-        userData={wasteManagementAgents}
+        userData={wasteAgents}
         filters={filters}
         showAddButton={false}
       />
@@ -673,6 +831,39 @@ const WasteManagementAgentManagement = () => {
                   className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none"
                 >
                   Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Approve Confirmation Modal */}
+      {showApproveModal && selectedAgent && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowApproveModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Confirm Approval</h3>
+              </div>
+              <div className="px-6 py-4">
+                <p className="text-gray-700">
+                  Are you sure you want to approve waste management agent <span className="font-medium">{selectedAgent.name}</span>? This will change their status to APPROVED.
+                </p>
+              </div>
+              <div className="px-6 py-3 bg-gray-50 flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowApproveModal(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 focus:outline-none"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmApproveAgent}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none"
+                >
+                  Approve
                 </button>
               </div>
             </div>

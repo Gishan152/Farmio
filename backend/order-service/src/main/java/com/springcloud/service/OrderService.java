@@ -106,6 +106,10 @@ public class OrderService {
         return orderList;
     }
 
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
     public Order markReadyToPickup(Long userId, Long orderId) {
         return orderRepository.findById(orderId)
                 .map(order -> {
@@ -202,8 +206,8 @@ public class OrderService {
                     }
 
                     BigDecimal refundRatio = switch (status) {
-                        case OrderStatus.PROCESSING -> BigDecimal.valueOf(0.8);
-                        case OrderStatus.AWAITING_PICKUP -> BigDecimal.valueOf(0.7);
+                        case PROCESSING -> BigDecimal.valueOf(0.8);
+                        case AWAITING_PICKUP -> BigDecimal.valueOf(0.7);
                         default -> BigDecimal.ZERO;
                     };
 

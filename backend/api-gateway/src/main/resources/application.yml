@@ -40,8 +40,8 @@ spring:
           uri: lb://warehouse-service
           predicates:
             - Path=/api/warehouse/**
-        - id: analytics-service
-          uri: lb://analytics-service
+        - id: analytic-service
+          uri: lb://analytic-service
           predicates:
             - Path=/api/analytics/**
         - id: payment-service
