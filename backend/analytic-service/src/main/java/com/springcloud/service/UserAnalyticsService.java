@@ -86,6 +86,28 @@ public class UserAnalyticsService {
         }
     }
 
+    public void approveUser(UserRequest request) {
+        try {
+            // First, find the user by ID to get the username
+            List<UserDTO> users = fetchAllUsers();
+            UserDTO user = users.stream()
+                    .filter(u -> u.getId().equals(request.userId()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("User with ID " + request.userId() + " not found"));
+            
+            // Create auth-service UserRequest with username
+            com.springcloud.dto.AuthUserRequest authRequest = new com.springcloud.dto.AuthUserRequest(user.getUsername());
+            
+            // Call the auth-service approve endpoint
+            String approveUrl = authServiceUrl.replace("/all-dto", "/approve");
+            restTemplate.postForEntity(approveUrl, authRequest, Void.class);
+            System.out.println("User approved successfully: " + user.getUsername());
+        } catch (RestClientException e) {
+            System.err.println("Error approving user: " + e.getMessage());
+            throw new RuntimeException("Failed to approve user", e);
+        }
+    }
+
     public Map<String, Long> getUserCountByRole() {
         List<UserDTO> users = fetchAllUsers();
         return users.stream()

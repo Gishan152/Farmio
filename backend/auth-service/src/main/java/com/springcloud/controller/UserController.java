@@ -39,4 +39,11 @@ public class UserController {
         userService.deactivateUser(request);
         return ResponseEntity.noContent().build();
     }
+
+    //approve the user
+    @PostMapping("/approve")
+    public ResponseEntity<Void> approveUser(@RequestBody UserRequest request) {
+        userService.approveUser(request);
+        return ResponseEntity.noContent().build();
+    }
 }

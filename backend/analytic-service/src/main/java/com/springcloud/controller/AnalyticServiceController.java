@@ -4,12 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 import com.springcloud.dto.UserDTO;
+import com.springcloud.dto.UserRequest;
 import com.springcloud.service.UserAnalyticsService;
 
 @RestController
@@ -76,6 +79,13 @@ public class AnalyticServiceController {
     @PostMapping("/admin/users/deactivate")
     public ResponseEntity<Void> deactivateUser(@RequestBody UserRequest request) {
         userAnalyticsService.deactivateUser(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    //approve the user
+    @PostMapping("/admin/users/approve")
+    public ResponseEntity<Void> approveUser(@RequestBody UserRequest request) {
+        userAnalyticsService.approveUser(request);
         return ResponseEntity.noContent().build();
     }
 }

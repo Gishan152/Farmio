@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import UserManagement from '../../../components/templates/UserManagement';
-import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES, deactivateUser } from '../../../Utils/roleUtils';
+import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES, deactivateUser, approveUser } from '../../../Utils/roleUtils';
 
 // Farmer icon
 const FarmerIcon = () => (
@@ -60,6 +60,7 @@ const FarmerManagement = () => {
   // State for modals
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showApproveModal, setShowApproveModal] = useState(false);
   const [selectedFarmer, setSelectedFarmer] = useState(null);
   const [activeTab, setActiveTab] = useState('profile');
   
@@ -132,6 +133,41 @@ const FarmerManagement = () => {
       alert('Failed to deactivate user. Please try again.');
     }
   };
+
+  // Handle approve farmer action
+  const handleApproveFarmer = (farmer) => {
+    setSelectedFarmer(farmer);
+    setShowApproveModal(true);
+  };
+
+  // Confirm approve farmer
+  const confirmApproveFarmer = async () => {
+    try {
+      console.log(`Approving farmer: ${selectedFarmer.name} (ID: ${selectedFarmer.id})`);
+      
+      await approveUser(selectedFarmer.id);
+      
+      // Update the local state to reflect the change
+      setFarmers(prevFarmers => 
+        prevFarmers.map(farmer => 
+          farmer.id === selectedFarmer.id 
+            ? { ...farmer, status: 'APPROVED' }
+            : farmer
+        )
+      );
+      
+      setShowApproveModal(false);
+      console.log('User approved successfully');
+      
+      // Optionally show a success message
+      alert('User approved successfully');
+      
+    } catch (error) {
+      console.error('Failed to approve user:', error);
+      alert('Failed to approve user. Please try again.');
+    }
+  };
+
   // Table columns - updated to show API data
   const columns = [
     { accessor: 'name', header: 'Name' },
@@ -170,6 +206,21 @@ const FarmerManagement = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
           </button>
+          {/* Approve button - only show for PENDING users */}
+          {row.status === 'PENDING' && (
+            <button
+              className="text-green-600 hover:text-green-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApproveFarmer(row);
+              }}
+              title="Approve User"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
+          )}
           <button
             className="text-red-600 hover:text-red-800"
             onClick={(e) => {
@@ -449,6 +500,39 @@ const FarmerManagement = () => {
                   className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none"
                 >
                   Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Approve Confirmation Modal */}
+      {showApproveModal && selectedFarmer && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowApproveModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Confirm Approval</h3>
+              </div>
+              <div className="px-6 py-4">
+                <p className="text-gray-700">
+                  Are you sure you want to approve farmer <span className="font-medium">{selectedFarmer.name}</span>? This will change their status to APPROVED.
+                </p>
+              </div>
+              <div className="px-6 py-3 bg-gray-50 flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowApproveModal(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 focus:outline-none"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmApproveFarmer}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none"
+                >
+                  Approve
                 </button>
               </div>
             </div>

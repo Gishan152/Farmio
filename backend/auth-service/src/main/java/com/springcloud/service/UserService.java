@@ -110,4 +110,11 @@ public class UserService {
         userRepository.save(user);
         
     }
+
+    public void approveUser(UserRequest request) {
+        var user = userRepository.findByUsername(request.username())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setStatus("APPROVED");
+        userRepository.save(user);
+    }
 }
