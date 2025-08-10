@@ -88,4 +88,11 @@ public class AnalyticServiceController {
         userAnalyticsService.approveUser(request);
         return ResponseEntity.noContent().build();
     }
+
+    //activate the user (specifically for buyers)
+    @PostMapping("/admin/users/activate")
+    public ResponseEntity<Void> activateUser(@RequestBody UserRequest request) {
+        userAnalyticsService.activateUser(request);
+        return ResponseEntity.noContent().build();
+    }
 }

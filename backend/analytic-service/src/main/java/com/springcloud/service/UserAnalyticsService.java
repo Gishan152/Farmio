@@ -108,6 +108,28 @@ public class UserAnalyticsService {
         }
     }
 
+    public void activateUser(UserRequest request) {
+        try {
+            // First, find the user by ID to get the username
+            List<UserDTO> users = fetchAllUsers();
+            UserDTO user = users.stream()
+                    .filter(u -> u.getId().equals(request.userId()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("User with ID " + request.userId() + " not found"));
+            
+            // Create auth-service UserRequest with username
+            com.springcloud.dto.AuthUserRequest authRequest = new com.springcloud.dto.AuthUserRequest(user.getUsername());
+            
+            // Call the auth-service activate endpoint
+            String activateUrl = authServiceUrl.replace("/all-dto", "/activate");
+            restTemplate.postForEntity(activateUrl, authRequest, Void.class);
+            System.out.println("User activated successfully: " + user.getUsername());
+        } catch (RestClientException e) {
+            System.err.println("Error activating user: " + e.getMessage());
+            throw new RuntimeException("Failed to activate user", e);
+        }
+    }
+
     public Map<String, Long> getUserCountByRole() {
         List<UserDTO> users = fetchAllUsers();
         return users.stream()

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import UserManagement from '../../../components/templates/UserManagement';
-import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES, deactivateUser } from '../../../Utils/roleUtils';
+import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES, deactivateUser, activateUser } from '../../../Utils/roleUtils';
 
 // Buyer icon
 const BuyerIcon = () => (
@@ -107,8 +107,14 @@ const BuyerManagement = () => {
   // State for modals
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showActivateModal, setShowActivateModal] = useState(false);
   const [selectedBuyer, setSelectedBuyer] = useState(null);
   const [activeTab, setActiveTab] = useState('profile');
+  
+  // State for success/error messages
+  const [showMessage, setShowMessage] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('success');
   
   // State for API data
   const [buyers, setBuyers] = useState([]);
@@ -139,6 +145,21 @@ const BuyerManagement = () => {
     fetchBuyers();
   }, []);
 
+  // Helper function to show messages
+  const showSuccessMessage = (msg) => {
+    setMessage(msg);
+    setMessageType('success');
+    setShowMessage(true);
+    setTimeout(() => setShowMessage(false), 3000);
+  };
+
+  const showErrorMessage = (msg) => {
+    setMessage(msg);
+    setMessageType('error');
+    setShowMessage(true);
+    setTimeout(() => setShowMessage(false), 5000);
+  };
+
   // Handle view buyer details
   const handleViewBuyer = (buyer) => {
     setSelectedBuyer(buyer);
@@ -163,20 +184,48 @@ const BuyerManagement = () => {
       setBuyers(prevBuyers => 
         prevBuyers.map(buyer => 
           buyer.id === selectedBuyer.id 
-            ? { ...buyer, status: 'REJECTED' }
+            ? { ...buyer, status: 'DEACTIVATED' }
             : buyer
         )
       );
       
       setShowDeleteModal(false);
-      console.log('User deactivated successfully');
-      
-      // Optionally show a success message
-      alert('User deactivated successfully');
+      showSuccessMessage(`Buyer ${selectedBuyer.name} has been deactivated successfully!`);
       
     } catch (error) {
       console.error('Failed to deactivate user:', error);
-      alert('Failed to deactivate user. Please try again.');
+      showErrorMessage('Failed to deactivate buyer. Please try again.');
+    }
+  };
+
+  // Handle activate buyer
+  const handleActivateBuyer = (buyer) => {
+    setSelectedBuyer(buyer);
+    setShowActivateModal(true);
+  };
+
+  // Confirm activate buyer
+  const confirmActivateBuyer = async () => {
+    try {
+      console.log(`Activating buyer: ${selectedBuyer.name} (ID: ${selectedBuyer.id})`);
+      
+      await activateUser(selectedBuyer.id);
+      
+      // Update the local state to reflect the change
+      setBuyers(prevBuyers => 
+        prevBuyers.map(buyer => 
+          buyer.id === selectedBuyer.id 
+            ? { ...buyer, status: 'Active' }
+            : buyer
+        )
+      );
+      
+      setShowActivateModal(false);
+      showSuccessMessage(`Buyer ${selectedBuyer.name} has been activated successfully!`);
+      
+    } catch (error) {
+      console.error('Failed to activate user:', error);
+      showErrorMessage('Failed to activate buyer. Please try again.');
     }
   };
 
@@ -196,6 +245,8 @@ const BuyerManagement = () => {
             ? 'bg-green-100 text-green-800' 
             : row.status === 'PENDING' 
             ? 'bg-yellow-100 text-yellow-800'
+            : row.status === 'DEACTIVATED'
+            ? 'bg-gray-100 text-gray-800'
             : 'bg-red-100 text-red-800'
         }`}>
           {row.status}
@@ -219,17 +270,32 @@ const BuyerManagement = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
           </button>
-          <button
-            className="text-red-600 hover:text-red-800"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteBuyer(row);
-            }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+          {row.status === 'DEACTIVATED' ? (
+            <button
+              className="text-green-600 hover:text-green-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleActivateBuyer(row);
+              }}
+              title="Activate Buyer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </button>
+          ) : (
+            <button
+              className="text-red-600 hover:text-red-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteBuyer(row);
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          )}
         </div>
       )
     }
@@ -243,7 +309,8 @@ const BuyerManagement = () => {
       options: [
         { label: 'Approved', value: 'APPROVED' },
         { label: 'Pending', value: 'PENDING' },
-        { label: 'Rejected', value: 'REJECTED' }
+        { label: 'Rejected', value: 'REJECTED' },
+        { label: 'Deactivated', value: 'DEACTIVATED' }
       ]
     }
   ];
@@ -293,6 +360,40 @@ const BuyerManagement = () => {
 
   return (
     <>
+      {/* Success/Error Message Toast */}
+      {showMessage && (
+        <div className={`fixed top-4 right-4 z-50 max-w-md w-full ${
+          messageType === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white p-4 rounded-lg shadow-lg transition-all duration-300`}>
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              {messageType === 'success' ? (
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              )}
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">{message}</p>
+            </div>
+            <div className="ml-auto pl-3">
+              <button
+                onClick={() => setShowMessage(false)}
+                className="text-white hover:text-gray-200"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* API Status Notification */}
       {error && buyers.length > 0 && (
         <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
@@ -496,6 +597,39 @@ const BuyerManagement = () => {
               >
                 Delete
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Activate Confirmation Modal */}
+      {showActivateModal && selectedBuyer && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowActivateModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Confirm Activation</h3>
+              </div>
+              <div className="px-6 py-4">
+                <p className="text-gray-700">
+                  Are you sure you want to activate buyer <span className="font-medium">{selectedBuyer.name}</span>? This will change their status to Active.
+                </p>
+              </div>
+              <div className="px-6 py-3 bg-gray-50 flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowActivateModal(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 focus:outline-none"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmActivateBuyer}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none"
+                >
+                  Activate
+                </button>
+              </div>
             </div>
           </div>
         </div>
