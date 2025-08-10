@@ -46,4 +46,11 @@ public class UserController {
         userService.approveUser(request);
         return ResponseEntity.noContent().build();
     }
+
+    //activate the user (specifically for buyers to set status to "Active")
+    @PostMapping("/activate")
+    public ResponseEntity<Void> activateUser(@RequestBody UserRequest request) {
+        userService.activateUser(request);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -117,4 +117,11 @@ public class UserService {
         user.setStatus("APPROVED");
         userRepository.save(user);
     }
+
+    public void activateUser(UserRequest request) {
+        var user = userRepository.findByUsername(request.username())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setStatus("Active");
+        userRepository.save(user);
+    }
 }

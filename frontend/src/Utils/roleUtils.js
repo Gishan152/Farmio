@@ -184,6 +184,34 @@ export const approveUser = async (userId) => {
 };
 
 /**
+ * Activate a deactivated user (specifically for buyers to set status to "Active")
+ * @param {number} userId - User ID to activate
+ * @returns {Promise<boolean>} Success status
+ */
+export const activateUser = async (userId) => {
+  try {
+    const response = await fetch('http://localhost:8080/api/analytics/admin/users/activate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId: userId })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.text();
+    console.log('Activate response:', result);
+    return true;
+  } catch (error) {
+    console.error('Error activating user:', error);
+    throw error;
+  }
+};
+
+/**
  * Get sample data for a specific role (fallback when API fails)
  * @param {string} role - Role constant
  * @returns {Array} Sample user data

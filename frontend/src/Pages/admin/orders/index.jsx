@@ -3,6 +3,28 @@ import DashboardLayout from '../../../components/layout/DashboardLayout';
 import Card from '../../../components/ui/Card';
 import Table from '../../../components/ui/Table';
 import StatCard from '../../../components/ui/StatCard';
+import { 
+  fetchAllOrders, 
+  getOrderCount, 
+  getOrderCountByStatus, 
+  getOrdersByStatus,
+  formatOrderStatus, 
+  getStatusColor 
+} from '../../../Utils/orderUtils';
+import {
+  fetchAllCrops,
+  createCropLookupMap,
+  getProductNamesFromOrder,
+  getProductDetailsFromOrder,
+  getFarmNameFromOrder,
+  getFarmerDetailsFromOrder,
+  getDetailedCropInfoFromOrder
+} from '../../../Utils/cropUtils';
+import {
+  fetchAllUsers,
+  createUserLookupMap,
+  getBuyerInfo
+} from '../../../Utils/userUtils';
 
 // Icons
 const OrdersIcon = () => (
@@ -36,173 +58,9 @@ const FilterIcon = () => (
 );
 
 
-// Move orders array outside the component to avoid new reference on every render
-const orders = [
-  {
-    id: 'ORD-10045',
-    customer: 'Fresh Foods Market',
-    buyer: 'Emily Clark',
-    date: '2023-06-20',
-    total: '$1,245.80',
-    items: 8,
-    status: 'Pending',
-    paymentStatus: 'Paid',
-    deliveryDate: '2023-06-25',
-    transport: 'Fast Track Logistics',
-    orderDetails: [
-      { product: 'Organic Tomatoes', quantity: 50, unit: 'kg', price: '$4.50/kg', total: '$225.00' },
-      { product: 'Fresh Lettuce', quantity: 40, unit: 'kg', price: '$3.20/kg', total: '$128.00' },
-      { product: 'Carrots', quantity: 60, unit: 'kg', price: '$2.75/kg', total: '$165.00' },
-      { product: 'Red Onions', quantity: 45, unit: 'kg', price: '$3.10/kg', total: '$139.50' },
-      { product: 'Bell Peppers', quantity: 35, unit: 'kg', price: '$4.80/kg', total: '$168.00' },
-      { product: 'Cucumbers', quantity: 55, unit: 'kg', price: '$2.90/kg', total: '$159.50' },
-      { product: 'Potatoes', quantity: 80, unit: 'kg', price: '$1.95/kg', total: '$156.00' },
-      { product: 'Green Beans', quantity: 30, unit: 'kg', price: '$3.50/kg', total: '$105.00' }
-    ]
-  },
-  {
-    id: 'ORD-10044',
-    customer: 'Farm to Table Restaurants',
-    buyer: 'Thomas Wright',
-    date: '2023-06-20',
-    total: '$876.25',
-    items: 12,
-    status: 'Processing',
-    paymentStatus: 'Paid',
-    deliveryDate: '2023-06-24',
-    transport: 'Green Mile Transports',
-    orderDetails: [
-      { product: 'Organic Apples', quantity: 35, unit: 'kg', price: '$3.75/kg', total: '$131.25' },
-      { product: 'Free-Range Eggs', quantity: 40, unit: 'dozen', price: '$4.50/dozen', total: '$180.00' },
-      { product: 'Honey', quantity: 15, unit: 'liter', price: '$12.00/liter', total: '$180.00' },
-      { product: 'Fresh Basil', quantity: 10, unit: 'kg', price: '$8.50/kg', total: '$85.00' },
-      { product: 'Cherry Tomatoes', quantity: 20, unit: 'kg', price: '$5.20/kg', total: '$104.00' },
-      { product: 'Zucchini', quantity: 25, unit: 'kg', price: '$3.10/kg', total: '$77.50' },
-      { product: 'Sweet Corn', quantity: 30, unit: 'dozen', price: '$3.95/dozen', total: '$118.50' }
-    ]
-  },
-  {
-    id: 'ORD-10043',
-    customer: 'Wholesome Foods Co-op',
-    buyer: 'Samantha Green',
-    date: '2023-06-19',
-    total: '$412.60',
-    items: 5,
-    status: 'Shipped',
-    paymentStatus: 'Paid',
-    deliveryDate: '2023-06-22',
-    transport: 'Rural Routes Delivery',
-    orderDetails: [
-      { product: 'Strawberries', quantity: 20, unit: 'kg', price: '$6.80/kg', total: '$136.00' },
-      { product: 'Blueberries', quantity: 15, unit: 'kg', price: '$8.50/kg', total: '$127.50' },
-      { product: 'Blackberries', quantity: 10, unit: 'kg', price: '$7.90/kg', total: '$79.00' },
-      { product: 'Raspberries', quantity: 8, unit: 'kg', price: '$8.75/kg', total: '$70.00' }
-    ]
-  },
-  {
-    id: 'ORD-10042',
-    customer: 'Green Smoothie Cafes',
-    buyer: 'Daniel Brown',
-    date: '2023-06-19',
-    total: '$198.75',
-    items: 3,
-    status: 'Delivered',
-    paymentStatus: 'Paid',
-    deliveryDate: '2023-06-21',
-    transport: 'Fast Track Logistics',
-    orderDetails: [
-      { product: 'Organic Spinach', quantity: 25, unit: 'kg', price: '$4.25/kg', total: '$106.25' },
-      { product: 'Kale', quantity: 15, unit: 'kg', price: '$3.50/kg', total: '$52.50' },
-      { product: 'Fresh Mint', quantity: 10, unit: 'kg', price: '$4.00/kg', total: '$40.00' }
-    ]
-  },
-  {
-    id: 'ORD-10041',
-    customer: 'Sunrise Grocery Store',
-    buyer: 'Jennifer Lee',
-    date: '2023-06-18',
-    total: '$1,567.90',
-    items: 15,
-    status: 'Delivered',
-    paymentStatus: 'Paid',
-    deliveryDate: '2023-06-20',
-    transport: 'Swift Stream Logistics',
-    orderDetails: [
-      { product: 'Organic Potatoes', quantity: 100, unit: 'kg', price: '$2.10/kg', total: '$210.00' },
-      { product: 'Onions', quantity: 80, unit: 'kg', price: '$1.75/kg', total: '$140.00' },
-      { product: 'Garlic', quantity: 30, unit: 'kg', price: '$5.50/kg', total: '$165.00' },
-      { product: 'Sweet Potatoes', quantity: 70, unit: 'kg', price: '$2.80/kg', total: '$196.00' },
-      { product: 'Broccoli', quantity: 50, unit: 'kg', price: '$3.40/kg', total: '$170.00' },
-      { product: 'Cauliflower', quantity: 40, unit: 'kg', price: '$3.60/kg', total: '$144.00' },
-      { product: 'Cabbage', quantity: 60, unit: 'kg', price: '$2.20/kg', total: '$132.00' },
-      { product: 'Eggplant', quantity: 35, unit: 'kg', price: '$3.30/kg', total: '$115.50' },
-      { product: 'Squash', quantity: 45, unit: 'kg', price: '$2.90/kg', total: '$130.50' },
-      { product: 'Mushrooms', quantity: 25, unit: 'kg', price: '$6.60/kg', total: '$165.00' }
-    ]
-  },
-  {
-    id: 'ORD-10040',
-    customer: 'Fresh Foods Market',
-    buyer: 'Emily Clark',
-    date: '2023-06-17',
-    total: '$920.45',
-    items: 7,
-    status: 'Cancelled',
-    paymentStatus: 'Refunded',
-    deliveryDate: 'N/A',
-    transport: 'N/A',
-    orderDetails: [
-      { product: 'Organic Apples', quantity: 60, unit: 'kg', price: '$3.75/kg', total: '$225.00' },
-      { product: 'Organic Pears', quantity: 45, unit: 'kg', price: '$4.10/kg', total: '$184.50' },
-      { product: 'Organic Bananas', quantity: 55, unit: 'kg', price: '$2.95/kg', total: '$162.25' },
-      { product: 'Organic Oranges', quantity: 50, unit: 'kg', price: '$3.50/kg', total: '$175.00' },
-      { product: 'Organic Grapes', quantity: 35, unit: 'kg', price: '$4.95/kg', total: '$173.25' }
-    ]
-  },
-  {
-    id: 'ORD-10039',
-    customer: 'Farm to Table Restaurants',
-    buyer: 'Thomas Wright',
-    date: '2023-06-17',
-    total: '$634.15',
-    items: 9,
-    status: 'Delivered',
-    paymentStatus: 'Paid',
-    deliveryDate: '2023-06-19',
-    transport: 'Local Haul Co-op',
-    orderDetails: [
-      { product: 'Fresh Rosemary', quantity: 8, unit: 'kg', price: '$9.50/kg', total: '$76.00' },
-      { product: 'Fresh Thyme', quantity: 7, unit: 'kg', price: '$8.75/kg', total: '$61.25' },
-      { product: 'Fresh Sage', quantity: 5, unit: 'kg', price: '$9.20/kg', total: '$46.00' },
-      { product: 'Fresh Oregano', quantity: 6, unit: 'kg', price: '$8.90/kg', total: '$53.40' },
-      { product: 'Fresh Parsley', quantity: 10, unit: 'kg', price: '$7.50/kg', total: '$75.00' },
-      { product: 'Fresh Cilantro', quantity: 9, unit: 'kg', price: '$7.80/kg', total: '$70.20' },
-      { product: 'Fresh Chives', quantity: 7, unit: 'kg', price: '$8.60/kg', total: '$60.20' },
-      { product: 'Fresh Mint', quantity: 12, unit: 'kg', price: '$8.10/kg', total: '$97.20' },
-      { product: 'Fresh Dill', quantity: 10, unit: 'kg', price: '$9.50/kg', total: '$95.00' }
-    ]
-  },
-  {
-    id: 'ORD-10038',
-    customer: 'Wholesome Foods Co-op',
-    buyer: 'Samantha Green',
-    date: '2023-06-16',
-    total: '$362.30',
-    items: 4,
-    status: 'Delivered',
-    paymentStatus: 'Paid',
-    deliveryDate: '2023-06-18',
-    transport: 'Rural Routes Delivery',
-    orderDetails: [
-      { product: 'Local Honey', quantity: 15, unit: 'liter', price: '$12.50/liter', total: '$187.50' },
-      { product: 'Maple Syrup', quantity: 10, unit: 'liter', price: '$14.80/liter', total: '$148.00' },
-      { product: 'Beeswax', quantity: 5, unit: 'kg', price: '$5.40/kg', total: '$27.00' }
-    ]
-  }
-];
-
 const OrdersManagement = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
@@ -210,35 +68,92 @@ const OrdersManagement = () => {
   const [selectedTab, setSelectedTab] = useState('all');
   const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [error, setError] = useState(null);
+  const [crops, setCrops] = useState([]);
+  const [cropLookupMap, setCropLookupMap] = useState({});
+  const [users, setUsers] = useState([]);
+  const [userLookupMap, setUserLookupMap] = useState({});
 
-  // Simulate loading
+  // Load orders and crops from API
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setFilteredData(orders);
-    }, 1000);
-    return () => clearTimeout(timer);
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        // Load orders, crops, and users in parallel
+        const [ordersData, cropsData, usersData] = await Promise.all([
+          fetchAllOrders(),
+          fetchAllCrops(),
+          fetchAllUsers()
+        ]);
+        
+        setOrders(ordersData);
+        setFilteredData(ordersData);
+        setCrops(cropsData);
+        setUsers(usersData);
+        
+        // Create lookup maps for quick access
+        const cropLookupMap = createCropLookupMap(cropsData);
+        const userLookupMap = createUserLookupMap(usersData);
+        setCropLookupMap(cropLookupMap);
+        setUserLookupMap(userLookupMap);
+        
+      } catch (error) {
+        console.error('Error loading data:', error);
+        setError('Failed to load data. Please try again.');
+        setOrders([]);
+        setFilteredData([]);
+        setCrops([]);
+        setUsers([]);
+        setCropLookupMap({});
+        setUserLookupMap({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   // Handle search
   useEffect(() => {
-    if (orders) {
+    if (orders && orders.length > 0) {
       let results = orders.filter(order => {
-        return Object.keys(order).some(key => 
-          order[key].toString().toLowerCase().includes(searchTerm.toLowerCase())
+        const searchableFields = [
+          order.orderId?.toString() || '',
+          order.paymentId || '',
+          order.status || '',
+          order.total?.toString() || '',
+          order.farmerId?.toString() || '',
+          order.buyerId?.toString() || ''
+        ];
+        
+        return searchableFields.some(field => 
+          field.toLowerCase().includes(searchTerm.toLowerCase())
         );
       });
   
       // Apply tab filtering
       if (selectedTab !== 'all') {
-        results = results.filter(order => order.status.toLowerCase() === selectedTab);
+        // Map frontend tab names to backend enum values
+        const statusMapping = {
+          'pending': 'PENDING',
+          'processing': 'PROCESSING',
+          'shipped': 'IN_TRANSPORT',
+          'delivered': 'DELIVERED',
+          'cancelled': 'CANCELLED'
+        };
+        const backendStatus = statusMapping[selectedTab];
+        if (backendStatus) {
+          results = results.filter(order => order.status === backendStatus);
+        }
       }
       
       setFilteredData(results);
+    } else {
+      setFilteredData([]);
     }
   }, [searchTerm, selectedTab, orders]);
 
@@ -246,11 +161,11 @@ const OrdersManagement = () => {
   const getStatusCounts = () => {
     const counts = {
       all: orders.length,
-      pending: orders.filter(o => o.status === 'Pending').length,
-      processing: orders.filter(o => o.status === 'Processing').length,
-      shipped: orders.filter(o => o.status === 'Shipped').length,
-      delivered: orders.filter(o => o.status === 'Delivered').length,
-      cancelled: orders.filter(o => o.status === 'Cancelled').length
+      pending: orders.filter(o => o.status === 'PENDING').length,
+      processing: orders.filter(o => o.status === 'PROCESSING').length,
+      shipped: orders.filter(o => o.status === 'IN_TRANSPORT').length,
+      delivered: orders.filter(o => o.status === 'DELIVERED').length,
+      cancelled: orders.filter(o => o.status === 'CANCELLED').length
     };
     return counts;
   };
@@ -328,72 +243,163 @@ const OrdersManagement = () => {
   // Order status badge
   const OrderStatusBadge = ({ status }) => {
     const statusStyles = {
-      'Delivered': 'bg-pastel-green text-green-800',
-      'Processing': 'bg-pastel-blue text-blue-800',
-      'Shipped': 'bg-purple-100 text-purple-800',
-      'Pending': 'bg-pastel-yellow text-yellow-800',
-      'Cancelled': 'bg-pastel-red text-red-800',
+      'DELIVERED': 'bg-pastel-green text-green-800',
+      'PROCESSING': 'bg-pastel-blue text-blue-800',
+      'IN_TRANSPORT': 'bg-purple-100 text-purple-800',
+      'AWAITING_PICKUP': 'bg-indigo-100 text-indigo-800',
+      'PENDING': 'bg-pastel-yellow text-yellow-800',
+      'CANCELLED': 'bg-pastel-red text-red-800',
     };
+    
+    const displayStatus = formatOrderStatus(status);
     
     return (
       <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status] || 'bg-gray-200 text-gray-800'}`}>
-        {status}
+        {displayStatus}
       </span>
     );
   };
 
   // Order Details Component
   const OrderDetails = ({ order }) => {
-    if (!order.orderDetails || order.orderDetails.length === 0) {
+    if (!order.items || order.items.length === 0) {
       return (
         <div className="p-4 text-center text-gray-500">
-          No order details available for this order.
+          No order items available for this order.
         </div>
       );
     }
 
+    // Get detailed crop information for all order items
+    const detailedItems = getDetailedCropInfoFromOrder(order.items, crops);
+
     return (
-      <div className="p-4 bg-gray-50">
-        <div className="mb-3 flex justify-between items-center">
+      <div className="p-6 bg-gray-50 max-h-96 overflow-y-auto">
+        <div className="mb-4 flex justify-between items-center">
           <div>
-            <h4 className="text-sm font-medium text-gray-700">Order Details - {order.id}</h4>
-            <p className="text-xs text-gray-500">Customer: {order.customer} | Ordered: {order.date}</p>
+            <h4 className="text-lg font-medium text-gray-700">Order Details - #{order.orderId}</h4>
+            <p className="text-sm text-gray-500">Payment ID: {order.paymentId} | Buyer ID: {order.buyerId}</p>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-xs text-gray-500">Status:</span>
+            <span className="text-sm text-gray-500">Status:</span>
             <OrderStatusBadge status={order.status} />
           </div>
         </div>
-        
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="text-xs text-left text-gray-500 bg-gray-100">
-                <th className="px-4 py-2">Product</th>
-                <th className="px-4 py-2">Quantity</th>
-                <th className="px-4 py-2">Unit</th>
-                <th className="px-4 py-2">Price</th>
-                <th className="px-4 py-2">Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {order.orderDetails.map((item, idx) => (
-                <tr key={idx} className="hover:bg-gray-100">
-                  <td className="px-4 py-2 font-medium">{item.product}</td>
-                  <td className="px-4 py-2">{item.quantity}</td>
-                  <td className="px-4 py-2">{item.unit}</td>
-                  <td className="px-4 py-2">{item.price}</td>
-                  <td className="px-4 py-2 font-medium">{item.total}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="font-medium text-gray-700 bg-gray-100">
-                <td colSpan="4" className="px-4 py-2 text-right">Total:</td>
-                <td className="px-4 py-2">{order.total}</td>
-              </tr>
-            </tfoot>
-          </table>
+
+        {/* Order Items with Detailed Information */}
+        <div className="space-y-4">
+          {detailedItems.map((item, idx) => (
+            <div key={idx} className="bg-white rounded-lg border border-gray-200 p-4">
+              <div className="flex flex-col lg:flex-row gap-4">
+                {/* Product Image */}
+                <div className="flex-shrink-0">
+                  {item.imageUrl ? (
+                    <img 
+                      src={item.imageUrl} 
+                      alt={item.productName}
+                      className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                      onError={(e) => {
+                        e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMiA5VjEzTTEyIDE3SDE2TTggMTdIMTJNOCAxM0gxNk04IDlIMTYiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center">
+                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+
+                {/* Product Details */}
+                <div className="flex-1">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h5 className="text-lg font-semibold text-gray-900">{item.productName}</h5>
+                      <p className="text-sm text-gray-600">{item.farm}</p>
+                      <p className="text-xs text-gray-500">{item.location}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-semibold text-gray-900">
+                        LKR {(item.quantity * item.pricePerUnit).toFixed(2)}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {item.quantity} {item.unitMeasurement} × LKR {item.pricePerUnit?.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Farm Information Grid */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                    <div>
+                      <span className="text-gray-500">Farmer ID:</span>
+                      <p className="font-medium">{item.cropInfo?.farmerId || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Rating:</span>
+                      <p className="font-medium flex items-center">
+                        {item.rating ? (
+                          <>
+                            <span className="text-yellow-500 mr-1">★</span>
+                            {item.rating}/5
+                          </>
+                        ) : 'Not rated'}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Verified:</span>
+                      <p className={`font-medium ${item.verified ? 'text-green-600' : 'text-red-600'}`}>
+                        {item.verified ? '✓ Verified' : '✗ Not verified'}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Transport:</span>
+                      <p className={`font-medium ${item.transportationAvailable ? 'text-green-600' : 'text-gray-600'}`}>
+                        {item.transportationAvailable ? 'Available' : 'Not available'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Additional Information */}
+                  <div className="mt-3 flex justify-between items-center">
+                    <div>
+                      <span className="text-xs text-gray-500">Returns:</span>
+                      <span className={`ml-1 text-xs font-medium ${item.returnsAccepted ? 'text-green-600' : 'text-gray-600'}`}>
+                        {item.returnsAccepted ? 'Accepted' : 'Not accepted'}
+                      </span>
+                    </div>
+                    
+                    {/* Badges */}
+                    {item.badges && item.badges.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {item.badges.map((badge, badgeIdx) => (
+                          <span key={badgeIdx} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                            {badge}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Order Summary */}
+        <div className="mt-6 bg-white rounded-lg border border-gray-200 p-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h5 className="text-lg font-semibold text-gray-700">Order Summary</h5>
+              <p className="text-sm text-gray-500">Transport: {order.transport || 'Not specified'}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-500">Total Amount</p>
+              <p className="text-2xl font-bold text-gray-900">
+                LKR {order.total ? order.total.toFixed(2) : '0.00'}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -404,44 +410,72 @@ const OrdersManagement = () => {
     setSelectedOrder(order);
     setShowViewModal(true);
   };
-  // Handle edit order
-  const handleEditOrder = (order) => {
-    setSelectedOrder(order);
-    setShowEditModal(true);
-  };
-  // Handle delete order
-  const handleDeleteOrder = (order) => {
-    setSelectedOrder(order);
-    setShowDeleteModal(true);
-  };
 
   // Table columns
   const columns = [
-    { accessor: 'id', header: 'Order ID' },
+    { accessor: 'orderId', header: 'Order ID' },
     { 
-      accessor: 'customer', 
-      header: 'Customer',
+      accessor: 'productName', 
+      header: 'Product(s)',
       cell: (row) => (
-        <div>
-          <div className="font-medium">{row.customer}</div>
-          <div className="text-xs text-dashboard-text-light">{row.buyer}</div>
+        <div className="max-w-xs">
+          <span className="text-sm font-medium text-gray-900">
+            {getProductNamesFromOrder(row.items, cropLookupMap)}
+          </span>
         </div>
       )
     },
-    { accessor: 'date', header: 'Order Date' },
+    { 
+      accessor: 'farm', 
+      header: 'Farmer',
+      cell: (row) => (
+        <div className="text-sm">
+          <div className="font-medium text-gray-900">
+            {getFarmNameFromOrder(row.items, cropLookupMap)}
+          </div>
+          <div className="text-xs text-gray-500">
+            ID: {row.farmerId || 'N/A'}
+          </div>
+        </div>
+      )
+    },
+    { 
+      accessor: 'buyerId', 
+      header: 'Buyer',
+      cell: (row) => {
+        const buyerInfo = getBuyerInfo(row.buyerId, userLookupMap);
+        return (
+          <div className="text-sm">
+            <div className="font-medium text-gray-900">
+              {buyerInfo.displayName}
+            </div>
+            <div className="text-xs text-gray-500">
+              {buyerInfo.email}
+            </div>
+          </div>
+        );
+      }
+    },
     { 
       accessor: 'total', 
       header: 'Total',
-      cell: (row) => <span className="font-medium">{row.total}</span>
+      cell: (row) => <span className="font-medium">LKR {row.total ? row.total.toFixed(2) : '0.00'}</span>
     },
-    { accessor: 'items', header: 'Items' },
+    { 
+      accessor: 'items', 
+      header: 'Items',
+      cell: (row) => row.items ? row.items.length : 0
+    },
     { 
       accessor: 'status', 
       header: 'Status',
       cell: (row) => <OrderStatusBadge status={row.status} />
     },
-    { accessor: 'paymentStatus', header: 'Payment' },
-    { accessor: 'deliveryDate', header: 'Delivery Date' },
+    { 
+      accessor: 'transport', 
+      header: 'Transport',
+      cell: (row) => row.transport || 'N/A'
+    },
     { 
       accessor: 'actions', 
       header: 'Actions',
@@ -454,20 +488,6 @@ const OrdersManagement = () => {
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
           </button>
-          <button
-            className="p-1.5 text-green-600 hover:bg-green-50 rounded-md transition-colors"
-            title="Edit Order"
-            onClick={e => { e.stopPropagation(); handleEditOrder(row); }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-          </button>
-          <button
-            className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-            title="Delete Order"
-            onClick={e => { e.stopPropagation(); handleDeleteOrder(row); }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-          </button>
         </div>
       )
     }
@@ -479,11 +499,23 @@ const OrdersManagement = () => {
       breadcrumbs="Orders / All Orders"
       userRole="admin"
     >
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <WarningIcon />
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error Loading Orders</h3>
+              <p className="text-sm text-red-700 mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard 
           title="New Orders"
-          value={orders.filter(o => o.status === 'Pending').length.toString()}
+          value={orders.filter(o => o.status === 'PENDING').length.toString()}
           subtitle="Awaiting processing"
           icon={<OrdersIcon />}
           color="yellow"
@@ -491,7 +523,7 @@ const OrdersManagement = () => {
         />
         <StatCard 
           title="Processing"
-          value={orders.filter(o => o.status === 'Processing').length.toString()}
+          value={orders.filter(o => o.status === 'PROCESSING').length.toString()}
           subtitle="Being prepared"
           icon={<OrdersIcon />}
           color="blue"
@@ -499,7 +531,7 @@ const OrdersManagement = () => {
         />
         <StatCard 
           title="Out for Delivery"
-          value={orders.filter(o => o.status === 'Shipped').length.toString()}
+          value={orders.filter(o => o.status === 'IN_TRANSPORT').length.toString()}
           subtitle="On the way"
           icon={<DeliveryIcon />}
           color="purple"
@@ -507,7 +539,7 @@ const OrdersManagement = () => {
         />
         <StatCard 
           title="Delivered"
-          value={orders.filter(o => o.status === 'Delivered').length.toString()}
+          value={orders.filter(o => o.status === 'DELIVERED').length.toString()}
           subtitle="This week"
           icon={<CheckIcon />}
           color="green"
@@ -678,48 +710,6 @@ const OrdersManagement = () => {
                 </button>
               </div>
               <OrderDetails order={selectedOrder} />
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Edit Order Modal */}
-      {showEditModal && selectedOrder && (
-        <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowEditModal(false)}></div>
-          <div className="relative flex items-center justify-center min-h-full p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-lg shadow-2xl">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Edit Order</h3>
-                <button onClick={() => setShowEditModal(false)} className="text-gray-400 hover:text-gray-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-              </div>
-              {/* You can add an edit form here if needed */}
-              <OrderDetails order={selectedOrder} />
-              <div className="mt-4 flex justify-end">
-                <button onClick={() => setShowEditModal(false)} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Save Changes</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Delete Order Modal */}
-      {showDeleteModal && selectedOrder && (
-        <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}></div>
-          <div className="relative flex items-center justify-center min-h-full p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-2xl">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-red-600">Delete Order</h3>
-                <button onClick={() => setShowDeleteModal(false)} className="text-gray-400 hover:text-gray-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-              </div>
-              <p className="mb-6 text-gray-700">Are you sure you want to delete order <span className="font-semibold">{selectedOrder.id}</span>? This action cannot be undone.</p>
-              <div className="flex space-x-3">
-                <button onClick={() => setShowDeleteModal(false)} className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">Cancel</button>
-                <button onClick={() => { setShowDeleteModal(false); /* Add delete logic here */ }} className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition-colors">Delete</button>
-              </div>
             </div>
           </div>
         </div>

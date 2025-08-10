@@ -99,6 +99,11 @@ const WarehouseOwnerManagement = () => {
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [activeTab, setActiveTab] = useState('details');
   
+  // State for success/error messages
+  const [showMessage, setShowMessage] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('success');
+  
   // State for API data
   const [warehouseOwners, setWarehouseOwners] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -128,6 +133,21 @@ const WarehouseOwnerManagement = () => {
     fetchWarehouseOwners();
   }, []);
 
+  // Helper function to show messages
+  const showSuccessMessage = (msg) => {
+    setMessage(msg);
+    setMessageType('success');
+    setShowMessage(true);
+    setTimeout(() => setShowMessage(false), 3000);
+  };
+
+  const showErrorMessage = (msg) => {
+    setMessage(msg);
+    setMessageType('error');
+    setShowMessage(true);
+    setTimeout(() => setShowMessage(false), 5000);
+  };
+
   // Handle view warehouse details
   const handleViewWarehouse = (warehouse) => {
     setSelectedWarehouse(warehouse);
@@ -152,20 +172,17 @@ const WarehouseOwnerManagement = () => {
       setWarehouseOwners(prevOwners => 
         prevOwners.map(owner => 
           owner.id === selectedWarehouse.id 
-            ? { ...owner, status: 'REJECTED' }
+            ? { ...owner, status: 'DEACTIVATED' }
             : owner
         )
       );
       
       setShowDeleteModal(false);
-      console.log('User deactivated successfully');
-      
-      // Optionally show a success message
-      alert('User deactivated successfully');
+      showSuccessMessage(`Warehouse owner ${selectedWarehouse.name} has been deactivated successfully!`);
       
     } catch (error) {
       console.error('Failed to deactivate user:', error);
-      alert('Failed to deactivate user. Please try again.');
+      showErrorMessage('Failed to deactivate warehouse owner. Please try again.');
     }
   };
 
@@ -192,14 +209,11 @@ const WarehouseOwnerManagement = () => {
       );
       
       setShowApproveModal(false);
-      console.log('User approved successfully');
-      
-      // Optionally show a success message
-      alert('User approved successfully');
+      showSuccessMessage(`Warehouse owner ${selectedWarehouse.name} has been approved successfully!`);
       
     } catch (error) {
       console.error('Failed to approve user:', error);
-      alert('Failed to approve user. Please try again.');
+      showErrorMessage('Failed to approve warehouse owner. Please try again.');
     }
   };
 
@@ -219,6 +233,8 @@ const WarehouseOwnerManagement = () => {
             ? 'bg-green-100 text-green-800' 
             : row.status === 'PENDING' 
             ? 'bg-yellow-100 text-yellow-800'
+            : row.status === 'DEACTIVATED'
+            ? 'bg-gray-100 text-gray-800'
             : 'bg-red-100 text-red-800'
         }`}>
           {row.status}
@@ -257,17 +273,32 @@ const WarehouseOwnerManagement = () => {
               </svg>
             </button>
           )}
-          <button
-            className="text-red-600 hover:text-red-800"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteWarehouse(row);
-            }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+          {row.status === 'DEACTIVATED' ? (
+            <button
+              className="text-blue-600 hover:text-blue-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApproveWarehouse(row);
+              }}
+              title="Activate Warehouse"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </button>
+          ) : (
+            <button
+              className="text-red-600 hover:text-red-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteWarehouse(row);
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          )}
         </div>
       )
     }
@@ -281,7 +312,8 @@ const WarehouseOwnerManagement = () => {
       options: [
         { label: 'Approved', value: 'APPROVED' },
         { label: 'Pending', value: 'PENDING' },
-        { label: 'Rejected', value: 'REJECTED' }
+        { label: 'Rejected', value: 'REJECTED' },
+        { label: 'Deactivated', value: 'DEACTIVATED' }
       ]
     }
   ];
@@ -317,6 +349,40 @@ const WarehouseOwnerManagement = () => {
 
   return (
     <>
+      {/* Success/Error Message Toast */}
+      {showMessage && (
+        <div className={`fixed top-4 right-4 z-50 max-w-md w-full ${
+          messageType === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white p-4 rounded-lg shadow-lg transition-all duration-300`}>
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              {messageType === 'success' ? (
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              )}
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">{message}</p>
+            </div>
+            <div className="ml-auto pl-3">
+              <button
+                onClick={() => setShowMessage(false)}
+                className="text-white hover:text-gray-200"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* API Status Notification */}
       {error && warehouseOwners.length > 0 && (
         <div className="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">

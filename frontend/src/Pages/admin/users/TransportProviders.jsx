@@ -398,8 +398,15 @@ const TransportProviderManagement = () => {
       accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
+          row.status === 'Active' || row.status === 'APPROVED' 
+            ? 'bg-green-100 text-green-800' 
+            : row.status === 'PENDING'
+            ? 'bg-yellow-100 text-yellow-800'
+            : row.status === 'DEACTIVATED'
+            ? 'bg-gray-100 text-gray-800'
+            : 'bg-red-100 text-red-800'
+        }`}>
           {row.status}
         </span>
       )
@@ -435,17 +442,32 @@ const TransportProviderManagement = () => {
               </svg>
             </button>
           )}
-          <button
-            className="text-red-600 hover:text-red-800"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteProvider(row);
-            }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+          {row.status === 'DEACTIVATED' ? (
+            <button
+              className="text-blue-600 hover:text-blue-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApproveProvider(row);
+              }}
+              title="Activate Provider"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </button>
+          ) : (
+            <button
+              className="text-red-600 hover:text-red-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteProvider(row);
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          )}
         </div>
       )
     }
@@ -458,7 +480,10 @@ const TransportProviderManagement = () => {
       label: 'Status',
       options: [
         { label: 'Active', value: 'Active' },
-        { label: 'Inactive', value: 'Inactive' }
+        { label: 'Inactive', value: 'Inactive' },
+        { label: 'PENDING', value: 'PENDING' },
+        { label: 'APPROVED', value: 'APPROVED' },
+        { label: 'Deactivated', value: 'DEACTIVATED' }
       ]
     },
     {
