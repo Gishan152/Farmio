@@ -14,7 +14,13 @@ public class RouterValidator {
         "/api/analytics/admin/users", 
         "/api/analytics/admin/users/count",
         "/api/analytics/admin/users/status-count",
-        "/api/analytics/admin/users/by-status"
+        "/api/analytics/admin/users/by-status",
+        "/api/analytics/admin/orders",
+        "/api/analytics/admin/orders/count",
+        "/api/analytics/admin/orders/status-count",
+        "/api/analytics/admin/orders/by-status",
+        "/api/order/get-crops",
+        "/api/user/all-dto"
     );
 
     public boolean isSecured(ServerHttpRequest request) {
