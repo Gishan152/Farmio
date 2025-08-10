@@ -83,6 +83,7 @@ export default function Sidebar() {
 					<button
 						className="flex items-center gap-4 text-gray-700 dark:text-gray-300 hover:text-red-500 transition text-sm"
 						aria-label="Logout"
+						onClick={() => navigate("/logout")}
 					>
 						<ArrowRightStartOnRectangleIcon className="h-7 w-8 flex-shrink-0" />
 						<span>Logout</span>

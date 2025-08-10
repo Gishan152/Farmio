@@ -7,12 +7,22 @@ services:
       POSTGRES_DB: userdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: farmio@1234
+      EUREKA_URL: http://eureka-server:8761/eureka
+    # host: rabbitmq
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
       - spring-net
+    profiles: ["essential", "full"]
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
 
   rabbitmq:
     image: rabbitmq:4-management
@@ -22,6 +32,14 @@ services:
     container_name: rabbitmq-farmio
     networks:
       - spring-net
+    profiles: ["essential", "full"]
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
 
   eureka-server:
     build:
@@ -31,16 +49,27 @@ services:
     hostname: eureka-server
     depends_on:
       - rabbitmq
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
     ports:
       - "8761:8761"
     networks:
       - spring-net
     volumes:
       - ./eureka-server:/app/service
+      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
+    profiles: ["essential", "full"]
     develop:
       watch:
         - action: rebuild
           path: ./eureka-server/target/*-SNAPSHOT.jar
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '0.5'
+        reservations:
+          memory: 384M
 
 #  product-service:
 #    build:
@@ -59,6 +88,7 @@ services:
 #      - spring-net
 #    volumes:
 #      - ./product-service:/app/service
+#      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
 #    develop:
 #      watch:
 #        - action: rebuild
@@ -82,32 +112,45 @@ services:
 #      - spring-net
 #    volumes:
 #      - ./product-service:/app/service
+#      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
 #    develop:
 #      watch:
 #        - action: rebuild
 #          path: ./product-service/target/*-SNAPSHOT.jar
 
-#  order-service:
-#    build:
-#      context: ./
-#      dockerfile: ./order-service/Dockerfile.dev
-#    container_name: order-service
-#    depends_on:
-#      - eureka-server
-#      - rabbitmq
-#    environment:
-#      - SERVER_PORT=8086
-#      - SPRING_APPLICATION_NAME=order-service
-#    ports:
-#      - "8086:8086"
-#    networks:
-#      - spring-net
-#    volumes:
-#      - ./order-service:/app/service
-#    develop:
-#      watch:
-#        - action: rebuild
-#          path: ./order-service/target/*-SNAPSHOT.jar
+  order-service:
+    build:
+      context: ./
+      dockerfile: ./order-service/Dockerfile.dev
+    container_name: order-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8086
+      - SPRING_APPLICATION_NAME=order-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_URL=http://eureka-server:8761/eureka
+      - RABBITMQ_HOST=rabbitmq
+    ports:
+      - "8086:8086"
+    networks:
+      - spring-net
+    volumes:
+      - ./order-service:/app/service
+      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
+    profiles: ["full"]
+    develop:
+      watch:
+        - action: rebuild
+          path: ./order-service/target/*-SNAPSHOT.jar
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '0.5'
+        reservations:
+          memory: 384M
 
 #  test-service:
 #    build:
@@ -127,6 +170,7 @@ services:
 #      - spring-net
 #    volumes:
 #      - ./test-service:/app/service
+#      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
 #    develop:
 #      watch:
 #        - action: rebuild
@@ -145,16 +189,28 @@ services:
     environment:
       - SERVER_PORT=8085
       - SPRING_APPLICATION_NAME=auth-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_URL=http://eureka-server:8761/eureka
+      - RABBITMQ_HOST=rabbitmq
     ports:
       - "8085:8085"
     networks:
       - spring-net
     volumes:
       - ./auth-service:/app/service
+      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
+    profiles: ["essential", "full"]
     develop:
       watch:
         - action: rebuild
           path: ./auth-service/target/*-SNAPSHOT.jar
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.75'
+        reservations:
+          memory: 512M
 
 
   api-gateway:
@@ -167,104 +223,164 @@ services:
       - eureka-server
 #      - product-service
       - auth-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_URL=http://eureka-server:8761/eureka
     ports:
       - "8080:8080"
     networks:
       - spring-net
     volumes:
       - ./api-gateway:/app/service
+      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
+    profiles: ["essential", "full"]
     develop:
       watch:
         - action: rebuild
           path: ./api-gateway/target/*-SNAPSHOT.jar
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.75'
+        reservations:
+          memory: 512M
 
-#  crop-listing-service:
-#    build:
-#      context: ./
-#      dockerfile: ./crop-listing-service/Dockerfile.dev
-#    container_name: crop-listing-service
-#    depends_on:
-#      - eureka-server
-#      - rabbitmq
-#    environment:
-#      - SERVER_PORT=8087
-#      - SPRING_APPLICATION_NAME=crop-listing-service
-#    ports:
-#      - "8087:8087"
-#    networks:
-#      - spring-net
-#    volumes:
-#      - ./crop-listing-service:/app/service
-#    develop:
-#      watch:
-#        - action: rebuild
-#          path: ./crop-listing-service/target/*-SNAPSHOT.jar
+  crop-listing-service:
+    build:
+      context: ./
+      dockerfile: ./crop-listing-service/Dockerfile.dev
+    container_name: crop-listing-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8087
+      - SPRING_APPLICATION_NAME=crop-listing-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_URL=http://eureka-server:8761/eureka
+      - RABBITMQ_HOST=rabbitmq
+    ports:
+      - "8087:8087"
+    networks:
+      - spring-net
+    volumes:
+      - ./crop-listing-service:/app/service
+      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
+    profiles: ["full"]
+    develop:
+      watch:
+        - action: rebuild
+          path: ./crop-listing-service/target/*-SNAPSHOT.jar
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '0.5'
+        reservations:
+          memory: 384M
 
-#  waste-service:
-#    build:
-#      context: ./
-#      dockerfile: ./waste-service/Dockerfile.dev
-#    container_name: waste-service
-#    depends_on:
-#      - eureka-server
-#      - rabbitmq
-#    environment:
-#      - SERVER_PORT=8088
-#      - SPRING_APPLICATION_NAME=waste-service
-#    ports:
-#      - "8088:8088"
-#    networks:
-#      - spring-net
-#    volumes:
-#      - ./waste-service:/app/service
-#    develop:
-#      watch:
-#        - action: rebuild
-#          path: ./waste-service/target/*-SNAPSHOT.jar
-#  transport-service:
-#    build:
-#      context: ./
-#      dockerfile: ./transport-service/Dockerfile.dev
-#    container_name: transport-service
-#    depends_on:
-#      - eureka-server
-#      - rabbitmq
-#    environment:
-#      - SERVER_PORT=8089
-#      - SPRING_APPLICATION_NAME=transport-service
-#    ports:
-#      - "8089:8089"
-#    networks:
-#      - spring-net
-#    volumes:
-#      - ./transport-service:/app/service
-#    develop:
-#      watch:
-#        - action: rebuild
-#          path: ./transport-service/target/*-SNAPSHOT.jar
-#
-#  warehouse-service:
-#    build:
-#      context: ./
-#      dockerfile: ./warehouse-service/Dockerfile.dev
-#    container_name: warehouse-service
-#    depends_on:
-#      - eureka-server
-#      - rabbitmq
-#    environment:
-#      - SERVER_PORT=8090
-#      - SPRING_APPLICATION_NAME=warehouse-service
-#    ports:
-#      - "8090:8090"
-#    networks:
-#      - spring-net
-#    volumes:
-#      - ./warehouse-service:/app/service
-#    develop:
-#      watch:
-#        - action: rebuild
-#          path: ./warehouse-service/target/*-SNAPSHOT.jar
-#
+  waste-service:
+    build:
+      context: ./
+      dockerfile: ./waste-service/Dockerfile.dev
+    container_name: waste-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8088
+      - SPRING_APPLICATION_NAME=waste-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_URL=http://eureka-server:8761/eureka
+      - RABBITMQ_HOST=rabbitmq
+    ports:
+      - "8088:8088"
+    networks:
+      - spring-net
+    volumes:
+      - ./waste-service:/app/service
+      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
+    profiles: ["full"]
+    develop:
+      watch:
+        - action: rebuild
+          path: ./waste-service/target/*-SNAPSHOT.jar
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+  transport-service:
+    build:
+      context: ./
+      dockerfile: ./transport-service/Dockerfile.dev
+    container_name: transport-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8089
+      - SPRING_APPLICATION_NAME=transport-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_URL=http://eureka-server:8761/eureka
+      - RABBITMQ_HOST=rabbitmq
+    ports:
+      - "8089:8089"
+    networks:
+      - spring-net
+    volumes:
+      - ./transport-service:/app/service
+      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
+    profiles: ["full"]
+    develop:
+      watch:
+        - action: rebuild
+          path: ./transport-service/target/*-SNAPSHOT.jar
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+
+  warehouse-service:
+    build:
+      context: ./
+      dockerfile: ./warehouse-service/Dockerfile.dev
+    container_name: warehouse-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8090
+      - SPRING_APPLICATION_NAME=warehouse-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_URL=http://eureka-server:8761/eureka
+      - RABBITMQ_HOST=rabbitmq
+    ports:
+      - "8090:8090"
+    networks:
+      - spring-net
+    volumes:
+      - ./warehouse-service:/app/service
+      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
+    profiles: ["full"]
+    develop:
+      watch:
+        - action: rebuild
+          path: ./warehouse-service/target/*-SNAPSHOT.jar
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+
   analytic-service:
     build:
       context: ./
@@ -276,61 +392,97 @@ services:
     environment:
       - SERVER_PORT=8091
       - SPRING_APPLICATION_NAME=analytic-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_URL=http://eureka-server:8761/eureka
+      - RABBITMQ_HOST=rabbitmq
     ports:
       - "8091:8091"
     networks:
       - spring-net
     volumes:
       - ./analytic-service:/app/service
+      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
+    profiles: ["full"]
     develop:
       watch:
         - action: rebuild
           path: ./analytic-service/target/*-SNAPSHOT.jar
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
 
-#  chat-service:
-#    build:
-#      context: ./
-#      dockerfile: ./chat-service/Dockerfile.dev
-#    container_name: chat-service
-#    depends_on:
-#      - eureka-server
-#      - rabbitmq
-#    environment:
-#      - SERVER_PORT=8092
-#      - SPRING_APPLICATION_NAME=chat-service
-#    ports:
-#      - "8092:8092"
-#    networks:
-#      - spring-net
-#    volumes:
-#      - ./chat-service:/app/service
-#    develop:
-#      watch:
-#        - action: rebuild
-#          path: ./chat-service/target/*-SNAPSHOT.jar
-#
-#  payment-service:
-#    build:
-#      context: ./
-#      dockerfile: ./payment-service/Dockerfile.dev
-#    container_name: payment-service
-#    depends_on:
-#      - eureka-server
-#      - rabbitmq
-#    environment:
-#      - SERVER_PORT=8093
-#      - SPRING_APPLICATION_NAME=payment-service
-#    ports:
-#      - "8093:8093"
-#    networks:
-#      - spring-net
-#    volumes:
-#      - ./payment-service:/app/service
-#    develop:
-#      watch:
-#        - action: rebuild
-#          path: ./payment-service/target/*-SNAPSHOT.jar
-#
+  chat-service:
+    build:
+      context: ./
+      dockerfile: ./chat-service/Dockerfile.dev
+    container_name: chat-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8092
+      - SPRING_APPLICATION_NAME=chat-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_URL=http://eureka-server:8761/eureka
+      - RABBITMQ_HOST=rabbitmq
+    ports:
+      - "8092:8092"
+    networks:
+      - spring-net
+    volumes:
+      - ./chat-service:/app/service
+      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
+    profiles: ["full"]
+    develop:
+      watch:
+        - action: rebuild
+          path: ./chat-service/target/*-SNAPSHOT.jar
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+
+  payment-service:
+    build:
+      context: ./
+      dockerfile: ./payment-service/Dockerfile.dev
+    container_name: payment-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8093
+      - SPRING_APPLICATION_NAME=payment-service
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_URL=http://eureka-server:8761/eureka
+      - RABBITMQ_HOST=rabbitmq
+    ports:
+      - "8093:8093"
+    networks:
+      - spring-net
+    volumes:
+      - ./payment-service:/app/service
+      - ${MAVEN_CACHE_PATH}:/root/.m2:cached
+    profiles: ["full"]
+    develop:
+      watch:
+        - action: rebuild
+          path: ./payment-service/target/*-SNAPSHOT.jar
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+
 volumes:
   pgdata:
 

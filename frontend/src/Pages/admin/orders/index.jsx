@@ -209,6 +209,10 @@ const OrdersManagement = () => {
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [selectedTab, setSelectedTab] = useState('all');
   const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Simulate loading
   useEffect(() => {
