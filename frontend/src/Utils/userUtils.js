@@ -105,6 +105,16 @@ export const getUserDetailsById = (userId, userLookupMap) => {
 };
 
 /**
+ * Get buyer name from order using user lookup map
+ * @param {number|string} buyerId - The buyer ID
+ * @param {Object} userLookupMap - The user lookup map
+ * @returns {string} The buyer's name
+ */
+export const getBuyerNameFromOrder = (buyerId, userLookupMap) => {
+  return getUserNameById(buyerId, userLookupMap);
+};
+
+/**
  * Get buyer information for display in orders
  * @param {number|string} buyerId - The buyer ID
  * @param {Object} userLookupMap - The user lookup map
@@ -127,5 +137,6 @@ export default {
   createUserLookupMap,
   getUserNameById,
   getUserDetailsById,
-  getBuyerInfo
+  getBuyerInfo,
+  getBuyerNameFromOrder
 };
