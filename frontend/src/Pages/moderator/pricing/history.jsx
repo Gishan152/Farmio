@@ -11,6 +11,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import productPriceService from '../../../API/productPriceService';
 
 // Register Chart.js components
 ChartJS.register(
@@ -30,44 +31,55 @@ const PriceHistoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [periodFilter, setPeriodFilter] = useState('30days');
 
-  // Load products data
+  // Load products data from API
   useEffect(() => {
-    // Simulated data - would fetch from API in real app
-    const sriLankanProducts = [
-      { id: 1, name: 'Rice (White)', category: 'Grains' },
-      { id: 2, name: 'Rice (Red)', category: 'Grains' },
-      { id: 3, name: 'Rice (Basmati)', category: 'Grains' },
-      { id: 4, name: 'Coconut', category: 'Fruits' },
-      { id: 5, name: 'Mango', category: 'Fruits' },
-      { id: 6, name: 'Banana', category: 'Fruits' },
-      { id: 7, name: 'Pineapple', category: 'Fruits' },
-      { id: 8, name: 'Carrot', category: 'Vegetables' },
-      { id: 9, name: 'Potato', category: 'Vegetables' },
-      { id: 10, name: 'Onion', category: 'Vegetables' },
-      { id: 11, name: 'Green Chili', category: 'Vegetables' },
-      { id: 12, name: 'Tomato', category: 'Vegetables' },
-      { id: 13, name: 'Chicken', category: 'Meat' },
-      { id: 14, name: 'Beef', category: 'Meat' },
-      { id: 15, name: 'Pork', category: 'Meat' },
-      { id: 16, name: 'Fish (Thalapath)', category: 'Seafood' },
-      { id: 17, name: 'Prawn', category: 'Seafood' },
-      { id: 18, name: 'Crab', category: 'Seafood' },
-      { id: 19, name: 'Tea', category: 'Beverages' },
-      { id: 20, name: 'Coconut Oil', category: 'Oil' }
-    ];
+    const fetchProductPrices = async () => {
+      try {
+        setLoading(true);
+        // Fetch product prices from API
+        const data = await productPriceService.getAllProductPrices();
+        
+        // Map the data to match our expected format
+        const mappedProducts = data.map(price => ({
+          id: price.id,
+          name: price.productName,
+          category: price.category || 'Uncategorized',
+          minPrice: price.minPrice,
+          recommendedPrice: price.recommendedPrice,
+          maxPrice: price.maxPrice,
+          unit: price.unit || 'kg'
+        }));
 
-    setProducts(sriLankanProducts);
-    
-    if (sriLankanProducts.length > 0) {
-      setSelectedProduct(sriLankanProducts[0].id.toString());
-    }
-    
-    setLoading(false);
+        setProducts(mappedProducts);
+        
+        if (mappedProducts.length > 0) {
+          setSelectedProduct(mappedProducts[0].id.toString());
+        }
+      } catch (error) {
+        console.error('Error fetching products for price history:', error);
+        
+        // Fallback data in case of API failure
+        const fallbackProducts = [
+          { id: 1, name: 'Rice (White)', category: 'Grains' },
+          { id: 2, name: 'Rice (Red)', category: 'Grains' },
+          { id: 3, name: 'Potato', category: 'Vegetables' }
+        ];
+        setProducts(fallbackProducts);
+        
+        if (fallbackProducts.length > 0) {
+          setSelectedProduct(fallbackProducts[0].id.toString());
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProductPrices();
   }, []);
 
   // Generate chart data when product or period filter changes
   useEffect(() => {
-    if (!selectedProduct) return;
+    if (!selectedProduct || products.length === 0) return;
 
     const generateChartData = () => {
       // Get dates for the x-axis
@@ -89,24 +101,33 @@ const PriceHistoryPage = () => {
         dates.push(formattedDate);
       }
 
-      // Generate random data points with some seasonal trends
+      // Find the selected product
+      const selectedProductObj = products.find(p => p.id.toString() === selectedProduct);
+      if (!selectedProductObj) return null;
+
+      // Generate simulated data points based on actual product price
       const govPrices = [];
       const marketPrices = [];
       
-      // Get base price from product ID to make it realistic
-      const basePrice = parseInt(selectedProduct) * 20 + 50;
+      // Base prices from actual product data
+      const baseGovPrice = selectedProductObj.minPrice || 100;
+      const baseMarketPrice = selectedProductObj.recommendedPrice || 120;
       
-      // Add a seasonal fluctuation
+      // Add simulated historical fluctuations
       for (let i = 0; i <= daysToShow; i++) {
-        // Add some seasonality with sine wave
-        const seasonalFactor = Math.sin((i / daysToShow) * Math.PI) * 0.2;
-        // Add some randomness
-        const randomGov = Math.random() * 0.1 - 0.05;
-        const randomMarket = Math.random() * 0.15 - 0.05;
+        // Seasonal factor (creates a wave pattern)
+        const seasonalFactor = Math.sin((i / daysToShow) * Math.PI) * 0.15;
+        
+        // Add slight randomness to make it look realistic
+        const randomGov = Math.random() * 0.08 - 0.04;
+        const randomMarket = Math.random() * 0.12 - 0.05;
+        
+        // For earlier dates, make prices slightly different to show trends
+        const dateFactor = (daysToShow - i) / daysToShow * 0.1; // Max 10% different for oldest date
         
         // Calculate the prices with seasonal and random components
-        const govPrice = basePrice * (1 + seasonalFactor + randomGov);
-        const marketPrice = govPrice * (1.15 + randomMarket); // Market price is usually higher
+        const govPrice = baseGovPrice * (1 + seasonalFactor + randomGov - dateFactor);
+        const marketPrice = baseMarketPrice * (1 + seasonalFactor + randomMarket - dateFactor * 0.8);
         
         govPrices.push(govPrice.toFixed(2));
         marketPrices.push(marketPrice.toFixed(2));
@@ -116,7 +137,7 @@ const PriceHistoryPage = () => {
         labels: dates,
         datasets: [
           {
-            label: 'Government Price (LKR)',
+            label: 'Min Price (LKR)',
             data: govPrices,
             borderColor: 'rgb(75, 192, 192)',
             backgroundColor: 'rgba(75, 192, 192, 0.5)',
@@ -134,7 +155,7 @@ const PriceHistoryPage = () => {
     };
 
     setChartData(generateChartData());
-  }, [selectedProduct, periodFilter]);
+  }, [selectedProduct, periodFilter, products]);
 
   const handleProductChange = (e) => {
     setSelectedProduct(e.target.value);
@@ -247,30 +268,45 @@ const PriceHistoryPage = () => {
               Key Statistics
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="border rounded-lg p-4 bg-pastel-blue bg-opacity-30">
-                <div className="text-sm text-gray-600 mb-1">Current Government Price</div>
-                <div className="text-2xl font-bold text-blue-800">
-                  LKR {(parseInt(selectedProduct) * 20 + 50).toFixed(2)}
-                </div>
-              </div>
-              <div className="border rounded-lg p-4 bg-pastel-green bg-opacity-30">
-                <div className="text-sm text-gray-600 mb-1">Current Market Price</div>
-                <div className="text-2xl font-bold text-farmio-dark">
-                  LKR {(parseInt(selectedProduct) * 20 + 50 * 1.15).toFixed(2)}
-                </div>
-              </div>
-              <div className="border rounded-lg p-4 bg-pastel-yellow bg-opacity-30">
-                <div className="text-sm text-gray-600 mb-1">Price Differential</div>
-                <div className="text-2xl font-bold text-yellow-800">
-                  {(15).toFixed(2)}%
-                </div>
-              </div>
-              <div className="border rounded-lg p-4 bg-pastel-purple bg-opacity-30">
-                <div className="text-sm text-gray-600 mb-1">30-Day Price Change</div>
-                <div className="text-2xl font-bold text-purple-800">
-                  +{(Math.random() * 8 + 2).toFixed(2)}%
-                </div>
-              </div>
+              {selectedProduct && products.length > 0 && (() => {
+                const product = products.find(p => p.id.toString() === selectedProduct) || {};
+                const minPrice = product.minPrice || 0;
+                const marketPrice = product.recommendedPrice || 0;
+                const maxPrice = product.maxPrice || 0;
+                const priceDiff = marketPrice > 0 ? ((marketPrice - minPrice) / minPrice * 100).toFixed(2) : "0.00";
+                // Calculate simulated 30-day change (between 2% and 10%)
+                const priceChange = (Math.sin(product.id * 0.5) * 4 + 6).toFixed(2);
+                const unit = product.unit || 'kg';
+                
+                return (
+                  <>
+                    <div className="border rounded-lg p-4 bg-pastel-blue bg-opacity-30">
+                      <div className="text-sm text-gray-600 mb-1">Minimum Price</div>
+                      <div className="text-2xl font-bold text-blue-800">
+                        LKR {minPrice.toFixed(2)}/{unit}
+                      </div>
+                    </div>
+                    <div className="border rounded-lg p-4 bg-pastel-green bg-opacity-30">
+                      <div className="text-sm text-gray-600 mb-1">Recommended Price</div>
+                      <div className="text-2xl font-bold text-farmio-dark">
+                        LKR {marketPrice.toFixed(2)}/{unit}
+                      </div>
+                    </div>
+                    <div className="border rounded-lg p-4 bg-pastel-yellow bg-opacity-30">
+                      <div className="text-sm text-gray-600 mb-1">Price Differential</div>
+                      <div className="text-2xl font-bold text-yellow-800">
+                        {priceDiff}%
+                      </div>
+                    </div>
+                    <div className="border rounded-lg p-4 bg-pastel-purple bg-opacity-30">
+                      <div className="text-sm text-gray-600 mb-1">30-Day Price Change</div>
+                      <div className="text-2xl font-bold text-purple-800">
+                        +{priceChange}%
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </>
