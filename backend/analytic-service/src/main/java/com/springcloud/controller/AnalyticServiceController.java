@@ -14,8 +14,10 @@ import java.util.Map;
 import com.springcloud.dto.UserDTO;
 import com.springcloud.dto.UserRequest;
 import com.springcloud.dto.OrderDTO;
+import com.springcloud.dto.ProductDTO;
 import com.springcloud.service.UserAnalyticsService;
 import com.springcloud.service.OrderAnalyticsService;
+import com.springcloud.service.ProductAnalyticsService;
 
 @RestController
 @RequestMapping("/api/analytics")
@@ -26,9 +28,20 @@ public class AnalyticServiceController {
     @Autowired
     private OrderAnalyticsService orderAnalyticsService;
 
+    @Autowired
+    private ProductAnalyticsService productAnalyticsService;
+
     @GetMapping("/hello")
     public String hello() {
         return "Hello from Analytic Service!";
+    }
+
+
+    //get the products from the crop listing service
+    @GetMapping("/admin/products")
+    public ResponseEntity<List<ProductDTO>> getAllProductsForAdmin() {
+        List<ProductDTO> products = productAnalyticsService.fetchAllProducts();
+        return ResponseEntity.ok(products);
     }
 
     // Order endpoints

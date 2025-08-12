@@ -49,6 +49,10 @@ order:
   service:
     url: http://order-service:8086/api/order/admin/all # This is the endpoint that returns Order[]
 
+crop-listing:
+  service:
+    url: http://crop-listing-service:8087/api/products/admin/all # This is the endpoint that returns Product[]
+
 eureka:
   client:
     service-url:
