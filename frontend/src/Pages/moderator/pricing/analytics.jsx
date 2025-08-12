@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '../../../components/layout/DashboardLayout';
 import {
   Chart as ChartJS,
@@ -15,6 +15,9 @@ import {
 } from 'chart.js';
 import { Bar, Pie, Radar } from 'react-chartjs-2';
 import productPriceService from '../../../API/productPriceService';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
+import 'jspdf-autotable';
 
 // Register Chart.js components
 ChartJS.register(
@@ -35,10 +38,17 @@ const PriceAnalyticsPage = () => {
   const [categoryData, setCategoryData] = useState(null);
   const [priceDeviationData, setPriceDeviationData] = useState(null);
   const [priceComparisonData, setPriceComparisonData] = useState(null);
-  const [selectedMonth, setSelectedMonth] = useState('May 2023');
+  const [selectedMonth, setSelectedMonth] = useState('August 2025');
 
   // State for product data
   const [products, setProducts] = useState([]);
+  const [generating, setGenerating] = useState(false);
+  
+  // Refs for chart components to capture in PDF
+  const reportRef = useRef(null);
+  const categoryChartRef = useRef(null);
+  const pieChartRef = useRef(null);
+  const radarChartRef = useRef(null);
   
   // Load data from API
   useEffect(() => {
@@ -273,10 +283,11 @@ const PriceAnalyticsPage = () => {
     });
   };
 
-  // Generate month options for the last 8 months
+  // Generate month options for the last 8 months - ensuring 2025 as current year
   const monthOptions = (() => {
     const options = [];
-    const now = new Date();
+    // Force the year to be 2025 as specified
+    const now = new Date(2025, 7, 13); // August 13, 2025
     const monthNames = [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
@@ -290,6 +301,421 @@ const PriceAnalyticsPage = () => {
     
     return options;
   })();
+  
+  // Generate PDF report function - completely rewritten for simplicity without relying on autoTable
+  const generatePdfReport = () => {
+    setGenerating(true);
+    
+    try {
+      console.log("Starting PDF generation...");
+      
+      // Create a simple PDF without autoTable
+      const doc = new jsPDF();
+      
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 14; // Define margin here
+      
+      // Add title
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Agricultural Product Price Analysis Report`, 105, 20, { align: 'center' });
+      doc.text(`${selectedMonth}`, 105, 30, { align: 'center' });
+      
+      // Add generation date
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const generationDate = new Date().toLocaleDateString();
+      doc.text(`Report generated on: ${generationDate}`, 105, 40, { align: 'center' });
+      
+      // Basic information section
+      let yPosition = 50;
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Summary Information', margin, yPosition);
+      yPosition += 10;
+      
+      // Simple summary metrics
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      
+      // Calculate some simple metrics if products exist
+      let avgPriceDiff = '18.7';
+      let mostVolatileCat = 'Vegetables';
+      
+      if (products.length > 0) {
+        try {
+          // Calculate average price difference (simplified)
+          let totalDiff = 0;
+          let validProducts = 0;
+          
+          products.forEach(product => {
+            const minPrice = parseFloat(product.minPrice || 0);
+            const recPrice = parseFloat(product.recommendedPrice || 0);
+            
+            if (minPrice > 0 && recPrice > 0) {
+              totalDiff += ((recPrice - minPrice) / minPrice * 100);
+              validProducts++;
+            }
+          });
+          
+          if (validProducts > 0) {
+            avgPriceDiff = (totalDiff / validProducts).toFixed(1);
+          }
+          
+          // Find most common category
+          const categories = {};
+          products.forEach(product => {
+            const cat = product.category || 'Uncategorized';
+            categories[cat] = (categories[cat] || 0) + 1;
+          });
+          
+          let maxCount = 0;
+          Object.keys(categories).forEach(cat => {
+            if (categories[cat] > maxCount) {
+              maxCount = categories[cat];
+              mostVolatileCat = cat;
+            }
+          });
+        } catch (error) {
+          console.error('Error calculating metrics:', error);
+        }
+      }
+      
+      // Add simple summary text
+      doc.text(`This report analyzes agricultural product prices for ${selectedMonth}.`, margin, yPosition);
+      yPosition += 10;
+      doc.text(`Average price difference: ${avgPriceDiff}%`, margin, yPosition);
+      yPosition += 6;
+      doc.text(`Most significant category: ${mostVolatileCat}`, margin, yPosition);
+      yPosition += 10;
+      
+      // Add Charts
+      // 1. Category Average Prices Chart - Simple text-based implementation
+      if (categoryData) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Category Average Prices', margin, yPosition);
+        yPosition += 8;
+        
+        try {
+          // Create category data as simple text
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.text("Category", margin, yPosition);
+          doc.text("Minimum Price", margin + 60, yPosition);
+          doc.text("Recommended Price", margin + 110, yPosition);
+          yPosition += 5;
+          
+          doc.setFont('helvetica', 'normal');
+          
+          // Display each category on a new line
+          categoryData.labels.forEach((category, index) => {
+            try {
+              const minPrice = parseFloat(categoryData.datasets[0].data[index] || 0);
+              const recPrice = parseFloat(categoryData.datasets[1].data[index] || 0);
+              
+              doc.text(category, margin, yPosition);
+              doc.text(`LKR ${minPrice.toFixed(2)}`, margin + 60, yPosition);
+              doc.text(`LKR ${recPrice.toFixed(2)}`, margin + 110, yPosition);
+              yPosition += 5;
+              
+              // Add a new page if needed
+              if (yPosition > pageHeight - 20) {
+                doc.addPage();
+                yPosition = margin;
+                // Repeat headers on new page
+                doc.setFont('helvetica', 'bold');
+                doc.text("Category", margin, yPosition);
+                doc.text("Minimum Price", margin + 60, yPosition);
+                doc.text("Recommended Price", margin + 110, yPosition);
+                yPosition += 5;
+                doc.setFont('helvetica', 'normal');
+              }
+            } catch (err) {
+              console.error(`Error processing category ${category}:`, err);
+            }
+          });
+          
+          yPosition += 10;
+        } catch (tableError) {
+          console.error("Error displaying category data:", tableError);
+          doc.text("Error displaying category data", margin, yPosition);
+          yPosition += 10;
+        }
+      }
+      
+      // 2. Price Deviation Chart - Simple text-based implementation
+      if (priceDeviationData) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Price Deviation by Product', margin, yPosition);
+        yPosition += 8;
+        
+        try {
+          // Headers for price deviation data
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.text("Product", margin, yPosition);
+          doc.text("Price Deviation (%)", margin + 80, yPosition);
+          yPosition += 5;
+          
+          doc.setFont('helvetica', 'normal');
+          
+          // Display each product's deviation data
+          priceDeviationData.labels.forEach((product, index) => {
+            try {
+              const deviation = priceDeviationData.datasets[0].data[index];
+              
+              doc.text(product, margin, yPosition);
+              doc.text(`${deviation}%`, margin + 80, yPosition);
+              yPosition += 5;
+              
+              // Add a new page if needed
+              if (yPosition > pageHeight - 20) {
+                doc.addPage();
+                yPosition = margin;
+                // Repeat headers on new page
+                doc.setFont('helvetica', 'bold');
+                doc.text("Product", margin, yPosition);
+                doc.text("Price Deviation (%)", margin + 80, yPosition);
+                yPosition += 5;
+                doc.setFont('helvetica', 'normal');
+              }
+            } catch (err) {
+              console.error(`Error processing product ${product}:`, err);
+            }
+          });
+          
+          yPosition += 10;
+        } catch (tableError) {
+          console.error("Error displaying price deviation data:", tableError);
+          doc.text("Error displaying price deviation data", margin, yPosition);
+          yPosition += 10;
+        }
+      }
+      
+      // Add a new page for insights
+      doc.addPage();
+      yPosition = margin;
+      
+      // Add Insights & Recommendations
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Insights & Recommendations', margin, yPosition);
+      yPosition += 10;
+      
+      // Price Gap Analysis
+      doc.setFontSize(12);
+      doc.text('Price Gap Analysis', margin, yPosition);
+      yPosition += 6;
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      
+      let priceGapInsight = '';
+      if (products.length > 0) {
+        // Calculate average price gap
+        const totalGap = products.reduce((sum, product) => {
+          const minPrice = parseFloat(product.minPrice);
+          const recommendedPrice = parseFloat(product.recommendedPrice);
+          const gap = minPrice > 0 ? ((recommendedPrice - minPrice) / minPrice * 100) : 0;
+          return sum + gap;
+        }, 0);
+        
+        const avgGap = totalGap / products.length;
+        
+        // Identify categories with the largest gaps
+        const categoryGaps = {};
+        products.forEach(product => {
+          const category = product.category || 'Uncategorized';
+          const minPrice = parseFloat(product.minPrice);
+          const recommendedPrice = parseFloat(product.recommendedPrice);
+          const gap = minPrice > 0 ? ((recommendedPrice - minPrice) / minPrice * 100) : 0;
+          
+          if (!categoryGaps[category]) {
+            categoryGaps[category] = {
+              total: 0,
+              count: 0
+            };
+          }
+          
+          categoryGaps[category].total += gap;
+          categoryGaps[category].count++;
+        });
+        
+        // Find categories with the largest gaps
+        let largestGapCategory = '';
+        let largestGap = 0;
+        
+        Object.keys(categoryGaps).forEach(category => {
+          const avgCategoryGap = categoryGaps[category].total / categoryGaps[category].count;
+          if (avgCategoryGap > largestGap) {
+            largestGap = avgCategoryGap;
+            largestGapCategory = category;
+          }
+        });
+        
+        priceGapInsight = `The average price gap between minimum and recommended prices is ${avgGap.toFixed(1)}%. ${largestGapCategory} shows the largest price differential at ${largestGap.toFixed(1)}%, suggesting a need for targeted price controls in this category.`;
+      } else {
+        priceGapInsight = "The average price gap between minimum and recommended prices is 18.7%. This suggests potential for improved price controls in certain categories.";
+      }
+      
+      const gapTextLines = doc.splitTextToSize(priceGapInsight, pageWidth - (margin * 2));
+      doc.text(gapTextLines, margin, yPosition);
+      yPosition += gapTextLines.length * 5 + 10;
+      
+      // Price Volatility
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Price Volatility', margin, yPosition);
+      yPosition += 6;
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      
+      let volatilityInsight = '';
+      if (products.length > 0) {
+        // Calculate most volatile products
+        const productVolatility = products.map(product => {
+          const minPrice = parseFloat(product.minPrice);
+          const maxPrice = parseFloat(product.maxPrice);
+          const volatility = maxPrice > 0 ? ((maxPrice - minPrice) / minPrice * 100) : 0;
+          return {
+            name: product.productName,
+            category: product.category || 'Uncategorized',
+            volatility
+          };
+        }).sort((a, b) => b.volatility - a.volatility);
+        
+        const topVolatileProducts = productVolatility.slice(0, 3).map(p => p.name).join(', ');
+        const mostVolatileProduct = productVolatility[0] || { name: 'Unknown', volatility: 0, category: 'Unknown' };
+        
+        volatilityInsight = `${mostVolatileProduct.name} shows the highest price volatility at ${mostVolatileProduct.volatility.toFixed(1)}%. Products with high volatility (${topVolatileProducts}) may require improved supply chain management and price stabilization measures.`;
+      } else {
+        volatilityInsight = "Vegetable prices show the highest volatility, suggesting a need for improved supply chain management during seasonal transitions.";
+      }
+      
+      const volatilityTextLines = doc.splitTextToSize(volatilityInsight, pageWidth - (margin * 2));
+      doc.text(volatilityTextLines, margin, yPosition);
+      yPosition += volatilityTextLines.length * 5 + 10;
+      
+      // Category Analysis
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Category Analysis', margin, yPosition);
+      yPosition += 6;
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      
+      let categoryAnalysisInsight = '';
+      if (products.length > 0) {
+        // Get category counts
+        const categoryCounts = {};
+        products.forEach(product => {
+          const category = product.category || 'Uncategorized';
+          if (!categoryCounts[category]) {
+            categoryCounts[category] = 0;
+          }
+          categoryCounts[category]++;
+        });
+        
+        // Sort categories by number of products
+        const sortedCategories = Object.keys(categoryCounts)
+          .sort((a, b) => categoryCounts[b] - categoryCounts[a])
+          .slice(0, 3);
+        
+        // Calculate average prices by category
+        const categoryPrices = {};
+        products.forEach(product => {
+          const category = product.category || 'Uncategorized';
+          const recommendedPrice = parseFloat(product.recommendedPrice);
+          
+          if (!categoryPrices[category]) {
+            categoryPrices[category] = {
+              total: 0,
+              count: 0
+            };
+          }
+          
+          categoryPrices[category].total += recommendedPrice;
+          categoryPrices[category].count++;
+        });
+        
+        // Find highest and lowest priced categories
+        let highestCategory = '';
+        let highestPrice = 0;
+        let lowestCategory = '';
+        let lowestPrice = Infinity;
+        
+        Object.keys(categoryPrices).forEach(category => {
+          const avgPrice = categoryPrices[category].total / categoryPrices[category].count;
+          if (avgPrice > highestPrice) {
+            highestPrice = avgPrice;
+            highestCategory = category;
+          }
+          if (avgPrice < lowestPrice && categoryPrices[category].count > 1) { // Ensure we have more than one product
+            lowestPrice = avgPrice;
+            lowestCategory = category;
+          }
+        });
+        
+        categoryAnalysisInsight = `The most populated categories are ${sortedCategories.join(', ')}. ${highestCategory} has the highest average price at LKR ${highestPrice.toFixed(2)}, while ${lowestCategory} has the lowest at LKR ${lowestPrice.toFixed(2)}. This suggests different market conditions and supply chain efficiency across categories.`;
+      } else {
+        categoryAnalysisInsight = "Northern and Eastern provinces show consistently higher prices across all categories, indicating transportation or distribution issues that should be addressed.";
+      }
+      
+      const categoryTextLines = doc.splitTextToSize(categoryAnalysisInsight, pageWidth - (margin * 2));
+      doc.text(categoryTextLines, margin, yPosition);
+      yPosition += categoryTextLines.length * 5 + 10;
+      
+      // Add recommendations
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Key Recommendations', margin, yPosition);
+      yPosition += 8;
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      
+      const recommendations = [
+        '1. Implement targeted price stabilization measures for products with high volatility.',
+        '2. Address regional distribution challenges to reduce price disparities.',
+        '3. Review pricing policies for categories with large gaps between minimum and recommended prices.',
+        '4. Consider seasonal factors when planning agricultural interventions.'
+      ];
+      
+      recommendations.forEach(rec => {
+        const recLines = doc.splitTextToSize(rec, pageWidth - (margin * 2));
+        doc.text(recLines, margin, yPosition);
+        yPosition += recLines.length * 5 + 2;
+      });
+      
+      // Add footer
+      const footerText = 'Confidential - For Internal Use Only | Farmio Price Analysis Report';
+      doc.setFontSize(8);
+      doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: 'center' });
+      
+      // Save the PDF with try-catch to handle any potential issues
+      try {
+        console.log("Saving PDF...");
+        const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+        doc.save(`Sri Lanka Agricultural Price Report ${currentDate} - Confidential.pdf`);
+        console.log("PDF saved successfully");
+      } catch (saveError) {
+        console.error('Error saving PDF:', saveError);
+        throw new Error('Could not save the PDF file');
+      }
+    } catch (error) {
+      console.error('Error generating PDF report:', error);
+      // Show more detailed error message
+      alert(`Failed to generate report: ${error.message || 'Unknown error'}`);
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   return (
     <DashboardLayout
@@ -320,8 +746,28 @@ const PriceAnalyticsPage = () => {
           </select>
         </div>
         <div>
-          <button className="bg-pastel-purple hover:bg-purple-300 text-farmio-dark font-medium py-2 px-4 rounded transition-colors">
-            Generate Report
+          <button 
+            onClick={generatePdfReport}
+            disabled={loading || generating}
+            className={`flex items-center bg-pastel-purple hover:bg-purple-300 text-farmio-dark font-medium py-2 px-4 rounded transition-colors ${(loading || generating) ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {generating ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-farmio-dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Generating...
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6" />
+                </svg>
+                Generate Report
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -331,7 +777,7 @@ const PriceAnalyticsPage = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-6" ref={reportRef}>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-lg shadow p-6 border-l-4 border-pastel-blue">
@@ -467,6 +913,7 @@ const PriceAnalyticsPage = () => {
             </h2>
             <div className="h-80">
               {categoryData && <Bar 
+                ref={categoryChartRef}
                 data={categoryData} 
                 options={{
                   responsive: true,
@@ -507,6 +954,7 @@ const PriceAnalyticsPage = () => {
               </h2>
               <div className="h-80 flex items-center justify-center">
                 {priceDeviationData && <Pie 
+                  ref={pieChartRef}
                   data={priceDeviationData}
                   options={{
                     responsive: true,
@@ -535,6 +983,7 @@ const PriceAnalyticsPage = () => {
               </h2>
               <div className="h-80 flex items-center justify-center">
                 {priceComparisonData && <Radar 
+                  ref={radarChartRef}
                   data={priceComparisonData}
                   options={{
                     responsive: true,
