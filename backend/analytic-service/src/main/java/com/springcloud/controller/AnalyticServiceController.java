@@ -18,6 +18,8 @@ import com.springcloud.dto.ProductDTO;
 import com.springcloud.service.UserAnalyticsService;
 import com.springcloud.service.OrderAnalyticsService;
 import com.springcloud.service.ProductAnalyticsService;
+import com.springcloud.service.ModeratorAnalyticsService;
+import com.springcloud.dto.ModeratorDTO;
 
 @RestController
 @RequestMapping("/api/analytics")
@@ -30,6 +32,9 @@ public class AnalyticServiceController {
 
     @Autowired
     private ProductAnalyticsService productAnalyticsService;
+    
+    @Autowired
+    private ModeratorAnalyticsService moderatorAnalyticsService;
 
     @GetMapping("/hello")
     public String hello() {
@@ -104,6 +109,13 @@ public class AnalyticServiceController {
     public ResponseEntity<Map<String, Long>> getUserCountByRole() {
         Map<String, Long> roleCounts = userAnalyticsService.getUserCountByRole();
         return ResponseEntity.ok(roleCounts);
+    }
+    
+    // Moderator endpoints
+    @GetMapping("/admin/moderators")
+    public ResponseEntity<List<ModeratorDTO>> getAllModerators() {
+        List<ModeratorDTO> moderators = moderatorAnalyticsService.fetchAllModerators();
+        return ResponseEntity.ok(moderators);
     }
 
     @GetMapping("/users")

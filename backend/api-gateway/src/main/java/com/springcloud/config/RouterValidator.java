@@ -20,11 +20,15 @@ public class RouterValidator {
         "/api/analytics/admin/orders/status-count",
         "/api/analytics/admin/orders/by-status",
         "/api/analytics/admin/products",
+        "/api/analytics/admin/moderators", 
         "/api/analytics/prices",
         "/api/analytics/prices/category",
         "/api/analytics/moderator/prices",
         "/api/order/get-crops",
-        "/api/user/all-dto"
+        "/api/user/all-dto",
+        "/api/admin/moderators/all-dto",
+        "/api/moderator/login",
+        "/api/moderator/change-temp-password"
     );
 
     public boolean isSecured(ServerHttpRequest request) {
