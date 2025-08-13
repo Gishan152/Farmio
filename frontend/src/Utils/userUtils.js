@@ -24,6 +24,42 @@ export const fetchAllUsers = async () => {
 };
 
 /**
+ * Get total user count from the system
+ * @returns {Promise<number>} Total number of users
+ */
+export const getUserCount = async () => {
+  try {
+    console.log('Attempting to fetch user count...');
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/analytics/admin/users/count`);
+      console.log('User count endpoint response status:', response.status);
+      
+      if (response.ok) {
+        const count = await response.json();
+        console.log('User count endpoint success:', count);
+        return count;
+      } else {
+        console.log(`User count endpoint failed with status ${response.status}, trying fallback...`);
+      }
+    } catch (endpointError) {
+      console.log('Error with user count endpoint:', endpointError.message);
+    }
+    
+    // Fall back to counting all users
+    console.log('Trying fallback: counting all users...');
+    const users = await fetchAllUsers();
+    console.log(`Fallback user count: ${users?.length || 0} users`);
+    return users?.length || 0;
+    
+  } catch (error) {
+    console.error('Error fetching user count:', error);
+    // Return 0 as fallback instead of throwing
+    return 0;
+  }
+};
+
+/**
  * Create a lookup map for quick user access by ID
  * @param {Array} users - Array of user objects
  * @returns {Object} Object with userId as key and user data as value
