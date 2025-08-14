@@ -3,6 +3,7 @@ import DashboardLayout from '../../../components/layout/DashboardLayout';
 import Card from '../../../components/ui/Card';
 import Table from '../../../components/ui/Table';
 import StatCard from '../../../components/ui/StatCard';
+import productService from '../../../API/productService';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -239,29 +240,67 @@ const ProductsManagement = () => {
   const [editFormData, setEditFormData] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Simulate loading
+  // Fetch products from API
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setFilteredData(products);
-    }, 1000);
-    return () => clearTimeout(timer);
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const apiProducts = await productService.getAllProducts();
+        console.log('API products:', apiProducts);
+        
+        // Map API data to match the expected product structure
+        const mappedProducts = apiProducts.map((product, index) => ({
+          id: product.id || `P${index + 1000}`,
+          name: product.productName || 'Unnamed Product',
+          category: product.measurement || 'Uncategorized',
+          farmer: `Farmer ${product.userId || ''}`,
+          location: product.location || 'Unknown location',
+          price: product.pricePerUnit ? `${product.pricePerUnit}/unit` : 'Price not set',
+          stock: product.availableStock || 0,
+          unit: product.measurement || 'unit',
+          stockStatus: product.availableStock > 20 ? 'In Stock' : 
+                        product.availableStock > 0 ? 'Low Stock' : 'Out of Stock',
+          certifications: product.badges && product.badges.length > 0 ? product.badges.join(', ') : 'Standard',
+          harvested: product.createdAt ? new Date(product.createdAt).toISOString().split('T')[0] : '2023-06-10',
+          image: product.imageUrls && product.imageUrls.length > 0 ? 
+                 product.imageUrls[0] : 
+                 'https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+          description: `${product.productName} - ${product.measurement}`,
+          lifespan: '7-10 days',
+          storageConditions: 'Store in a cool, dry place'
+        }));
+        
+        setFilteredData(mappedProducts);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+        setIsLoading(false);
+        // Use sample data as fallback if API fails
+        setFilteredData(products);
+      }
+    };
+    
+    fetchProducts();
   }, []);
 
   // Handle search
   useEffect(() => {
-    if (products) {
-      const results = products.filter(product => {
-        return Object.keys(product).some(key =>
-          product[key].toString().toLowerCase().includes(searchTerm.toLowerCase())
-        );
+    if (filteredData && filteredData.length > 0) {
+      const results = filteredData.filter(product => {
+        return Object.keys(product).some(key => {
+          if (product[key]) {
+            return product[key].toString().toLowerCase().includes(searchTerm.toLowerCase());
+          }
+          return false;
+        });
       });
 
-      setFilteredData(results);
+      if (searchTerm) {
+        setFilteredData(results);
+      }
     }
 
-  }, [searchTerm, products]);
+  }, [searchTerm]);
 
   // Filter options
   const filters = [
@@ -594,13 +633,16 @@ const ProductsManagement = () => {
 
   // Product Card Component
   const ProductCard = ({ product }) => {
+    const fallbackImage = "https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80";
+    
     return (
       <div className="bg-white rounded-lg border border-dashboard-border shadow-card hover:shadow-card-hover transition-all">
         <div className="relative h-40 overflow-hidden rounded-t-lg">
           <img
-            src={product.image}
+            src={product.image || fallbackImage}
             alt={product.name}
             className="w-full h-full object-cover"
+            onError={(e) => {e.target.onerror = null; e.target.src = fallbackImage}}
           />
           <div className={`absolute top-2 right-2 px-2 py-1 text-xs font-medium rounded-full ${product.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' :
             product.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
@@ -615,15 +657,15 @@ const ProductsManagement = () => {
               <h3 className="font-medium text-dashboard-text-primary">{product.name}</h3>
               <p className="text-xs text-dashboard-text-light">{product.category}</p>
             </div>
-            <p className="font-medium text-farmio">LKR {product.price}</p>
+            <p className="font-medium text-farmio">{product.price}</p>
           </div>
           <div className="mb-2 text-sm text-dashboard-text-secondary">
-            <p>Farmer: {product.farmer}</p>
-            <p className="text-xs text-dashboard-text-light mt-1">Location: {product.location}</p>
+            <p>Farmer: {product.farmer || 'Unknown'}</p>
+            <p className="text-xs text-dashboard-text-light mt-1">Location: {product.location || 'N/A'}</p>
           </div>
           <div className="flex items-center text-xs text-dashboard-text-light mb-3">
             <CalendarIcon />
-            <span className="ml-1">Harvested: {product.harvested}</span>
+            <span className="ml-1">Added: {product.harvested}</span>
           </div>
           <div className="mt-3 flex justify-between">
             <button

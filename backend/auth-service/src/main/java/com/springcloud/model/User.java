@@ -53,6 +53,12 @@ public class User implements UserDetails {
     @Pattern(regexp = "^\\d{10}$", message = "Phone number must be exactly 10 digits")
     @Column(nullable = false)
     private String phoneNo;
+    
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean isFirstLogin = false;
+    
+    @Column
+    private String address;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(

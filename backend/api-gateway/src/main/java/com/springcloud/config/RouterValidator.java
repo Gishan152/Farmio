@@ -19,12 +19,31 @@ public class RouterValidator {
         "/api/analytics/admin/orders/count",
         "/api/analytics/admin/orders/status-count",
         "/api/analytics/admin/orders/by-status",
+        "/api/analytics/admin/products",
+        "/api/analytics/admin/moderators", 
+        "/api/analytics/prices",
+        "/api/analytics/prices/category",
+        "/api/analytics/moderator/prices",
         "/api/order/get-crops",
-        "/api/user/all-dto"
+        "/api/user/all-dto",
+        "/api/admin/moderators/all-dto",
+        "/api/moderator/login",
+        "/api/moderator/change-temp-password"
     );
 
     public boolean isSecured(ServerHttpRequest request) {
-        return openEndpoints.stream()
-                .noneMatch(uri -> request.getURI().getPath().contains(uri));
+        String path = request.getURI().getPath();
+        
+        // Check if the path contains any of the explicitly open endpoints
+        if (openEndpoints.stream().anyMatch(path::contains)) {
+            return false;
+        }
+        
+        // Special handling for moderator endpoints - allow all moderator price endpoints
+        if (path.contains("/api/analytics/moderator/prices")) {
+            return false;
+        }
+        
+        return true;
     }
 }

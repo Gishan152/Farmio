@@ -14,8 +14,12 @@ import java.util.Map;
 import com.springcloud.dto.UserDTO;
 import com.springcloud.dto.UserRequest;
 import com.springcloud.dto.OrderDTO;
+import com.springcloud.dto.ProductDTO;
 import com.springcloud.service.UserAnalyticsService;
 import com.springcloud.service.OrderAnalyticsService;
+import com.springcloud.service.ProductAnalyticsService;
+import com.springcloud.service.ModeratorAnalyticsService;
+import com.springcloud.dto.ModeratorDTO;
 
 @RestController
 @RequestMapping("/api/analytics")
@@ -26,9 +30,23 @@ public class AnalyticServiceController {
     @Autowired
     private OrderAnalyticsService orderAnalyticsService;
 
+    @Autowired
+    private ProductAnalyticsService productAnalyticsService;
+    
+    @Autowired
+    private ModeratorAnalyticsService moderatorAnalyticsService;
+
     @GetMapping("/hello")
     public String hello() {
         return "Hello from Analytic Service!";
+    }
+
+
+    //get the products from the crop listing service
+    @GetMapping("/admin/products")
+    public ResponseEntity<List<ProductDTO>> getAllProductsForAdmin() {
+        List<ProductDTO> products = productAnalyticsService.fetchAllProducts();
+        return ResponseEntity.ok(products);
     }
 
     // Order endpoints
@@ -91,6 +109,13 @@ public class AnalyticServiceController {
     public ResponseEntity<Map<String, Long>> getUserCountByRole() {
         Map<String, Long> roleCounts = userAnalyticsService.getUserCountByRole();
         return ResponseEntity.ok(roleCounts);
+    }
+    
+    // Moderator endpoints
+    @GetMapping("/admin/moderators")
+    public ResponseEntity<List<ModeratorDTO>> getAllModerators() {
+        List<ModeratorDTO> moderators = moderatorAnalyticsService.fetchAllModerators();
+        return ResponseEntity.ok(moderators);
     }
 
     @GetMapping("/users")

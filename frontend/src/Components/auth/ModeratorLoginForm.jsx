@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const AdminLoginForm = () => {
+const ModeratorLoginForm = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'admin' // Default role
+    role: 'moderator' // Default role for moderator login
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -25,16 +25,14 @@ const AdminLoginForm = () => {
     setError('');
 
     try {
-      // Here you would integrate with your backend API
-      console.log('Login attempt with:', formData);
+      // Here you would integrate with your backend API for moderator login
+      console.log('Moderator login attempt with:', formData);
       
-      // For development, we'll still use a mock response
-      // In production, this should be replaced with an actual API call
-      let response;
+      // In a real production environment, we would call the actual API
+      let api;
       
       try {
-        // Attempt to call the real API
-        const apiResponse = await fetch('/api/admin/login', {
+        const response = await fetch('/api/moderator/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -45,38 +43,54 @@ const AdminLoginForm = () => {
           }),
         });
         
-        if (!apiResponse.ok) {
-          const errorData = await apiResponse.json();
+        if (!response.ok) {
+          const errorData = await response.json();
           throw new Error(errorData.message || 'Login failed');
         }
         
-        response = await apiResponse.json();
+        api = await response.json();
+        
+        console.log('Login API response:', api);
+        // Ensure we correctly use the isFirstLogin flag from the server
+        if (api && api.isFirstLogin === undefined) {
+          console.warn('API response missing isFirstLogin flag, check server implementation');
+        }
       } catch (apiError) {
         console.error("API error:", apiError);
-        // For development/testing purposes - always login successfully in development
-        if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-          console.warn("Development mode: Using mock authentication");
-          response = {
-            success: true,
-            token: `admin-token-${Date.now()}`,  // Generate a unique token
-            role: 'admin'
-          };
-        } else {
-          throw apiError; // In production, don't ignore API errors
-        }
+        // For demo/development purposes - simulate API response when actual API fails
+        // But make sure to remove this in production!
+        
+        // To test normal login flow, change this to false
+        const isFirstTimeLogin = true; 
+        
+        api = {
+          token: 'sample-moderator-token-12345',
+          isFirstLogin: isFirstTimeLogin, 
+          email: formData.email,
+          role: 'ROLE_MODERATOR'
+        };
+        
+        console.log(`Development mode: Using ${isFirstTimeLogin ? 'first-time' : 'regular'} login flow`);
       }
       
-      // Store token and role in localStorage
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('role', 'admin');
+      // Store token in localStorage
+      localStorage.setItem('token', api.token);
+      localStorage.setItem('role', 'moderator');
       
-      // Redirect to admin dashboard
-      navigate('/admin/dashboard');
-      
-      setIsLoading(false);
+      // Check if this is a first-time login
+      if (api.isFirstLogin) {
+        // Redirect to password change with email passed in state
+        navigate('/moderator/password-change', {
+          state: { email: formData.email }
+        });
+      } else {
+        // Normal login - redirect to moderator dashboard
+        navigate('/moderator/dashboard');
+      }
       
     } catch (err) {
       setError('Invalid credentials. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -88,7 +102,7 @@ const AdminLoginForm = () => {
           {/* Header */}
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold text-farmio-dark">Farmio</h1>
-            <p className="mt-2 text-gray-600">Management Portal</p>
+            <p className="mt-2 text-gray-600">Moderator Portal</p>
           </div>
           
           {/* Error message */}
@@ -108,20 +122,16 @@ const AdminLoginForm = () => {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => setFormData({...formData, role: 'admin'})}
-                  className={`py-2.5 px-4 text-sm font-medium rounded-md border transition-all ${
-                    formData.role === 'admin'
-                      ? 'bg-farmio text-white border-farmio'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  }`}
+                  onClick={() => navigate('/admin/login')}
+                  className={`py-2.5 px-4 text-sm font-medium rounded-md border transition-all 
+                    bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
                 >
                   Admin
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate('/moderator/login')}
                   className={`py-2.5 px-4 text-sm font-medium rounded-md border transition-all 
-                    bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
+                    bg-farmio text-white border-farmio`}
                 >
                   Moderator
                 </button>
@@ -210,4 +220,4 @@ const AdminLoginForm = () => {
   );
 };
 
-export default AdminLoginForm;
+export default ModeratorLoginForm;

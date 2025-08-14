@@ -88,6 +88,7 @@ export const transformApiUsers = (apiUsers, defaultRole = 'User') => {
     status: user.status,
     nic: user.nic,
     roles: user.roles ? user.roles.join(', ') : 'N/A',
+    roleArray: user.roles || [],
     joinDate: "N/A", // Not available in API
     lastActive: "N/A", // Not available in API
     
