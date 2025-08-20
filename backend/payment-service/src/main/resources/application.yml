@@ -44,3 +44,10 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+
+# PayHere Configuration
+payhere:
+  merchant-id: ${PAYHERE_MERCHANT_ID:121XXXX}
+  merchant-secret: ${PAYHERE_MERCHANT_SECRET:XXXXXXXXXXXXX}
+  notify-url: ${PAYHERE_NOTIFY_URL:http://localhost:8093/api/payment/payhere/notify}
+  sandbox: ${PAYHERE_SANDBOX:true}

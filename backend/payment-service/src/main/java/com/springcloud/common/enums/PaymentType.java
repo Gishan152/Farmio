@@ -8,5 +8,6 @@ public enum PaymentType {
     REFUND,
     ESCROW,
     RELEASE,
+    PAYHERE,
     OTHER
 }
