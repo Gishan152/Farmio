@@ -34,98 +34,95 @@ const DownloadIcon = () => (
   </svg>
 );
 
+// Static mock data moved outside component to prevent re-render issues
+const salesData = {
+  totalRevenue: 'R528,945.00',
+  totalOrders: '1,245',
+  averageOrderValue: 'R425.00',
+  conversionRate: '4.2%',
+  yearlyGrowth: '+18.5%'
+};
+
+const chartData = {
+  month: {
+    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+    datasets: {
+      revenue: [125450, 132780, 141230, 129485],
+      orders: [289, 312, 345, 299]
+    }
+  },
+  quarter: {
+    labels: ['Jan', 'Feb', 'Mar'],
+    datasets: {
+      revenue: [385450, 412780, 528945],
+      orders: [875, 952, 1245]
+    }
+  },
+  year: {
+    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+    datasets: {
+      revenue: [1385450, 1512780, 1628945, 1728950],
+      orders: [3275, 3652, 3845, 4125]
+    }
+  }
+};
+
+const topSellingProducts = [
+  {
+    id: '1',
+    name: 'Organic Potatoes (5kg)',
+    sales: 'R45,680.00',
+    quantity: '845 units',
+    growth: '+12.5%',
+    image: 'https://via.placeholder.com/50'
+  },
+  {
+    id: '2',
+    name: 'Fresh Farm Tomatoes (2kg)',
+    sales: 'R38,450.00',
+    quantity: '785 units',
+    growth: '+8.3%',
+    image: 'https://via.placeholder.com/50'
+  },
+  {
+    id: '3',
+    name: 'Organic Carrots (3kg)',
+    sales: 'R32,780.00',
+    quantity: '654 units',
+    growth: '+15.7%',
+    image: 'https://via.placeholder.com/50'
+  },
+  {
+    id: '4',
+    name: 'Free Range Eggs (Dozen)',
+    sales: 'R28,950.00',
+    quantity: '578 units',
+    growth: '+6.2%',
+    image: 'https://via.placeholder.com/50'
+  },
+  {
+    id: '5',
+    name: 'Grass-Fed Beef (1kg)',
+    sales: 'R25,680.00',
+    quantity: '345 units',
+    growth: '+9.8%',
+    image: 'https://via.placeholder.com/50'
+  }
+];
+
+const salesByRegion = [
+  { region: 'Western Cape', revenue: 'R185,450.00', percentage: '35%', growth: '+14.2%' },
+  { region: 'Gauteng', revenue: 'R158,680.00', percentage: '30%', growth: '+18.7%' },
+  { region: 'KwaZulu-Natal', revenue: 'R95,210.00', percentage: '18%', growth: '+10.5%' },
+  { region: 'Eastern Cape', revenue: 'R52,895.00', percentage: '10%', growth: '+7.8%' },
+  { region: 'Other Provinces', revenue: 'R36,710.00', percentage: '7%', growth: '+5.4%' }
+];
+
 const SalesAnalytics = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [timeRange, setTimeRange] = useState('month');
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('all');
-
-  // Mock sales data
-  const salesData = {
-    totalRevenue: 'R528,945.00',
-    totalOrders: '1,245',
-    averageOrderValue: 'R425.00',
-    conversionRate: '4.2%',
-    yearlyGrowth: '+18.5%'
-  };
-
-  // Mock chart data
-  const chartData = {
-    month: {
-      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-      datasets: {
-        revenue: [125450, 132780, 141230, 129485],
-        orders: [289, 312, 345, 299]
-      }
-    },
-    quarter: {
-      labels: ['Jan', 'Feb', 'Mar'],
-      datasets: {
-        revenue: [385450, 412780, 528945],
-        orders: [875, 952, 1245]
-      }
-    },
-    year: {
-      labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-      datasets: {
-        revenue: [1385450, 1512780, 1628945, 1728950],
-        orders: [3275, 3652, 3845, 4125]
-      }
-    }
-  };
-
-  // Mock top selling products
-  const topSellingProducts = [
-    {
-      id: '1',
-      name: 'Organic Potatoes (5kg)',
-      sales: 'R45,680.00',
-      quantity: '845 units',
-      growth: '+12.5%',
-      image: 'https://via.placeholder.com/50'
-    },
-    {
-      id: '2',
-      name: 'Fresh Farm Tomatoes (2kg)',
-      sales: 'R38,450.00',
-      quantity: '785 units',
-      growth: '+8.3%',
-      image: 'https://via.placeholder.com/50'
-    },
-    {
-      id: '3',
-      name: 'Organic Carrots (3kg)',
-      sales: 'R32,780.00',
-      quantity: '654 units',
-      growth: '+15.7%',
-      image: 'https://via.placeholder.com/50'
-    },
-    {
-      id: '4',
-      name: 'Free Range Eggs (Dozen)',
-      sales: 'R28,950.00',
-      quantity: '578 units',
-      growth: '+6.2%',
-      image: 'https://via.placeholder.com/50'
-    },
-    {
-      id: '5',
-      name: 'Grass-Fed Beef (1kg)',
-      sales: 'R25,680.00',
-      quantity: '345 units',
-      growth: '+9.8%',
-      image: 'https://via.placeholder.com/50'
-    }
-  ];
-
-  // Mock sales by region
-  const salesByRegion = [
-    { region: 'Western Cape', revenue: 'R185,450.00', percentage: '35%', growth: '+14.2%' },
-    { region: 'Gauteng', revenue: 'R158,680.00', percentage: '30%', growth: '+18.7%' },
-    { region: 'KwaZulu-Natal', revenue: 'R95,210.00', percentage: '18%', growth: '+10.5%' },
-    { region: 'Eastern Cape', revenue: 'R52,895.00', percentage: '10%', growth: '+7.8%' },
-    { region: 'Other Provinces', revenue: 'R36,710.00', percentage: '7%', growth: '+5.4%' }
-  ];
 
   return (
     <DashboardLayout>

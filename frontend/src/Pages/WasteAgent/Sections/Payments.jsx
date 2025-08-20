@@ -636,76 +636,82 @@ const Payments = () => {
 				</div>
 				<div className="flex space-x-2">
 					
-					<Button>Setup Auto-Pay</Button>
+					{/* <Button>Setup Auto-Pay</Button> */}
 				</div>
 			</div>
 
 			{/* Payment Summary */}
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
-						<CreditCard className="h-4 w-4" />
-						Total Paid This Month
-					</h3>
-					<p className="text-2xl mt-2 text-right font-bold text-gray-600 dark:text-green-400">
-						<NumberFlow value={totalPaidThisMonth} format={{ style: "currency", currency: "USD" }} />
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-green-400 p-4 flex items-center overflow-hidden">
+					<CreditCard className="h-7 w-7 text-green-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Total Paid This Month</p>
+						<p className="text-lg font-bold text-green-700">
+							<NumberFlow value={totalPaidThisMonth} format={{ style: "currency", currency: "USD" }} />
+						</p>
+					</div>
 				</div>
-				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
-						<Clock className="h-4 w-4" />
-						Number of Payments
-					</h3>
-					<p className="text-2xl mt-2 text-right font-bold text-gray-600 dark:text-gray-100">
-						<NumberFlow value={filteredPayments.length} />
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<Clock className="h-7 w-7 text-blue-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Number of Payments</p>
+						<p className="text-lg font-bold text-gray-900">
+							<NumberFlow value={filteredPayments.length} />
+						</p>
+					</div>
 				</div>
-				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
-						<CheckCircle className="h-4 w-4" />
-						Top Paid Farmer
-					</h3>
-					<p className="text-m text-right mt-4 font-medium text-gray-600 dark:text-gray-100 truncate">
-						{topFarmerName}
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<CheckCircle className="h-7 w-7 text-yellow-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Top Paid Farmer</p>
+						<p className="text-sm font-medium text-gray-900 truncate">
+							{topFarmerName}
+						</p>
+					</div>
 				</div>
-				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
-						<AlertTriangle className="h-4 w-4" />
-						Total Weight Collected
-					</h3>
-					<p className="text-2xl mt-2 text-right font-bold text-gray-600 dark:text-blue-400">
-						<NumberFlow value={totalWeightCollected} />
-						<span className="text-sm font-normal text-gray-500"> kg</span>
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<AlertTriangle className="h-7 w-7 text-purple-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Total Weight Collected</p>
+						<p className="text-lg font-bold text-gray-900">
+							<NumberFlow value={totalWeightCollected} />
+							<span className="text-sm font-normal text-gray-500"> kg</span>
+						</p>
+					</div>
 				</div>
 			</div>
 
 			{/* Status Overview */}
 			<div className="grid grid-cols-3 gap-4">
-				<div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
-					<h3 className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
-						Paid Payments
-					</h3>
-					<p className="text-6xl text-right mt-2 font-bold text-green-600 dark:text-green-400">
-						<NumberFlow value={paidCount} />
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
+					<CheckCircle className="h-7 w-7 text-green-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Paid Payments</p>
+						<p className="text-lg font-bold text-gray-900">
+							<NumberFlow value={paidCount} />
+						</p>
+					</div>
 				</div>
-				<div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
-					<h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">
-						Pending Payments
-					</h3>
-					<p className="text-6xl text-right mt-2 font-bold text-yellow-600 dark:text-yellow-400">
-						<NumberFlow value={pendingCount} />
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<div className="absolute left-0 top-0 h-full w-1 bg-yellow-500 rounded-l-lg" />
+					<Clock className="h-7 w-7 text-yellow-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Pending Payments</p>
+						<p className="text-lg font-bold text-gray-900">
+							<NumberFlow value={pendingCount} />
+						</p>
+					</div>
 				</div>
-				<div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
-					<h3 className="text-sm font-medium text-red-800 dark:text-red-200 mb-1">
-						Rejected Payments
-					</h3>
-					<p className="text-6xl text-right mt-2 font-bold text-red-600 dark:text-red-400">
-						<NumberFlow value={rejectedCount} />
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<div className="absolute left-0 top-0 h-full w-1 bg-red-500 rounded-l-lg" />
+					<AlertTriangle className="h-7 w-7 text-red-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Rejected Payments</p>
+						<p className="text-lg font-bold text-gray-900">
+							<NumberFlow value={rejectedCount} />
+						</p>
+					</div>
 				</div>
 			</div>
 

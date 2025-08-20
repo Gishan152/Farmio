@@ -34,109 +34,106 @@ const DownloadIcon = () => (
   </svg>
 );
 
+// Static mock data moved outside component to prevent re-render issues
+const metrics = {
+  averageDeliveryTime: '2.4 days',
+  warehouseUtilization: '78.5%',
+  transportEfficiency: '83.2%',
+  onTimeDelivery: '92.3%',
+  inventoryTurnover: '8.4x'
+};
+
+const bottlenecks = [
+  {
+    id: 1,
+    stage: 'Packaging',
+    impactLevel: 'High',
+    avgDelay: '6 hours',
+    affectedOrders: '18%'
+  },
+  {
+    id: 2,
+    stage: 'Rural Transport',
+    impactLevel: 'Medium',
+    avgDelay: '12 hours',
+    affectedOrders: '12%'
+  },
+  {
+    id: 3,
+    stage: 'Warehouse Processing',
+    impactLevel: 'Low',
+    avgDelay: '3 hours',
+    affectedOrders: '8%'
+  }
+];
+
+const transportProviders = [
+  {
+    id: 1,
+    name: 'FastTrack Logistics',
+    reliability: '95.2%',
+    averageTime: '1.8 days',
+    costEfficiency: 'High',
+    region: 'National'
+  },
+  {
+    id: 2,
+    name: 'Rural Routes Co.',
+    reliability: '89.7%',
+    averageTime: '2.4 days',
+    costEfficiency: 'Medium',
+    region: 'Eastern Cape'
+  },
+  {
+    id: 3,
+    name: 'Farm2City Delivery',
+    reliability: '93.8%',
+    averageTime: '2.1 days',
+    costEfficiency: 'High',
+    region: 'Western Cape'
+  },
+  {
+    id: 4,
+    name: 'GreenMile Transports',
+    reliability: '91.5%',
+    averageTime: '2.3 days',
+    costEfficiency: 'Medium',
+    region: 'Gauteng'
+  }
+];
+
+const warehousePerformance = [
+  {
+    id: 1,
+    name: 'Johannesburg Central Hub',
+    utilization: '92%',
+    processingTime: '4.2 hours',
+    capacity: '2500 tons',
+    efficiency: 'High'
+  },
+  {
+    id: 2,
+    name: 'Cape Town Distribution Center',
+    utilization: '78%',
+    processingTime: '5.8 hours',
+    capacity: '1800 tons',
+    efficiency: 'Medium'
+  },
+  {
+    id: 3,
+    name: 'Durban Coastal Facility',
+    utilization: '85%',
+    processingTime: '5.1 hours',
+    capacity: '2200 tons',
+    efficiency: 'High'
+  }
+];
+
 const SupplyChainAnalytics = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [timeRange, setTimeRange] = useState('month');
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [regionFilter, setRegionFilter] = useState('all');
-
-  // Mock supply chain metrics
-  const metrics = {
-    averageDeliveryTime: '2.4 days',
-    warehouseUtilization: '78.5%',
-    transportEfficiency: '83.2%',
-    onTimeDelivery: '92.3%',
-    inventoryTurnover: '8.4x'
-  };
-
-  // Mock bottleneck data
-  const bottlenecks = [
-    {
-      id: 1,
-      stage: 'Packaging',
-      impactLevel: 'High',
-      avgDelay: '6 hours',
-      affectedOrders: '18%'
-    },
-    {
-      id: 2,
-      stage: 'Rural Transport',
-      impactLevel: 'Medium',
-      avgDelay: '12 hours',
-      affectedOrders: '12%'
-    },
-    {
-      id: 3,
-      stage: 'Warehouse Processing',
-      impactLevel: 'Low',
-      avgDelay: '3 hours',
-      affectedOrders: '8%'
-    }
-  ];
-
-  // Mock transport provider efficiency
-  const transportProviders = [
-    {
-      id: 1,
-      name: 'FastTrack Logistics',
-      reliability: '95.2%',
-      averageTime: '1.8 days',
-      costEfficiency: 'High',
-      region: 'National'
-    },
-    {
-      id: 2,
-      name: 'Rural Routes Co.',
-      reliability: '89.7%',
-      averageTime: '2.4 days',
-      costEfficiency: 'Medium',
-      region: 'Eastern Cape'
-    },
-    {
-      id: 3,
-      name: 'Farm2City Delivery',
-      reliability: '93.8%',
-      averageTime: '2.1 days',
-      costEfficiency: 'High',
-      region: 'Western Cape'
-    },
-    {
-      id: 4,
-      name: 'GreenMile Transports',
-      reliability: '91.5%',
-      averageTime: '2.3 days',
-      costEfficiency: 'Medium',
-      region: 'Gauteng'
-    }
-  ];
-
-  // Mock warehouse data
-  const warehousePerformance = [
-    {
-      id: 1,
-      name: 'Johannesburg Central Hub',
-      utilization: '92%',
-      processingTime: '4.2 hours',
-      capacity: '2500 tons',
-      efficiency: 'High'
-    },
-    {
-      id: 2,
-      name: 'Cape Town Distribution Center',
-      utilization: '78%',
-      processingTime: '5.8 hours',
-      capacity: '1800 tons',
-      efficiency: 'Medium'
-    },
-    {
-      id: 3,
-      name: 'Durban Coastal Facility',
-      utilization: '85%',
-      processingTime: '5.1 hours',
-      capacity: '2200 tons',
-      efficiency: 'High'
-    }
-  ];
 
   return (
     <DashboardLayout title="Supply Chain Analytics">

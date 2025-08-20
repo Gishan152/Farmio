@@ -574,7 +574,7 @@ const WasteListings = () => {
 		location: "",
 		minQuantity: "",
 		maxPrice: "",
-		status: "Accepted",
+		status: "All",
 	});
 
 	const getStatusBadge = (status) => {
@@ -688,88 +688,90 @@ const WasteListings = () => {
 
 			{/* Summary Cards */}
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
-						<CheckCircle className="h-4 w-4" />
-						Accepted Requests
-					</h3>
-					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						<NumberFlow
-							value={
-								filteredListings.filter(
-									(l) => l.status === "Accepted"
-								).length
-							}
-						/>
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
+					<CheckCircle className="h-7 w-7 text-green-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Accepted Requests</p>
+						<p className="text-lg font-bold text-gray-900">
+							<NumberFlow
+								value={
+									filteredListings.filter(
+										(l) => l.status === "Accepted"
+									).length
+								}
+							/>
+						</p>
+					</div>
 				</div>
-				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
-						<RotateCcw className="h-4 w-4" />
-						Total Quantity
-					</h3>
-					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						<NumberFlow
-							value={filteredListings.reduce(
-								(total, listing) =>
-									total +
-									parseInt(
-										listing.quantity.replace(/[^\d]/g, "")
-									),
-								0
-							)}
-							suffix="kg"
-						/>
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<div className="absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-l-lg" />
+					<RotateCcw className="h-7 w-7 text-blue-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Total Quantity</p>
+						<p className="text-lg font-bold text-gray-900">
+							<NumberFlow
+								value={filteredListings.reduce(
+									(total, listing) =>
+										total +
+										parseInt(
+											listing.quantity.replace(/[^\d]/g, "")
+										),
+									0
+								)}
+								suffix=" kg"
+							/>
+						</p>
+					</div>
 				</div>
-				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
-						<DollarSign className="h-4 w-4" />
-						Avg Price/kg
-					</h3>
-					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						$
-						<NumberFlow
-							value={
-								filteredListings.length > 0
-									? parseFloat(
-											(
-												filteredListings.reduce(
-													(total, listing) =>
-														total +
-														parseFloat(
-															listing.pricePerKg.replace(
-																"$",
-																""
-															)
-														),
-													0
-												) / filteredListings.length
-											).toFixed(2)
-									  )
-									: 0
-							}
-						/>
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<div className="absolute left-0 top-0 h-full w-1 bg-yellow-500 rounded-l-lg" />
+					<DollarSign className="h-7 w-7 text-yellow-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Avg Price/kg</p>
+						<p className="text-lg font-bold text-gray-900">
+							$<NumberFlow
+								value={
+									filteredListings.length > 0
+										? parseFloat(
+												(
+													filteredListings.reduce(
+														(total, listing) =>
+															total +
+															parseFloat(
+																listing.pricePerKg.replace(
+																	"$",
+																	""
+																)
+															),
+														0
+													) / filteredListings.length
+												).toFixed(2)
+										  )
+										: 0
+								}
+							/>
+						</p>
+					</div>
 				</div>
-				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
-						<Banknote className="h-4 w-4" />
-						Potential Value
-					</h3>
-					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						$
-						<NumberFlow
-							value={filteredListings.reduce(
-								(total, listing) =>
-									total +
-									parseFloat(
-										listing.totalValue.replace("$", "")
-									),
-								0
-							)}
-						/>
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<div className="absolute left-0 top-0 h-full w-1 bg-purple-500 rounded-l-lg" />
+					<Banknote className="h-7 w-7 text-purple-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Potential Value</p>
+						<p className="text-lg font-bold text-gray-900">
+							$<NumberFlow
+								value={filteredListings.reduce(
+									(total, listing) =>
+										total +
+										parseFloat(
+											listing.totalValue.replace("$", "")
+										),
+									0
+								)}
+							/>
+						</p>
+					</div>
 				</div>
 			</div>
 
