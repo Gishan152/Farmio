@@ -25,91 +25,43 @@ public class PaymentController {
     @Autowired
     private PayHereFormGenerator payHereFormGenerator;
     
-    // Wallet Info
-    @GetMapping("/wallet/{userId}")
-    public ResponseEntity<WalletInfo> getWalletInfo(@PathVariable Long userId) {
-        WalletInfo walletInfo = paymentService.getWalletInfo(userId);
-        return ResponseEntity.ok(walletInfo);
-    }
-    
-    // Transaction History
-    @GetMapping("/history/{userId}")
-    public ResponseEntity<List<TransactionHistory>> getTransactionHistory(@PathVariable Long userId) {
-        List<TransactionHistory> history = paymentService.getTransactionHistory(userId);
-        return ResponseEntity.ok(history);
-    }
-    
-    // Make a Payment
-    @PostMapping("/pay")
-    public ResponseEntity<PaymentResponse> makePayment(@RequestBody PaymentRequest request) {
-        PaymentResponse response = paymentService.makePayment(request);
-        return ResponseEntity.ok(response);
-    }
-    
-    // Escrow Funds
-    @PostMapping("/escrow")
-    public ResponseEntity<PaymentResponse> escrowFunds(@RequestBody PaymentRequest request) {
-        PaymentResponse response = paymentService.escrowFunds(request);
-        return ResponseEntity.ok(response);
-    }
-    
-    // Release Escrowed Funds
-    @PostMapping("/release-escrow")
-    public ResponseEntity<PaymentResponse> releaseEscrow(@RequestBody PaymentRequest request) {
-        PaymentResponse response = paymentService.releaseEscrow(request);
-        return ResponseEntity.ok(response);
-    }
-    
-    // Refund Payment
-    @PostMapping("/refund")
-    public ResponseEntity<PaymentResponse> refundPayment(@RequestBody PaymentRequest request) {
-        PaymentResponse response = paymentService.refundPayment(request);
-        return ResponseEntity.ok(response);
-    }
-    
-    // Get Payment Details
-    @GetMapping("/details/{reference}")
-    public ResponseEntity<PaymentResponse> getPaymentDetails(@PathVariable String reference) {
-        PaymentResponse response = paymentService.getPaymentDetails(reference);
-        return ResponseEntity.ok(response);
-    }
-    
-    // Bank Details & Withdrawals
-    @PostMapping("/bank-details")
-    public ResponseEntity<Void> addOrUpdateBankDetails(@RequestBody BankDetailsRequest request) {
-        paymentService.addOrUpdateBankDetails(request);
-        return ResponseEntity.noContent().build();
-    }
-    
-    @GetMapping("/bank-details/{userId}")
-    public ResponseEntity<BankDetailsResponse> getBankDetails(@PathVariable Long userId) {
-        BankDetailsResponse response = paymentService.getBankDetails(userId);
-        return ResponseEntity.ok(response);
-    }
-    
-    @PostMapping("/withdraw")
-    public ResponseEntity<WithdrawalResponse> withdrawToBank(@RequestBody WithdrawalRequest request) {
-        WithdrawalResponse response = paymentService.withdrawToBank(request);
-        return ResponseEntity.ok(response);
-    }
-    
     // PayHere Integration Endpoints
     
-    // Initiate PayHere Payment
+    // Payment Initialization (called by order-service, transport-service, etc.)
     @PostMapping("/payhere/initiate")
-    public ResponseEntity<PayHerePaymentResponse> initiatePayHerePayment(@RequestBody PayHerePaymentRequest request) {
+    public ResponseEntity<PayHerePaymentResponse> initiatePayHerePayment(@RequestBody PaymentInitiationRequest request) {
         PayHerePaymentResponse response = payHereService.initiatePayment(request);
         return ResponseEntity.ok(response);
     }
     
     // Generate PayHere Payment Form
     @PostMapping(value = "/payhere/form", produces = MediaType.TEXT_HTML_VALUE)
-    public ResponseEntity<String> generatePayHereForm(@RequestBody PayHerePaymentRequest request) {
+    public ResponseEntity<String> generatePayHereForm(@RequestBody PaymentInitiationRequest request) {
         try {
             PayHerePaymentResponse initResponse = payHereService.initiatePayment(request);
             
             if ("SUCCESS".equals(initResponse.status())) {
-                String form = payHereFormGenerator.generatePaymentForm(request, initResponse.hash());
+                // Convert to PayHerePaymentRequest for form generation
+                PayHerePaymentRequest payHereRequest = new PayHerePaymentRequest(
+                    request.payerId(),
+                    request.reference(),
+                    request.description(),
+                    "LKR",
+                    request.amount(),
+                    request.firstName(),
+                    request.lastName(),
+                    request.email(),
+                    request.phone(),
+                    request.address(),
+                    request.city(),
+                    request.country(),
+                    request.returnUrl(),
+                    request.cancelUrl(),
+                    request.payerId().toString(),
+                    request.payeeId().toString()
+                );
+                
+                String form = payHereFormGenerator.generatePaymentForm(payHereRequest, initResponse.hash());
                 return ResponseEntity.ok(form);
             } else {
                 return ResponseEntity.badRequest().body("<html><body><h3>Payment initiation failed: " + initResponse.message() + "</h3></body></html>");
@@ -162,5 +114,67 @@ public class PaymentController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("ERROR: " + e.getMessage());
         }
+    }
+    
+    // Escrow Management Endpoints
+    
+    // Release Escrow Amount
+    @PostMapping("/release-escrow")
+    public ResponseEntity<PaymentResponse> releaseEscrow(@RequestBody EscrowReleaseRequest request) {
+        PaymentResponse response = paymentService.releaseEscrow(request);
+        return ResponseEntity.ok(response);
+    }
+    
+    // Refund Escrow Amount
+    @PostMapping("/refund-escrow")
+    public ResponseEntity<PaymentResponse> refundEscrow(@RequestBody EscrowRefundRequest request) {
+        PaymentResponse response = paymentService.refundEscrow(request);
+        return ResponseEntity.ok(response);
+    }
+    
+    // Wallet Management Endpoints
+    
+    // Get Wallet Info (including payment history)
+    @GetMapping("/wallet/{userId}")
+    public ResponseEntity<WalletInfo> getWalletInfo(@PathVariable Long userId) {
+        WalletInfo walletInfo = paymentService.getWalletInfo(userId);
+        return ResponseEntity.ok(walletInfo);
+    }
+    
+    // Withdraw Wallet Amount (excluding escrow)
+    @PostMapping("/withdraw")
+    public ResponseEntity<WithdrawalResponse> withdrawToBank(@RequestBody WithdrawalRequest request) {
+        WithdrawalResponse response = paymentService.withdrawToBank(request);
+        return ResponseEntity.ok(response);
+    }
+    
+    // Bank Details Management
+    
+    @PostMapping("/bank-details")
+    public ResponseEntity<Void> addOrUpdateBankDetails(@RequestBody BankDetailsRequest request) {
+        paymentService.addOrUpdateBankDetails(request);
+        return ResponseEntity.noContent().build();
+    }
+    
+    @GetMapping("/bank-details/{userId}")
+    public ResponseEntity<BankDetailsResponse> getBankDetails(@PathVariable Long userId) {
+        BankDetailsResponse response = paymentService.getBankDetails(userId);
+        return ResponseEntity.ok(response);
+    }
+    
+    // Admin/Moderator Endpoints
+    
+    // Get Payment Statistics
+    @GetMapping("/statistics")
+    public ResponseEntity<PaymentStatistics> getPaymentStatistics() {
+        PaymentStatistics statistics = paymentService.getPaymentStatistics();
+        return ResponseEntity.ok(statistics);
+    }
+    
+    // Additional endpoints for transaction history
+    @GetMapping("/history/{userId}")
+    public ResponseEntity<List<TransactionHistory>> getTransactionHistory(@PathVariable Long userId) {
+        List<TransactionHistory> history = paymentService.getTransactionHistory(userId);
+        return ResponseEntity.ok(history);
     }
 }

@@ -1,7 +1,16 @@
 # PayHere Integration Documentation
 
 ## Overview
-This implementation provides integration with PayHere payment gateway for the Farmio payment service. It supports initiating payments, handling notifications, and automatically crediting user wallets upon successful payments.
+This implementation provides integration with PayHere payment gateway for the Farmio payment service. It supports marketplace payments with escrow functionality, automatic wallet crediting, and comprehensive transaction management.
+
+## Key Features
+
+✅ **PayHere Integration** - Secure payment processing via PayHere gateway  
+✅ **Escrow Management** - Automatic escrow split based on percentage  
+✅ **Wallet System** - User wallets with balance and escrow tracking  
+✅ **Transaction History** - Complete audit trail of all transactions  
+✅ **Admin Dashboard** - Payment statistics for admins/moderators  
+✅ **Bank Withdrawals** - Secure withdrawal to bank accounts  
 
 ## Configuration
 
@@ -25,93 +34,136 @@ Set these environment variables:
 
 ## API Endpoints
 
-### 1. Initiate PayHere Payment
+### 1. Payment Initialization (from other services)
 **POST** `/api/payment/payhere/initiate`
 
-Request body:
+```json
+{
+  "reference": "ORDER_001",
+  "amount": 1000.00,
+  "payerId": 123,
+  "payeeId": 456,
+  "escrowPercentage": 10.0,
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john@example.com",
+  "phone": "0771234567",
+  "address": "123 Main St",
+  "city": "Colombo",
+  "country": "Sri Lanka",
+  "returnUrl": "http://app.com/success",
+  "cancelUrl": "http://app.com/cancel",
+  "description": "Product purchase"
+}
+```
+
+### 2. Generate Payment Form
+**POST** `/api/payment/payhere/form` (Returns HTML)
+
+Same request body as above. Returns HTML form that redirects to PayHere.
+
+### 3. Release Escrow
+**POST** `/api/payment/release-escrow`
+
+```json
+{
+  "reference": "ORDER_001",
+  "payeeId": 456
+}
+```
+
+### 4. Refund Escrow
+**POST** `/api/payment/refund-escrow`
+
+```json
+{
+  "reference": "ORDER_001",
+  "payeeId": 456,
+  "payerId": 123
+}
+```
+
+### 5. Withdraw to Bank
+**POST** `/api/payment/withdraw`
+
 ```json
 {
   "userId": 123,
-  "orderId": "ORDER_001",
-  "items": "Product Purchase",
-  "currency": "LKR",
-  "amount": 1000.00,
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@example.com",
-  "phone": "0771234567",
-  "address": "123 Main Street",
-  "city": "Colombo",
-  "country": "Sri Lanka",
-  "returnUrl": "http://your-app.com/payment/success",
-  "cancelUrl": "http://your-app.com/payment/cancel",
-  "custom1": "user_id_123",
-  "custom2": "order_type_product"
+  "amount": 500.00,
+  "description": "Monthly withdrawal"
 }
 ```
 
-Response:
-```json
-{
-  "status": "SUCCESS",
-  "message": "Payment initiated successfully",
-  "checkoutUrl": "https://sandbox.payhere.lk/pay/checkout",
-  "orderId": "ORDER_001",
-  "hash": "generated_hash_value"
-}
-```
+### 6. Get Wallet Info
+**GET** `/api/payment/wallet/{userId}`
 
-### 2. Generate PayHere Payment Form
-**POST** `/api/payment/payhere/form` (Returns HTML)
+Returns wallet balance, escrow amount, and payment history.
 
-Same request body as above. Returns an HTML form that automatically redirects to PayHere.
+### 7. Get Payment Statistics (Admin)
+**GET** `/api/payment/statistics`
 
-### 3. PayHere Notification Handler (Webhook)
-**POST** `/api/payment/payhere/notify`
-
-This endpoint is called by PayHere automatically. Do not call manually.
+Returns total amounts, revenue, transaction counts, etc.
 
 ## Payment Flow
 
-1. **Frontend calls** `/api/payment/payhere/form` with payment details
-2. **Service generates** HTML form with PayHere parameters and hash
-3. **User is redirected** to PayHere payment gateway
-4. **User completes payment** on PayHere
-5. **PayHere calls** `/api/payment/payhere/notify` with payment result
-6. **Service verifies** payment notification and updates database
-7. **On success**, funds are automatically added to user's wallet
-8. **User is redirected** back to your return URL
+1. **Service Integration**: Order/Transport service calls `/payhere/initiate`
+2. **Payment Creation**: Creates payment record with escrow percentage
+3. **Hash Generation**: Generates secure PayHere hash
+4. **Redirect**: User redirects to PayHere with form
+5. **Payment Processing**: User completes payment on PayHere
+6. **Notification**: PayHere sends webhook to `/payhere/notify`
+7. **Amount Split**: Automatically splits payment:
+   - `amount * escrowPercentage` → Payee's escrow
+   - `amount - escrowAmount` → Payee's wallet balance
+8. **Transaction Records**: Creates audit trail entries
+
+## Escrow Logic
+
+- **On Payment Success**: Amount is split between escrow and direct wallet credit
+- **Release Escrow**: Moves escrowed amount to payee's wallet balance
+- **Refund Escrow**: Moves escrowed amount back to payer's wallet
+- **Withdrawals**: Only from wallet balance (excludes escrow)
 
 ## Security
 
-- All payment notifications are verified using MD5 hash
-- Merchant secret is never exposed to client-side
-- Payment status is only updated after successful verification
+- All PayHere notifications verified with MD5 hash
+- Merchant secret never exposed to client-side
+- Escrow amounts protected from unauthorized access
+- Complete transaction audit trail
+
+## Integration Example
+
+```java
+// In OrderService
+@Autowired
+private PaymentServiceClient paymentServiceClient;
+
+public void processOrderPayment(Order order) {
+    PaymentInitiationRequest request = new PaymentInitiationRequest(
+        order.getId(),
+        order.getTotalAmount(),
+        order.getBuyerId(),
+        order.getSellerId(),
+        BigDecimal.valueOf(10.0), // 10% escrow
+        // ... other customer details
+    );
+    
+    PayHerePaymentResponse response = paymentServiceClient.initiatePayment(request);
+    // Redirect user to PayHere with response data
+}
+```
 
 ## Testing
 
-For testing, use PayHere sandbox:
-- Set `payhere.sandbox=true` in configuration
-- Use test merchant credentials
-- Use publicly accessible notify URL (not localhost)
+1. Use PayHere sandbox environment
+2. Set publicly accessible notify URL
+3. Test with real PayHere merchant credentials
+4. Verify escrow calculations and wallet updates
 
-## Error Handling
+## Admin Features
 
-The service handles various error scenarios:
-- Invalid payment notifications (verification failed)
-- Payment failures, cancellations, and chargebacks
-- Network errors and timeouts
-
-All errors are logged and appropriate responses are sent to PayHere.
-
-## Wallet Integration
-
-Upon successful payment:
-1. User's wallet balance is automatically increased
-2. Transaction record is created
-3. Payment status is updated to COMPLETED
-
-The wallet can then be used for:
-- Making payments to other users
-- Escrow transactions
-- Withdrawals to bank accounts
+- View payment statistics
+- Monitor transaction volumes
+- Track escrow amounts
+- Generate revenue reports
+- Manage user wallet information

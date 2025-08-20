@@ -29,14 +29,17 @@ public class PaymentService {
     @Autowired
     private BankDetailsRepository bankDetailsRepository;
     
-    // Wallet Info
+    // Get Wallet Info with Payment History
     public WalletInfo getWalletInfo(Long userId) {
         Wallet wallet = getOrCreateWallet(userId);
+        List<TransactionHistory> history = getTransactionHistory(userId);
+        
         return new WalletInfo(
             wallet.getUserId(),
             wallet.getBalance(),
             wallet.getEscrowedAmount(),
-            wallet.getStatus()
+            wallet.getStatus(),
+            history
         );
     }
     
@@ -48,170 +51,127 @@ public class PaymentService {
             .collect(Collectors.toList());
     }
     
-    // Make a Payment
+    // Create Payment Record (for PayHere initiation)
     @Transactional
-    public PaymentResponse makePayment(PaymentRequest request) {
-        try {
-            // Generate payment ID
-            String paymentId = UUID.randomUUID().toString();
+    public Payment createPaymentRecord(PaymentInitiationRequest request) {
+        String paymentId = UUID.randomUUID().toString();
+        
+        Payment payment = new Payment(
+            paymentId,
+            request.payerId(),
+            request.amount(),
+            PaymentType.PAYHERE,
+            request.reference()
+        );
+        payment.setRecipientId(request.payeeId());
+        payment.setDescription(request.description());
+        payment.setStatus(PaymentStatus.PENDING);
+        payment.setEscrowPercentage(request.escrowPercentage());
+        
+        return paymentRepository.save(payment);
+    }
+    
+    // Process Payment Notification (from PayHere webhook)
+    @Transactional
+    public void processPaymentNotification(String orderId, String statusCode, BigDecimal amount) {
+        Payment payment = paymentRepository.findByReference(orderId)
+            .orElseThrow(() -> new RuntimeException("Payment not found: " + orderId));
+        
+        PaymentStatus newStatus = mapPayHereStatusToPaymentStatus(statusCode);
+        payment.setStatus(newStatus);
+        payment.setUpdatedAt(LocalDateTime.now());
+        paymentRepository.save(payment);
+        
+        // If payment is successful, split amount between escrow and direct credit
+        if ("2".equals(statusCode)) { // Success
+            BigDecimal escrowPercentage = payment.getEscrowPercentage() != null ? 
+                payment.getEscrowPercentage() : BigDecimal.ZERO;
             
-            // Create payment record
-            Payment payment = new Payment(
-                paymentId,
-                request.userId(),
-                request.amount(),
-                PaymentType.valueOf(request.type().toUpperCase()),
-                request.reference()
-            );
-            payment.setRecipientId(request.recipientId());
-            payment.setDescription(request.description());
-            payment.setStatus(PaymentStatus.COMPLETED);
+            BigDecimal escrowAmount = amount.multiply(escrowPercentage.divide(BigDecimal.valueOf(100)));
+            BigDecimal directAmount = amount.subtract(escrowAmount);
             
-            paymentRepository.save(payment);
+            // Get or create payee wallet
+            Wallet payeeWallet = getOrCreateWallet(payment.getRecipientId());
             
-            // Update recipient wallet if specified
-            if (request.recipientId() != null) {
-                Wallet recipientWallet = getOrCreateWallet(request.recipientId());
-                recipientWallet.addToBalance(request.amount());
-                walletRepository.save(recipientWallet);
+            // Add escrow amount to payee's escrow
+            if (escrowAmount.compareTo(BigDecimal.ZERO) > 0) {
+                payeeWallet.addToEscrow(escrowAmount);
                 
-                // Create transaction record for recipient
+                // Create escrow transaction
                 createTransaction(
-                    request.recipientId(),
-                    request.amount(),
+                    payment.getRecipientId(),
+                    escrowAmount,
+                    TransactionType.ESCROW,
+                    payment.getReference(),
+                    "Escrowed from PayHere payment: " + payment.getDescription()
+                );
+            }
+            
+            // Add remaining amount directly to payee's balance
+            if (directAmount.compareTo(BigDecimal.ZERO) > 0) {
+                payeeWallet.addToBalance(directAmount);
+                
+                // Create credit transaction
+                createTransaction(
+                    payment.getRecipientId(),
+                    directAmount,
                     TransactionType.CREDIT,
-                    request.reference(),
-                    "Payment received: " + request.description()
+                    payment.getReference(),
+                    "Direct credit from PayHere payment: " + payment.getDescription()
                 );
             }
             
-            return new PaymentResponse(
-                "SUCCESS",
-                "Payment completed successfully",
-                UUID.randomUUID().toString(),
-                paymentId
-            );
-            
-        } catch (Exception e) {
-            return new PaymentResponse(
-                "FAILED",
-                "Payment failed: " + e.getMessage(),
-                null,
-                null
-            );
+            walletRepository.save(payeeWallet);
         }
     }
     
-    // Escrow Funds
+    // Release Escrow Amount
     @Transactional
-    public PaymentResponse escrowFunds(PaymentRequest request) {
-        try {
-            Wallet payerWallet = getOrCreateWallet(request.userId());
-            
-            // Check if user has sufficient balance
-            if (payerWallet.getBalance().compareTo(request.amount()) < 0) {
-                return new PaymentResponse(
-                    "FAILED",
-                    "Insufficient balance",
-                    null,
-                    null
-                );
-            }
-            
-            // Move funds from balance to escrow
-            payerWallet.subtractFromBalance(request.amount());
-            payerWallet.addToEscrow(request.amount());
-            walletRepository.save(payerWallet);
-            
-            // Create payment record
-            String paymentId = UUID.randomUUID().toString();
-            Payment payment = new Payment(
-                paymentId,
-                request.userId(),
-                request.amount(),
-                PaymentType.valueOf(request.type().toUpperCase()),
-                request.reference()
-            );
-            payment.setRecipientId(request.recipientId());
-            payment.setDescription(request.description());
-            payment.setStatus(PaymentStatus.ESCROWED);
-            paymentRepository.save(payment);
-            
-            // Create transaction record
-            createTransaction(
-                request.userId(),
-                request.amount(),
-                TransactionType.ESCROW,
-                request.reference(),
-                "Funds escrowed: " + request.description()
-            );
-            
-            return new PaymentResponse(
-                "SUCCESS",
-                "Funds escrowed successfully",
-                UUID.randomUUID().toString(),
-                paymentId
-            );
-            
-        } catch (Exception e) {
-            return new PaymentResponse(
-                "FAILED",
-                "Escrow failed: " + e.getMessage(),
-                null,
-                null
-            );
-        }
-    }
-    
-    // Release Escrowed Funds
-    @Transactional
-    public PaymentResponse releaseEscrow(PaymentRequest request) {
+    public PaymentResponse releaseEscrow(EscrowReleaseRequest request) {
         try {
             // Find payment by reference
             Payment payment = paymentRepository.findByReference(request.reference())
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
             
-            if (payment.getStatus() != PaymentStatus.ESCROWED) {
+            // Calculate escrow amount
+            BigDecimal escrowPercentage = payment.getEscrowPercentage() != null ? 
+                payment.getEscrowPercentage() : BigDecimal.ZERO;
+            BigDecimal escrowAmount = payment.getAmount().multiply(escrowPercentage.divide(BigDecimal.valueOf(100)));
+            
+            if (escrowAmount.compareTo(BigDecimal.ZERO) <= 0) {
                 return new PaymentResponse(
                     "FAILED",
-                    "Payment is not in escrowed status",
+                    "No escrow amount to release",
                     null,
                     payment.getPaymentId()
                 );
             }
             
-            // Update payer wallet (remove from escrow)
-            Wallet payerWallet = getOrCreateWallet(payment.getUserId());
-            payerWallet.subtractFromEscrow(payment.getAmount());
-            walletRepository.save(payerWallet);
+            // Get payee wallet
+            Wallet payeeWallet = getOrCreateWallet(request.payeeId());
             
-            // Update recipient wallet (add to balance)
-            if (payment.getRecipientId() != null) {
-                Wallet recipientWallet = getOrCreateWallet(payment.getRecipientId());
-                recipientWallet.addToBalance(payment.getAmount());
-                walletRepository.save(recipientWallet);
-                
-                // Create transaction record for recipient
-                createTransaction(
-                    payment.getRecipientId(),
-                    payment.getAmount(),
-                    TransactionType.CREDIT,
-                    payment.getReference(),
-                    "Escrow released: " + payment.getDescription()
+            // Check if sufficient escrow amount exists
+            if (payeeWallet.getEscrowedAmount().compareTo(escrowAmount) < 0) {
+                return new PaymentResponse(
+                    "FAILED",
+                    "Insufficient escrow amount",
+                    null,
+                    payment.getPaymentId()
                 );
             }
             
-            // Update payment status
-            payment.setStatus(PaymentStatus.RELEASED);
-            paymentRepository.save(payment);
+            // Move from escrow to balance
+            payeeWallet.subtractFromEscrow(escrowAmount);
+            payeeWallet.addToBalance(escrowAmount);
+            walletRepository.save(payeeWallet);
             
-            // Create transaction record for payer
+            // Create transaction record
             createTransaction(
-                payment.getUserId(),
-                payment.getAmount(),
+                request.payeeId(),
+                escrowAmount,
                 TransactionType.RELEASE,
-                payment.getReference(),
-                "Escrow released: " + payment.getDescription()
+                request.reference(),
+                "Escrow released to wallet balance"
             );
             
             return new PaymentResponse(
@@ -231,59 +191,70 @@ public class PaymentService {
         }
     }
     
-    // Refund Payment
+    // Refund Escrow Amount
     @Transactional
-    public PaymentResponse refundPayment(PaymentRequest request) {
+    public PaymentResponse refundEscrow(EscrowRefundRequest request) {
         try {
             // Find payment by reference
             Payment payment = paymentRepository.findByReference(request.reference())
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
             
-            // Return funds to payer
-            Wallet payerWallet = getOrCreateWallet(payment.getUserId());
+            // Calculate escrow amount
+            BigDecimal escrowPercentage = payment.getEscrowPercentage() != null ? 
+                payment.getEscrowPercentage() : BigDecimal.ZERO;
+            BigDecimal escrowAmount = payment.getAmount().multiply(escrowPercentage.divide(BigDecimal.valueOf(100)));
             
-            if (payment.getStatus() == PaymentStatus.ESCROWED) {
-                // If escrowed, move from escrow to balance
-                payerWallet.subtractFromEscrow(payment.getAmount());
-                payerWallet.addToBalance(payment.getAmount());
-            } else if (payment.getStatus() == PaymentStatus.COMPLETED || payment.getStatus() == PaymentStatus.RELEASED) {
-                // If completed, add to balance and deduct from recipient if applicable
-                payerWallet.addToBalance(payment.getAmount());
-                
-                if (payment.getRecipientId() != null) {
-                    Wallet recipientWallet = getOrCreateWallet(payment.getRecipientId());
-                    recipientWallet.subtractFromBalance(payment.getAmount());
-                    walletRepository.save(recipientWallet);
-                    
-                    // Create transaction record for recipient
-                    createTransaction(
-                        payment.getRecipientId(),
-                        payment.getAmount(),
-                        TransactionType.DEBIT,
-                        payment.getReference(),
-                        "Payment refunded: " + payment.getDescription()
-                    );
-                }
+            if (escrowAmount.compareTo(BigDecimal.ZERO) <= 0) {
+                return new PaymentResponse(
+                    "FAILED",
+                    "No escrow amount to refund",
+                    null,
+                    payment.getPaymentId()
+                );
             }
             
+            // Get wallets
+            Wallet payeeWallet = getOrCreateWallet(request.payeeId());
+            Wallet payerWallet = getOrCreateWallet(request.payerId());
+            
+            // Check if sufficient escrow amount exists
+            if (payeeWallet.getEscrowedAmount().compareTo(escrowAmount) < 0) {
+                return new PaymentResponse(
+                    "FAILED",
+                    "Insufficient escrow amount",
+                    null,
+                    payment.getPaymentId()
+                );
+            }
+            
+            // Remove from payee's escrow
+            payeeWallet.subtractFromEscrow(escrowAmount);
+            walletRepository.save(payeeWallet);
+            
+            // Add to payer's balance
+            payerWallet.addToBalance(escrowAmount);
             walletRepository.save(payerWallet);
             
-            // Update payment status
-            payment.setStatus(PaymentStatus.REFUNDED);
-            paymentRepository.save(payment);
-            
-            // Create transaction record
+            // Create transaction records
             createTransaction(
-                payment.getUserId(),
-                payment.getAmount(),
+                request.payeeId(),
+                escrowAmount,
+                TransactionType.DEBIT,
+                request.reference(),
+                "Escrow refunded to payer"
+            );
+            
+            createTransaction(
+                request.payerId(),
+                escrowAmount,
                 TransactionType.REFUND,
-                payment.getReference(),
-                "Payment refunded: " + payment.getDescription()
+                request.reference(),
+                "Escrow refund received"
             );
             
             return new PaymentResponse(
                 "SUCCESS",
-                "Payment refunded successfully",
+                "Escrow refunded successfully",
                 UUID.randomUUID().toString(),
                 payment.getPaymentId()
             );
@@ -291,80 +262,27 @@ public class PaymentService {
         } catch (Exception e) {
             return new PaymentResponse(
                 "FAILED",
-                "Refund failed: " + e.getMessage(),
+                "Escrow refund failed: " + e.getMessage(),
                 null,
                 null
             );
         }
     }
     
-    // Get Payment Details
-    public PaymentResponse getPaymentDetails(String reference) {
-        try {
-            Payment payment = paymentRepository.findByReference(reference)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
-            
-            return new PaymentResponse(
-                payment.getStatus().toString(),
-                "Payment details retrieved",
-                null,
-                payment.getPaymentId()
-            );
-            
-        } catch (Exception e) {
-            return new PaymentResponse(
-                "FAILED",
-                "Payment not found: " + e.getMessage(),
-                null,
-                null
-            );
-        }
-    }
-    
-    // Bank Details
-    public void addOrUpdateBankDetails(BankDetailsRequest request) {
-        BankDetails bankDetails = bankDetailsRepository.findByUserId(request.userId())
-            .orElse(new BankDetails());
-        
-        bankDetails.setUserId(request.userId());
-        bankDetails.setBank(request.bank());
-        bankDetails.setBranch(request.branch());
-        bankDetails.setAccountNumber(request.accountNumber());
-        bankDetails.setAccountHolderName(request.accountHolderName());
-        bankDetails.setSwiftCode(request.swiftCode());
-        
-        bankDetailsRepository.save(bankDetails);
-    }
-    
-    public BankDetailsResponse getBankDetails(Long userId) {
-        BankDetails bankDetails = bankDetailsRepository.findByUserId(userId)
-            .orElseThrow(() -> new RuntimeException("Bank details not found"));
-        
-        return new BankDetailsResponse(
-            bankDetails.getUserId(),
-            bankDetails.getBank(),
-            bankDetails.getBranch(),
-            bankDetails.getAccountNumber(),
-            bankDetails.getAccountHolderName(),
-            bankDetails.getSwiftCode(),
-            bankDetails.getStatus()
-        );
-    }
-    
-    // Withdraw to Bank
+    // Withdraw to Bank (excluding escrow amount)
     @Transactional
     public WithdrawalResponse withdrawToBank(WithdrawalRequest request) {
         try {
             Wallet wallet = getOrCreateWallet(request.userId());
             
-            // Check if user has sufficient balance
+            // Check if user has sufficient balance (excluding escrow)
             if (wallet.getBalance().compareTo(request.amount()) < 0) {
                 return new WithdrawalResponse(
                     null,
                     request.userId(),
                     request.amount(),
                     "FAILED",
-                    "Insufficient balance"
+                    "Insufficient balance (excluding escrow amount)"
                 );
             }
             
@@ -372,7 +290,7 @@ public class PaymentService {
             BankDetails bankDetails = bankDetailsRepository.findByUserId(request.userId())
                 .orElseThrow(() -> new RuntimeException("Bank details not found"));
             
-            // Deduct from wallet
+            // Deduct from wallet balance only
             wallet.subtractFromBalance(request.amount());
             walletRepository.save(wallet);
             
@@ -403,6 +321,86 @@ public class PaymentService {
                 "Withdrawal failed: " + e.getMessage()
             );
         }
+    }
+    
+    // Get Payment Statistics (Admin/Moderator)
+    public PaymentStatistics getPaymentStatistics() {
+        List<Payment> allPayments = paymentRepository.findAll();
+        List<Transaction> allTransactions = transactionRepository.findAll();
+        List<Wallet> allWallets = walletRepository.findAll();
+        
+        BigDecimal totalAmount = allPayments.stream()
+            .map(Payment::getAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        BigDecimal totalRevenue = allPayments.stream()
+            .filter(p -> p.getStatus() == PaymentStatus.COMPLETED)
+            .map(Payment::getAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        int transactionCount = allTransactions.size();
+        
+        BigDecimal totalEscrowAmount = allWallets.stream()
+            .map(Wallet::getEscrowedAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        long successfulPayments = allPayments.stream()
+            .filter(p -> p.getStatus() == PaymentStatus.COMPLETED)
+            .count();
+        
+        long failedPayments = allPayments.stream()
+            .filter(p -> p.getStatus() == PaymentStatus.FAILED)
+            .count();
+        
+        long pendingPayments = allPayments.stream()
+            .filter(p -> p.getStatus() == PaymentStatus.PENDING)
+            .count();
+        
+        BigDecimal totalWithdrawals = allTransactions.stream()
+            .filter(t -> t.getType() == TransactionType.WITHDRAWAL)
+            .map(Transaction::getAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        return new PaymentStatistics(
+            totalAmount,
+            totalRevenue,
+            transactionCount,
+            totalEscrowAmount,
+            (int) successfulPayments,
+            (int) failedPayments,
+            (int) pendingPayments,
+            totalWithdrawals
+        );
+    }
+    
+    // Bank Details
+    public void addOrUpdateBankDetails(BankDetailsRequest request) {
+        BankDetails bankDetails = bankDetailsRepository.findByUserId(request.userId())
+            .orElse(new BankDetails());
+        
+        bankDetails.setUserId(request.userId());
+        bankDetails.setBank(request.bank());
+        bankDetails.setBranch(request.branch());
+        bankDetails.setAccountNumber(request.accountNumber());
+        bankDetails.setAccountHolderName(request.accountHolderName());
+        bankDetails.setSwiftCode(request.swiftCode());
+        
+        bankDetailsRepository.save(bankDetails);
+    }
+    
+    public BankDetailsResponse getBankDetails(Long userId) {
+        BankDetails bankDetails = bankDetailsRepository.findByUserId(userId)
+            .orElseThrow(() -> new RuntimeException("Bank details not found"));
+        
+        return new BankDetailsResponse(
+            bankDetails.getUserId(),
+            bankDetails.getBank(),
+            bankDetails.getBranch(),
+            bankDetails.getAccountNumber(),
+            bankDetails.getAccountHolderName(),
+            bankDetails.getSwiftCode(),
+            bankDetails.getStatus()
+        );
     }
     
     // Helper methods
@@ -437,5 +435,16 @@ public class PaymentService {
             transaction.getTimestamp(),
             transaction.getDescription()
         );
+    }
+    
+    private PaymentStatus mapPayHereStatusToPaymentStatus(String statusCode) {
+        return switch (statusCode) {
+            case "2" -> PaymentStatus.COMPLETED;
+            case "0" -> PaymentStatus.PENDING;
+            case "-1" -> PaymentStatus.CANCELLED;
+            case "-2" -> PaymentStatus.FAILED;
+            case "-3" -> PaymentStatus.REFUNDED;
+            default -> PaymentStatus.FAILED;
+        };
     }
 }

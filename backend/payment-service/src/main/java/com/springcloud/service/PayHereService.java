@@ -23,47 +23,49 @@ public class PayHereService {
     private PayHereConfig payHereConfig;
     
     @Autowired
-    private PaymentRepository paymentRepository;
-    
-    @Autowired
-    private WalletRepository walletRepository;
-    
-    @Autowired
-    private TransactionRepository transactionRepository;
-    
-    @Autowired
     private PaymentService paymentService;
     
     /**
-     * Initiate PayHere payment and generate checkout URL
+     * Initiate PayHere payment from other services (order-service, transport-service)
      */
-    public PayHerePaymentResponse initiatePayment(PayHerePaymentRequest request) {
+    public PayHerePaymentResponse initiatePayment(PaymentInitiationRequest request) {
         try {
+            // Create payment record
+            Payment payment = paymentService.createPaymentRecord(request);
+            
             // Generate hash for PayHere
             String hash = generateHash(
                 payHereConfig.getMerchantId(),
-                request.orderId(),
+                request.reference(),
                 request.amount(),
-                request.currency()
+                "LKR"
             );
             
-            // Create pending payment record
-            Payment payment = new Payment(
-                request.orderId(),
-                request.userId(),
+            // Create PayHere request
+            PayHerePaymentRequest payHereRequest = new PayHerePaymentRequest(
+                request.payerId(),
+                request.reference(),
+                request.description(),
+                "LKR",
                 request.amount(),
-                PaymentType.PAYHERE,
-                request.orderId()
+                request.firstName(),
+                request.lastName(),
+                request.email(),
+                request.phone(),
+                request.address(),
+                request.city(),
+                request.country(),
+                request.returnUrl(),
+                request.cancelUrl(),
+                request.payerId().toString(), // custom1 - payer ID
+                request.payeeId().toString()  // custom2 - payee ID
             );
-            payment.setStatus(PaymentStatus.PENDING);
-            payment.setDescription("PayHere payment for: " + request.items());
-            paymentRepository.save(payment);
             
             return new PayHerePaymentResponse(
                 "SUCCESS",
                 "Payment initiated successfully",
                 payHereConfig.getCheckoutUrl(),
-                request.orderId(),
+                request.reference(),
                 hash
             );
             
@@ -72,7 +74,7 @@ public class PayHereService {
                 "FAILED",
                 "Payment initiation failed: " + e.getMessage(),
                 null,
-                request.orderId(),
+                request.reference(),
                 null
             );
         }
@@ -89,23 +91,12 @@ public class PayHereService {
                 throw new RuntimeException("Invalid payment notification signature");
             }
             
-            // Find the payment record
-            Payment payment = paymentRepository.findByPaymentId(notification.orderId())
-                .orElseThrow(() -> new RuntimeException("Payment not found: " + notification.orderId()));
-            
-            // Update payment status based on status code
-            PaymentStatus newStatus = mapPayHereStatusToPaymentStatus(notification.statusCode());
-            payment.setStatus(newStatus);
-            payment.setUpdatedAt(LocalDateTime.now());
-            paymentRepository.save(payment);
-            
-            // If payment is successful, add funds to user's wallet
-            if ("2".equals(notification.statusCode())) { // Success
-                addFundsToWallet(payment.getUserId(), payment.getAmount(), notification.orderId());
-            }
-            
-            // Create transaction record
-            createTransactionRecord(payment, notification);
+            // Process payment notification through main payment service
+            paymentService.processPaymentNotification(
+                notification.orderId(),
+                notification.statusCode(),
+                notification.payhereAmount()
+            );
             
         } catch (Exception e) {
             // Log error - in production, you might want to use proper logging
@@ -179,78 +170,5 @@ public class PayHereService {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("MD5 algorithm not available", e);
         }
-    }
-    
-    /**
-     * Map PayHere status code to internal payment status
-     */
-    private PaymentStatus mapPayHereStatusToPaymentStatus(String statusCode) {
-        return switch (statusCode) {
-            case "2" -> PaymentStatus.COMPLETED;
-            case "0" -> PaymentStatus.PENDING;
-            case "-1" -> PaymentStatus.CANCELLED;
-            case "-2" -> PaymentStatus.FAILED;
-            case "-3" -> PaymentStatus.REFUNDED;
-            default -> PaymentStatus.FAILED;
-        };
-    }
-    
-    /**
-     * Add funds to user's wallet
-     */
-    private void addFundsToWallet(Long userId, BigDecimal amount, String reference) {
-        // Get or create wallet
-        Wallet wallet = walletRepository.findByUserId(userId)
-            .orElseGet(() -> {
-                Wallet newWallet = new Wallet(userId);
-                return walletRepository.save(newWallet);
-            });
-        
-        // Add funds to wallet
-        wallet.addToBalance(amount);
-        walletRepository.save(wallet);
-        
-        // Create transaction record
-        Transaction transaction = new Transaction(
-            UUID.randomUUID().toString(),
-            userId,
-            amount,
-            TransactionType.CREDIT,
-            reference
-        );
-        transaction.setDescription("PayHere payment credited to wallet");
-        transaction.setStatus("COMPLETED");
-        transactionRepository.save(transaction);
-    }
-    
-    /**
-     * Create transaction record for PayHere payment
-     */
-    private void createTransactionRecord(Payment payment, PayHereNotificationRequest notification) {
-        Transaction transaction = new Transaction(
-            UUID.randomUUID().toString(),
-            payment.getUserId(),
-            notification.payhereAmount(),
-            TransactionType.PAYMENT,
-            notification.orderId()
-        );
-        
-        transaction.setDescription("PayHere payment - " + notification.statusMessage());
-        transaction.setStatus(mapPayHereStatusToTransactionStatus(notification.statusCode()));
-        transactionRepository.save(transaction);
-    }
-    
-    /**
-     * Map PayHere status to transaction status
-     */
-    private String mapPayHereStatusToTransactionStatus(String statusCode) {
-        return switch (statusCode) {
-            case "2" -> "COMPLETED";
-            case "0" -> "PENDING";
-            case "-1" -> "CANCELLED";
-            case "-2" -> "FAILED";
-            case "-3" -> "REFUNDED";
-            default -> "FAILED";
-        };
     }
 }

@@ -24,6 +24,9 @@ public class Payment {
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
     
+    @Column(precision = 5, scale = 2)
+    private BigDecimal escrowPercentage;
+    
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentType type;
@@ -73,6 +76,9 @@ public class Payment {
     
     public BigDecimal getAmount() { return amount; }
     public void setAmount(BigDecimal amount) { this.amount = amount; }
+    
+    public BigDecimal getEscrowPercentage() { return escrowPercentage; }
+    public void setEscrowPercentage(BigDecimal escrowPercentage) { this.escrowPercentage = escrowPercentage; }
     
     public PaymentType getType() { return type; }
     public void setType(PaymentType type) { this.type = type; }
