@@ -64,9 +64,9 @@ export default function OrderDetails() {
                 // Required PayHere params from backend response
                 const params = {
                     merchant_id: res.data.merchantId,
-                    return_url: "https://yourdomain.com/payhere/return", // Hardcoded
-                    cancel_url: "https://yourdomain.com/payhere/cancel", // Hardcoded
-                    notify_url: "https://yourdomain.com/payhere/notify", // Hardcoded
+                    return_url: "https://http://localhost:5173/buyer/orders/14", // Hardcoded
+                    cancel_url: "https://http://localhost:5173/buyer/orders/14", // Hardcoded
+                    notify_url: "http://iolko-61-245-169-29.a.free.pinggy.link/api/payment/payhere/notify", // Hardcoded
                     first_name: res.data.firstName,
                     last_name: res.data.lastName,
                     email: res.data.email,

@@ -92,6 +92,8 @@ public class PayHereService {
             if (!verifyPaymentNotification(notification)) {
                 throw new RuntimeException("Invalid payment notification signature");
             }
+
+            System.out.println("Notification signature is valid");
             
             // Process payment notification through main payment service
             paymentService.processPaymentNotification(

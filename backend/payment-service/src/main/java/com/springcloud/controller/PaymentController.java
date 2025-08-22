@@ -57,7 +57,9 @@ public class PaymentController {
             @RequestParam(value = "card_holder_name", required = false) String cardHolderName,
             @RequestParam(value = "card_no", required = false) String cardNo,
             @RequestParam(value = "card_expiry", required = false) String cardExpiry) {
-        
+
+        System.out.println("Payment notification received");
+
         try {
             PayHereNotificationRequest notification = new PayHereNotificationRequest(
                 merchantId,
