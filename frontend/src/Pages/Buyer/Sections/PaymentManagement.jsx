@@ -10,6 +10,8 @@ import {
     ReceiptRefundIcon,
     CalendarIcon
 } from '@heroicons/react/24/outline';
+import { useUserContext } from '@/Contexts/UserContext';
+import api from '@/API/client';
 // TODO: Replace with actual buyer payment context/hook
 // import { useBuyerPayment } from '../../../Contexts/Buyer/PaymentContext';
 
@@ -18,6 +20,44 @@ const useBuyerPayment = () => {
     // Replace with real data fetching and actions
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [walletData, setWalletData] = useState(null);
+    const {user} = useUserContext();
+
+    useEffect(()=>{
+        async function fetchPayments(){
+            try {
+                setLoading(true);
+                // Replace with real API call
+                const response = await api.get(`/api/payment/wallet/${user.id}`);
+                console.log("wallet data : ", response.data);
+                setWalletData(response.data);
+                
+                // Convert payment history to payments format
+                if (response.data.paymentHistory) {
+                    const formattedPayments = response.data.paymentHistory.map(transaction => ({
+                        id: transaction.transactionId,
+                        type: transaction.type,
+                        reference: transaction.reference,
+                        amount: transaction.amount,
+                        status: transaction.status.toLowerCase(),
+                        paymentDate: new Date(transaction.timestamp).toISOString().split('T')[0],
+                        description: transaction.description,
+                        transactionType: transaction.type
+                    }));
+                    setPayments(formattedPayments);
+                }
+            } catch (error) {
+                console.error("Failed to fetch wallet data:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        if (user?.id) {
+            fetchPayments();
+        }
+    }, [user])
+
+
     useEffect(() => {
         setLoading(true);
         setTimeout(() => {
@@ -103,6 +143,7 @@ const useBuyerPayment = () => {
     return {
         payments,
         loading,
+        walletData,
         loadPayments: () => {},
         exportPayments: () => {},
     };
@@ -113,27 +154,37 @@ function PaymentTable({ payments }) {
         <table className="min-w-full text-sm">
             <thead>
                 <tr className="bg-gray-100 dark:bg-gray-800">
+                    <th className="p-2 text-left font-semibold">Transaction ID</th>
                     <th className="p-2 text-left font-semibold">Type</th>
                     <th className="p-2 text-left font-semibold">Reference</th>
-                    <th className="p-2 text-left font-semibold">Produce</th>
-                    <th className="p-2 text-left font-semibold">Quantity</th>
-                    <th className="p-2 text-left font-semibold">Total Paid</th>
+                    <th className="p-2 text-left font-semibold">Amount</th>
                     <th className="p-2 text-left font-semibold">Status</th>
-                    <th className="p-2 text-left font-semibold">Payment Date</th>
+                    <th className="p-2 text-left font-semibold">Date</th>
+                    <th className="p-2 text-left font-semibold">Description</th>
                 </tr>
             </thead>
             <tbody>
                 {payments.map(p => (
                     <tr key={p.id} className="border-b border-gray-100 dark:border-gray-700">
-                        <td className="p-2">{p.type || (p.orderId ? 'Order' : p.bookingId ? 'Warehouse Booking' : '')}</td>
-                        <td className="p-2">{p.type === 'Order' ? p.orderId : p.bookingId}</td>
-                        <td className="p-2">{p.produce}</td>
-                        <td className="p-2">{p.quantity} kg</td>
-                        <td className="p-2">Rs. {p.totalAmount.toLocaleString()}</td>
+                        <td className="p-2 font-mono text-xs">{p.id}</td>
+                        <td className="p-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                p.transactionType === 'CREDIT' ? 'bg-green-100 text-green-800' : 
+                                p.transactionType === 'ESCROW' ? 'bg-yellow-100 text-yellow-800' : 
+                                p.transactionType === 'DEBIT' ? 'bg-red-100 text-red-800' :
+                                p.transactionType === 'REFUND' ? 'bg-blue-100 text-blue-800' :
+                                'bg-gray-100 text-gray-800'
+                            }`}>
+                                {p.transactionType}
+                            </span>
+                        </td>
+                        <td className="p-2">{p.reference}</td>
+                        <td className="p-2 font-semibold">Rs. {(p.amount ?? 0).toLocaleString()}</td>
                         <td className="p-2">
                             <span className={`px-2 py-1 rounded-full text-xs font-semibold ${p.status === 'settled' ? 'bg-green-100 text-green-800' : p.status === 'refunded' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-500'}`}>{p.status}</span>
                         </td>
                         <td className="p-2">{p.paymentDate}</td>
+                        <td className="p-2 text-xs text-gray-600">{p.description}</td>
                     </tr>
                 ))}
             </tbody>
@@ -142,9 +193,8 @@ function PaymentTable({ payments }) {
 }
 
 export default function PaymentManagement() {
-    const { payments, loading, loadPayments } = useBuyerPayment();
-    // Wallet state (mocked for demo)
-    const [wallet, setWallet] = useState(15000); // Rs. 15,000 in wallet
+    const { payments, loading, walletData, loadPayments } = useBuyerPayment();
+    // Wallet state (now from API)
     const [withdrawModal, setWithdrawModal] = useState(false);
     const [withdrawAmount, setWithdrawAmount] = useState('');
     const [withdrawError, setWithdrawError] = useState('');
@@ -152,15 +202,15 @@ export default function PaymentManagement() {
     // Simple CSV export for buyer payments
     const exportPayments = () => {
         if (!payments.length) return;
-        const headers = ['Type','Reference','Produce','Quantity','Total Paid','Status','Payment Date'];
+        const headers = ['Transaction ID','Type','Reference','Amount','Status','Date','Description'];
         const rows = payments.map(p => [
-            p.type || (p.orderId ? 'Order' : p.bookingId ? 'Warehouse Booking' : ''),
-            p.type === 'Order' ? p.orderId : p.bookingId,
-            p.produce,
-            p.quantity,
-            p.totalAmount,
+            p.id,
+            p.transactionType,
+            p.reference,
+            p.amount,
             p.status,
-            p.paymentDate
+            p.paymentDate,
+            p.description
         ]);
         const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -184,29 +234,29 @@ export default function PaymentManagement() {
         search: ''
     });
 
-    // Filtering logic (extended)
+    // Filtering logic (updated for new data structure)
     const filteredPayments = payments.filter(payment => {
         if (filters.status !== 'all' && payment.status !== filters.status) return false;
-        if (filters.type !== 'all' && payment.type !== filters.type) return false;
-        if (filters.minAmount && payment.totalAmount < Number(filters.minAmount)) return false;
-        if (filters.maxAmount && payment.totalAmount > Number(filters.maxAmount)) return false;
+        if (filters.type !== 'all' && payment.transactionType !== filters.type) return false;
+        if (filters.minAmount && payment.amount < Number(filters.minAmount)) return false;
+        if (filters.maxAmount && payment.amount > Number(filters.maxAmount)) return false;
         if (filters.startDate && payment.paymentDate < filters.startDate) return false;
         if (filters.endDate && payment.paymentDate > filters.endDate) return false;
         if (filters.search && !(
-            (payment.bookingId && payment.bookingId.toLowerCase().includes(filters.search.toLowerCase())) ||
-            (payment.orderId && payment.orderId.toLowerCase().includes(filters.search.toLowerCase()))
+            payment.reference.toLowerCase().includes(filters.search.toLowerCase()) ||
+            payment.description.toLowerCase().includes(filters.search.toLowerCase())
         )) return false;
         return true;
     });
 
     const stats = {
-        totalPaid: payments.reduce((sum, p) => sum + p.totalAmount, 0),
-        refunds: payments.reduce((sum, p) => sum + p.refundAmount, 0),
-        settled: payments.filter(p => p.status === 'settled').length,
-        refunded: payments.filter(p => p.status === 'refunded').length,
-        warehousePayments: payments.filter(p => p.type === 'Warehouse Booking').length,
-        extensionPayments: payments.filter(p => p.type === 'Warehouse Extension').length,
-        orderPayments: payments.filter(p => p.type === 'Order').length
+        totalPaid: payments.filter(p => p.transactionType === 'CREDIT').reduce((sum, p) => sum + p.amount, 0),
+        totalEscrow: payments.filter(p => p.transactionType === 'ESCROW').reduce((sum, p) => sum + p.amount, 0),
+        refunds: payments.filter(p => p.transactionType === 'REFUND').reduce((sum, p) => sum + p.amount, 0),
+        completed: payments.filter(p => p.status === 'completed').length,
+        pending: payments.filter(p => p.status === 'pending').length,
+        creditTransactions: payments.filter(p => p.transactionType === 'CREDIT').length,
+        escrowTransactions: payments.filter(p => p.transactionType === 'ESCROW').length
     };
 
     // Withdraw handler
@@ -217,11 +267,12 @@ export default function PaymentManagement() {
             setWithdrawError('Please enter a valid amount.');
             return;
         }
-        if (amount > wallet) {
+        if (amount > (walletData?.amount || 0)) {
             setWithdrawError('Insufficient wallet balance.');
             return;
         }
-        setWallet(w => w - amount);
+        // TODO: Call API to withdraw funds
+        console.log('Withdrawing:', amount);
         setWithdrawModal(false);
         setWithdrawAmount('');
     };
@@ -269,8 +320,9 @@ export default function PaymentManagement() {
                         <div className="flex items-center">
                             <CurrencyDollarIcon className="h-7 w-7 text-green-600" />
                             <div className="ml-3">
-                                <p className="text-xs font-medium text-gray-500">Wallet Balance</p>
-                                <p className="text-xl font-bold text-green-700">Rs. {wallet.toLocaleString()}</p>
+                                <p className="text-xs font-medium text-gray-500">Available Balance</p>
+                                <p className="text-xl font-bold text-green-700">Rs. {(walletData?.amount || 0).toLocaleString()}</p>
+                                <p className="text-xs text-gray-500 mt-1">Escrow: Rs. {(walletData?.escrowAmount || 0).toLocaleString()}</p>
                             </div>
                         </div>
                     </div>
@@ -279,8 +331,17 @@ export default function PaymentManagement() {
                         <div className="flex items-center">
                             <CurrencyDollarIcon className="h-6 w-6 text-green-600" />
                             <div className="ml-3">
-                                <p className="text-xs font-medium text-gray-500">Total Paid</p>
+                                <p className="text-xs font-medium text-gray-500">Total Credits</p>
                                 <p className="text-lg font-bold text-gray-900">Rs. {stats.totalPaid.toLocaleString()}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                        <div className="flex items-center">
+                            <BanknotesIcon className="h-6 w-6 text-yellow-600" />
+                            <div className="ml-3">
+                                <p className="text-xs font-medium text-gray-500">Total Escrow</p>
+                                <p className="text-lg font-bold text-gray-900">Rs. {stats.totalEscrow.toLocaleString()}</p>
                             </div>
                         </div>
                     </div>
@@ -295,19 +356,10 @@ export default function PaymentManagement() {
                     </div>
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                         <div className="flex items-center">
-                            <BanknotesIcon className="h-6 w-6 text-yellow-600" />
-                            <div className="ml-3">
-                                <p className="text-xs font-medium text-gray-500">Warehouse Bookings</p>
-                                <p className="text-lg font-bold text-gray-900">{stats.warehousePayments}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                        <div className="flex items-center">
                             <CalendarIcon className="h-6 w-6 text-purple-600" />
                             <div className="ml-3">
-                                <p className="text-xs font-medium text-gray-500">Order Payments</p>
-                                <p className="text-lg font-bold text-gray-900">{stats.orderPayments}</p>
+                                <p className="text-xs font-medium text-gray-500">Total Transactions</p>
+                                <p className="text-lg font-bold text-gray-900">{payments.length}</p>
                             </div>
                         </div>
                     </div>
@@ -324,7 +376,7 @@ export default function PaymentManagement() {
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium mb-1">Available Balance</label>
-                        <div className="p-2 bg-gray-100 rounded text-green-700 font-bold">Rs. {wallet.toLocaleString()}</div>
+                        <div className="p-2 bg-gray-100 rounded text-green-700 font-bold">Rs. {(walletData?.amount || 0).toLocaleString()}</div>
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">Withdraw Amount</label>
@@ -335,7 +387,7 @@ export default function PaymentManagement() {
                             value={withdrawAmount}
                             onChange={e => setWithdrawAmount(e.target.value)}
                             min={1}
-                            max={wallet}
+                            max={walletData?.amount || 0}
                         />
                     </div>
                     {withdrawError && <div className="text-red-600 text-sm font-medium">{withdrawError}</div>}
@@ -365,9 +417,12 @@ export default function PaymentManagement() {
                                 className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                             >
                                 <option value="all">All Types</option>
-                                <option value="Warehouse Booking">Warehouse Booking</option>
-                                <option value="Warehouse Extension">Warehouse Extension</option>
-                                <option value="Order">Order</option>
+                                <option value="CREDIT">Credit</option>
+                                <option value="ESCROW">Escrow</option>
+                                <option value="DEBIT">Debit</option>
+                                <option value="REFUND">Refund</option>
+                                <option value="WITHDRAWAL">Withdrawal</option>
+                                <option value="RELEASE">Release</option>
                             </select>
                         </div>
                         <div>
@@ -416,7 +471,7 @@ export default function PaymentManagement() {
                                 <MagnifyingGlassIcon className="h-4 w-4 text-gray-400 absolute left-2 top-1/2 transform -translate-y-1/2" />
                                 <input
                                     type="text"
-                                    placeholder="Search by booking/order ID..."
+                                    placeholder="Search by reference or description..."
                                     value={filters.search}
                                     onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
                                     className="w-full pl-8 pr-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"

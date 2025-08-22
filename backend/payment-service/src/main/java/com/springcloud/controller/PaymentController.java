@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/payment")
-@CrossOrigin(origins = "*")
 public class PaymentController {
     
     @Autowired
@@ -107,6 +106,7 @@ public class PaymentController {
     // Get Wallet Info (including payment history)
     @GetMapping("/wallet/{userId}")
     public ResponseEntity<WalletInfo> getWalletInfo(@PathVariable Long userId) {
+        System.out.println("Fetching wallet info for the user : " + userId);
         WalletInfo walletInfo = paymentService.getWalletInfo(userId);
         return ResponseEntity.ok(walletInfo);
     }
