@@ -260,7 +260,8 @@ export default function PaymentManagement() {
     };
 
     // Withdraw handler
-    const handleWithdraw = () => {
+    const { user } = useUserContext();
+    const handleWithdraw = async () => {
         setWithdrawError('');
         const amount = parseFloat(withdrawAmount);
         if (isNaN(amount) || amount <= 0) {
@@ -271,10 +272,22 @@ export default function PaymentManagement() {
             setWithdrawError('Insufficient wallet balance.');
             return;
         }
-        // TODO: Call API to withdraw funds
-        console.log('Withdrawing:', amount);
-        setWithdrawModal(false);
-        setWithdrawAmount('');
+        try {
+            const response = await api.post('/api/payment/withdraw', {
+                userId: user.id,
+                amount,
+                description: 'User withdrawal from wallet'
+            });
+            if (response.data.status === 'SUCCESS') {
+                // Optionally refresh wallet data here
+                setWithdrawModal(false);
+                setWithdrawAmount('');
+            } else {
+                setWithdrawError(response.data.message || 'Withdrawal failed.');
+            }
+        } catch (err) {
+            setWithdrawError('Withdrawal failed: ' + (err?.response?.data?.message || err.message));
+        }
     };
 
     return (
