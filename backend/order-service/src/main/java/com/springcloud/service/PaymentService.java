@@ -5,6 +5,7 @@ import com.springcloud.model.Order;
 import com.springcloud.repository.OrderRepository;
 import com.springcloud.common.enums.OrderStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -60,4 +61,7 @@ public class PaymentService {
         return response;
     }
 
+    public ResponseEntity<?> getPaymentStatusByReference(String reference) {
+        return paymentServiceClient.getPaymentStatusByReference(reference);
+    }
 }

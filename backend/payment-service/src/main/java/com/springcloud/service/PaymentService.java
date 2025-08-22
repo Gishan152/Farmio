@@ -28,7 +28,7 @@ public class PaymentService {
     
     @Autowired
     private BankDetailsRepository bankDetailsRepository;
-    
+
     // Get Wallet Info with Payment History
     public WalletInfo getWalletInfo(Long userId) {
         Wallet wallet = getOrCreateWallet(userId);
@@ -57,6 +57,10 @@ public class PaymentService {
         // Check if a payment with the same reference already exists
         Payment payment = paymentRepository.findByReference(request.reference())
             .map(existing -> {
+                // If payment is already completed, return failure (do not allow new/updated payment)
+                if (existing.getStatus() == PaymentStatus.COMPLETED) {
+                    throw new IllegalStateException("A completed payment already exists for this reference");
+                }
                 // Update existing payment fields and reset status to PENDING
                 existing.setPayerId(request.payerId());
                 existing.setPayeeId(request.payeeId());
@@ -92,6 +96,7 @@ public class PaymentService {
             .orElseThrow(() -> new RuntimeException("Payment not found: " + orderId));
         
         PaymentStatus newStatus = mapPayHereStatusToPaymentStatus(statusCode);
+        System.out.println("Payhere status code: " + statusCode + ", mapped to: " + newStatus);
         payment.setStatus(newStatus);
         payment.setUpdatedAt(LocalDateTime.now());
         paymentRepository.save(payment);
@@ -100,18 +105,11 @@ public class PaymentService {
         if ("2".equals(statusCode)) { // Success
             BigDecimal escrowPercentage = payment.getEscrowPercentage() != null ? 
                 payment.getEscrowPercentage() : BigDecimal.ZERO;
-            
             BigDecimal escrowAmount = amount.multiply(escrowPercentage.divide(BigDecimal.valueOf(100)));
             BigDecimal directAmount = amount.subtract(escrowAmount);
-            
-            // Get or create payee wallet
             Wallet payeeWallet = getOrCreateWallet(payment.getPayeeId());
-            
-            // Add escrow amount to payee's escrow
             if (escrowAmount.compareTo(BigDecimal.ZERO) > 0) {
                 payeeWallet.addToEscrow(escrowAmount);
-                
-                // Create escrow transaction
                 createTransaction(
                     payment.getPayeeId(),
                     escrowAmount,
@@ -120,12 +118,8 @@ public class PaymentService {
                     "Escrowed from PayHere payment: " + payment.getDescription()
                 );
             }
-            
-            // Add remaining amount directly to payee's balance
             if (directAmount.compareTo(BigDecimal.ZERO) > 0) {
                 payeeWallet.addToBalance(directAmount);
-                
-                // Create credit transaction
                 createTransaction(
                     payment.getPayeeId(),
                     directAmount,
@@ -134,7 +128,6 @@ public class PaymentService {
                     "Direct credit from PayHere payment: " + payment.getDescription()
                 );
             }
-            
             walletRepository.save(payeeWallet);
         }
     }
@@ -488,5 +481,9 @@ public class PaymentService {
         } catch (Exception e) {
             return PaymentType.OTHER; // fallback or handle as needed
         }
+    }
+
+    public Payment getPaymentByReference(String reference) {
+        return paymentRepository.findByReference(reference).orElse(null);
     }
 }

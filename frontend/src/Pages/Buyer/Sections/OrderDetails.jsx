@@ -23,6 +23,35 @@ export default function OrderDetails() {
         model: "",
     });
 
+    // Check for order_id in URL and trigger payment status check
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const redirectedOrderId = params.get('order_id');
+        if (redirectedOrderId) {
+            checkPaymentStatus();
+        }
+    }, []);
+
+    // Optionally, check payment status on mount or after payment
+    useEffect(() => {
+        checkPaymentStatus();
+    }, []);
+
+    // Check payment status and update order state
+    const checkPaymentStatus = async () => {
+        try {
+            if(order.status == "PENDING"){
+                const res = await api.get(`/api/order/payment-status/${orderId}`);
+                console.log('payment status response : ', res.data);
+                if (res.data && res.data.status === true) {
+                    updateOrder(orderId, { status: "PROCESSING" });
+                }
+            }
+        } catch (err) {
+            console.error("Failed to check payment status:", err);
+        }
+    };
+
     const openModel = (model) => {
         setModelDetails(prev => {
             prev.isOpen = true
@@ -64,9 +93,9 @@ export default function OrderDetails() {
                 // Required PayHere params from backend response
                 const params = {
                     merchant_id: res.data.merchantId,
-                    return_url: "https://http://localhost:5173/buyer/orders/14", // Hardcoded
-                    cancel_url: "https://http://localhost:5173/buyer/orders/14", // Hardcoded
-                    notify_url: "http://iolko-61-245-169-29.a.free.pinggy.link/api/payment/payhere/notify", // Hardcoded
+                    return_url: `http://localhost:5173/buyer/orders/${orderId}`, // Hardcoded
+                    cancel_url: `http://localhost:5173/buyer/orders/${orderId}`, // Hardcoded
+                    notify_url: "http://cypyp-61-245-169-29.a.free.pinggy.link/api/payment/payhere/notify", // Hardcoded
                     first_name: res.data.firstName,
                     last_name: res.data.lastName,
                     email: res.data.email,
@@ -97,6 +126,8 @@ export default function OrderDetails() {
                 });
                 document.body.appendChild(form);
                 form.submit();
+                // After redirect, you may want to check payment status
+                // Optionally, you can call checkPaymentStatus here or on return page
             } else {
                 // Fallback: update local state if hash not present
                 updateOrder(orderId, { status: res.data?.status || "PROCESSING", paymentId: res.data?.paymentId });

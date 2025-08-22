@@ -147,4 +147,18 @@ public class PaymentController {
         List<TransactionHistory> history = paymentService.getTransactionHistory(userId);
         return ResponseEntity.ok(history);
     }
+
+    // Check Payment Status by Reference
+    @GetMapping("/status/{reference}")
+    public ResponseEntity<?> getPaymentStatusByReference(@PathVariable String reference) {
+        try {
+            var payment = paymentService.getPaymentByReference(reference);
+            if (payment == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(payment.getStatus().toString());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("ERROR: " + e.getMessage());
+        }
+    }
 }
