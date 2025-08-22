@@ -39,7 +39,7 @@ public class Payment {
     @Column(nullable = false)
     private PaymentStatus status;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String reference;
 
     @Column(nullable = false)

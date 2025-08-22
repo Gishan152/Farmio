@@ -54,20 +54,33 @@ public class PaymentService {
     // Create Payment Record (for PayHere initiation)
     @Transactional
     public Payment createPaymentRecord(PaymentInitiationRequest request) {
-        String paymentId = UUID.randomUUID().toString();
-        
-        Payment payment = Payment.builder()
-            .payerId(request.payerId())
-            .payeeId(request.payeeId())
-            .amount(request.amount())
-            .escrowPercentage(request.escrowPercentage())
-            .type(parsePaymentType(request.paymentType()))
-            .status(PaymentStatus.PENDING)
-            .reference(request.reference())
-            .description(request.description())
-            .createdAt(LocalDateTime.now())
-            .updatedAt(LocalDateTime.now())
-            .build();
+        // Check if a payment with the same reference already exists
+        Payment payment = paymentRepository.findByReference(request.reference())
+            .map(existing -> {
+                // Update existing payment fields and reset status to PENDING
+                existing.setPayerId(request.payerId());
+                existing.setPayeeId(request.payeeId());
+                existing.setAmount(request.amount());
+                existing.setEscrowPercentage(request.escrowPercentage());
+                existing.setType(parsePaymentType(request.paymentType()));
+                existing.setStatus(PaymentStatus.PENDING);
+                existing.setDescription(request.description());
+                existing.setUpdatedAt(LocalDateTime.now());
+                return existing;
+            })
+            .orElseGet(() -> Payment.builder()
+                .payerId(request.payerId())
+                .payeeId(request.payeeId())
+                .amount(request.amount())
+                .escrowPercentage(request.escrowPercentage())
+                .type(parsePaymentType(request.paymentType()))
+                .status(PaymentStatus.PENDING)
+                .reference(request.reference())
+                .description(request.description())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build()
+            );
 
         return paymentRepository.save(payment);
     }
@@ -133,7 +146,17 @@ public class PaymentService {
             // Find payment by reference
             Payment payment = paymentRepository.findByReference(request.reference())
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
-            
+
+            // Only proceed if payment state is COMPLETED
+            if (payment.getStatus() != PaymentStatus.COMPLETED) {
+                return new PaymentResponse(
+                    "FAILED",
+                    "Payment is not completed. Current status: " + payment.getStatus(),
+                    null,
+                    payment.getId() != null ? payment.getId().toString() : null
+                );
+            }
+
             // Calculate escrow amount
             BigDecimal escrowPercentage = payment.getEscrowPercentage() != null ? 
                 payment.getEscrowPercentage() : BigDecimal.ZERO;
@@ -199,7 +222,17 @@ public class PaymentService {
             // Find payment by reference
             Payment payment = paymentRepository.findByReference(request.reference())
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
-            
+
+            // Only proceed if payment state is COMPLETED
+            if (payment.getStatus() != PaymentStatus.COMPLETED) {
+                return new PaymentResponse(
+                        "FAILED",
+                        "Payment is not completed. Current status: " + payment.getStatus(),
+                        null,
+                        payment.getId() != null ? payment.getId().toString() : null
+                );
+            }
+
             // Calculate escrow amount
             BigDecimal escrowPercentage = payment.getEscrowPercentage() != null ? 
                 payment.getEscrowPercentage() : BigDecimal.ZERO;

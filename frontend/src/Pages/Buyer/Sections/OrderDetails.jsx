@@ -78,7 +78,8 @@ export default function OrderDetails() {
                     items: res.data.description,
                     currency: res.data.currency,
                     amount: Number(res.data.amount).toFixed(2),
-                    hash: res.data.hash
+                    hash: res.data.hash,
+                    custom_1: res.data.paymentId
                 };
 
                 console.log("PayHere params: ", params);
