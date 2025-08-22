@@ -165,7 +165,7 @@ public class PaymentService {
             }
             
             // Get payee wallet
-            Wallet payeeWallet = getOrCreateWallet(request.payeeId());
+            Wallet payeeWallet = getOrCreateWallet(payment.getPayeeId());
             
             // Check if sufficient escrow amount exists
             if (payeeWallet.getEscrowedAmount().compareTo(escrowAmount) < 0) {
@@ -184,7 +184,7 @@ public class PaymentService {
             
             // Create transaction record
             createTransaction(
-                request.payeeId(),
+                payment.getPayeeId(),
                 escrowAmount,
                 TransactionType.RELEASE,
                 request.reference(),
@@ -241,8 +241,8 @@ public class PaymentService {
             }
             
             // Get wallets
-            Wallet payeeWallet = getOrCreateWallet(request.payeeId());
-            Wallet payerWallet = getOrCreateWallet(request.payerId());
+            Wallet payeeWallet = getOrCreateWallet(payment.getPayeeId());
+            Wallet payerWallet = getOrCreateWallet(payment.getPayerId());
             
             // Check if sufficient escrow amount exists
             if (payeeWallet.getEscrowedAmount().compareTo(escrowAmount) < 0) {
@@ -264,7 +264,7 @@ public class PaymentService {
             
             // Create transaction records
             createTransaction(
-                request.payeeId(),
+                payment.getPayeeId(),
                 escrowAmount,
                 TransactionType.DEBIT,
                 request.reference(),
@@ -272,7 +272,7 @@ public class PaymentService {
             );
             
             createTransaction(
-                request.payerId(),
+                payment.getPayerId(),
                 escrowAmount,
                 TransactionType.REFUND,
                 request.reference(),

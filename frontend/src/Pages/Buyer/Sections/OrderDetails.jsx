@@ -30,17 +30,17 @@ export default function OrderDetails() {
         if (redirectedOrderId) {
             checkPaymentStatus();
         }
-    }, []);
+    }, [order]);
 
     // Optionally, check payment status on mount or after payment
     useEffect(() => {
         checkPaymentStatus();
-    }, []);
+    }, [order]);
 
     // Check payment status and update order state
     const checkPaymentStatus = async () => {
         try {
-            if(order.status == "PENDING"){
+            if(order && order.status === "PENDING"){
                 const res = await api.get(`/api/order/payment-status/${orderId}`);
                 console.log('payment status response : ', res.data);
                 if (res.data && res.data.status === true) {
@@ -95,7 +95,7 @@ export default function OrderDetails() {
                     merchant_id: res.data.merchantId,
                     return_url: `http://localhost:5173/buyer/orders/${orderId}`, // Hardcoded
                     cancel_url: `http://localhost:5173/buyer/orders/${orderId}`, // Hardcoded
-                    notify_url: "http://cypyp-61-245-169-29.a.free.pinggy.link/api/payment/payhere/notify", // Hardcoded
+                    notify_url: "http://wowql-61-245-169-29.a.free.pinggy.link/api/payment/payhere/notify", // Hardcoded
                     first_name: res.data.firstName,
                     last_name: res.data.lastName,
                     email: res.data.email,

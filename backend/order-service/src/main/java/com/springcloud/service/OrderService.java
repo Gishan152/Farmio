@@ -20,6 +20,7 @@ import com.springcloud.common.enums.OrderStatus;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+    private final com.springcloud.feign.PaymentServiceClient paymentServiceClient;
 
     private final OrderRepository orderRepository;
 
@@ -215,6 +216,16 @@ public class OrderService {
                             .multiply(refundRatio)
                             .setScale(2, RoundingMode.HALF_UP);
 //                    order.setRefundAmount(refundAmount);
+
+                    // Feign call to refund escrow
+                    var refundRequest = new EscrowRefundRequest(
+                        order.getId().toString()
+                    );
+                    try {
+                        paymentServiceClient.refundEscrow(refundRequest);
+                    } catch (Exception e) {
+                        System.err.println("Failed to refund escrow: " + e.getMessage());
+                    }
 
                     order.setStatus(OrderStatus.CANCELLED);
                     // TODO : restore the stock of order items

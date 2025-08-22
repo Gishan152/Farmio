@@ -50,7 +50,7 @@ public class PaymentService {
             order.getBuyerId(),
             order.getSellerId(),
             "ORDER",
-            0.8,
+            80.0, // 20% to seller, 80% to escrow
             "Order payment for " + order.getId()
         );
         // Call payment-service via Feign client
