@@ -56,18 +56,19 @@ public class PaymentService {
     public Payment createPaymentRecord(PaymentInitiationRequest request) {
         String paymentId = UUID.randomUUID().toString();
         
-        Payment payment = new Payment(
-            paymentId,
-            request.payerId(),
-            request.amount(),
-            PaymentType.PAYHERE,
-            request.reference()
-        );
-        payment.setRecipientId(request.payeeId());
-        payment.setDescription(request.description());
-        payment.setStatus(PaymentStatus.PENDING);
-        payment.setEscrowPercentage(request.escrowPercentage());
-        
+        Payment payment = Payment.builder()
+            .payerId(request.payerId())
+            .payeeId(request.payeeId())
+            .amount(request.amount())
+            .escrowPercentage(request.escrowPercentage())
+            .type(parsePaymentType(request.paymentType()))
+            .status(PaymentStatus.PENDING)
+            .reference(request.reference())
+            .description(request.description())
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build();
+
         return paymentRepository.save(payment);
     }
     
@@ -91,7 +92,7 @@ public class PaymentService {
             BigDecimal directAmount = amount.subtract(escrowAmount);
             
             // Get or create payee wallet
-            Wallet payeeWallet = getOrCreateWallet(payment.getRecipientId());
+            Wallet payeeWallet = getOrCreateWallet(payment.getPayeeId());
             
             // Add escrow amount to payee's escrow
             if (escrowAmount.compareTo(BigDecimal.ZERO) > 0) {
@@ -99,7 +100,7 @@ public class PaymentService {
                 
                 // Create escrow transaction
                 createTransaction(
-                    payment.getRecipientId(),
+                    payment.getPayeeId(),
                     escrowAmount,
                     TransactionType.ESCROW,
                     payment.getReference(),
@@ -113,7 +114,7 @@ public class PaymentService {
                 
                 // Create credit transaction
                 createTransaction(
-                    payment.getRecipientId(),
+                    payment.getPayeeId(),
                     directAmount,
                     TransactionType.CREDIT,
                     payment.getReference(),
@@ -143,7 +144,7 @@ public class PaymentService {
                     "FAILED",
                     "No escrow amount to release",
                     null,
-                    payment.getPaymentId()
+                    payment.getId().toString()
                 );
             }
             
@@ -156,7 +157,7 @@ public class PaymentService {
                     "FAILED",
                     "Insufficient escrow amount",
                     null,
-                    payment.getPaymentId()
+                    payment.getId().toString()
                 );
             }
             
@@ -178,7 +179,7 @@ public class PaymentService {
                 "SUCCESS",
                 "Escrow released successfully",
                 UUID.randomUUID().toString(),
-                payment.getPaymentId()
+                payment.getId().toString()
             );
             
         } catch (Exception e) {
@@ -209,7 +210,7 @@ public class PaymentService {
                     "FAILED",
                     "No escrow amount to refund",
                     null,
-                    payment.getPaymentId()
+                    payment.getId().toString()
                 );
             }
             
@@ -223,7 +224,7 @@ public class PaymentService {
                     "FAILED",
                     "Insufficient escrow amount",
                     null,
-                    payment.getPaymentId()
+                    payment.getId().toString()
                 );
             }
             
@@ -256,7 +257,7 @@ public class PaymentService {
                 "SUCCESS",
                 "Escrow refunded successfully",
                 UUID.randomUUID().toString(),
-                payment.getPaymentId()
+                payment.getId().toString()
             );
             
         } catch (Exception e) {
@@ -446,5 +447,13 @@ public class PaymentService {
             case "-3" -> PaymentStatus.REFUNDED;
             default -> PaymentStatus.FAILED;
         };
+    }
+
+    private PaymentType parsePaymentType(String type) {
+        try {
+            return PaymentType.valueOf(type.trim().toUpperCase());
+        } catch (Exception e) {
+            return PaymentType.OTHER; // fallback or handle as needed
+        }
     }
 }

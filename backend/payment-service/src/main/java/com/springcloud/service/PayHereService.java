@@ -41,32 +41,23 @@ public class PayHereService {
                 "LKR"
             );
             
-            // Create PayHere request
-            PayHerePaymentRequest payHereRequest = new PayHerePaymentRequest(
-                request.payerId(),
-                request.reference(),
-                request.description(),
-                "LKR",
-                request.amount(),
-                request.firstName(),
-                request.lastName(),
-                request.email(),
-                request.phone(),
-                request.address(),
-                request.city(),
-                request.country(),
-                request.returnUrl(),
-                request.cancelUrl(),
-                request.payerId().toString(), // custom1 - payer ID
-                request.payeeId().toString()  // custom2 - payee ID
-            );
-            
             return new PayHerePaymentResponse(
                 "SUCCESS",
                 "Payment initiated successfully",
                 payHereConfig.getCheckoutUrl(),
-                request.reference(),
-                hash
+                payment.getReference(), // orderId
+                hash,
+                payHereConfig.getMerchantId(), // merchantId
+                "John", // firstName (hardcoded)
+                "Doe", // lastName (hardcoded)
+                "john.doe@example.com", // email (hardcoded)
+                "+94123456789", // phone (hardcoded)
+                "123 Main St", // address (hardcoded)
+                "Colombo", // city (hardcoded)
+                "Sri Lanka", // country (hardcoded)
+                payment.getDescription(), // description
+                "LKR", // currency (hardcoded as per usage)
+                payment.getAmount().toString() // amount
             );
             
         } catch (Exception e) {
@@ -75,6 +66,17 @@ public class PayHereService {
                 "Payment initiation failed: " + e.getMessage(),
                 null,
                 request.reference(),
+                null,
+                payHereConfig.getMerchantId(),
+                "John",
+                "Doe",
+                "john.doe@example.com",
+                "+94123456789",
+                "123 Main St",
+                "Colombo",
+                "Sri Lanka",
+                null,
+                "LKR",
                 null
             );
         }
@@ -108,10 +110,12 @@ public class PayHereService {
      * Generate MD5 hash for PayHere payment
      */
     private String generateHash(String merchantId, String orderId, BigDecimal amount, String currency) {
+        System.out.println("Generating hash for PayHere payment : " + merchantId + ", " + orderId + ", " + amount + ", " + currency);
         try {
             DecimalFormat df = new DecimalFormat("0.00");
             String amountFormatted = df.format(amount);
-            
+            System.out.println("Formatted amount: " + amountFormatted);
+            System.out.println("Merchant secret: " + payHereConfig.getMerchantSecret());
             String hashedSecret = getMd5(payHereConfig.getMerchantSecret()).toUpperCase();
             String dataToHash = merchantId + orderId + amountFormatted + currency + hashedSecret;
             
@@ -156,7 +160,7 @@ public class PayHereService {
             MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] messageDigest = md.digest(input.getBytes());
             StringBuilder hexString = new StringBuilder();
-            
+
             for (byte b : messageDigest) {
                 String hex = Integer.toHexString(0xff & b);
                 if (hex.length() == 1) {
@@ -164,9 +168,9 @@ public class PayHereService {
                 }
                 hexString.append(hex);
             }
-            
+
             return hexString.toString();
-            
+
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("MD5 algorithm not available", e);
         }

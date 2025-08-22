@@ -29,16 +29,17 @@ public class OrderController {
     /**
      * Endpoint for buyer to make payment for an order
      */
-    @PostMapping("/pay")
-    public ResponseEntity<Order> payForOrder(
-            @RequestHeader("X-User-Id") String userId,
-            @RequestHeader("X-User-Name") String username,
-            @RequestHeader("X-Roles") String rolesCsv,
-            @RequestBody PaymentRequest request
-    ) {
-        var order = paymentService.makePayment(Long.valueOf(userId), request);
-        return ResponseEntity.ok(order);
-    }
+        @PostMapping("/pay")
+        public ResponseEntity<?> payForOrder(
+                @RequestHeader("X-User-Id") String userId,
+                @RequestHeader("X-User-Name") String username,
+                @RequestHeader("X-Roles") String rolesCsv,
+                @RequestBody PaymentRequest request
+        ) {
+            // Updated to handle PaymentInitiationResponse DTO
+            var response = paymentService.makePayment(Long.valueOf(userId), request);
+            return ResponseEntity.ok(response);
+        }
 
     @PostMapping("/create")
     public ResponseEntity<List<Order>> createOrder(

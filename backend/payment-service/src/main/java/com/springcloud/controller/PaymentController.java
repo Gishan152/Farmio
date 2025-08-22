@@ -30,46 +30,14 @@ public class PaymentController {
     // Payment Initialization (called by order-service, transport-service, etc.)
     @PostMapping("/payhere/initiate")
     public ResponseEntity<PayHerePaymentResponse> initiatePayHerePayment(@RequestBody PaymentInitiationRequest request) {
+        System.out.println("reference: " + request.reference());
+        System.out.println("amount: " + request.amount());
+        System.out.println("payerId: " + request.payerId());
+        System.out.println("payeeId: " + request.payeeId());
+        System.out.println("escrowPercentage: " + request.escrowPercentage());
+        System.out.println("description: " + request.description());
         PayHerePaymentResponse response = payHereService.initiatePayment(request);
         return ResponseEntity.ok(response);
-    }
-    
-    // Generate PayHere Payment Form
-    @PostMapping(value = "/payhere/form", produces = MediaType.TEXT_HTML_VALUE)
-    public ResponseEntity<String> generatePayHereForm(@RequestBody PaymentInitiationRequest request) {
-        try {
-            PayHerePaymentResponse initResponse = payHereService.initiatePayment(request);
-            
-            if ("SUCCESS".equals(initResponse.status())) {
-                // Convert to PayHerePaymentRequest for form generation
-                PayHerePaymentRequest payHereRequest = new PayHerePaymentRequest(
-                    request.payerId(),
-                    request.reference(),
-                    request.description(),
-                    "LKR",
-                    request.amount(),
-                    request.firstName(),
-                    request.lastName(),
-                    request.email(),
-                    request.phone(),
-                    request.address(),
-                    request.city(),
-                    request.country(),
-                    request.returnUrl(),
-                    request.cancelUrl(),
-                    request.payerId().toString(),
-                    request.payeeId().toString()
-                );
-                
-                String form = payHereFormGenerator.generatePaymentForm(payHereRequest, initResponse.hash());
-                return ResponseEntity.ok(form);
-            } else {
-                return ResponseEntity.badRequest().body("<html><body><h3>Payment initiation failed: " + initResponse.message() + "</h3></body></html>");
-            }
-            
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("<html><body><h3>Error: " + e.getMessage() + "</h3></body></html>");
-        }
     }
     
     // PayHere Payment Notification Handler (Webhook)

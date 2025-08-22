@@ -7,15 +7,7 @@ public record PaymentInitiationRequest(
     BigDecimal amount,
     Long payerId,
     Long payeeId,
+    String paymentType,
     BigDecimal escrowPercentage,
-    String firstName,
-    String lastName,
-    String email,
-    String phone,
-    String address,
-    String city,
-    String country,
-    String returnUrl,
-    String cancelUrl,
     String description
 ) {}

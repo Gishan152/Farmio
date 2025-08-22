@@ -57,11 +57,48 @@ export default function OrderDetails() {
         try {
             // Call backend to make payment
             const res = await api.post('/api/order/pay', { orderId });
-            // Update local state with new order status and paymentId if present
-            if (res.data) {
-                updateOrder(orderId, { status: res.data.status, paymentId: res.data.paymentId });
+            console.log("init pay : ", res.data);
+            // return
+            // If all required PayHere params are present, create and submit a form
+            if (res.data && res.data.hash) {
+                // Required PayHere params from backend response
+                const params = {
+                    merchant_id: res.data.merchantId,
+                    return_url: "https://yourdomain.com/payhere/return", // Hardcoded
+                    cancel_url: "https://yourdomain.com/payhere/cancel", // Hardcoded
+                    notify_url: "https://yourdomain.com/payhere/notify", // Hardcoded
+                    first_name: res.data.firstName,
+                    last_name: res.data.lastName,
+                    email: res.data.email,
+                    phone: res.data.phone,
+                    address: res.data.address,
+                    city: res.data.city,
+                    country: res.data.country,
+                    order_id: res.data.orderId,
+                    items: res.data.description,
+                    currency: res.data.currency,
+                    amount: Number(res.data.amount).toFixed(2),
+                    hash: res.data.hash
+                };
+
+                console.log("PayHere params: ", params);
+                // return
+                // Create form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'https://sandbox.payhere.lk/pay/checkout';
+                Object.entries(params).forEach(([key, value]) => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    form.appendChild(input);
+                });
+                document.body.appendChild(form);
+                form.submit();
             } else {
-                updateOrder(orderId, { status: "PROCESSING" });
+                // Fallback: update local state if hash not present
+                updateOrder(orderId, { status: res.data?.status || "PROCESSING", paymentId: res.data?.paymentId });
             }
         } catch (err) {
             console.error("Payment failed:", err);
