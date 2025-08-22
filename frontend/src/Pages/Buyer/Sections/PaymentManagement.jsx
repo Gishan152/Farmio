@@ -199,6 +199,20 @@ export default function PaymentManagement() {
     const [withdrawAmount, setWithdrawAmount] = useState('');
     const [withdrawError, setWithdrawError] = useState('');
 
+    // Bank details state
+    const [bankDetailsModal, setBankDetailsModal] = useState(false);
+    const [viewBankDetailsModal, setViewBankDetailsModal] = useState(false);
+    const [bankDetails, setBankDetails] = useState({
+        accountNumber: '',
+        accountHolderName: '',
+        bank: '',
+        branch: '',
+        swiftCode: ''
+    });
+    const [currentBankDetails, setCurrentBankDetails] = useState(null);
+    const [bankDetailsError, setBankDetailsError] = useState('');
+    const [bankDetailsLoading, setBankDetailsLoading] = useState(false);
+
     // Simple CSV export for buyer payments
     const exportPayments = () => {
         if (!payments.length) return;
@@ -261,6 +275,73 @@ export default function PaymentManagement() {
 
     // Withdraw handler
     const { user } = useUserContext();
+    
+    // Fetch bank details
+    const fetchBankDetails = async () => {
+        try {
+            setBankDetailsLoading(true);
+            const response = await api.get(`/api/payment/bank-details/${user.id}`);
+            setCurrentBankDetails(response.data);
+        } catch (error) {
+            console.error("Failed to fetch bank details:", error);
+            setCurrentBankDetails(null);
+        } finally {
+            setBankDetailsLoading(false);
+        }
+    };
+
+    // Load bank details on component mount
+    useEffect(() => {
+        if (user?.id) {
+            fetchBankDetails();
+        }
+    }, [user]);
+
+    // Bank details handlers
+    const handleBankDetailsSubmit = async () => {
+        setBankDetailsError('');
+        
+        // Validation
+        if (!bankDetails.accountNumber || !bankDetails.accountHolderName || 
+            !bankDetails.bank || !bankDetails.branch || !bankDetails.swiftCode) {
+            setBankDetailsError('All fields are required.');
+            return;
+        }
+
+        try {
+            await api.post('/api/payment/bank-details', {
+                userId: user.id,
+                ...bankDetails
+            });
+            setBankDetailsModal(false);
+            setBankDetails({
+                accountNumber: '',
+                accountHolderName: '',
+                bank: '',
+                branch: '',
+                swiftCode: ''
+            });
+            // Refresh bank details
+            fetchBankDetails();
+        } catch (err) {
+            setBankDetailsError('Failed to save bank details: ' + (err?.response?.data?.message || err.message));
+        }
+    };
+
+    const openBankDetailsModal = () => {
+        // Pre-fill form if details exist
+        if (currentBankDetails) {
+            setBankDetails({
+                accountNumber: currentBankDetails.accountNumber || '',
+                accountHolderName: currentBankDetails.accountHolderName || '',
+                bank: currentBankDetails.bank || '',
+                branch: currentBankDetails.branch || '',
+                swiftCode: currentBankDetails.swiftCode || ''
+            });
+        }
+        setBankDetailsModal(true);
+    };
+
     const handleWithdraw = async () => {
         setWithdrawError('');
         const amount = parseFloat(withdrawAmount);
@@ -314,6 +395,13 @@ export default function PaymentManagement() {
                             >
                                 <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
                                 Export
+                            </button>
+                            <button
+                                onClick={() => setViewBankDetailsModal(true)}
+                                className="flex items-center bg-blue-100 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-200 transition-colors duration-200 text-sm font-semibold shadow border border-blue-400"
+                            >
+                                <BanknotesIcon className="h-4 w-4 mr-2" />
+                                Bank Details
                             </button>
                             <button
                                 className="flex items-center bg-green-100 text-green-700 px-3 py-2 rounded-lg hover:bg-green-200 transition-colors duration-200 text-sm font-semibold shadow border border-green-400"
@@ -404,6 +492,154 @@ export default function PaymentManagement() {
                         />
                     </div>
                     {withdrawError && <div className="text-red-600 text-sm font-medium">{withdrawError}</div>}
+                </div>
+            </CustomModal>
+
+            {/* Bank Details Modal */}
+            <CustomModal
+                isOpen={bankDetailsModal}
+                onClose={() => { 
+                    setBankDetailsModal(false); 
+                    setBankDetailsError(''); 
+                    setBankDetails({
+                        accountNumber: '',
+                        accountHolderName: '',
+                        bank: '',
+                        branch: '',
+                        swiftCode: ''
+                    }); 
+                }}
+                title="Bank Details"
+                description="Enter or update your bank account details for withdrawals."
+                submitText="Save"
+                onSubmit={handleBankDetailsSubmit}
+            >
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Account Number</label>
+                        <input
+                            type="text"
+                            className="w-full border rounded px-3 py-2"
+                            placeholder="Enter account number"
+                            value={bankDetails.accountNumber}
+                            onChange={e => setBankDetails(prev => ({ ...prev, accountNumber: e.target.value }))}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Account Holder Name</label>
+                        <input
+                            type="text"
+                            className="w-full border rounded px-3 py-2"
+                            placeholder="Enter account holder name"
+                            value={bankDetails.accountHolderName}
+                            onChange={e => setBankDetails(prev => ({ ...prev, accountHolderName: e.target.value }))}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Bank Name</label>
+                        <input
+                            type="text"
+                            className="w-full border rounded px-3 py-2"
+                            placeholder="Enter bank name"
+                            value={bankDetails.bank}
+                            onChange={e => setBankDetails(prev => ({ ...prev, bank: e.target.value }))}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Branch Name</label>
+                        <input
+                            type="text"
+                            className="w-full border rounded px-3 py-2"
+                            placeholder="Enter branch name"
+                            value={bankDetails.branch}
+                            onChange={e => setBankDetails(prev => ({ ...prev, branch: e.target.value }))}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">SWIFT Code</label>
+                        <input
+                            type="text"
+                            className="w-full border rounded px-3 py-2"
+                            placeholder="Enter SWIFT code"
+                            value={bankDetails.swiftCode}
+                            onChange={e => setBankDetails(prev => ({ ...prev, swiftCode: e.target.value }))}
+                        />
+                    </div>
+                    {bankDetailsError && <div className="text-red-600 text-sm font-medium">{bankDetailsError}</div>}
+                </div>
+            </CustomModal>
+
+            {/* View Bank Details Modal */}
+            <CustomModal
+                isOpen={viewBankDetailsModal}
+                onClose={() => setViewBankDetailsModal(false)}
+                title="Bank Account Details"
+                description="Your registered bank account information."
+                showFooter={false}
+            >
+                <div className="space-y-4">
+                    {bankDetailsLoading ? (
+                        <div className="text-center py-8">
+                            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                            <p className="mt-2 text-gray-600 text-sm">Loading bank details...</p>
+                        </div>
+                    ) : currentBankDetails ? (
+                        <>
+                            <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Account Number</label>
+                                    <p className="text-gray-900 font-mono">{currentBankDetails.accountNumber}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Account Holder Name</label>
+                                    <p className="text-gray-900">{currentBankDetails.accountHolderName}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Bank Name</label>
+                                    <p className="text-gray-900">{currentBankDetails.bank}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Branch Name</label>
+                                    <p className="text-gray-900">{currentBankDetails.branch}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">SWIFT Code</label>
+                                    <p className="text-gray-900">{currentBankDetails.swiftCode}</p>
+                                </div>
+                            </div>
+                            <div className="flex justify-between mt-6">
+                                <button
+                                    onClick={() => {
+                                        setViewBankDetailsModal(false);
+                                        openBankDetailsModal();
+                                    }}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                >
+                                    Edit Details
+                                </button>
+                                <button
+                                    onClick={() => setViewBankDetailsModal(false)}
+                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="text-center py-8">
+                            <BanknotesIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-600 mb-4">No bank details found</p>
+                            <button
+                                onClick={() => {
+                                    setViewBankDetailsModal(false);
+                                    setBankDetailsModal(true);
+                                }}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                            >
+                                Add Bank Details
+                            </button>
+                        </div>
+                    )}
                 </div>
             </CustomModal>
 
