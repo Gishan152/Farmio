@@ -95,7 +95,7 @@ export default function OrderDetails() {
                     merchant_id: res.data.merchantId,
                     return_url: `http://localhost:5173/buyer/orders/${orderId}`, // Hardcoded
                     cancel_url: `http://localhost:5173/buyer/orders/${orderId}`, // Hardcoded
-                    notify_url: "http://wowql-61-245-169-29.a.free.pinggy.link/api/payment/payhere/notify", // Hardcoded
+                    notify_url: "http://ymelm-61-245-169-29.a.free.pinggy.link/api/payment/payhere/notify", // Hardcoded
                     first_name: res.data.firstName,
                     last_name: res.data.lastName,
                     email: res.data.email,

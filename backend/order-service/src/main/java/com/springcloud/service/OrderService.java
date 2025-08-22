@@ -167,7 +167,16 @@ public class OrderService {
                         );
                     }
 
-                    // TODO : Relese the pending payment to the farmer
+                    // TODO : Check the code below for releasing escrow to farmer
+                    var releaseRequest = new EscrowReleaseRequest(
+                        order.getId().toString()
+                    );
+                    try {
+                        paymentServiceClient.releaseEscrow(releaseRequest);
+                    } catch (Exception e) {
+                        System.err.println("Failed to release escrow: " + e.getMessage());
+                    }
+
                     order.setStatus(OrderStatus.DELIVERED);
                     return orderRepository.save(order);
                 })
