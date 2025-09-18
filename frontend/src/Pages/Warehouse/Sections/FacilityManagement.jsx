@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useWarehouseContext } from '../../../Contexts/Warehouse/WarehouseContext';
 import { PencilIcon, TrashIcon, EyeIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import LocationInput from '../../../Components/Common/LocationInput';
 
 export default function FacilityManagement() {
-    const { warehouses, addWarehouse, updateWarehouse, deleteWarehouse } = useWarehouseContext();
+    const { warehouses, loading, error, loadWarehouses, addWarehouse, updateWarehouse, deleteWarehouse } = useWarehouseContext();
     const [editingWarehouse, setEditingWarehouse] = useState(null);
     const [viewingWarehouse, setViewingWarehouse] = useState(null);
     const [deletingWarehouse, setDeletingWarehouse] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [submitLoading, setSubmitLoading] = useState(false);
 
     // Sample warehouses with city instead of lat/lng
     const sampleWarehouses = [
@@ -66,7 +68,9 @@ export default function FacilityManagement() {
         status: 'open',
         keeperName: '',
         keeperContact: '',
-        keeperEmail: ''
+        keeperEmail: '',
+        lat: null,
+        lng: null
     });
 
     const handleInputChange = (e) => {
@@ -79,7 +83,7 @@ export default function FacilityManagement() {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (
@@ -101,15 +105,37 @@ export default function FacilityManagement() {
             return;
         }
 
-        if (editingWarehouse) {
-            updateWarehouse(editingWarehouse.id, formData);
-            setEditingWarehouse(null);
-        } else {
-            addWarehouse(formData);
-        }
+        setSubmitLoading(true);
+        try {
+            const warehouseData = {
+                ...formData,
+                totalSlots: parseInt(formData.totalSlots),
+                totalCapacity: parseInt(formData.totalCapacity),
+                pricePerKg: parseFloat(formData.pricePerKg),
+                capacityPerSlot: parseInt(formData.capacityPerSlot) || 100,
+                temperatureMin: parseInt(formData.temperatureMin) || 0,
+                temperatureMax: parseInt(formData.temperatureMax) || 14,
+                storageType: formData.storageType === 'Cold Storage (0°C to 14°C)' ? 'COLD_STORAGE' : 'DRY_STORAGE',
+                status: formData.status.toUpperCase()
+            };
 
-        resetForm();
-        setShowForm(false);
+            if (editingWarehouse) {
+                await updateWarehouse(editingWarehouse.id, warehouseData);
+                setEditingWarehouse(null);
+                alert('Warehouse updated successfully!');
+            } else {
+                await addWarehouse(warehouseData);
+                alert('Warehouse added successfully!');
+            }
+
+            resetForm();
+            setShowForm(false);
+        } catch (error) {
+            console.error('Error saving warehouse:', error);
+            alert('Failed to save warehouse. Please try again.');
+        } finally {
+            setSubmitLoading(false);
+        }
     };
 
     const resetForm = () => {
@@ -129,7 +155,9 @@ export default function FacilityManagement() {
             status: 'open',
             keeperName: '',
             keeperContact: '',
-            keeperEmail: ''
+            keeperEmail: '',
+            lat: null,
+            lng: null
         });
     };
 
@@ -143,10 +171,16 @@ export default function FacilityManagement() {
         setDeletingWarehouse(warehouse);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (deletingWarehouse) {
-            deleteWarehouse(deletingWarehouse.id);
-            setDeletingWarehouse(null);
+            try {
+                await deleteWarehouse(deletingWarehouse.id);
+                setDeletingWarehouse(null);
+                alert('Warehouse deleted successfully!');
+            } catch (error) {
+                console.error('Error deleting warehouse:', error);
+                alert('Failed to delete warehouse. Please try again.');
+            }
         }
     };
 
@@ -160,13 +194,17 @@ export default function FacilityManagement() {
         resetForm();
     };
 
-    const displayWarehouses = warehouses.length > 0 ? warehouses : sampleWarehouses;
+    // Handle search with debouncing
+    const handleSearch = async (value) => {
+        setSearchTerm(value);
+        try {
+            await loadWarehouses(value);
+        } catch (error) {
+            console.error('Search failed:', error);
+        }
+    };
 
-    const filteredWarehouses = displayWarehouses.filter(warehouse =>
-        warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        warehouse.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        warehouse.city.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const displayWarehouses = warehouses.length > 0 ? warehouses : sampleWarehouses;
 
     const isModalOpen = showForm || viewingWarehouse || deletingWarehouse;
 
@@ -199,7 +237,7 @@ export default function FacilityManagement() {
                         <input
                             type="text"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => handleSearch(e.target.value)}
                             placeholder="Search warehouses..."
                             className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-400 focus:border-green-400 transition-all duration-200 text-sm"
                         />
@@ -208,7 +246,7 @@ export default function FacilityManagement() {
 
                 {/* Wide Warehouse Cards */}
                 <div className="space-y-4">
-                    {filteredWarehouses.map((warehouse) => (
+                    {displayWarehouses.map((warehouse) => (
                         <div key={warehouse.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 transform hover:-translate-y-1">
                             <div className="flex">
                                 {/* Left Header Section */}
@@ -315,7 +353,7 @@ export default function FacilityManagement() {
                 </div>
 
                 {/* Compact Empty State */}
-                {filteredWarehouses.length === 0 && (
+                {displayWarehouses.length === 0 && (
                     <div className="text-center py-8">
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
                             <div className="text-4xl mb-3">🏭</div>
@@ -373,15 +411,25 @@ export default function FacilityManagement() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Full Address *</label>
-                                    <input
-                                        type="text"
-                                        name="address"
+                                    <LocationInput
                                         value={formData.address}
-                                        onChange={handleInputChange}
+                                        onChange={(address) => setFormData(prev => ({ ...prev, address }))}
+                                        onLocationSelect={(locationData) => {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                address: locationData.address,
+                                                lat: locationData.lat,
+                                                lng: locationData.lng,
+                                                city: locationData.city || prev.city
+                                            }));
+                                        }}
                                         placeholder="Enter full address"
                                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
                                         required
                                     />
+                                    {formData.lat && formData.lng && (
+                                        <p className="mt-1 text-xs text-gray-500">Lat: {formData.lat.toFixed(6)}, Lng: {formData.lng.toFixed(6)}</p>
+                                    )}
                                 </div>
 
                                 <div>
@@ -694,7 +742,7 @@ export default function FacilityManagement() {
                 </div>
             )}
 
-            <style jsx>{`
+            <style>{`
                 @keyframes fadeIn {
                     from { opacity: 0; }
                     to { opacity: 1; }

@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import warehouseAPI from '../../API/warehouse';
 
 const WarehouseContext = createContext();
 
@@ -15,17 +16,76 @@ const WarehouseContextProvider = ({ children }) => {
     const [slots, setSlots] = useState([]);
     const [bookings, setBookings] = useState([]);
     const [payments, setPayments] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    const addWarehouse = (warehouse) => {
-        setWarehouses(prev => [...prev, { ...warehouse, id: Date.now() }]);
+    // Load warehouses
+    const loadWarehouses = async (search = '') => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await warehouseAPI.getWarehouses(search);
+            setWarehouses(response.data || []);
+        } catch (error) {
+            console.error('Failed to load warehouses:', error);
+            setError('Failed to load warehouses');
+            setWarehouses([]);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const updateWarehouse = (id, updates) => {
-        setWarehouses(prev => prev.map(w => w.id === id ? { ...w, ...updates } : w));
+    useEffect(() => {
+        loadWarehouses();
+    }, []);
+
+    const addWarehouse = async (warehouse) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await warehouseAPI.createWarehouse(warehouse);
+            const created = response.data;
+            setWarehouses(prev => [...prev, created]);
+            return created;
+        } catch (error) {
+            console.error('Failed to create warehouse:', error);
+            setError('Failed to create warehouse');
+            throw error;
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const deleteWarehouse = (id) => {
-        setWarehouses(prev => prev.filter(w => w.id !== id));
+    const updateWarehouse = async (id, updates) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await warehouseAPI.updateWarehouse(id, updates);
+            const updated = response.data;
+            setWarehouses(prev => prev.map(w => w.id === id ? updated : w));
+            return updated;
+        } catch (error) {
+            console.error('Failed to update warehouse:', error);
+            setError('Failed to update warehouse');
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const deleteWarehouse = async (id) => {
+        setLoading(true);
+        setError(null);
+        try {
+            await warehouseAPI.deleteWarehouse(id);
+            setWarehouses(prev => prev.filter(w => w.id !== id));
+        } catch (error) {
+            console.error('Failed to delete warehouse:', error);
+            setError('Failed to delete warehouse');
+            throw error;
+        } finally {
+            setLoading(false);
+        }
     };
 
     const value = {
@@ -33,6 +93,9 @@ const WarehouseContextProvider = ({ children }) => {
         slots,
         bookings,
         payments,
+        loading,
+        error,
+        loadWarehouses,
         addWarehouse,
         updateWarehouse,
         deleteWarehouse,

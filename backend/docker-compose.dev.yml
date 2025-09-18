@@ -36,11 +36,12 @@ services:
     networks:
       - spring-net
     volumes:
-      - ./eureka-server:/app/service
+      - .:/app
     develop:
       watch:
         - action: rebuild
           path: ./eureka-server/target/*-SNAPSHOT.jar
+
 
 #  product-service:
 #    build:
@@ -103,7 +104,7 @@ services:
     networks:
       - spring-net
     volumes:
-      - ./order-service:/app/service
+      - .:/app
     develop:
       watch:
         - action: rebuild
@@ -150,12 +151,11 @@ services:
     networks:
       - spring-net
     volumes:
-      - ./auth-service:/app/service
+      - .:/app
     develop:
       watch:
         - action: rebuild
           path: ./auth-service/target/*-SNAPSHOT.jar
-
 
   api-gateway:
     build:
@@ -172,7 +172,7 @@ services:
     networks:
       - spring-net
     volumes:
-      - ./api-gateway:/app/service
+      - .:/app
     develop:
       watch:
         - action: rebuild
@@ -194,12 +194,12 @@ services:
     networks:
       - spring-net
     volumes:
-      - ./crop-listing-service:/app/service
+      - .:/app
     develop:
       watch:
         - action: rebuild
           path: ./crop-listing-service/target/*-SNAPSHOT.jar
-#
+
 #  waste-service:
 #    build:
 #      context: ./
@@ -243,28 +243,28 @@ services:
 #        - action: rebuild
 #          path: ./transport-service/target/*-SNAPSHOT.jar
 #
-#  warehouse-service:
-#    build:
-#      context: ./
-#      dockerfile: ./warehouse-service/Dockerfile.dev
-#    container_name: warehouse-service
-#    depends_on:
-#      - eureka-server
-#      - rabbitmq
-#    environment:
-#      - SERVER_PORT=8090
-#      - SPRING_APPLICATION_NAME=warehouse-service
-#    ports:
-#      - "8090:8090"
-#    networks:
-#      - spring-net
-#    volumes:
-#      - ./warehouse-service:/app/service
-#    develop:
-#      watch:
-#        - action: rebuild
-#          path: ./warehouse-service/target/*-SNAPSHOT.jar
-#
+  warehouse-service:
+    build:
+      context: ./
+      dockerfile: ./warehouse-service/Dockerfile.dev
+    container_name: warehouse-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+    environment:
+      - SERVER_PORT=8090
+      - SPRING_APPLICATION_NAME=warehouse-service
+    ports:
+      - "8090:8090"
+    networks:
+      - spring-net
+    volumes:
+      - .:/app
+    develop:
+      watch:
+        - action: rebuild
+          path: ./warehouse-service/target/*-SNAPSHOT.jar
+
 #  analytic-service:
 #    build:
 #      context: ./

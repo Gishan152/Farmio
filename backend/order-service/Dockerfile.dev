@@ -2,18 +2,12 @@ FROM eclipse-temurin:24-jdk-noble
 
 WORKDIR /app
 
-COPY pom.xml /app
+# For dev, we'll rely on bind mount of the entire backend directory into /app
+# Ensure directory exists
+RUN mkdir -p /app
 
-# RUN ls -la /app         # Check wrapper files are here
+# Expose port used by order-service in compose
+EXPOSE 8086
 
-WORKDIR /app/service
-
-# RUN /app/service/mvnw dependency:go-offline -B
-CMD ["bash", "-c", "/app/service/mvnw dependency:go-offline -B"]
-
-# No VOLUME here — using bind mount instead
-
-# EXPOSE 8080 5005
-
-ENTRYPOINT ["bash", "-c", "/app/service/mvnw org.springframework.boot:spring-boot-maven-plugin:run"]
-# CMD ["sh", "-c", "while true; do sleep 1; done"]
+# Fix Windows CRLF and executable bit on mvnw at container start, then run from order-service subdirectory
+ENTRYPOINT ["/bin/sh", "-lc", "cd /app/order-service && if [ -f ./mvnw ]; then sed -i 's/\r$//' ./mvnw && chmod +x ./mvnw; fi; ./mvnw spring-boot:run"]

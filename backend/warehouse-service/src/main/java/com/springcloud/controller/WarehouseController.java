@@ -16,16 +16,21 @@ import java.util.List;
 @RequestMapping("/api/warehouses")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class WarehouseController {
     
     private final WarehouseService warehouseService;
     
     @GetMapping
     public ResponseEntity<List<WarehouseResponseDTO>> getAllWarehouses(
+            @RequestParam(required = false) String search,
             @RequestHeader(value = "X-User-Id", defaultValue = "1") Long userId) {
-        log.info("Received request to get all warehouses for user: {}", userId);
-        List<WarehouseResponseDTO> warehouses = warehouseService.getAllWarehousesByOwner(userId);
+        log.info("Received request to get warehouses for user: {} with search: {}", userId, search);
+        List<WarehouseResponseDTO> warehouses;
+        if (search != null && !search.trim().isEmpty()) {
+            warehouses = warehouseService.searchWarehouses(search, userId);
+        } else {
+            warehouses = warehouseService.getAllWarehousesByOwner(userId);
+        }
         return ResponseEntity.ok(warehouses);
     }
     

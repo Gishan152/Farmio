@@ -39,7 +39,7 @@ spring:
         - id: warehouse-service
           uri: lb://warehouse-service
           predicates:
-            - Path=/api/warehouse/**
+            - Path=/api/warehouses/**,/api/facilities/**
         - id: analytics-service
           uri: lb://analytics-service
           predicates:
@@ -56,6 +56,22 @@ spring:
           uri: lb://chat-service
           predicates:
             - Path=/api/chat/**
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - http://localhost:5173
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            exposedHeaders:
+              - "*"
+            allowCredentials: true
 
   security:
     user:

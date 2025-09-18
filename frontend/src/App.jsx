@@ -183,7 +183,7 @@ function App() {
 	return (
 		<UserContextProvider>
 			<TempCommonProvider>
-				<GoogleMapsProvider>
+				<GoogleMapsProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
 					<RouterProvider router={router} />
 				</GoogleMapsProvider>
 			</TempCommonProvider>

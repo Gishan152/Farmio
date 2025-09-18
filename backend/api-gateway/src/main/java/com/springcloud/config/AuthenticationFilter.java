@@ -37,19 +37,12 @@ public class AuthenticationFilter implements WebFilter {
         ServerHttpRequest req = exchange.getRequest();
         System.out.println("Executing AuthenticationFilter...");
 
-        ServerHttpResponse res = exchange.getResponse();
-        HttpHeaders headers = res.getHeaders();
-        headers.add(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:5173");
-        headers.addAll(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS,
-                List.of("GET","POST","PUT","DELETE","OPTIONS"));
-        headers.addAll(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, List.of("*"));
-        headers.add(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
-        headers.add(HttpHeaders.ACCESS_CONTROL_MAX_AGE, "3600");
+        // CORS headers are now handled by the globalcors configuration in application.yml
+        // Removing manual CORS headers to avoid duplication
 
         if (exchange.getRequest().getMethod() == HttpMethod.OPTIONS) {
             System.out.println("OPTIONS request handled.");
-            res.setStatusCode(HttpStatus.OK);
-            return res.setComplete();
+            return chain.filter(exchange); // Let the global CORS handler deal with OPTIONS
         }
 
         if (routerValidator.isSecured(req)) {

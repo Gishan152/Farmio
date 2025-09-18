@@ -8,7 +8,13 @@ import java.util.List;
 
 @Component
 public class RouterValidator {
-    private static final List<String> openEndpoints = Arrays.asList("/auth/login", "/auth/register");
+    private static final List<String> openEndpoints = Arrays.asList(
+            "/api/auth/",
+            "/auth/login",
+            "/auth/register",
+            "/actuator/health",
+            "/api/warehouses" // Temporarily open for testing
+    );
 
     public boolean isSecured(ServerHttpRequest request) {
         return openEndpoints.stream()
