@@ -13,7 +13,8 @@ public class RouterValidator {
             "/auth/login",
             "/auth/register",
             "/actuator/health",
-            "/api/warehouses" // Temporarily open for testing
+            "/api/warehouses", // Temporarily open for testing
+            "/api/slots" // Temporarily open for testing
     );
 
     public boolean isSecured(ServerHttpRequest request) {

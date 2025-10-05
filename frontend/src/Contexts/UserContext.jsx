@@ -11,15 +11,16 @@ const UserContextProvider = ({children}) => {
         const token = localStorage.getItem("token");
         if(token){
             const decoded = jwtDecode(token);
-            console.log("decoded : ", decoded);
             api.post("/api/user/get", {
                 username: decoded.sub
             })
             .then(res=>{
                 const user = res.data;
-                console.log("user : ", user);
                 setUser(user);
             })
+            .catch(error => {
+                console.error("Failed to fetch user data:", error);
+            });
         }
     }, [])
 

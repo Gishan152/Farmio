@@ -19,6 +19,10 @@ spring:
     username: neondb_owner
     password: npg_l2wurAbES8Cq
     driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
+      platform: postgresql
   jpa:
     hibernate:
       ddl-auto: update

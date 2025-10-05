@@ -1,0 +1,14 @@
+# Development profile - disables discovery and RabbitMQ for standalone testing
+spring:
+  cloud:
+    discovery:
+      enabled: false
+  rabbitmq:
+    host: localhost
+    port: 5672
+    
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false

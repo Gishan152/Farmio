@@ -11,6 +11,17 @@ export default function FacilityManagement() {
     const [showForm, setShowForm] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [submitLoading, setSubmitLoading] = useState(false);
+    const [notification, setNotification] = useState(null);
+    const [activeTab, setActiveTab] = useState('basic'); // basic, contact, suppliers
+    
+    // Form states for different sections
+    const [supplierForm, setSupplierForm] = useState({ 
+        name: '', 
+        category: '', 
+        contact: '', 
+        email: '', 
+        address: '' 
+    });
 
     // Sample warehouses with city instead of lat/lng
     const sampleWarehouses = [
@@ -70,7 +81,25 @@ export default function FacilityManagement() {
         keeperContact: '',
         keeperEmail: '',
         lat: null,
-        lng: null
+        lng: null,
+        // Enhanced contact information
+        contactName: '',
+        contactPhone: '',
+        contactEmail: '',
+        // Operational details
+        operatingHours: '06:00 - 18:00',
+        // Supplier contacts
+        supplierContacts: [],
+        // Security and access
+        securityFeatures: '',
+        accessControl: 'keycard',
+        // Insurance and maintenance
+        insuranceDetails: '',
+        maintenanceSchedule: 'monthly',
+        // Branding
+        logo: '',
+        displayName: '',
+        warehouseCode: ''
     });
 
     const handleInputChange = (e) => {
@@ -83,6 +112,30 @@ export default function FacilityManagement() {
         }));
     };
 
+    // Show notification helper
+    const showNotification = (message, type = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), 4000);
+    };
+
+    // Supplier Contact Management
+    const addSupplier = () => {
+        if (supplierForm.name && supplierForm.category) {
+            setFormData(prev => ({
+                ...prev,
+                supplierContacts: [...prev.supplierContacts, { ...supplierForm, id: Date.now() }]
+            }));
+            setSupplierForm({ name: '', category: '', contact: '', email: '', address: '' });
+        }
+    };
+
+    const removeSupplier = (id) => {
+        setFormData(prev => ({
+            ...prev,
+            supplierContacts: prev.supplierContacts.filter(supplier => supplier.id !== id)
+        }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -91,17 +144,17 @@ export default function FacilityManagement() {
             !formData.totalSlots || !formData.totalCapacity || !formData.pricePerKg ||
             !formData.keeperName || !formData.keeperContact || !formData.keeperEmail
         ) {
-            alert('Please fill in all required fields');
+            showNotification('Please fill in all required fields', 'error');
             return;
         }
 
         if (parseInt(formData.totalSlots) <= 0 || parseInt(formData.totalCapacity) <= 0) {
-            alert('Slots and capacity must be positive numbers');
+            showNotification('Slots and capacity must be positive numbers', 'error');
             return;
         }
 
         if (parseFloat(formData.pricePerKg) < 0) {
-            alert('Price per kg cannot be negative');
+            showNotification('Price per kg cannot be negative', 'error');
             return;
         }
 
@@ -115,24 +168,24 @@ export default function FacilityManagement() {
                 capacityPerSlot: parseInt(formData.capacityPerSlot) || 100,
                 temperatureMin: parseInt(formData.temperatureMin) || 0,
                 temperatureMax: parseInt(formData.temperatureMax) || 14,
-                storageType: formData.storageType === 'Cold Storage (0°C to 14°C)' ? 'COLD_STORAGE' : 'DRY_STORAGE',
+                storageType: getStorageTypeEnum(formData.storageType),
                 status: formData.status.toUpperCase()
             };
 
             if (editingWarehouse) {
                 await updateWarehouse(editingWarehouse.id, warehouseData);
                 setEditingWarehouse(null);
-                alert('Warehouse updated successfully!');
+                showNotification('Warehouse updated successfully!', 'success');
             } else {
                 await addWarehouse(warehouseData);
-                alert('Warehouse added successfully!');
+                showNotification('Warehouse added successfully!', 'success');
             }
 
             resetForm();
             setShowForm(false);
         } catch (error) {
             console.error('Error saving warehouse:', error);
-            alert('Failed to save warehouse. Please try again.');
+            showNotification('Failed to save warehouse. Please try again.', 'error');
         } finally {
             setSubmitLoading(false);
         }
@@ -157,12 +210,77 @@ export default function FacilityManagement() {
             keeperContact: '',
             keeperEmail: '',
             lat: null,
-            lng: null
+            lng: null,
+            // Enhanced contact information
+            contactName: '',
+            contactPhone: '',
+            contactEmail: '',
+            // Operational details
+            operatingHours: '06:00 - 18:00',
+            // Supplier contacts
+            supplierContacts: [],
+            // Security and access
+            securityFeatures: '',
+            accessControl: 'keycard',
+            // Insurance and maintenance
+            insuranceDetails: '',
+            maintenanceSchedule: 'monthly',
+            // Branding
+            logo: '',
+            displayName: '',
+            warehouseCode: ''
         });
+        setActiveTab('basic');
+    };
+
+    // Helper function to convert display names to backend enum values
+    const getStorageTypeEnum = (displayValue) => {
+        switch (displayValue) {
+            case 'Cold Storage (0°C to 14°C)':
+                return 'COLD_STORAGE';
+            case 'Freezer (-18°C to -10°C)':
+                return 'FREEZER';
+            case 'Dry Storage':
+                return 'DRY_STORAGE';
+            default:
+                return 'DRY_STORAGE';
+        }
+    };
+
+    // Helper function to convert backend enum values to display names
+    const getStorageTypeDisplay = (enumValue) => {
+        switch (enumValue) {
+            case 'COLD_STORAGE':
+                return 'Cold Storage (0°C to 14°C)';
+            case 'FREEZER':
+                return 'Freezer (-18°C to -10°C)';
+            case 'DRY_STORAGE':
+                return 'Dry Storage';
+            default:
+                return 'Dry Storage';
+        }
+    };
+
+    // Helper function to get storage type icon and short name
+    const getStorageTypeInfo = (enumValue) => {
+        switch (enumValue) {
+            case 'COLD_STORAGE':
+                return { icon: '❄️', name: 'Cold' };
+            case 'FREEZER':
+                return { icon: '🧊', name: 'Freezer' };
+            case 'DRY_STORAGE':
+                return { icon: '🌡️', name: 'Dry' };
+            default:
+                return { icon: '🌡️', name: 'Dry' };
+        }
     };
 
     const handleEdit = (warehouse) => {
-        setFormData(warehouse);
+        setFormData({
+            ...warehouse,
+            storageType: getStorageTypeDisplay(warehouse.storageType),
+            status: warehouse.status?.toLowerCase() || 'open'
+        });
         setEditingWarehouse(warehouse);
         setShowForm(true);
     };
@@ -176,10 +294,10 @@ export default function FacilityManagement() {
             try {
                 await deleteWarehouse(deletingWarehouse.id);
                 setDeletingWarehouse(null);
-                alert('Warehouse deleted successfully!');
+                showNotification('Warehouse deleted successfully!', 'success');
             } catch (error) {
                 console.error('Error deleting warehouse:', error);
-                alert('Failed to delete warehouse. Please try again.');
+                showNotification('Failed to delete warehouse. Please try again.', 'error');
             }
         }
     };
@@ -286,9 +404,9 @@ export default function FacilityManagement() {
                                         <div className="flex flex-col items-center">
                                             <div className="flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold bg-green-50 text-green-700 border border-green-200">
                                                 <span className="text-base">
-                                                    {warehouse.storageType.includes('Cold') ? '❄️' : '🌡️'}
+                                                    {getStorageTypeInfo(warehouse.storageType).icon}
                                                 </span>
-                                                <span>{warehouse.storageType.includes('Cold') ? 'Cold' : 'Dry'}</span>
+                                                <span>{getStorageTypeInfo(warehouse.storageType).name}</span>
                                             </div>
                                             <span className="text-xs text-gray-500 mt-1 font-medium">
                                                 {warehouse.temperatureMin}°C - {warehouse.temperatureMax}°C
@@ -454,6 +572,7 @@ export default function FacilityManagement() {
                                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
                                     >
                                         <option value="Cold Storage (0°C to 14°C)">Cold Storage (0°C to 14°C)</option>
+                                        <option value="Freezer (-18°C to -10°C)">Freezer (-18°C to -10°C)</option>
                                         <option value="Dry Storage">Dry Storage</option>
                                     </select>
                                 </div>
@@ -649,7 +768,7 @@ export default function FacilityManagement() {
                                 </div>
                                 <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Storage Type</label>
-                                    <p className="text-gray-900">{viewingWarehouse.storageType}</p>
+                                    <p className="text-gray-900">{getStorageTypeDisplay(viewingWarehouse.storageType)}</p>
                                 </div>
                                 <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Temperature Range</label>
@@ -767,6 +886,43 @@ export default function FacilityManagement() {
                     animation: scaleIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
                 }
             `}</style>
+
+            {/* Custom Notification */}
+            {notification && (
+                <div className={`fixed top-4 right-4 z-50 max-w-md w-full animate-fadeIn`}>
+                    <div className={`rounded-lg shadow-lg p-4 flex items-center space-x-3 ${
+                        notification.type === 'success' 
+                            ? 'bg-green-500 text-white' 
+                            : notification.type === 'error'
+                            ? 'bg-red-500 text-white'
+                            : 'bg-blue-500 text-white'
+                    }`}>
+                        <div className="flex-shrink-0">
+                            {notification.type === 'success' && (
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            )}
+                            {notification.type === 'error' && (
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            )}
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-sm font-medium">{notification.message}</p>
+                        </div>
+                        <button
+                            onClick={() => setNotification(null)}
+                            className="flex-shrink-0 text-white hover:text-gray-200 transition-colors"
+                        >
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
