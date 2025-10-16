@@ -11,143 +11,9 @@ import {
     CalendarIcon
 } from '@heroicons/react/24/outline';
 import { useUserContext } from '@/Contexts/UserContext';
-import api from '@/API/client';
-// TODO: Replace with actual buyer payment context/hook
-// import { useBuyerPayment } from '../../../Contexts/Buyer/PaymentContext';
-
-// Placeholder for payment data and actions
-const useBuyerPayment = () => {
-    // Replace with real data fetching and actions
-    const [payments, setPayments] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [walletData, setWalletData] = useState(null);
-    const {user} = useUserContext();
-
-    useEffect(()=>{
-        async function fetchPayments(){
-            try {
-                console.log("Fetching payment details")
-                setLoading(true);
-                // Replace with real API call
-                const response = await api.get(`/api/payment/wallet`);
-                console.log("wallet data : ", response.data);
-                setWalletData(response.data);
-                
-                // Convert payment history to payments format
-                if (response.data.paymentHistory) {
-                    const formattedPayments = response.data.paymentHistory.map(transaction => ({
-                        id: transaction.transactionId,
-                        type: transaction.type,
-                        reference: transaction.reference,
-                        amount: transaction.amount,
-                        status: transaction.status.toLowerCase(),
-                        paymentDate: new Date(transaction.timestamp).toISOString().split('T')[0],
-                        description: transaction.description,
-                        transactionType: transaction.type
-                    }));
-                    setPayments(formattedPayments);
-                }
-            } catch (error) {
-                console.error("Failed to fetch wallet data:", error);
-            } finally {
-                setLoading(false);
-            }
-        }
-        
-        fetchPayments();
-    }, [user])
+import { usePaymentContext } from '@/Contexts/Buyer/PaymentContext';
 
 
-    useEffect(() => {
-        setLoading(true);
-        setTimeout(() => {
-            setPayments([
-                // Warehouse Booking Payment
-                {
-                    id: 'PMT-001',
-                    type: 'Warehouse Booking',
-                    bookingId: 'BK-1001',
-                    produce: 'Corn',
-                    quantity: 100,
-                    duration: 30,
-                    paymentDate: '2025-07-01',
-                    releaseDate: '2025-07-31',
-                    baseCost: 12000,
-                    bufferCost: 500,
-                    baseFee: 1250,
-                    totalAmount: 13750,
-                    refundAmount: 0,
-                    status: 'settled',
-                    escrowStatus: 'settled',
-                    payHereReceiptId: 'PH-123456',
-                    buyerName: 'John Doe',
-                    isEarlyRetrieval: false,
-                    warehouse: 'Sunny Warehouse',
-                },
-                // Warehouse Extension Payment
-                {
-                    id: 'PMT-002',
-                    type: 'Warehouse Extension',
-                    bookingId: 'BK-1001',
-                    produce: 'Corn',
-                    quantity: 100,
-                    duration: 10,
-                    paymentDate: '2025-07-31',
-                    releaseDate: '2025-08-10',
-                    baseCost: 4000,
-                    bufferCost: 200,
-                    baseFee: 400,
-                    totalAmount: 4600,
-                    refundAmount: 0,
-                    status: 'settled',
-                    escrowStatus: 'settled',
-                    payHereReceiptId: 'PH-123457',
-                    buyerName: 'John Doe',
-                    isEarlyRetrieval: false,
-                    warehouse: 'Sunny Warehouse',
-                },
-                // Order Payment
-                {
-                    id: 'PMT-003',
-                    type: 'Order',
-                    orderId: 'ORD-2001',
-                    produce: 'Wheat',
-                    quantity: 50,
-                    paymentDate: '2025-07-05',
-                    totalAmount: 8000,
-                    refundAmount: 0,
-                    status: 'settled',
-                    payHereReceiptId: 'PH-123458',
-                    buyerName: 'John Doe',
-                    sellerName: 'Golden Fields',
-                },
-                // Refunded Order Payment
-                {
-                    id: 'PMT-004',
-                    type: 'Order',
-                    orderId: 'ORD-2002',
-                    produce: 'Tomato',
-                    quantity: 20,
-                    paymentDate: '2025-07-10',
-                    totalAmount: 2000,
-                    refundAmount: 500,
-                    status: 'refunded',
-                    payHereReceiptId: 'PH-123459',
-                    buyerName: 'John Doe',
-                    sellerName: 'Highland Farms',
-                },
-            ]);
-            setLoading(false);
-        }, 500);
-    }, []);
-    return {
-        payments,
-        loading,
-        walletData,
-        loadPayments: () => {},
-        exportPayments: () => {},
-    };
-};
 
 function PaymentTable({ payments }) {
     return (
@@ -193,13 +59,24 @@ function PaymentTable({ payments }) {
 }
 
 export default function PaymentManagement() {
-    const { payments, loading, walletData, loadPayments } = useBuyerPayment();
-    // Wallet state (now from API)
+    const { 
+        payments, 
+        walletData, 
+        bankDetails: currentBankDetails,
+        walletLoading,
+        bankDetailsLoading,
+        withdrawFunds,
+        saveBankDetails,
+        exportPayments: exportPaymentsFromContext,
+        fetchBankDetails,
+        refreshPaymentData
+    } = usePaymentContext();
+    // Local state for modals and forms (not in context)
     const [withdrawModal, setWithdrawModal] = useState(false);
     const [withdrawAmount, setWithdrawAmount] = useState('');
     const [withdrawError, setWithdrawError] = useState('');
 
-    // Bank details state
+    // Bank details modal state
     const [bankDetailsModal, setBankDetailsModal] = useState(false);
     const [viewBankDetailsModal, setViewBankDetailsModal] = useState(false);
     const [bankDetails, setBankDetails] = useState({
@@ -209,35 +86,10 @@ export default function PaymentManagement() {
         branch: '',
         swiftCode: ''
     });
-    const [currentBankDetails, setCurrentBankDetails] = useState(null);
     const [bankDetailsError, setBankDetailsError] = useState('');
-    const [bankDetailsLoading, setBankDetailsLoading] = useState(false);
     const [cameFromWithdraw, setCameFromWithdraw] = useState(false);
 
-    // Simple CSV export for buyer payments
-    const exportPayments = () => {
-        if (!payments.length) return;
-        const headers = ['Transaction ID','Type','Reference','Amount','Status','Date','Description'];
-        const rows = payments.map(p => [
-            p.id,
-            p.transactionType,
-            p.reference,
-            p.amount,
-            p.status,
-            p.paymentDate,
-            p.description
-        ]);
-        const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'buyer_payments.csv';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    };
+
     const [showFilters, setShowFilters] = useState(false);
     const [filters, setFilters] = useState({
         status: 'all',
@@ -277,49 +129,11 @@ export default function PaymentManagement() {
     // Withdraw handler
     const { user } = useUserContext();
     
-    // Fetch bank details
-    const fetchBankDetails = async () => {
-        try {
-            setBankDetailsLoading(true);
-            const response = await api.get(`/api/payment/bank-details`);
-            setCurrentBankDetails(response.data);
-        } catch (error) {
-            console.error("Failed to fetch bank details:", error);
-            setCurrentBankDetails(null);
-        } finally {
-            setBankDetailsLoading(false);
-        }
-    };
 
-    // Helper function to refresh wallet and payment data
-    const refreshWalletData = async () => {
-        try {
-            const response = await api.get(`/api/payment/wallet`);
-            setWalletData(response.data);
-            
-            // Convert payment history to payments format
-            if (response.data.paymentHistory) {
-                const formattedPayments = response.data.paymentHistory.map(transaction => ({
-                    id: transaction.transactionId,
-                    type: transaction.type,
-                    reference: transaction.reference,
-                    amount: transaction.amount,
-                    status: transaction.status.toLowerCase(),
-                    paymentDate: new Date(transaction.timestamp).toISOString().split('T')[0],
-                    description: transaction.description,
-                    transactionType: transaction.type
-                }));
-                setPayments(formattedPayments);
-            }
-        } catch (error) {
-            console.error("Failed to refresh wallet data:", error);
-        }
-    };
 
-    // Load bank details on component mount
-    useEffect(() => {
-        fetchBankDetails();
-    }, [user]);
+
+
+
 
     // Bank details handlers
     const handleBankDetailsSubmit = async () => {
@@ -332,10 +146,9 @@ export default function PaymentManagement() {
             return;
         }
 
-        try {
-            await api.post('/api/payment/bank-details', {
-                ...bankDetails
-            });
+        const result = await saveBankDetails(bankDetails);
+        
+        if (result.success) {
             setBankDetailsModal(false);
             setBankDetails({
                 accountNumber: '',
@@ -344,9 +157,6 @@ export default function PaymentManagement() {
                 branch: '',
                 swiftCode: ''
             });
-            // Refresh bank details and wallet data
-            await fetchBankDetails();
-            await refreshWalletData();
             
             // If user came from withdraw, redirect back to withdraw
             if (cameFromWithdraw) {
@@ -355,8 +165,8 @@ export default function PaymentManagement() {
                     setWithdrawModal(true);
                 }, 500); // Small delay for better UX
             }
-        } catch (err) {
-            setBankDetailsError('Failed to save bank details: ' + (err?.response?.data?.message || err.message));
+        } else {
+            setBankDetailsError(result.error);
         }
     };
 
@@ -386,30 +196,18 @@ export default function PaymentManagement() {
             setWithdrawError('Insufficient wallet balance.');
             return;
         }
-        try {
-            const response = await api.post('/api/payment/withdraw', {
-                amount,
-                description: 'User withdrawal from wallet'
-            });
-            if (response.data.status === 'SUCCESS') {
-                // Refresh wallet data and payment history in real-time
-                await refreshWalletData();
-                
-                setWithdrawModal(false);
-                setWithdrawAmount('');
-            } else {
-                setWithdrawError(response.data.message || 'Withdrawal failed.');
-            }
-        } catch (err) {
-            const errorMessage = err?.response?.data?.message || err.message;
-            
+
+        const result = await withdrawFunds(amount, 'User withdrawal from wallet');
+        
+        if (result.success) {
+            setWithdrawModal(false);
+            setWithdrawAmount('');
+        } else {
             // Check if error is related to missing bank details
-            if (errorMessage.toLowerCase().includes('bank details') || 
-                errorMessage.toLowerCase().includes('bank account') ||
-                err?.response?.status === 400) {
+            if (result.needsBankDetails) {
                 setWithdrawError(
                     <div>
-                        {errorMessage}
+                        {result.error}
                         <button
                             onClick={() => {
                                 setWithdrawModal(false);
@@ -422,7 +220,7 @@ export default function PaymentManagement() {
                     </div>
                 );
             } else {
-                setWithdrawError('Withdrawal failed: ' + errorMessage);
+                setWithdrawError('Withdrawal failed: ' + result.error);
             }
         }
     };
@@ -446,7 +244,7 @@ export default function PaymentManagement() {
                                 Filters
                             </button>
                             <button
-                                onClick={() => exportPayments('csv')}
+                                onClick={() => exportPaymentsFromContext()}
                                 className="flex items-center bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm"
                             >
                                 <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
@@ -803,7 +601,7 @@ export default function PaymentManagement() {
                     <div className="p-4 border-b border-gray-200">
                         <h2 className="text-lg font-semibold text-gray-900">Payment History</h2>
                     </div>
-                    {loading ? (
+                    {walletLoading ? (
                         <div className="p-8 text-center">
                             <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
                             <p className="mt-2 text-gray-600 text-sm">Loading payments...</p>
