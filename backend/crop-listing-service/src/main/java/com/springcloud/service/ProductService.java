@@ -27,7 +27,7 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public Product addProduct(AddProductDTO dto,Long userId) {
+    public Product addProduct(AddProductDTO dto, Long userId) {
         Product product = new Product();
         product.setUserId(userId);
         product.setProductName(dto.getProductName());
@@ -40,21 +40,30 @@ public class ProductService {
         product.setBadges(dto.getBadges());
 
         List<String> imageUrls = new ArrayList<>();
-        for (MultipartFile file : dto.getImages()) {
-            String url = fileStorageService.uploadFile(file);
-            imageUrls.add(url);
+        // Check if the images array is not null to prevent errors
+        if (dto.getImages() != null) {
+            for (MultipartFile file : dto.getImages()) {
+                if (!file.isEmpty()) {
+                    // 1. Store the file using the new service method
+                    String filename = fileStorageService.storeFile(file);
+                    // 2. Construct the correct URL path
+                    String url = "/uploads/" + filename;
+                    imageUrls.add(url);
+                }
+            }
         }
         product.setImageUrls(imageUrls);
 
         return productRepository.save(product);
     }
 
-    public Product editProduct(Long id, EditProductDTO dto,Long userId) {
+    public Product editProduct(Long id, EditProductDTO dto, Long userId) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Product not found with id " + id
                 ));
+        
         product.setUserId(userId);
         product.setProductName(dto.getProductName());
         product.setMeasurement(dto.getMeasurement());
@@ -65,21 +74,25 @@ public class ProductService {
         product.setReturnAccepted(dto.getReturnAccepted());
         product.setBadges(dto.getBadges());
 
-        // Handle images
-        List<String> currentImages = product.getImageUrls();
-        List<String> existingImages = dto.getExistingImages();
-        List<String> imagesToKeep = currentImages.stream()
-                .filter(existingImages::contains)
-                .collect(Collectors.toList());
-
-        List<String> newImageUrls = new ArrayList<>();
-        for (MultipartFile file : dto.getNewImages()) {
-            String url = fileStorageService.uploadFile(file);
-            newImageUrls.add(url);
+        // Handle images: start with the list of existing images to keep
+        List<String> updatedImageUrls = new ArrayList<>();
+        if (dto.getExistingImages() != null) {
+            updatedImageUrls.addAll(dto.getExistingImages());
         }
 
-        List<String> updatedImageUrls = new ArrayList<>(imagesToKeep);
-        updatedImageUrls.addAll(newImageUrls);
+        // Add the newly uploaded images
+        if (dto.getNewImages() != null) {
+            for (MultipartFile file : dto.getNewImages()) {
+                if (!file.isEmpty()) {
+                    // 1. Store the new file
+                    String filename = fileStorageService.storeFile(file);
+                    // 2. Construct its URL and add it to the list
+                    String url = "/uploads/" + filename;
+                    updatedImageUrls.add(url);
+                }
+            }
+        }
+       
         product.setImageUrls(updatedImageUrls);
 
         return productRepository.save(product);
