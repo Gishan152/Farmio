@@ -212,6 +212,7 @@ export default function PaymentManagement() {
     const [currentBankDetails, setCurrentBankDetails] = useState(null);
     const [bankDetailsError, setBankDetailsError] = useState('');
     const [bankDetailsLoading, setBankDetailsLoading] = useState(false);
+    const [cameFromWithdraw, setCameFromWithdraw] = useState(false);
 
     // Simple CSV export for buyer payments
     const exportPayments = () => {
@@ -290,6 +291,31 @@ export default function PaymentManagement() {
         }
     };
 
+    // Helper function to refresh wallet and payment data
+    const refreshWalletData = async () => {
+        try {
+            const response = await api.get(`/api/payment/wallet/${user.id}`);
+            setWalletData(response.data);
+            
+            // Convert payment history to payments format
+            if (response.data.paymentHistory) {
+                const formattedPayments = response.data.paymentHistory.map(transaction => ({
+                    id: transaction.transactionId,
+                    type: transaction.type,
+                    reference: transaction.reference,
+                    amount: transaction.amount,
+                    status: transaction.status.toLowerCase(),
+                    paymentDate: new Date(transaction.timestamp).toISOString().split('T')[0],
+                    description: transaction.description,
+                    transactionType: transaction.type
+                }));
+                setPayments(formattedPayments);
+            }
+        } catch (error) {
+            console.error("Failed to refresh wallet data:", error);
+        }
+    };
+
     // Load bank details on component mount
     useEffect(() => {
         if (user?.id) {
@@ -321,14 +347,24 @@ export default function PaymentManagement() {
                 branch: '',
                 swiftCode: ''
             });
-            // Refresh bank details
-            fetchBankDetails();
+            // Refresh bank details and wallet data
+            await fetchBankDetails();
+            await refreshWalletData();
+            
+            // If user came from withdraw, redirect back to withdraw
+            if (cameFromWithdraw) {
+                setCameFromWithdraw(false);
+                setTimeout(() => {
+                    setWithdrawModal(true);
+                }, 500); // Small delay for better UX
+            }
         } catch (err) {
             setBankDetailsError('Failed to save bank details: ' + (err?.response?.data?.message || err.message));
         }
     };
 
-    const openBankDetailsModal = () => {
+    const openBankDetailsModal = (fromWithdraw = false) => {
+        setCameFromWithdraw(fromWithdraw);
         // Pre-fill form if details exist
         if (currentBankDetails) {
             setBankDetails({
@@ -360,14 +396,38 @@ export default function PaymentManagement() {
                 description: 'User withdrawal from wallet'
             });
             if (response.data.status === 'SUCCESS') {
-                // Optionally refresh wallet data here
+                // Refresh wallet data and payment history in real-time
+                await refreshWalletData();
+                
                 setWithdrawModal(false);
                 setWithdrawAmount('');
             } else {
                 setWithdrawError(response.data.message || 'Withdrawal failed.');
             }
         } catch (err) {
-            setWithdrawError('Withdrawal failed: ' + (err?.response?.data?.message || err.message));
+            const errorMessage = err?.response?.data?.message || err.message;
+            
+            // Check if error is related to missing bank details
+            if (errorMessage.toLowerCase().includes('bank details') || 
+                errorMessage.toLowerCase().includes('bank account') ||
+                err?.response?.status === 400) {
+                setWithdrawError(
+                    <div>
+                        {errorMessage}
+                        <button
+                            onClick={() => {
+                                setWithdrawModal(false);
+                                openBankDetailsModal(true);
+                            }}
+                            className="ml-2 text-blue-600 underline hover:text-blue-800"
+                        >
+                            Add Bank Details
+                        </button>
+                    </div>
+                );
+            } else {
+                setWithdrawError('Withdrawal failed: ' + errorMessage);
+            }
         }
     };
 
@@ -491,7 +551,11 @@ export default function PaymentManagement() {
                             max={walletData?.amount || 0}
                         />
                     </div>
-                    {withdrawError && <div className="text-red-600 text-sm font-medium">{withdrawError}</div>}
+                    {withdrawError && (
+                        <div className="text-red-600 text-sm font-medium">
+                            {typeof withdrawError === 'string' ? withdrawError : withdrawError}
+                        </div>
+                    )}
                 </div>
             </CustomModal>
 
@@ -501,6 +565,7 @@ export default function PaymentManagement() {
                 onClose={() => { 
                     setBankDetailsModal(false); 
                     setBankDetailsError(''); 
+                    setCameFromWithdraw(false);
                     setBankDetails({
                         accountNumber: '',
                         accountHolderName: '',
