@@ -39,6 +39,7 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
     
+    // PUBLIC
     // PayHere Payment Notification Handler (Webhook)
     @PostMapping("/payhere/notify")
     public ResponseEntity<String> handlePayHereNotification(
@@ -103,31 +104,43 @@ public class PaymentController {
     
     // Wallet Management Endpoints
     
+    // PUBLIC
     // Get Wallet Info (including payment history)
-    @GetMapping("/wallet/{userId}")
-    public ResponseEntity<WalletInfo> getWalletInfo(@PathVariable Long userId) {
+    @GetMapping("/wallet")
+    public ResponseEntity<WalletInfo> getWalletInfo(@RequestHeader("X-User-Id") Long userId) {
         System.out.println("Fetching wallet info for the user : " + userId);
         WalletInfo walletInfo = paymentService.getWalletInfo(userId);
         return ResponseEntity.ok(walletInfo);
     }
     
+    // PUBLIC
     // Withdraw Wallet Amount (excluding escrow)
     @PostMapping("/withdraw")
-    public ResponseEntity<WithdrawalResponse> withdrawToBank(@RequestBody WithdrawalRequest request) {
-        WithdrawalResponse response = paymentService.withdrawToBank(request);
+    public ResponseEntity<WithdrawalResponse> withdrawToBank(
+        @RequestHeader("X-User-Id") Long userId,
+        @RequestBody WithdrawalRequest request
+    ) {
+        WithdrawalResponse response = paymentService.withdrawToBank(userId, request);
         return ResponseEntity.ok(response);
     }
     
     // Bank Details Management
-    
+
+    // PUBLIC
     @PostMapping("/bank-details")
-    public ResponseEntity<Void> addOrUpdateBankDetails(@RequestBody BankDetailsRequest request) {
-        paymentService.addOrUpdateBankDetails(request);
+    public ResponseEntity<Void> addOrUpdateBankDetails(
+        @RequestHeader("X-User-Id") Long userId,
+        @RequestBody BankDetailsRequest request
+    ) {
+        paymentService.addOrUpdateBankDetails(userId, request);
         return ResponseEntity.noContent().build();
     }
     
-    @GetMapping("/bank-details/{userId}")
-    public ResponseEntity<BankDetailsResponse> getBankDetails(@PathVariable Long userId) {
+    // PUBLIC
+    @GetMapping("/bank-details")
+    public ResponseEntity<BankDetailsResponse> getBankDetails(
+        @RequestHeader("X-User-Id") Long userId
+    ) {
         BankDetailsResponse response = paymentService.getBankDetails(userId);
         return ResponseEntity.ok(response);
     }

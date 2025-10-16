@@ -298,15 +298,15 @@ public class PaymentService {
     
     // Withdraw to Bank (excluding escrow amount)
     @Transactional
-    public WithdrawalResponse withdrawToBank(WithdrawalRequest request) {
+    public WithdrawalResponse withdrawToBank(Long userId, WithdrawalRequest request) {
         try {
-            Wallet wallet = getOrCreateWallet(request.userId());
+            Wallet wallet = getOrCreateWallet(userId);
             
             // Check if user has sufficient balance (excluding escrow)
             if (wallet.getBalance().compareTo(request.amount()) < 0) {
                 return new WithdrawalResponse(
                     null,
-                    request.userId(),
+                    userId,
                     request.amount(),
                     "FAILED",
                     "Insufficient balance (excluding escrow amount)"
@@ -314,7 +314,7 @@ public class PaymentService {
             }
             
             // Check if bank details exist
-            BankDetails bankDetails = bankDetailsRepository.findByUserId(request.userId())
+            BankDetails bankDetails = bankDetailsRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Bank details not found"));
             
             // Deduct from wallet balance only
@@ -324,7 +324,7 @@ public class PaymentService {
             // Create transaction record
             String withdrawalId = UUID.randomUUID().toString();
             createTransaction(
-                request.userId(),
+                userId,
                 request.amount(),
                 TransactionType.WITHDRAWAL,
                 withdrawalId,
@@ -333,7 +333,7 @@ public class PaymentService {
             
             return new WithdrawalResponse(
                 withdrawalId,
-                request.userId(),
+                userId,
                 request.amount(),
                 "SUCCESS",
                 "Withdrawal initiated successfully"
@@ -342,7 +342,7 @@ public class PaymentService {
         } catch (Exception e) {
             return new WithdrawalResponse(
                 null,
-                request.userId(),
+                userId,
                 request.amount(),
                 "FAILED",
                 "Withdrawal failed: " + e.getMessage()
@@ -401,11 +401,11 @@ public class PaymentService {
     }
     
     // Bank Details
-    public void addOrUpdateBankDetails(BankDetailsRequest request) {
-        BankDetails bankDetails = bankDetailsRepository.findByUserId(request.userId())
+    public void addOrUpdateBankDetails(Long userId, BankDetailsRequest request) {
+        BankDetails bankDetails = bankDetailsRepository.findByUserId(userId)
             .orElse(new BankDetails());
         
-        bankDetails.setUserId(request.userId());
+        bankDetails.setUserId(userId);
         bankDetails.setBank(request.bank());
         bankDetails.setBranch(request.branch());
         bankDetails.setAccountNumber(request.accountNumber());

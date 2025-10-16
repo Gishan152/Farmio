@@ -26,9 +26,10 @@ const useBuyerPayment = () => {
     useEffect(()=>{
         async function fetchPayments(){
             try {
+                console.log("Fetching payment details")
                 setLoading(true);
                 // Replace with real API call
-                const response = await api.get(`/api/payment/wallet/${user.id}`);
+                const response = await api.get(`/api/payment/wallet`);
                 console.log("wallet data : ", response.data);
                 setWalletData(response.data);
                 
@@ -52,9 +53,8 @@ const useBuyerPayment = () => {
                 setLoading(false);
             }
         }
-        if (user?.id) {
-            fetchPayments();
-        }
+        
+        fetchPayments();
     }, [user])
 
 
@@ -281,7 +281,7 @@ export default function PaymentManagement() {
     const fetchBankDetails = async () => {
         try {
             setBankDetailsLoading(true);
-            const response = await api.get(`/api/payment/bank-details/${user.id}`);
+            const response = await api.get(`/api/payment/bank-details`);
             setCurrentBankDetails(response.data);
         } catch (error) {
             console.error("Failed to fetch bank details:", error);
@@ -294,7 +294,7 @@ export default function PaymentManagement() {
     // Helper function to refresh wallet and payment data
     const refreshWalletData = async () => {
         try {
-            const response = await api.get(`/api/payment/wallet/${user.id}`);
+            const response = await api.get(`/api/payment/wallet`);
             setWalletData(response.data);
             
             // Convert payment history to payments format
@@ -318,9 +318,7 @@ export default function PaymentManagement() {
 
     // Load bank details on component mount
     useEffect(() => {
-        if (user?.id) {
-            fetchBankDetails();
-        }
+        fetchBankDetails();
     }, [user]);
 
     // Bank details handlers
@@ -336,7 +334,6 @@ export default function PaymentManagement() {
 
         try {
             await api.post('/api/payment/bank-details', {
-                userId: user.id,
                 ...bankDetails
             });
             setBankDetailsModal(false);
@@ -391,7 +388,6 @@ export default function PaymentManagement() {
         }
         try {
             const response = await api.post('/api/payment/withdraw', {
-                userId: user.id,
                 amount,
                 description: 'User withdrawal from wallet'
             });
