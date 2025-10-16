@@ -14,10 +14,10 @@
 <!--        <relativePath/> &lt;!&ndash; optional, adjust for multi-module &ndash;&gt;-->
 <!--    </parent>-->
 
-    <artifactId>order-service</artifactId>
+    <artifactId>chat-service</artifactId>
     <packaging>jar</packaging>
 
-    <name>order-service</name>
+    <name>chat-service</name>
     <url>http://maven.apache.org</url>
 
     <properties>
