@@ -14,33 +14,33 @@ services:
     networks:
       - spring-net
 
-  rabbitmq:
-    image: rabbitmq:4-management
-    ports:
-      - "5672:5672"    # AMQP port
-      - "15672:15672"  # Management UI
-    container_name: rabbitmq-farmio
-    networks:
-      - spring-net
-
-  eureka-server:
-    build:
-      context: ./
-      dockerfile: ./eureka-server/Dockerfile.dev
-    container_name: eureka-server-farmio
-    hostname: eureka-server
-    depends_on:
-      - rabbitmq
-    ports:
-      - "8761:8761"
-    networks:
-      - spring-net
-    volumes:
-      - ./eureka-server:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./eureka-server/target/*-SNAPSHOT.jar
+#  rabbitmq:
+#    image: rabbitmq:4-management
+#    ports:
+#      - "5672:5672"    # AMQP port
+#      - "15672:15672"  # Management UI
+#    container_name: rabbitmq-farmio
+#    networks:
+#      - spring-net
+#
+#  eureka-server:
+#    build:
+#      context: ./
+#      dockerfile: ./eureka-server/Dockerfile.dev
+#    container_name: eureka-server-farmio
+#    hostname: eureka-server
+#    depends_on:
+#      - rabbitmq
+#    ports:
+#      - "8761:8761"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./eureka-server:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./eureka-server/target/*-SNAPSHOT.jar
 
 #  product-service:
 #    build:
@@ -87,27 +87,27 @@ services:
 #        - action: rebuild
 #          path: ./product-service/target/*-SNAPSHOT.jar
 
-  order-service:
-    build:
-      context: ./
-      dockerfile: ./order-service/Dockerfile.dev
-    container_name: order-service
-    depends_on:
-      - eureka-server
-      - rabbitmq
-    environment:
-      - SERVER_PORT=8086
-      - SPRING_APPLICATION_NAME=order-service
-    ports:
-      - "8086:8086"
-    networks:
-      - spring-net
-    volumes:
-      - ./order-service:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./order-service/target/*-SNAPSHOT.jar
+#  order-service:
+#    build:
+#      context: ./
+#      dockerfile: ./order-service/Dockerfile.dev
+#    container_name: order-service
+#    depends_on:
+#      - eureka-server
+#      - rabbitmq
+#    environment:
+#      - SERVER_PORT=8086
+#      - SPRING_APPLICATION_NAME=order-service
+#    ports:
+#      - "8086:8086"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./order-service:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./order-service/target/*-SNAPSHOT.jar
 
 #  test-service:
 #    build:
@@ -133,94 +133,94 @@ services:
 #          path: ./test-service/target/*-SNAPSHOT.jar
 
 
-  auth-service:
-    build:
-      context: ./
-      dockerfile: ./auth-service/Dockerfile.dev
-    container_name: auth-service
-    depends_on:
-      - eureka-server
-      - rabbitmq
-      - postgres
-    environment:
-      - SERVER_PORT=8085
-      - SPRING_APPLICATION_NAME=auth-service
-    ports:
-      - "8085:8085"
-    networks:
-      - spring-net
-    volumes:
-      - ./auth-service:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./auth-service/target/*-SNAPSHOT.jar
-
-
-  api-gateway:
-    build:
-      context: ./
-      dockerfile: ./api-gateway/Dockerfile.dev
-    container_name: api-gateway-farmio
-    depends_on:
-      - rabbitmq
-      - eureka-server
-#      - product-service
-      - auth-service
-    ports:
-      - "8080:8080"
-    networks:
-      - spring-net
-    volumes:
-      - ./api-gateway:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./api-gateway/target/*-SNAPSHOT.jar
-
-  crop-listing-service:
-    build:
-      context: ./
-      dockerfile: ./crop-listing-service/Dockerfile.dev
-    container_name: crop-listing-service
-    depends_on:
-      - eureka-server
-      - rabbitmq
-    environment:
-      - SERVER_PORT=8087
-      - SPRING_APPLICATION_NAME=crop-listing-service
-    ports:
-      - "8087:8087"
-    networks:
-      - spring-net
-    volumes:
-      - ./crop-listing-service:/app/service
-    develop:
-      watch:
-        - action: rebuild
-          path: ./crop-listing-service/target/*-SNAPSHOT.jar
-
-#  waste-service:
+#  auth-service:
 #    build:
 #      context: ./
-#      dockerfile: ./waste-service/Dockerfile.dev
-#    container_name: waste-service
+#      dockerfile: ./auth-service/Dockerfile.dev
+#    container_name: auth-service
+#    depends_on:
+#      - eureka-server
+#      - rabbitmq
+#      - postgres
+#    environment:
+#      - SERVER_PORT=8085
+#      - SPRING_APPLICATION_NAME=auth-service
+#    ports:
+#      - "8085:8085"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./auth-service:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./auth-service/target/*-SNAPSHOT.jar
+
+
+#  api-gateway:
+#    build:
+#      context: ./
+#      dockerfile: ./api-gateway/Dockerfile.dev
+#    container_name: api-gateway-farmio
+#    depends_on:
+#      - rabbitmq
+#      - eureka-server
+#      - product-service
+#      - auth-service
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      - spring-net
+#    volumes:
+#      - ./api-gateway:/app/service
+#    develop:
+#      watch:
+#        - action: rebuild
+#          path: ./api-gateway/target/*-SNAPSHOT.jar
+
+#  crop-listing-service:
+#    build:
+#      context: ./
+#      dockerfile: ./crop-listing-service/Dockerfile.dev
+#    container_name: crop-listing-service
 #    depends_on:
 #      - eureka-server
 #      - rabbitmq
 #    environment:
-#      - SERVER_PORT=8088
-#      - SPRING_APPLICATION_NAME=waste-service
+#      - SERVER_PORT=8087
+#      - SPRING_APPLICATION_NAME=crop-listing-service
 #    ports:
-#      - "8088:8088"
+#      - "8087:8087"
 #    networks:
 #      - spring-net
 #    volumes:
-#      - ./waste-service:/app/service
+#      - ./crop-listing-service:/app/service
 #    develop:
 #      watch:
 #        - action: rebuild
-#          path: ./waste-service/target/*-SNAPSHOT.jar
+#          path: ./crop-listing-service/target/*-SNAPSHOT.jar
+
+  waste-service:
+    build:
+      context: ./
+      dockerfile: ./waste-service/Dockerfile.dev
+    container_name: waste-service
+    depends_on:
+      - postgres
+    environment:
+      - SERVER_PORT=8088
+      - SPRING_APPLICATION_NAME=waste-service
+      - SPRING_PROFILES_ACTIVE=dev
+    ports:
+      - "8088:8088"
+    networks:
+      - spring-net
+    volumes:
+      - ./:/app
+      - maven-repo:/root/.m2
+    working_dir: /app/waste-service
+
+
 #  transport-service:
 #    build:
 #      context: ./
@@ -333,6 +333,8 @@ services:
 #
 volumes:
   pgdata:
+  maven-repo:
 
 networks:
   spring-net:
+    driver: bridge
