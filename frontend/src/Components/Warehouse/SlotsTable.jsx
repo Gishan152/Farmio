@@ -1,3 +1,11 @@
+// Format slot ID with S- prefix
+const formatSlotId = (id) => {
+    if (typeof id === 'string' && id.startsWith('S-')) {
+        return id; // Already formatted
+    }
+    return `S-${String(id).padStart(3, '0')}`;
+};
+
 export default function SlotsTable({ slots, getSlotStatusColor, getUsagePercentage }) {
     return (
         <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
@@ -23,7 +31,7 @@ export default function SlotsTable({ slots, getSlotStatusColor, getUsagePercenta
                             return (
                                 <tr key={slot.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="text-sm font-semibold text-gray-900">#{slot.id}</span>
+                                        <span className="text-sm font-semibold text-gray-900">{formatSlotId(slot.id)}</span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getSlotStatusColor(slot)}`}>

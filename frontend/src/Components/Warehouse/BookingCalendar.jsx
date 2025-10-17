@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
+// Format slot ID with S- prefix
+const formatSlotId = (id) => {
+    if (typeof id === 'string' && id.startsWith('S-')) {
+        return id; // Already formatted
+    }
+    return `S-${String(id).padStart(3, '0')}`;
+};
+
 export default function BookingCalendar({ slots = [] }) {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
@@ -210,7 +218,7 @@ export default function BookingCalendar({ slots = [] }) {
                                                 {getSelectedDateBookings().map((booking, index) => (
                                                     <div key={index} className="bg-white p-3 rounded border border-gray-200">
                                                         <div className="text-sm">
-                                                            <div className="font-medium text-gray-900">Slot #{booking.id}</div>
+                                                            <div className="font-medium text-gray-900">Slot {formatSlotId(booking.id)}</div>
                                                             <div className="text-gray-600">Booked by: {booking.bookedBy}</div>
                                                             <div className="text-gray-600">Produce: {booking.produce}</div>
                                                             <div className="text-gray-600">
