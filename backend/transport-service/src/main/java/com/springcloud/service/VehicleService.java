@@ -12,6 +12,6 @@ import org.springframework.stereotype.Service;
 public interface VehicleService {
     VehicleDto getVehicleByProvider(Long providerId);
     VehicleDto saveVehicle(VehicleDto vehicleDto);
-    VehicleDto updateVehicle(VehicleDto vehicleDto);
+    VehicleDto updateVehicle(Long id,VehicleDto vehicleDto);
     void deleteVehicle(Long vehicleId);
 }

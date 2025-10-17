@@ -31,14 +31,35 @@ public class VehicleServiceImpl implements VehicleService {
         return modelMapper.map(savedVehicle, VehicleDto.class);
     }
 
-    public VehicleDto updateVehicle(VehicleDto vehicleDto){
-        Optional<Vehicle> existingVehicle = vehicleRepository.findByProviderId(vehicleDto.getProviderId());
+    public VehicleDto updateVehicle(Long id, VehicleDto vehicleDto) {
+        Vehicle existingVehicle = vehicleRepository.findByProviderId(vehicleDto.getProviderId())
+                .orElseThrow(() -> new RuntimeException("Vehicle not found for provider: " + vehicleDto.getProviderId()));
 
-        Vehicle vehicle = existingVehicle.get();
-        modelMapper.map(vehicleDto, vehicle);
+        Vehicle updatedVehicle = updateVehicleFromDto(existingVehicle, vehicleDto);
+        Vehicle savedVehicle = vehicleRepository.save(updatedVehicle);
+        return modelMapper.map(savedVehicle, VehicleDto.class);
+    }
 
-        Vehicle updatedVehicle = vehicleRepository.save(vehicle);
-        return modelMapper.map(updatedVehicle, VehicleDto.class);
+    private Vehicle updateVehicleFromDto(Vehicle existingVehicle, VehicleDto vehicleDto) {
+        if (vehicleDto.getRegNo() != null) {
+            existingVehicle.setRegNo(vehicleDto.getRegNo());
+        }
+        if (vehicleDto.getType() != null) {
+            existingVehicle.setType(vehicleDto.getType());
+        }
+        if (vehicleDto.getKind() != null) {
+            existingVehicle.setKind(vehicleDto.getKind());
+        }
+        if (vehicleDto.getMaxLoad() != null) {
+            existingVehicle.setMaxLoad(vehicleDto.getMaxLoad());
+        }
+        if (vehicleDto.getFrontPhoto() != null) {
+            existingVehicle.setFrontPhoto(vehicleDto.getFrontPhoto());
+        }
+        if (vehicleDto.getSidePhoto() != null) {
+            existingVehicle.setSidePhoto(vehicleDto.getSidePhoto());
+        }
+        return existingVehicle;
     }
 
     public void deleteVehicle(Long vehicleId){
