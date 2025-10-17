@@ -1,4 +1,5 @@
 import axios from "axios";
+import { get, update } from "lodash";
 
 const base = import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:8080';
 
@@ -106,7 +107,51 @@ const transportService = {
       console.error(`Error deleting availability with ID ${id}:`, error?.response || error.message);
       throw error;
     }
+  },
+
+  //------- VEHICLE --------
+
+  getVehicleByProvider: async (providerId) => {
+    try {
+      const response = await api.get(`/api/transport/my-vehicle?providerId=${providerId}`);
+      return response.data;
+    }catch (error) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      console.error('Error fetching vehicle:', error?.response || error.message);
+      throw error;
+    }
+  },
+
+  saveVehicle: async (vehicleData) => {
+    try {
+      const response = await api.post('/api/transport/createVehicle', vehicleData);
+      return response.data;
+    }catch (error) {
+      console.error('Error creating vehicle:', error?.response || error.message);
+      throw error;
+    }
+  },
+
+  updateVehicle: async (id, vehicleData) => {
+    try {
+      const response = await api.put(`/api/transport/updateVehicle/${id}`, vehicleData);
+      return response.data;
+    }catch (error) {
+      console.error('Error updating vehicle:', error?.response || error.message);
+      throw error;
+    }
+  },
+
+  deleteVehicle: async (id) => {
+    try {
+      await api.delete(`/api/transport/deleteVehicle/${id}`);
+    }catch (error) {
+      console.error('Error deleting vehicle:', error?.response || error.message);
+    }
   }
+
 };
 
 export default transportService;

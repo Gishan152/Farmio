@@ -8,6 +8,7 @@ import {
   CameraIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
+import transportService from '../../../API/transportService';
 
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) return null;
@@ -65,14 +66,26 @@ export default function VehicleInfo() {
     sidePhoto: '',
   });
   const [errors, setErrors] = useState({});
+  const providerId = 1;
 
-  // Load saved vehicle from localStorage
   useEffect(() => {
-    const savedVehicle = localStorage.getItem('transportProviderVehicle');
-    if (savedVehicle) {
-      setVehicle(JSON.parse(savedVehicle));
+    loadVehicle();
+  }, [providerId]);
+
+  const loadVehicle = async () => {
+    try {
+      setLoading(true);
+      const vehicleData = await transportService.getVehicleByProvider(providerId);
+      if (vehicleData) {
+        setVehicle(vehicleData);
+      }
+    } catch (error) {
+      console.error('Error loading vehicle:', error);
+      // It's okay if no vehicle exists yet
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -101,17 +114,29 @@ export default function VehicleInfo() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const newVehicle = {
-      ...formData,
-      updatedAt: new Date().toISOString()
-    };
-    setVehicle(newVehicle);
-    localStorage.setItem('transportProviderVehicle', JSON.stringify(newVehicle));
-    setIsEditing(false);
+    try {
+      const vehicleData = {
+        ...formData,
+        providerId: providerId
+      };
+
+      let savedVehicle;
+      if (vehicle) {
+        savedVehicle = await transportService.updateVehicle(vehicle.id, vehicleData);
+      } else {
+        savedVehicle = await transportService.saveVehicle(vehicleData);
+      }
+
+      setVehicle(savedVehicle);
+      setIsEditing(false);
+
+    } catch (error) {
+      console.error('Error saving vehicle:', error);
+    }
   };
 
   const handleEdit = () => {
@@ -130,10 +155,14 @@ export default function VehicleInfo() {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
-    setVehicle(null);
-    localStorage.removeItem('transportProviderVehicle');
-    setShowDeleteModal(false);
+  const handleDeleteConfirm = async () => {
+    try {
+      await transportService.deleteVehicle(vehicle.id);
+      setVehicle(null);
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error('Error deleting vehicle:', error);
+    }
   };
 
   const handleDeleteCancel = () => {
