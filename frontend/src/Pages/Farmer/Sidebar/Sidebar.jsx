@@ -25,7 +25,7 @@ const menu = [
     {
         label: 'Warehouses',
         children: [
-            { label: 'Warehouses', to: 'warehouses/all' },
+            { label: 'Warehouses', to: 'warehouses' },
             { label: 'Reserved Storage Units', to: 'warehouses/reserved' },
         ],
     },

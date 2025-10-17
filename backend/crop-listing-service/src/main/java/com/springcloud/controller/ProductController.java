@@ -21,6 +21,18 @@ public class ProductController {
         List<Product> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
     }
+    
+    @GetMapping("/all")
+    public ResponseEntity<List<Product>> getAllProductss() {
+        List<Product> products = productService.getAllProducts();
+        return ResponseEntity.ok(products);
+    }
+    
+    @GetMapping("/my-products")
+    public ResponseEntity<List<Product>> getMyProducts(@RequestHeader("X-User-Id") Long userId) {
+        List<Product> products = productService.getProductsByUserId(userId);
+        return ResponseEntity.ok(products);
+    }
 
     @PostMapping("/createproduct")
     public ResponseEntity<?> addProduct(

@@ -112,7 +112,7 @@ const farmerRoutes = {
             path: 'warehouses',
             children: [
                 {
-                    path: 'all',
+                    path: '',
                     Component: FarmerWarehouses
                 },
                 {

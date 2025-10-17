@@ -115,31 +115,21 @@ export default function FarmerWarehouseDetails() {
     };
 
     return (
-        <div className="p-6 max-w-6xl mx-auto space-y-6">
+        <div className="p-6 max-w-4xl mx-auto space-y-6">
             {/* Header */}
             <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="flex flex-col lg:flex-row lg:items-start gap-6">
-                    <div className="relative w-50 lg:w-1/4 min-w-80">
+                    <div className="relative w-20 lg:w-1/4 min-w-40">
                         <img
                             src={w.images[currentImageIndex]}
                             alt={w.name}
-                            className="object-cover w-80 h-80"
+                            className="object-cover w-50 h-50"
                         />
                         {w.verified && (
                             <div className="absolute top-2 right-2 bg-white p-1 border-none rounded-[50%]">
                                 <CheckBadgeIcon className="h-6 w-6 text-green-500" />
                             </div>
                         )}
-                        <div className="absolute bottom-0 left-3 flex flex-wrap gap-2">
-                            {w.badges.map((b) => (
-                                <span
-                                    key={b}
-                                    className="bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 text-xs font-medium px-2 py-1 rounded"
-                                >
-                                    {b}
-                                </span>
-                            ))}
-                        </div>
                         <br />
                         {/* Thumbnail Gallery */}
                         <div className="flex gap-2">
@@ -148,7 +138,7 @@ export default function FarmerWarehouseDetails() {
                                     key={index}
                                     src={img}
                                     alt={`Warehouse image ${index + 1}`}
-                                    className={`w-24 h-24 object-cover rounded cursor-pointer transition-all ${
+                                    className={`w-15 h-15 object-cover rounded cursor-pointer transition-all ${
                                         index === currentImageIndex
                                             ? "border-2 border-green-500"
                                             : "border-2 border-transparent"

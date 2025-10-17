@@ -27,6 +27,10 @@ public class ProductService {
         return productRepository.findAll();
     }
 
+    public List<Product> getProductsByUserId(Long userId) {
+        return productRepository.findByUserId(userId);
+    }
+
     public Product addProduct(AddProductDTO dto, Long userId) {
         Product product = new Product();
         product.setUserId(userId);
