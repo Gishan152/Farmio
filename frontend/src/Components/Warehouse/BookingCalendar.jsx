@@ -128,7 +128,7 @@ export default function BookingCalendar({ slots = [] }) {
                         <div className="grid grid-cols-7 gap-1">
                             {calendarDays.map((date, index) => {
                                 if (!date) {
-                                    return <div key={index} className="p-3"></div>;
+                                    return <div key={`empty-${index}`} className="p-3"></div>;
                                 }
 
                                 const dateStatus = getDateStatus(date);
@@ -139,7 +139,7 @@ export default function BookingCalendar({ slots = [] }) {
 
                                 return (
                                     <button
-                                        key={date}
+                                        key={`${currentYear}-${currentMonth}-${date}`}
                                         onClick={() => handleDateClick(date)}
                                         className={`
                                             p-3 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105
