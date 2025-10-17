@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useWarehouseContext } from '../../../Contexts/Warehouse/WarehouseContext';
 import bookingsAPI from '../../../API/bookings';
+import { formatSlotId } from '../../../Utils/slotUtils';
 
 // Sample booking data
 const sampleBookings = [
@@ -434,7 +435,7 @@ export default function BookingManagement() {
                                                     <BuildingStorefrontIcon className="h-4 w-4 text-gray-400 mr-2" />
                                                     <div>
                                                         <div className="text-sm font-medium text-gray-900">{booking.warehouseName || 'Unknown Warehouse'}</div>
-                                                        <div className="text-xs text-gray-500">Slot {booking.slotId}</div>
+                                                        <div className="text-xs text-gray-500">Slot {formatSlotId(booking.slotId)}</div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -450,7 +451,7 @@ export default function BookingManagement() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">
-                                                    {booking.slotId}
+                                                    {formatSlotId(booking.slotId)}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
@@ -637,7 +638,7 @@ export default function BookingManagement() {
                                         <div><span className="font-medium">Crop Type:</span> {selectedBooking.cropType}</div>
                                         <div><span className="font-medium">Category:</span> {selectedBooking.produce}</div>
                                         <div><span className="font-medium">Quantity:</span> {selectedBooking.quantity} kg</div>
-                                        <div><span className="font-medium">Slot:</span> {selectedBooking.slotId}</div>
+                                        <div><span className="font-medium">Slot:</span> {formatSlotId(selectedBooking.slotId)}</div>
                                     </div>
                                 </div>
                                 

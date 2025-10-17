@@ -1,13 +1,6 @@
 import { useState } from 'react';
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-
-// Format slot ID with S- prefix
-const formatSlotId = (id) => {
-    if (typeof id === 'string' && id.startsWith('S-')) {
-        return id; // Already formatted
-    }
-    return `S-${String(id).padStart(3, '0')}`;
-};
+import { formatSlotId } from '../../Utils/slotUtils';
 
 export default function BookingCalendar({ slots = [] }) {
     const [currentDate, setCurrentDate] = useState(new Date());

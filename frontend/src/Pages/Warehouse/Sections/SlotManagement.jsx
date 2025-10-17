@@ -5,14 +5,7 @@ import SlotsTable from '../../../Components/Warehouse/SlotsTable';
 import BookingCalendar from '../../../Components/Warehouse/BookingCalendar';
 import warehouseAPI from '../../../API/warehouse';
 import slotsAPI from '../../../API/slots';
-
-// Format slot ID with S- prefix
-const formatSlotId = (id) => {
-    if (typeof id === 'string' && id.startsWith('S-')) {
-        return id; // Already formatted
-    }
-    return `S-${String(id).padStart(3, '0')}`;
-};
+import { formatSlotId } from '../../../Utils/slotUtils';
 
 export default function SlotManagement() {
     const { user = {} } = useUserContext();
