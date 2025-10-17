@@ -39,7 +39,7 @@ spring:
         - id: warehouse-service
           uri: lb://warehouse-service
           predicates:
-            - Path=/api/warehouses/**,/api/facilities/**,/api/slots/**
+            - Path=/api/warehouses/**,/api/facilities/**,/api/slots/**,/api/bookings/**
         - id: analytics-service
           uri: lb://analytics-service
           predicates:
