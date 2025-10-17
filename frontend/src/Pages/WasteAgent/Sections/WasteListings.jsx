@@ -766,7 +766,7 @@ const WasteListings = () => {
 										const unit = listing.unit?.toUpperCase();
 										// Convert to KG for consistency
 										if (unit === "TON" || unit === "TONS") {
-											return total + (quantity * 1000);
+											return total + (quantity * 907.185);
 										}
 										return total + quantity;
 									},
