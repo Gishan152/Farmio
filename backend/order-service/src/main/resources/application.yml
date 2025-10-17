@@ -6,13 +6,31 @@ server:
 spring:
   application:
     name: order-service
+  # profiles:
+  #   active: local # Change to 'docker' when running in Docker
   cloud:
     config:
       import-check:
         enabled: false
+
+# ---
+# spring:
+#   config:
+#     activate:
+#       on-profile: docker
   rabbitmq:
-    host: rabbitmq
+    host: ${RABBITMQ_HOST:localhost}
+    # host: rabbitmq
     port: 5672
+
+# ---
+# spring:
+#   config:
+#     activate:
+#       on-profile: local
+#   rabbitmq:
+#     host: localhost
+#     port: 5672
 
   datasource:
 #    url: jdbc:postgresql://pg-349c31eb-gishan768-629b.e.aivencloud.com:15794/orderdb?sslmode=require
@@ -46,4 +64,5 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+      # defaultZone: http://eureka-server:8761/eureka

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmio: Warehouse to Waste Agent Flow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: auto;
+        }
+        
+        .presentation-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .slide {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            min-height: 500px;
+        }
+        
+        .slide h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .slide h2 {
+            color: #4a5568;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        .slide h3 {
+            color: #2b6cb0;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .flow-step {
+            background: linear-gradient(45deg, #4299e1, #3182ce);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 150px;
+            margin: 10px;
+            position: relative;
+        }
+        
+        .flow-step:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            color: #4299e1;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .example-box {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+        
+        .highlight {
+            background: #fef5e7;
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: #744210;
+        }
+        
+        .timeline {
+            position: relative;
+            margin: 30px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: #4299e1;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            width: 45%;
+        }
+        
+        .timeline-item:nth-child(odd) {
+            margin-left: 0;
+            margin-right: auto;
+        }
+        
+        .timeline-item:nth-child(even) {
+            margin-left: auto;
+            margin-right: 0;
+        }
+        
+        .cta-section {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            padding: 40px;
+            border-radius: 15px;
+        }
+        
+        .cta-button {
+            background: #48bb78;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                padding: 20px;
+            }
+            
+            .slide h1 {
+                font-size: 2rem;
+            }
+            
+            .flow-step {
+                min-width: 120px;
+                margin: 5px;
+            }
+            
+            .timeline-item {
+                width: 90%;
+                margin: 10px auto;
+            }
+            
+            .timeline::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide">
+            <h1>🏭➡️🚛 Warehouse to Waste Agent Flow</h1>
+            <p style="text-align: center; font-size: 1.5rem; color: #666; margin-top: 20px;">
+                Farmio Platform: Connecting Warehouses with Certified Waste Agents
+            </p>
+            <p style="text-align: center; font-size: 1.2rem; color: #888; margin-top: 15px;">
+                <em>Streamlining agricultural waste management from storage to sustainable disposal</em>
+            </p>
+        </div>
+        
+        <!-- Slide 2: Problem Statement -->
+        <div class="slide">
+            <h2>🚨 Current Warehouse Waste Problems</h2>
+            <div class="stats-grid">
+                <div class="stat-card" style="background: linear-gradient(45deg, #f56565, #e53e3e);">
+                    <div class="stat-number">2,500kg</div>
+                    <div>Daily waste accumulation</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(45deg, #ed8936, #dd6b20);">
+                    <div class="stat-number">72hrs</div>
+                    <div>Average disposal delay</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(45deg, #ecc94b, #d69e2e);">
+                    <div class="stat-number">40%</div>
+                    <div>Manual coordination overhead</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(45deg, #9f7aea, #805ad5);">
+                    <div class="stat-number">$500</div>
+                    <div>Daily compliance risk cost</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 3: Solution Flow -->
+        <div class="slide">
+            <h2>✅ Farmio's 5-Step Automated Solution</h2>
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <h3>📋</h3>
+                    <div>Waste Detection</div>
+                </div>
+                <div class="flow-step">
+                    <h3>🔄</h3>
+                    <div>Agent Matching</div>
+                </div>
+                <div class="flow-step">
+                    <h3>📱</h3>
+                    <div>Communication</div>
+                </div>
+                <div class="flow-step">
+                    <h3>🚚</h3>
+                    <div>Pickup</div>
+                </div>
+                <div class="flow-step">
+                    <h3>💰</h3>
+                    <div>Payment</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 4: Real Example -->
+        <div class="slide">
+            <h2>📋 Real-World Example: Kandy Central Warehouse</h2>
+            <div class="example-box">
+                <h3>Waste Request Details:</h3>
+                <div class="code-block">
+{
+  "wasteId": "WR-2025-001234",
+  "warehouse": "Kandy Central Produce Storage",
+  "location": "123 Peradeniya Road, Kandy",
+  "totalQuantity": "2,800 kg",
+  "wasteTypes": [
+    { "type": "Spoiled Vegetables", "quantity": "2,200 kg", "urgency": "High" },
+    { "type": "Plastic Packaging", "quantity": "400 kg", "urgency": "Medium" },
+    { "type": "Cardboard Boxes", "quantity": "200 kg", "urgency": "Low" }
+  ],
+  "preferredPickupTime": "2025-07-22T10:00:00Z"
+}
+                </div>
+            </div>
+            
+            <div class="example-box">
+                <h3>Matched Agent Response:</h3>
+                <div class="code-block">
+{
+  "agentName": "Naleeka Kumarasinghe - Ceylon Green Waste",
+  "vehicleType": "Refrigerated Small Lorry",
+  "capacity": "3,500 kg",
+  "estimatedArrival": "2025-07-22T10:15:00Z",
+  "quotedPrice": "LKR 8,750.00",
+  "rating": 4.8
+}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 5: Technology Features -->
+        <div class="slide">
+            <h2>🔧 Smart Technology Integration</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div>
+                    <h3>For Warehouses:</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin: 10px 0; padding: 10px; background: #e6fffa; border-left: 4px solid #38b2ac; border-radius: 5px;">📊 Waste Analytics Dashboard</li>
+                        <li style="margin: 10px 0; padding: 10px; background: #f0fff4; border-left: 4px solid #48bb78; border-radius: 5px;">🤖 AI Waste Forecasting</li>
+                        <li style="margin: 10px 0; padding: 10px; background: #fef5e7; border-left: 4px solid #ed8936; border-radius: 5px;">📋 Compliance Reporting</li>
+                        <li style="margin: 10px 0; padding: 10px; background: #e6ffed; border-left: 4px solid #48bb78; border-radius: 5px;">💵 Cost Optimization</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>For Waste Agents:</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin: 10px 0; padding: 10px; background: #ebf8ff; border-left: 4px solid #4299e1; border-radius: 5px;">🗺️ Route Optimization</li>
+                        <li style="margin: 10px 0; padding: 10px; background: #f7fafc; border-left: 4px solid #718096; border-radius: 5px;">📱 Mobile Integration</li>
+                        <li style="margin: 10px 0; padding: 10px; background: #f0fff4; border-left: 4px solid #48bb78; border-radius: 5px;">💰 Instant Payments</li>
+                        <li style="margin: 10px 0; padding: 10px; background: #fef5e7; border-left: 4px solid #ed8936; border-radius: 5px;">📈 Performance Analytics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 6: ROI & Benefits -->
+        <div class="slide">
+            <h2>📈 Measurable Impact & ROI</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">75%</div>
+                    <div>Faster disposal coordination</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">30%</div>
+                    <div>Cost reduction for warehouses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">40%</div>
+                    <div>Pickup efficiency increase</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">100%</div>
+                    <div>Environmental compliance</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 7: Timeline -->
+        <div class="slide">
+            <h2>⏱️ Typical Request-to-Completion Timeline</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h3>0:00 - Request Submitted</h3>
+                    <p>Warehouse manager creates waste disposal request with details and requirements</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>0:05 - Agent Matching</h3>
+                    <p>AI algorithm identifies and notifies qualified waste agents in the area</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>0:15 - Quote Received</h3>
+                    <p>Agents submit competitive quotes with pickup schedules and pricing</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>0:30 - Agent Selected</h3>
+                    <p>Warehouse confirms preferred agent and finalizes pickup details</p>
+                </div>
+                <div class="timeline-item">
+                    <h3>24:00 - Pickup Complete</h3>
+                    <p>Waste collected, documented, and payment processed automatically</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 8: Call to Action -->
+        <div class="slide cta-section">
+            <h1>🚀 Ready to Transform Your Waste Management?</h1>
+            <p style="font-size: 1.3rem; margin: 20px 0;">
+                Join Farmio's Integrated Platform Today!
+            </p>
+            <div style="margin: 30px 0;">
+                <button class="cta-button">📋 Schedule Demo</button>
+                <button class="cta-button">📞 Contact Sales</button>
+                <button class="cta-button">🌐 Visit Website</button>
+            </div>
+            <div style="margin-top: 30px; font-size: 1.1rem;">
+                <p><strong>Contact:</strong> support@farmio.lk | +94 11 234 5678</p>
+                <p><em>Transforming waste management from manual hassle to automated success</em></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Add smooth scrolling between slides
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            let currentSlide = 0;
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+                    if (currentSlide < slides.length - 1) {
+                        currentSlide++;
+                        slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+                    }
+                } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                    if (currentSlide > 0) {
+                        currentSlide--;
+                        slides[currentSlide].scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+            
+            // Add click handlers to CTA buttons
+            document.querySelectorAll('.cta-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    alert('Demo scheduling functionality would be implemented here!');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -17,7 +17,11 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/Components/WasteUI/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/Components/WasteUI/avatar";
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from "@/Components/WasteUI/avatar";
 import {
 	Popover,
 	PopoverTrigger,
@@ -298,53 +302,56 @@ const Requests = () => {
 
 			{/* Summary Cards */}
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
-						<Clock className="h-4 w-4" />
-						Pending Requests
-					</h3>
-					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						<NumberFlow value={pendingCount} />
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
+					<Check className="h-7 w-7 text-green-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Accepted</p>
+						<p className="text-lg font-bold text-gray-900">
+							<NumberFlow value={acceptedCount} />
+						</p>
+					</div>
 				</div>
-				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
-						<Check className="h-4 w-4" />
-						Accepted
-					</h3>
-					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						<NumberFlow value={acceptedCount} />
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<div className="absolute left-0 top-0 h-full w-1 bg-yellow-500 rounded-l-lg" />
+					<Clock className="h-7 w-7 text-yellow-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Pending Requests</p>
+						<p className="text-lg font-bold text-gray-900">
+							<NumberFlow value={pendingCount} />
+						</p>
+					</div>
 				</div>
-				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
-						<X className="h-4 w-4" />
-						Rejected
-					</h3>
-					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						<NumberFlow value={rejectedCount} />
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<div className="absolute left-0 top-0 h-full w-1 bg-red-500 rounded-l-lg" />
+					<X className="h-7 w-7 text-red-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Rejected</p>
+						<p className="text-lg font-bold text-gray-900">
+							<NumberFlow value={rejectedCount} />
+						</p>
+					</div>
 				</div>
-				<div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-					<h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-2">
-						<DollarSign className="h-4 w-4" />
-						Total Value
-					</h3>
-					<p className="text-6xl text-right mt-2 font-bold text-gray-400">
-						$
-						<NumberFlow
-							value={requests
-								.filter((r) => r.status === "Accepted")
-								.reduce(
-									(sum, r) =>
-										sum +
-										parseFloat(
-											r.totalOffer.replace("$", "")
-										),
-									0
-								)}
-						/>
-					</p>
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<div className="absolute left-0 top-0 h-full w-1 bg-purple-500 rounded-l-lg" />
+					<DollarSign className="h-7 w-7 text-purple-500 mr-3 z-10" />
+					<div className="z-10">
+						<p className="text-xs font-medium text-gray-500">Total Value</p>
+						<p className="text-lg font-bold text-gray-900">
+							$<NumberFlow
+								value={requests
+									.filter((r) => r.status === "Accepted")
+									.reduce(
+										(sum, r) =>
+											sum +
+											parseFloat(
+												r.totalOffer.replace("$", "")
+											),
+										0
+									)}
+							/>
+						</p>
+					</div>
 				</div>
 			</div>
 

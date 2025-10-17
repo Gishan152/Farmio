@@ -22,6 +22,10 @@ public class ProductService {
 
     @Autowired
     private FileStorageService fileStorageService;
+    
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
 
     public Product addProduct(AddProductDTO dto,Long userId) {
         Product product = new Product();

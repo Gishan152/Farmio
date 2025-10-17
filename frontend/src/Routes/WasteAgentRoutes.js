@@ -4,6 +4,7 @@ import WasteRequests from '../Pages/WasteAgent/Sections/Requests';
 import Payments from '../Pages/WasteAgent/Sections/Payments';
 import BrowseDiscover from '../Pages/WasteAgent/Sections/BrowseDiscover';
 import AgentProfile from '../Pages/WasteAgent/Sections/AgentProfile';
+import Chat from '../Pages/WasteAgent/Sections/chat';
 
 
 const wasteAgentRoutes = {
@@ -33,6 +34,10 @@ const wasteAgentRoutes = {
         {
             path: "profile",
             Component: AgentProfile
+        },
+        {
+            path: "chat",
+            Component: Chat
         },
     ],
 }
