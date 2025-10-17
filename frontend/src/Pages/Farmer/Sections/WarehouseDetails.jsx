@@ -4,6 +4,14 @@ import { StarIcon, CheckBadgeIcon } from "@heroicons/react/24/solid";
 import warehouseImage from "../../../Assets/Farmer/Warehouses/warehouse.webp";
 import warehouseImage2 from "../../../Assets/Farmer/Warehouses/warehouse2.webp";
 
+// Format slot ID with S- prefix
+const formatSlotId = (id) => {
+    if (typeof id === 'string' && id.startsWith('S-')) {
+        return id; // Already formatted
+    }
+    return `S-${String(id).padStart(3, '0')}`;
+};
+
 export async function FarmerwarehouseDetailsLoader({ params }) {
     const { warehouseId } = params;
     // TODO: Replace with actual API call to GET /warehouses/{id}
@@ -240,7 +248,7 @@ export default function FarmerWarehouseDetails() {
                     <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                         {w.slots.map(slot => (
                             <tr key={slot.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{slot.id}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{formatSlotId(slot.id)}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{slot.capacityKg}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     {slot.temperatureControl ? (
@@ -361,7 +369,7 @@ export default function FarmerWarehouseDetails() {
                                         <option value="">Choose a slot</option>
                                         {availableSlots.map(slot => (
                                             <option key={slot.id} value={slot.id}>
-                                                Slot {slot.id} - Capacity: {slot.capacityKg} kg
+                                                Slot {formatSlotId(slot.id)} - Capacity: {slot.capacityKg} kg
                                             </option>
                                         ))}
                                     </select>
