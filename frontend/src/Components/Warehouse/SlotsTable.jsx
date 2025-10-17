@@ -1,10 +1,4 @@
-// Format slot ID with S- prefix
-const formatSlotId = (id) => {
-    if (typeof id === 'string' && id.startsWith('S-')) {
-        return id; // Already formatted
-    }
-    return `S-${String(id).padStart(3, '0')}`;
-};
+import { formatSlotId } from '../../Utils/slotUtils';
 
 export default function SlotsTable({ slots, getSlotStatusColor, getUsagePercentage }) {
     return (
