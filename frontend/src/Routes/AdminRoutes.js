@@ -16,6 +16,9 @@ import Deliveries from '../Pages/admin/orders/deliveries';
 import OrdersIssues from '../Pages/admin/orders/issues';
 import AnalyticsPage from '../Pages/admin/analytics/index';
 import AdminSettingsPage from '../Pages/admin/settings/index';
+import ProductCategories from '../Pages/admin/products/categories';
+import ProductInventory from '../Pages/admin/products/inventory';
+import ProductQuality from '../Pages/admin/products/quality';
 
 // Admin Logistics pages
 import LogisticsRoutes from '../Pages/admin/logistics/routes';
@@ -84,7 +87,24 @@ const adminRoutes = {
         },
         {
             path: 'products',
-            Component: ProductsManagementWithErrorHandling
+            children: [
+                {
+                    index: true,
+                    Component: ProductsManagementWithErrorHandling
+                },
+                {
+                    path: 'categories',
+                    Component: ProductCategories
+                },
+                {
+                    path: 'inventory',
+                    Component: ProductInventory
+                },
+                {
+                    path: 'quality',
+                    Component: ProductQuality
+                }
+            ]
         },
         {
             path: 'orders',

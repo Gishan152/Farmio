@@ -40,8 +40,8 @@ spring:
           uri: lb://warehouse-service
           predicates:
             - Path=/api/warehouses/**,/api/facilities/**,/api/slots/**,/api/bookings/**
-        - id: analytics-service
-          uri: lb://analytics-service
+        - id: analytic-service
+          uri: lb://analytic-service
           predicates:
             - Path=/api/analytics/**
         - id: payment-service
@@ -82,7 +82,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
 
 jwt:
   secret: your256bitsecretyour256bitsecretyour256bitsecret # Generate using: openssl rand -base64 32

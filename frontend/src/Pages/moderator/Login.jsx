@@ -1,7 +1,7 @@
-import AdminLoginForm from '../../components/auth/AdminLoginForm';
+import ModeratorLoginForm from '../../components/auth/ModeratorLoginForm';
 
 const ModeratorLogin = () => {
-  return <AdminLoginForm />;
+  return <ModeratorLoginForm />;
 };
 
 export default ModeratorLogin;

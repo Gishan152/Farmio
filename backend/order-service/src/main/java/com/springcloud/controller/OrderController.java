@@ -134,6 +134,12 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getCrops());
     }
 
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<Order>> getAllOrdersForAdmin() {
+        List<Order> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
+    }
+
 
 
 //    @PostMapping("/create")

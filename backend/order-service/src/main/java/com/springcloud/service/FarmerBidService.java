@@ -75,6 +75,14 @@ public class FarmerBidService {
         }
     }
 
+    public void rejectAll(Long buyerRequestId) {
+        List<FarmerBid> bids = farmerBidRepository.findByBuyerRequestId(buyerRequestId);
+        for (FarmerBid bid : bids) {
+            bid.setBidStatus(BidStatus.REJECTED);
+        }
+        farmerBidRepository.saveAll(bids);
+    }
+
     // Map FarmerBid to FarmerBidResponseDto (including nested BuyerRequest fields)
     public static FarmerBidResponseDto toResponseDto(FarmerBid bid) {
         if (bid == null) return null;

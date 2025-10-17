@@ -3,6 +3,25 @@ import DashboardLayout from '../../../components/layout/DashboardLayout';
 import Card from '../../../components/ui/Card';
 import Table from '../../../components/ui/Table';
 import StatCard from '../../../components/ui/StatCard';
+import { 
+  fetchAllOrders, 
+  getOrderCount, 
+  getOrderCountByStatus, 
+  getOrdersByStatus,
+  formatOrderStatus, 
+  getStatusColor 
+} from '../../../Utils/orderUtils';
+import {
+  fetchAllCrops,
+  createCropLookupMap,
+  getProductNamesFromOrder,
+  getDetailedCropInfoFromOrder
+} from '../../../Utils/cropUtils';
+import {
+  fetchAllUsers,
+  createUserLookupMap,
+  getBuyerNameFromOrder
+} from '../../../Utils/userUtils';
 
 // Icons
 const OrdersIcon = () => (
@@ -17,140 +36,107 @@ const FilterIcon = () => (
   </svg>
 );
 
+// Filter options
+
+
 const PendingOrders = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [error, setError] = useState(null);
+  const [crops, setCrops] = useState([]);
+  const [cropLookupMap, setCropLookupMap] = useState({});
+  const [users, setUsers] = useState([]);
+  const [userLookupMap, setUserLookupMap] = useState({});
 
-  // Sample order data - only pending orders
-  const orders = [
-    {
-      id: 'ORD-10045',
-      customer: 'Fresh Foods Market',
-      buyer: 'Emily Clark',
-      date: '2023-06-20',
-      total: '$1,245.80',
-      items: 8,
-      status: 'Pending',
-      paymentStatus: 'Paid',
-      deliveryDate: '2023-06-25',
-      transport: 'Fast Track Logistics',
-      orderDetails: [
-        { product: 'Organic Tomatoes', quantity: 50, unit: 'kg', price: '$4.50/kg', total: '$225.00' },
-        { product: 'Fresh Lettuce', quantity: 40, unit: 'kg', price: '$3.20/kg', total: '$128.00' },
-        { product: 'Carrots', quantity: 60, unit: 'kg', price: '$2.75/kg', total: '$165.00' },
-        { product: 'Red Onions', quantity: 45, unit: 'kg', price: '$3.10/kg', total: '$139.50' },
-        { product: 'Bell Peppers', quantity: 35, unit: 'kg', price: '$4.80/kg', total: '$168.00' },
-        { product: 'Cucumbers', quantity: 55, unit: 'kg', price: '$2.90/kg', total: '$159.50' },
-        { product: 'Potatoes', quantity: 80, unit: 'kg', price: '$1.95/kg', total: '$156.00' },
-        { product: 'Green Beans', quantity: 30, unit: 'kg', price: '$3.50/kg', total: '$105.00' }
-      ],
-      priority: 'High',
-      expectedProcessingDate: '2023-06-21'
-    },
-    {
-      id: 'ORD-10046',
-      customer: 'Green Market Co-op',
-      buyer: 'Michael Johnson',
-      date: '2023-06-20',
-      total: '$876.40',
-      items: 6,
-      status: 'Pending',
-      paymentStatus: 'Paid',
-      deliveryDate: '2023-06-26',
-      transport: 'Rural Routes Delivery',
-      orderDetails: [
-        { product: 'Organic Apples', quantity: 40, unit: 'kg', price: '$3.80/kg', total: '$152.00' },
-        { product: 'Organic Bananas', quantity: 35, unit: 'kg', price: '$2.95/kg', total: '$103.25' },
-        { product: 'Organic Oranges', quantity: 45, unit: 'kg', price: '$3.50/kg', total: '$157.50' },
-        { product: 'Organic Grapes', quantity: 30, unit: 'kg', price: '$4.95/kg', total: '$148.50' },
-        { product: 'Organic Berries', quantity: 25, unit: 'kg', price: '$7.80/kg', total: '$195.00' },
-        { product: 'Organic Melons', quantity: 30, unit: 'kg', price: '$4.00/kg', total: '$120.00' }
-      ],
-      priority: 'Medium',
-      expectedProcessingDate: '2023-06-22'
-    },
-    {
-      id: 'ORD-10047',
-      customer: 'Healthy Eats Cafe',
-      buyer: 'Sarah Williams',
-      date: '2023-06-21',
-      total: '$436.25',
-      items: 4,
-      status: 'Pending',
-      paymentStatus: 'Unpaid',
-      deliveryDate: '2023-06-25',
-      transport: 'Swift Stream Logistics',
-      orderDetails: [
-        { product: 'Organic Spinach', quantity: 15, unit: 'kg', price: '$5.50/kg', total: '$82.50' },
-        { product: 'Organic Kale', quantity: 12, unit: 'kg', price: '$6.25/kg', total: '$75.00' },
-        { product: 'Organic Arugula', quantity: 10, unit: 'kg', price: '$7.80/kg', total: '$78.00' },
-        { product: 'Organic Mixed Greens', quantity: 25, unit: 'kg', price: '$8.00/kg', total: '$200.00' }
-      ],
-      priority: 'Low',
-      expectedProcessingDate: '2023-06-22'
-    }
-  ];
-
-  // Simulate loading
+  // Load orders, crops, and users from API
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setFilteredData(orders);
-    }, 1000);
-    return () => clearTimeout(timer);
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        // Load all data in parallel
+        const [ordersData, cropsData, usersData] = await Promise.all([
+          fetchAllOrders(),
+          fetchAllCrops(),
+          fetchAllUsers()
+        ]);
+        
+        // Filter only pending orders
+        const pendingOrders = ordersData.filter(order => 
+          order.status && order.status.toUpperCase() === 'PENDING'
+        );
+        
+        setOrders(pendingOrders);
+        setFilteredData(pendingOrders);
+        setCrops(cropsData);
+        setUsers(usersData);
+        
+        // Create lookup maps for quick access
+        const cropLookup = createCropLookupMap(cropsData);
+        const userLookup = createUserLookupMap(usersData);
+        setCropLookupMap(cropLookup);
+        setUserLookupMap(userLookup);
+        
+      } catch (error) {
+        console.error('Error loading data:', error);
+        setError('Failed to load data. Please try again.');
+        setOrders([]);
+        setFilteredData([]);
+        setCrops([]);
+        setUsers([]);
+        setCropLookupMap({});
+        setUserLookupMap({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   // Handle search
   useEffect(() => {
-    if (!orders) return;
-    
+    if (!orders || orders.length === 0) return;
+
     let results = orders.filter(order => {
-      return Object.keys(order).some(key => 
-        order[key].toString().toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      // Get product names for search
+      const productNames = getProductNamesFromOrder(order.items || [], cropLookupMap);
+      const buyerName = getBuyerNameFromOrder(order.buyerId, userLookupMap);
+      
+      // Search in various fields
+      const searchFields = [
+        order.orderId,
+        order.buyerId,
+        buyerName,
+        productNames,
+        order.transport,
+        order.status,
+        formatOrderStatus(order.status)
+      ].filter(Boolean).join(' ').toLowerCase();
+
+      return searchFields.includes(searchTerm.toLowerCase());
     });
-    
+
     setFilteredData(results);
-  }, [searchTerm, orders]);
+  }, [searchTerm, orders, cropLookupMap, userLookupMap]);
 
   // Filter options
-  const filters = [
-    {
-      name: 'paymentStatus',
-      label: 'Payment Status',
-      options: [
-        { label: 'Paid', value: 'Paid' },
-        { label: 'Unpaid', value: 'Unpaid' }
-      ]
-    },
-    {
-      name: 'transport',
-      label: 'Transport Provider',
-      options: [
-        { label: 'Fast Track Logistics', value: 'Fast Track Logistics' },
-        { label: 'Green Mile Transports', value: 'Green Mile Transports' },
-        { label: 'Rural Routes Delivery', value: 'Rural Routes Delivery' },
-        { label: 'Swift Stream Logistics', value: 'Swift Stream Logistics' },
-        { label: 'Local Haul Co-op', value: 'Local Haul Co-op' }
-      ]
-    },
-    {
-      name: 'priority',
-      label: 'Priority',
-      options: [
-        { label: 'High', value: 'High' },
-        { label: 'Medium', value: 'Medium' },
-        { label: 'Low', value: 'Low' }
-      ]
-    }
-  ];
-
-  // Handle filter changes
+const filters = [
+  {
+    name: 'transport',
+    label: 'Transport Provider',
+    options: [
+      { label: 'Available', value: 'true' },
+      { label: 'Not Available', value: 'false' }
+    ]
+  }
+];  // Handle filter changes
   const handleFilterChange = (filterName, value) => {
     setSelectedFilters(prev => ({
       ...prev,
@@ -164,14 +150,14 @@ const PendingOrders = () => {
       setFilteredData(orders);
       return;
     }
-    
+
     let results = orders.filter(order => {
       return Object.entries(selectedFilters).every(([key, value]) => {
         if (!value || value === 'all') return true;
         return order[key] === value;
       });
     });
-    
+
     setFilteredData(results);
   }, [selectedFilters, orders]);
 
@@ -186,27 +172,31 @@ const PendingOrders = () => {
 
   // Order Details Component
   const OrderDetails = ({ order }) => {
-    if (!order.orderDetails || order.orderDetails.length === 0) {
+    if (!order.items || order.items.length === 0) {
       return (
         <div className="p-4 text-center text-gray-500">
-          No order details available for this order.
+          No order items available for this order.
         </div>
       );
     }
+
+    // Get detailed crop information for all order items
+    const detailedItems = getDetailedCropInfoFromOrder(order.items, crops);
+    const buyerName = getBuyerNameFromOrder(order.buyerId, userLookupMap);
 
     return (
       <div className="p-4 bg-gray-50">
         <div className="mb-3 flex justify-between items-center">
           <div>
-            <h4 className="text-sm font-medium text-gray-700">Order Details - {order.id}</h4>
-            <p className="text-xs text-gray-500">Customer: {order.customer} | Ordered: {order.date}</p>
+            <h4 className="text-sm font-medium text-gray-700">Order Details - #{order.orderId}</h4>
+            <p className="text-xs text-gray-500">Buyer: {buyerName || `Buyer #${order.buyerId}`} | Payment ID: {order.paymentId}</p>
           </div>
           <div className="flex items-center space-x-2">
             <span className="text-xs text-gray-500">Status:</span>
             <OrderStatusBadge status={order.status} />
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
@@ -214,28 +204,51 @@ const PendingOrders = () => {
                 <th className="px-4 py-2">Product</th>
                 <th className="px-4 py-2">Quantity</th>
                 <th className="px-4 py-2">Unit</th>
-                <th className="px-4 py-2">Price</th>
+                <th className="px-4 py-2">Price/Unit</th>
                 <th className="px-4 py-2">Total</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {order.orderDetails.map((item, idx) => (
+              {detailedItems.map((item, idx) => (
                 <tr key={idx} className="hover:bg-gray-100">
-                  <td className="px-4 py-2 font-medium">{item.product}</td>
+                  <td className="px-4 py-2 font-medium">{item.productName}</td>
                   <td className="px-4 py-2">{item.quantity}</td>
-                  <td className="px-4 py-2">{item.unit}</td>
-                  <td className="px-4 py-2">{item.price}</td>
-                  <td className="px-4 py-2 font-medium">{item.total}</td>
+                  <td className="px-4 py-2">{item.unitMeasurement || 'units'}</td>
+                  <td className="px-4 py-2">LKR {item.pricePerUnit ? item.pricePerUnit.toFixed(2) : '0.00'}</td>
+                  <td className="px-4 py-2 font-medium">LKR {(item.quantity * (item.pricePerUnit || 0)).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr className="font-medium text-gray-700 bg-gray-100">
                 <td colSpan="4" className="px-4 py-2 text-right">Total:</td>
-                <td className="px-4 py-2">{order.total}</td>
+                <td className="px-4 py-2">LKR {order.total ? order.total.toFixed(2) : '0.00'}</td>
               </tr>
             </tfoot>
           </table>
+        </div>
+
+        {/* Additional Order Information */}
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h5 className="text-xs font-medium text-gray-500 mb-2">ORDER INFO</h5>
+            <table className="text-sm">
+              <tbody>
+                <tr>
+                  <td className="py-1 pr-4 text-gray-500">Transport Available:</td>
+                  <td className="py-1 font-medium">{order.transport ? 'Yes' : 'No'}</td>
+                </tr>
+                <tr>
+                  <td className="py-1 pr-4 text-gray-500">Order Date:</td>
+                  <td className="py-1 font-medium">{new Date(order.createdAt).toLocaleDateString()}</td>
+                </tr>
+                <tr>
+                  <td className="py-1 pr-4 text-gray-500">Payment ID:</td>
+                  <td className="py-1 font-medium">{order.paymentId}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     );
@@ -243,54 +256,78 @@ const PendingOrders = () => {
 
   // Table columns
   const columns = [
-    { key: 'id', header: 'Order ID' },
+    { accessor: 'orderId', header: 'Order ID' },
     { 
-      key: 'customer', 
-      header: 'Customer',
-      render: (value, row) => (
-        <div>
-          <div className="font-medium">{value}</div>
-          <div className="text-xs text-dashboard-text-light">{row.buyer}</div>
-        </div>
-      )
-    },
-    { key: 'date', header: 'Order Date' },
-    { 
-      key: 'total', 
-      header: 'Total',
-      render: (value) => <span className="font-medium">{value}</span>
-    },
-    { key: 'items', header: 'Items' },
-    { 
-      key: 'priority', 
-      header: 'Priority',
-      render: (value) => {
-        const priorityStyles = {
-          'High': 'bg-red-100 text-red-800',
-          'Medium': 'bg-yellow-100 text-yellow-800',
-          'Low': 'bg-blue-100 text-blue-800',
-        };
-        
+      accessor: 'buyerName', 
+      header: 'Buyer',
+      cell: (row) => {
+        const buyerName = getBuyerNameFromOrder(row.buyerId, userLookupMap);
         return (
-          <span className={`px-2 py-1 text-xs rounded-full ${priorityStyles[value] || 'bg-gray-200 text-gray-800'}`}>
-            {value}
-          </span>
+          <div>
+            <div className="font-medium">{buyerName || `Buyer #${row.buyerId}`}</div>
+            <div className="text-xs text-dashboard-text-light">ID: {row.buyerId}</div>
+          </div>
         );
       }
     },
-    { key: 'paymentStatus', header: 'Payment' },
-    { key: 'expectedProcessingDate', header: 'Process By' },
     { 
-      key: 'actions', 
+      accessor: 'productName', 
+      header: 'Product(s)',
+      cell: (row) => {
+        const productNames = getProductNamesFromOrder(row.items || [], cropLookupMap);
+        return (
+          <div className="max-w-xs">
+            <div className="font-medium truncate" title={productNames}>
+              {productNames || 'No products'}
+            </div>
+            <div className="text-xs text-dashboard-text-light">
+              {row.items ? row.items.length : 0} item(s)
+            </div>
+          </div>
+        );
+      }
+    },
+    { 
+      accessor: 'createdAt', 
+      header: 'Order Date',
+      cell: (row) => new Date(row.createdAt).toLocaleDateString()
+    },
+    { 
+      accessor: 'total', 
+      header: 'Total',
+      cell: (row) => (
+        <span className="font-medium">
+          LKR {row.total ? row.total.toFixed(2) : '0.00'}
+        </span>
+      )
+    },
+    { 
+      accessor: 'transport', 
+      header: 'Transport',
+      cell: (row) => (
+        <span className={`px-2 py-1 text-xs rounded-full ${
+          row.transport ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}>
+          {row.transport ? 'Available' : 'Not Available'}
+        </span>
+      )
+    },
+    { 
+      accessor: 'status', 
+      header: 'Status',
+      cell: (row) => <OrderStatusBadge status={row.status} />
+    },
+    { 
+      accessor: 'actions', 
       header: 'Actions',
-      render: (_, row) => (
+      cell: (row) => (
         <div className="flex space-x-2">
-          <button 
-            className={`text-blue-600 hover:text-blue-800 ${expandedOrderId === row.id ? 'text-blue-800' : ''}`}
-            title={expandedOrderId === row.id ? "Hide Details" : "View Details"}
+          <button
+            className={`text-blue-600 hover:text-blue-800 ${expandedOrderId === row.orderId ? 'text-blue-800' : ''}`}
+            title={expandedOrderId === row.orderId ? "Hide Details" : "View Details"}
             onClick={(e) => {
               e.stopPropagation();
-              setExpandedOrderId(expandedOrderId === row.id ? null : row.id);
+              setExpandedOrderId(expandedOrderId === row.orderId ? null : row.orderId);
             }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -301,11 +338,6 @@ const PendingOrders = () => {
           <button className="text-green-600 hover:text-green-800" title="Process Order">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </button>
-          <button className="text-indigo-600 hover:text-indigo-800" title="Print Invoice">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
             </svg>
           </button>
         </div>
@@ -319,9 +351,16 @@ const PendingOrders = () => {
       breadcrumbs="Orders / Pending Orders"
       userRole="admin"
     >
+      {/* Error Display */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-100 border border-red-300 text-red-700 rounded-lg">
+          {error}
+        </div>
+      )}
+
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <StatCard 
+        <StatCard
           title="Pending Orders"
           value={orders.length.toString()}
           subtitle="Awaiting processing"
@@ -329,18 +368,18 @@ const PendingOrders = () => {
           color="yellow"
           isLoading={isLoading}
         />
-        <StatCard 
-          title="High Priority"
-          value={orders.filter(o => o.priority === 'High').length.toString()}
-          subtitle="Need immediate attention"
+        <StatCard
+          title="With Transport"
+          value={orders.filter(o => o.transport).length.toString()}
+          subtitle="Transportation available"
           icon={<OrdersIcon />}
-          color="red"
+          color="green"
           isLoading={isLoading}
         />
-        <StatCard 
-          title="Average Processing Time"
-          value="1.2 days"
-          subtitle="For this month"
+        <StatCard
+          title="Average Value"
+          value={`LKR ${orders.length > 0 ? (orders.reduce((sum, o) => sum + (o.total || 0), 0) / orders.length).toFixed(0) : '0'}`}
+          subtitle="Per order"
           icon={<OrdersIcon />}
           color="blue"
           isLoading={isLoading}
@@ -365,7 +404,7 @@ const PendingOrders = () => {
               </svg>
             </span>
           </div>
-          
+
           {/* Filter Button */}
           <button
             className="flex items-center text-sm py-2 px-4 rounded-md border border-dashboard-border hover:bg-gray-100"
@@ -405,9 +444,9 @@ const PendingOrders = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-4 flex justify-end space-x-2">
-              <button 
+              <button
                 className="px-3 py-1 text-sm text-gray-600 border border-dashboard-border rounded-md hover:bg-gray-100"
                 onClick={() => setSelectedFilters({})}
               >
@@ -432,6 +471,7 @@ const PendingOrders = () => {
           emptyMessage="No pending orders found matching your criteria."
           expandedRowRender={(row) => <OrderDetails order={row} />}
           expandedRowId={expandedOrderId}
+          rowKey="orderId"
         />
       </Card>
     </DashboardLayout>

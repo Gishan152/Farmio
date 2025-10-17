@@ -8,80 +8,80 @@ const AdminIcon = () => (
   </svg>
 );
 
+const admins = [
+  {
+    id: 1,
+    name: "Thusitha Rajapaksa",
+    email: "thusitha.r@farmio.lk",
+    phone: "+94 77 111 2222",
+    role: "System Administrator",
+    department: "IT & Security",
+    accessLevel: "Full Access",
+    twoFactorEnabled: "Yes",
+    lastPasswordChange: "2023-05-10",
+    status: "Active",
+    joinDate: "2022-05-15",
+    lastActive: "2023-06-10"
+  },
+  {
+    id: 2,
+    name: "Dilini Seneviratne",
+    email: "dilini.s@farmio.lk",
+    phone: "+94 76 222 3333",
+    role: "Operations Admin",
+    department: "Operations",
+    accessLevel: "High",
+    twoFactorEnabled: "Yes",
+    lastPasswordChange: "2023-04-22",
+    status: "Active",
+    joinDate: "2022-06-20",
+    lastActive: "2023-06-09"
+  },
+  {
+    id: 3,
+    name: "Buddhika Jayawardena",
+    email: "buddhika.j@farmio.lk",
+    phone: "+94 71 333 4444",
+    role: "Executive Admin",
+    department: "Executive",
+    accessLevel: "Full Access",
+    twoFactorEnabled: "Yes",
+    lastPasswordChange: "2023-03-15",
+    status: "Active",
+    joinDate: "2022-04-10",
+    lastActive: "2023-06-10"
+  },
+  {
+    id: 4,
+    name: "Nayomi Gunawardena",
+    email: "nayomi.g@farmio.lk",
+    phone: "+94 70 444 5555",
+    role: "Security Admin",
+    department: "IT & Security",
+    accessLevel: "High",
+    twoFactorEnabled: "Yes",
+    lastPasswordChange: "2023-05-05",
+    status: "Inactive",
+    joinDate: "2022-07-18",
+    lastActive: "2023-05-01"
+  },
+  {
+    id: 5,
+    name: "Tariq Nazeer",
+    email: "tariq.n@farmio.lk",
+    phone: "+94 77 555 6666",
+    role: "Technology Admin",
+    department: "IT & Development",
+    accessLevel: "Full Access",
+    twoFactorEnabled: "Yes",
+    lastPasswordChange: "2023-06-01",
+    status: "Active",
+    joinDate: "2022-03-12",
+    lastActive: "2023-06-09"
+  }
+];
+
 const AdminManagement = () => {
-  // Sample admin data for demonstration
-  const admins = [
-    {
-      id: 1,
-      name: "Thusitha Rajapaksa",
-      email: "thusitha.r@farmio.lk",
-      phone: "+94 77 111 2222",
-      role: "System Administrator",
-      department: "IT & Security",
-      accessLevel: "Full Access",
-      twoFactorEnabled: "Yes",
-      lastPasswordChange: "2023-05-10",
-      status: "Active",
-      joinDate: "2022-05-15",
-      lastActive: "2023-06-10"
-    },
-    {
-      id: 2,
-      name: "Dilini Seneviratne",
-      email: "dilini.s@farmio.lk",
-      phone: "+94 76 222 3333",
-      role: "Operations Admin",
-      department: "Operations",
-      accessLevel: "High",
-      twoFactorEnabled: "Yes",
-      lastPasswordChange: "2023-04-22",
-      status: "Active",
-      joinDate: "2022-06-20",
-      lastActive: "2023-06-09"
-    },
-    {
-      id: 3,
-      name: "Buddhika Jayawardena",
-      email: "buddhika.j@farmio.lk",
-      phone: "+94 71 333 4444",
-      role: "Executive Admin",
-      department: "Executive",
-      accessLevel: "Full Access",
-      twoFactorEnabled: "Yes",
-      lastPasswordChange: "2023-03-15",
-      status: "Active",
-      joinDate: "2022-04-10",
-      lastActive: "2023-06-10"
-    },
-    {
-      id: 4,
-      name: "Nayomi Gunawardena",
-      email: "nayomi.g@farmio.lk",
-      phone: "+94 70 444 5555",
-      role: "Security Admin",
-      department: "IT & Security",
-      accessLevel: "High",
-      twoFactorEnabled: "Yes",
-      lastPasswordChange: "2023-05-05",
-      status: "Inactive",
-      joinDate: "2022-07-18",
-      lastActive: "2023-05-01"
-    },
-    {
-      id: 5,
-      name: "Tariq Nazeer",
-      email: "tariq.n@farmio.lk",
-      phone: "+94 77 555 6666",
-      role: "Technology Admin",
-      department: "IT & Development",
-      accessLevel: "Full Access",
-      twoFactorEnabled: "Yes",
-      lastPasswordChange: "2023-06-01",
-      status: "Active",
-      joinDate: "2022-03-12",
-      lastActive: "2023-06-09"
-    }
-  ];
 
   // Table columns
   const columns = [
@@ -93,20 +93,19 @@ const AdminManagement = () => {
     { key: 'accessLevel', header: 'Access Level' },
     { key: 'twoFactorEnabled', header: '2FA' },
     { key: 'lastPasswordChange', header: 'Password Changed' },
-    { 
-      key: 'status', 
+    {
+      key: 'status',
       header: 'Status',
       render: (value) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
-          value === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-        }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${value === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+          }`}>
           {value}
         </span>
       )
     },
     { key: 'lastActive', header: 'Last Active' },
-    { 
-      key: 'actions', 
+    {
+      key: 'actions',
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">

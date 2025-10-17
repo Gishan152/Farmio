@@ -24,6 +24,153 @@ const LocationIcon = () => (
   </svg>
 );
 
+// Sample processing facilities data
+const facilities = [
+  {
+    id: 'PF-001',
+    name: 'Green Valley Recycling Center',
+    location: 'Green Valley Industrial Zone',
+    address: '123 Recycle Way, Green Valley, GV 10001',
+    manager: 'John Smith',
+    contact: '+1 (555) 123-4567',
+    email: 'jsmith@greenvalley.com',
+    processingCapacity: '50 tons daily',
+    currentUtilization: '80%',
+    status: 'Operational',
+    wasteTypes: ['Organic', 'Packaging', 'Mixed'],
+    operatingHours: 'Mon-Sat: 6:00 AM - 8:00 PM',
+    outputProducts: ['Compost', 'Biogas', 'Recycled Materials'],
+    facilityDetails: {
+      processes: [
+        { name: 'Organic Composting', capacity: '30 tons', utilization: '85%', outputType: 'Organic Compost' },
+        { name: 'Material Sorting', capacity: '15 tons', utilization: '75%', outputType: 'Sorted Recyclables' },
+        { name: 'Anaerobic Digestion', capacity: '5 tons', utilization: '70%', outputType: 'Biogas' }
+      ],
+      equipment: [
+        { name: 'Industrial Composter', status: 'Operational', lastMaintenance: '2023-05-15', nextMaintenance: '2023-08-15' },
+        { name: 'Sorting Line', status: 'Operational', lastMaintenance: '2023-06-01', nextMaintenance: '2023-09-01' },
+        { name: 'Biodigester', status: 'Operational', lastMaintenance: '2023-04-20', nextMaintenance: '2023-07-20' }
+      ],
+      certifications: ['ISO 14001', 'Organic Processing Certified', 'Zero Waste Certified'],
+      notes: 'Main processing facility handling the bulk of organic waste from central markets. Currently operating near capacity for organic waste processing.'
+    }
+  },
+  {
+    id: 'PF-002',
+    name: 'River Basin Composting Facility',
+    location: 'Riverside Agricultural Area',
+    address: '456 Farm Road, Riverside, RS 20002',
+    manager: 'Emma Johnson',
+    contact: '+1 (555) 234-5678',
+    email: 'ejohnson@riverbasin.org',
+    processingCapacity: '25 tons daily',
+    currentUtilization: '60%',
+    status: 'Operational',
+    wasteTypes: ['Organic', 'Agricultural'],
+    operatingHours: 'Mon-Fri: 7:00 AM - 6:00 PM',
+    outputProducts: ['Premium Compost', 'Soil Amendments'],
+    facilityDetails: {
+      processes: [
+        { name: 'Windrow Composting', capacity: '15 tons', utilization: '65%', outputType: 'Agricultural Compost' },
+        { name: 'Vermiculture', capacity: '5 tons', utilization: '50%', outputType: 'Worm Castings' },
+        { name: 'Compost Tea Production', capacity: '5 tons', utilization: '60%', outputType: 'Liquid Fertilizer' }
+      ],
+      equipment: [
+        { name: 'Compost Turner', status: 'Operational', lastMaintenance: '2023-05-10', nextMaintenance: '2023-08-10' },
+        { name: 'Screening Equipment', status: 'Maintenance Required', lastMaintenance: '2023-03-15', nextMaintenance: '2023-06-15' },
+        { name: 'Aeration System', status: 'Operational', lastMaintenance: '2023-05-30', nextMaintenance: '2023-08-30' }
+      ],
+      certifications: ['Organic Processing Certified', 'Sustainable Agriculture Partner'],
+      notes: 'Specialized in agricultural waste processing. Produces premium compost sold back to local farms. Screening equipment requires maintenance soon.'
+    }
+  },
+  {
+    id: 'PF-003',
+    name: 'Metro Recycling Industries',
+    location: 'Metro Industrial Park',
+    address: '789 Industry Blvd, Metro City, MC 30003',
+    manager: 'Michael Chen',
+    contact: '+1 (555) 345-6789',
+    email: 'mchen@metrorecycle.com',
+    processingCapacity: '70 tons daily',
+    currentUtilization: '85%',
+    status: 'Operational',
+    wasteTypes: ['Packaging', 'Plastic', 'Cardboard', 'Paper', 'Mixed'],
+    operatingHours: 'Mon-Sun: 24 hours',
+    outputProducts: ['Recycled Materials', 'Raw Materials for Manufacturing'],
+    facilityDetails: {
+      processes: [
+        { name: 'Material Sorting', capacity: '30 tons', utilization: '90%', outputType: 'Sorted Materials' },
+        { name: 'Plastic Processing', capacity: '20 tons', utilization: '80%', outputType: 'Plastic Pellets' },
+        { name: 'Cardboard Processing', capacity: '20 tons', utilization: '85%', outputType: 'Pulp' }
+      ],
+      equipment: [
+        { name: 'Automated Sorting Line', status: 'Operational', lastMaintenance: '2023-06-05', nextMaintenance: '2023-09-05' },
+        { name: 'Plastic Shredder', status: 'Operational', lastMaintenance: '2023-05-25', nextMaintenance: '2023-08-25' },
+        { name: 'Cardboard Pulper', status: 'Operational', lastMaintenance: '2023-06-10', nextMaintenance: '2023-09-10' }
+      ],
+      certifications: ['ISO 9001', 'ISO 14001', 'Recycling Industry Standard'],
+      notes: 'High volume industrial recycling facility. Main processor for packaging materials from distribution centers. Operating at high capacity.'
+    }
+  },
+  {
+    id: 'PF-004',
+    name: 'Urban Biogas Plant',
+    location: 'Urban Eastern District',
+    address: '101 Energy Way, Metro City, MC 30004',
+    manager: 'Sarah Williams',
+    contact: '+1 (555) 456-7890',
+    email: 'swilliams@urbanbiogas.com',
+    processingCapacity: '20 tons daily',
+    currentUtilization: '75%',
+    status: 'Operational',
+    wasteTypes: ['Food Waste', 'Organic'],
+    operatingHours: 'Mon-Sun: 24 hours',
+    outputProducts: ['Biogas', 'Electricity', 'Liquid Fertilizer'],
+    facilityDetails: {
+      processes: [
+        { name: 'Anaerobic Digestion', capacity: '15 tons', utilization: '80%', outputType: 'Biogas' },
+        { name: 'Energy Generation', capacity: '5 tons', utilization: '60%', outputType: 'Electricity' },
+        { name: 'Digestate Processing', capacity: '5 tons', utilization: '70%', outputType: 'Liquid Fertilizer' }
+      ],
+      equipment: [
+        { name: 'Biodigesters', status: 'Operational', lastMaintenance: '2023-05-20', nextMaintenance: '2023-08-20' },
+        { name: 'Gas Cleaning System', status: 'Operational', lastMaintenance: '2023-06-01', nextMaintenance: '2023-09-01' },
+        { name: 'Generator', status: 'Operational', lastMaintenance: '2023-05-15', nextMaintenance: '2023-08-15' }
+      ],
+      certifications: ['Renewable Energy Certified', 'Clean Energy Producer'],
+      notes: 'Specialized facility converting food waste to energy. Supplies electricity back to the grid and produces liquid fertilizer as a byproduct.'
+    }
+  },
+  {
+    id: 'PF-005',
+    name: 'Highland Recycling Cooperative',
+    location: 'Highland Community',
+    address: '202 Community Circle, Highland, HV 50005',
+    manager: 'David Martinez',
+    contact: '+1 (555) 567-8901',
+    email: 'dmartinez@highlandcoop.org',
+    processingCapacity: '5 tons daily',
+    currentUtilization: '40%',
+    status: 'Maintenance',
+    wasteTypes: ['Organic', 'Recyclables', 'Mixed'],
+    operatingHours: 'Mon-Fri: 8:00 AM - 4:00 PM',
+    outputProducts: ['Community Compost', 'Recycled Craft Materials'],
+    facilityDetails: {
+      processes: [
+        { name: 'Community Composting', capacity: '3 tons', utilization: '45%', outputType: 'Compost' },
+        { name: 'Material Recovery', capacity: '2 tons', utilization: '30%', outputType: 'Recycled Materials' }
+      ],
+      equipment: [
+        { name: 'Small-Scale Composter', status: 'Under Maintenance', lastMaintenance: '2023-01-15', nextMaintenance: '2023-06-25' },
+        { name: 'Manual Sorting Station', status: 'Operational', lastMaintenance: '2023-05-01', nextMaintenance: '2023-08-01' }
+      ],
+      certifications: ['Community Supported Recycling', 'Local Sustainability Partner'],
+      notes: 'Community-run cooperative recycling center. Currently undergoing maintenance and upgrades to the composting system. Limited operations until June 30.'
+    }
+  }
+];
+
 const WasteProcessing = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,153 +178,6 @@ const WasteProcessing = () => {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [expandedFacilityId, setExpandedFacilityId] = useState(null);
-
-  // Sample processing facilities data
-  const facilities = [
-    {
-      id: 'PF-001',
-      name: 'Green Valley Recycling Center',
-      location: 'Green Valley Industrial Zone',
-      address: '123 Recycle Way, Green Valley, GV 10001',
-      manager: 'John Smith',
-      contact: '+1 (555) 123-4567',
-      email: 'jsmith@greenvalley.com',
-      processingCapacity: '50 tons daily',
-      currentUtilization: '80%',
-      status: 'Operational',
-      wasteTypes: ['Organic', 'Packaging', 'Mixed'],
-      operatingHours: 'Mon-Sat: 6:00 AM - 8:00 PM',
-      outputProducts: ['Compost', 'Biogas', 'Recycled Materials'],
-      facilityDetails: {
-        processes: [
-          { name: 'Organic Composting', capacity: '30 tons', utilization: '85%', outputType: 'Organic Compost' },
-          { name: 'Material Sorting', capacity: '15 tons', utilization: '75%', outputType: 'Sorted Recyclables' },
-          { name: 'Anaerobic Digestion', capacity: '5 tons', utilization: '70%', outputType: 'Biogas' }
-        ],
-        equipment: [
-          { name: 'Industrial Composter', status: 'Operational', lastMaintenance: '2023-05-15', nextMaintenance: '2023-08-15' },
-          { name: 'Sorting Line', status: 'Operational', lastMaintenance: '2023-06-01', nextMaintenance: '2023-09-01' },
-          { name: 'Biodigester', status: 'Operational', lastMaintenance: '2023-04-20', nextMaintenance: '2023-07-20' }
-        ],
-        certifications: ['ISO 14001', 'Organic Processing Certified', 'Zero Waste Certified'],
-        notes: 'Main processing facility handling the bulk of organic waste from central markets. Currently operating near capacity for organic waste processing.'
-      }
-    },
-    {
-      id: 'PF-002',
-      name: 'River Basin Composting Facility',
-      location: 'Riverside Agricultural Area',
-      address: '456 Farm Road, Riverside, RS 20002',
-      manager: 'Emma Johnson',
-      contact: '+1 (555) 234-5678',
-      email: 'ejohnson@riverbasin.org',
-      processingCapacity: '25 tons daily',
-      currentUtilization: '60%',
-      status: 'Operational',
-      wasteTypes: ['Organic', 'Agricultural'],
-      operatingHours: 'Mon-Fri: 7:00 AM - 6:00 PM',
-      outputProducts: ['Premium Compost', 'Soil Amendments'],
-      facilityDetails: {
-        processes: [
-          { name: 'Windrow Composting', capacity: '15 tons', utilization: '65%', outputType: 'Agricultural Compost' },
-          { name: 'Vermiculture', capacity: '5 tons', utilization: '50%', outputType: 'Worm Castings' },
-          { name: 'Compost Tea Production', capacity: '5 tons', utilization: '60%', outputType: 'Liquid Fertilizer' }
-        ],
-        equipment: [
-          { name: 'Compost Turner', status: 'Operational', lastMaintenance: '2023-05-10', nextMaintenance: '2023-08-10' },
-          { name: 'Screening Equipment', status: 'Maintenance Required', lastMaintenance: '2023-03-15', nextMaintenance: '2023-06-15' },
-          { name: 'Aeration System', status: 'Operational', lastMaintenance: '2023-05-30', nextMaintenance: '2023-08-30' }
-        ],
-        certifications: ['Organic Processing Certified', 'Sustainable Agriculture Partner'],
-        notes: 'Specialized in agricultural waste processing. Produces premium compost sold back to local farms. Screening equipment requires maintenance soon.'
-      }
-    },
-    {
-      id: 'PF-003',
-      name: 'Metro Recycling Industries',
-      location: 'Metro Industrial Park',
-      address: '789 Industry Blvd, Metro City, MC 30003',
-      manager: 'Michael Chen',
-      contact: '+1 (555) 345-6789',
-      email: 'mchen@metrorecycle.com',
-      processingCapacity: '70 tons daily',
-      currentUtilization: '85%',
-      status: 'Operational',
-      wasteTypes: ['Packaging', 'Plastic', 'Cardboard', 'Paper', 'Mixed'],
-      operatingHours: 'Mon-Sun: 24 hours',
-      outputProducts: ['Recycled Materials', 'Raw Materials for Manufacturing'],
-      facilityDetails: {
-        processes: [
-          { name: 'Material Sorting', capacity: '30 tons', utilization: '90%', outputType: 'Sorted Materials' },
-          { name: 'Plastic Processing', capacity: '20 tons', utilization: '80%', outputType: 'Plastic Pellets' },
-          { name: 'Cardboard Processing', capacity: '20 tons', utilization: '85%', outputType: 'Pulp' }
-        ],
-        equipment: [
-          { name: 'Automated Sorting Line', status: 'Operational', lastMaintenance: '2023-06-05', nextMaintenance: '2023-09-05' },
-          { name: 'Plastic Shredder', status: 'Operational', lastMaintenance: '2023-05-25', nextMaintenance: '2023-08-25' },
-          { name: 'Cardboard Pulper', status: 'Operational', lastMaintenance: '2023-06-10', nextMaintenance: '2023-09-10' }
-        ],
-        certifications: ['ISO 9001', 'ISO 14001', 'Recycling Industry Standard'],
-        notes: 'High volume industrial recycling facility. Main processor for packaging materials from distribution centers. Operating at high capacity.'
-      }
-    },
-    {
-      id: 'PF-004',
-      name: 'Urban Biogas Plant',
-      location: 'Urban Eastern District',
-      address: '101 Energy Way, Metro City, MC 30004',
-      manager: 'Sarah Williams',
-      contact: '+1 (555) 456-7890',
-      email: 'swilliams@urbanbiogas.com',
-      processingCapacity: '20 tons daily',
-      currentUtilization: '75%',
-      status: 'Operational',
-      wasteTypes: ['Food Waste', 'Organic'],
-      operatingHours: 'Mon-Sun: 24 hours',
-      outputProducts: ['Biogas', 'Electricity', 'Liquid Fertilizer'],
-      facilityDetails: {
-        processes: [
-          { name: 'Anaerobic Digestion', capacity: '15 tons', utilization: '80%', outputType: 'Biogas' },
-          { name: 'Energy Generation', capacity: '5 tons', utilization: '60%', outputType: 'Electricity' },
-          { name: 'Digestate Processing', capacity: '5 tons', utilization: '70%', outputType: 'Liquid Fertilizer' }
-        ],
-        equipment: [
-          { name: 'Biodigesters', status: 'Operational', lastMaintenance: '2023-05-20', nextMaintenance: '2023-08-20' },
-          { name: 'Gas Cleaning System', status: 'Operational', lastMaintenance: '2023-06-01', nextMaintenance: '2023-09-01' },
-          { name: 'Generator', status: 'Operational', lastMaintenance: '2023-05-15', nextMaintenance: '2023-08-15' }
-        ],
-        certifications: ['Renewable Energy Certified', 'Clean Energy Producer'],
-        notes: 'Specialized facility converting food waste to energy. Supplies electricity back to the grid and produces liquid fertilizer as a byproduct.'
-      }
-    },
-    {
-      id: 'PF-005',
-      name: 'Highland Recycling Cooperative',
-      location: 'Highland Community',
-      address: '202 Community Circle, Highland, HV 50005',
-      manager: 'David Martinez',
-      contact: '+1 (555) 567-8901',
-      email: 'dmartinez@highlandcoop.org',
-      processingCapacity: '5 tons daily',
-      currentUtilization: '40%',
-      status: 'Maintenance',
-      wasteTypes: ['Organic', 'Recyclables', 'Mixed'],
-      operatingHours: 'Mon-Fri: 8:00 AM - 4:00 PM',
-      outputProducts: ['Community Compost', 'Recycled Craft Materials'],
-      facilityDetails: {
-        processes: [
-          { name: 'Community Composting', capacity: '3 tons', utilization: '45%', outputType: 'Compost' },
-          { name: 'Material Recovery', capacity: '2 tons', utilization: '30%', outputType: 'Recycled Materials' }
-        ],
-        equipment: [
-          { name: 'Small-Scale Composter', status: 'Under Maintenance', lastMaintenance: '2023-01-15', nextMaintenance: '2023-06-25' },
-          { name: 'Manual Sorting Station', status: 'Operational', lastMaintenance: '2023-05-01', nextMaintenance: '2023-08-01' }
-        ],
-        certifications: ['Community Supported Recycling', 'Local Sustainability Partner'],
-        notes: 'Community-run cooperative recycling center. Currently undergoing maintenance and upgrades to the composting system. Limited operations until June 30.'
-      }
-    }
-  ];
 
   // Simulate loading
   useEffect(() => {
@@ -192,19 +192,19 @@ const WasteProcessing = () => {
   // Handle search
   useEffect(() => {
     if (!facilities) return;
-    
+
     let results = facilities.filter(facility => {
-      return Object.keys(facility).some(key => 
+      return Object.keys(facility).some(key =>
         typeof facility[key] === 'string' && facility[key].toLowerCase().includes(searchTerm.toLowerCase())
-      ) || 
-      (facility.wasteTypes && facility.wasteTypes.some(type => 
-        type.toLowerCase().includes(searchTerm.toLowerCase())
-      )) ||
-      (facility.outputProducts && facility.outputProducts.some(product => 
-        product.toLowerCase().includes(searchTerm.toLowerCase())
-      ));
+      ) ||
+        (facility.wasteTypes && facility.wasteTypes.some(type =>
+          type.toLowerCase().includes(searchTerm.toLowerCase())
+        )) ||
+        (facility.outputProducts && facility.outputProducts.some(product =>
+          product.toLowerCase().includes(searchTerm.toLowerCase())
+        ));
     });
-    
+
     setFilteredData(results);
   }, [searchTerm, facilities]);
 
@@ -261,25 +261,25 @@ const WasteProcessing = () => {
       setFilteredData(facilities);
       return;
     }
-    
+
     let results = facilities.filter(facility => {
       return Object.entries(selectedFilters).every(([key, value]) => {
         if (!value || value === 'all') return true;
-        
+
         // Special case for wasteType
         if (key === 'wasteType') {
           return facility.wasteTypes && facility.wasteTypes.includes(value);
         }
-        
+
         // Special case for outputProduct
         if (key === 'outputProduct') {
           return facility.outputProducts && facility.outputProducts.includes(value);
         }
-        
+
         return facility[key] === value;
       });
     });
-    
+
     setFilteredData(results);
   }, [selectedFilters, facilities]);
 
@@ -290,7 +290,7 @@ const WasteProcessing = () => {
       'Maintenance': 'bg-pastel-yellow text-yellow-800',
       'Offline': 'bg-pastel-red text-red-800',
     };
-    
+
     return (
       <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status] || 'bg-gray-200 text-gray-800'}`}>
         {status}
@@ -306,7 +306,7 @@ const WasteProcessing = () => {
       'Under Maintenance': 'bg-pastel-yellow text-yellow-800',
       'Offline': 'bg-pastel-red text-red-800',
     };
-    
+
     return (
       <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status] || 'bg-gray-200 text-gray-800'}`}>
         {status}
@@ -333,7 +333,7 @@ const WasteProcessing = () => {
             <StatusBadge status={facility.status} />
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h5 className="text-xs font-medium text-gray-500 mb-2">FACILITY INFORMATION</h5>
@@ -363,7 +363,7 @@ const WasteProcessing = () => {
                 <span className="font-medium">{facility.currentUtilization}</span>
               </div>
             </div>
-            
+
             <h5 className="text-xs font-medium text-gray-500 mt-4 mb-2">CERTIFICATIONS</h5>
             <div className="flex flex-wrap gap-2">
               {facility.facilityDetails.certifications.map((cert, idx) => (
@@ -372,7 +372,7 @@ const WasteProcessing = () => {
                 </span>
               ))}
             </div>
-            
+
             <h5 className="text-xs font-medium text-gray-500 mt-4 mb-2">WASTE TYPES PROCESSED</h5>
             <div className="flex flex-wrap gap-2">
               {facility.wasteTypes.map((type, idx) => (
@@ -381,7 +381,7 @@ const WasteProcessing = () => {
                 </span>
               ))}
             </div>
-            
+
             <h5 className="text-xs font-medium text-gray-500 mt-4 mb-2">OUTPUT PRODUCTS</h5>
             <div className="flex flex-wrap gap-2">
               {facility.outputProducts.map((product, idx) => (
@@ -390,13 +390,13 @@ const WasteProcessing = () => {
                 </span>
               ))}
             </div>
-            
+
             <div className="mt-4">
               <h5 className="text-xs font-medium text-gray-500 mb-2">NOTES</h5>
               <p className="text-sm bg-white p-3 border border-gray-200 rounded-md">{facility.facilityDetails.notes}</p>
             </div>
           </div>
-          
+
           <div>
             <h5 className="text-xs font-medium text-gray-500 mb-2">PROCESSING OPERATIONS</h5>
             <div className="space-y-3">
@@ -420,7 +420,7 @@ const WasteProcessing = () => {
                   </div>
                   <div className="mt-2">
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className={`h-2 rounded-full ${parseInt(process.utilization) > 80 ? 'bg-red-500' : parseInt(process.utilization) > 50 ? 'bg-yellow-500' : 'bg-green-500'}`}
                         style={{ width: process.utilization }}
                       ></div>
@@ -429,7 +429,7 @@ const WasteProcessing = () => {
                 </div>
               ))}
             </div>
-            
+
             <h5 className="text-xs font-medium text-gray-500 mt-4 mb-2">EQUIPMENT STATUS</h5>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -453,7 +453,7 @@ const WasteProcessing = () => {
                 </tbody>
               </table>
             </div>
-            
+
             <div className="mt-4 flex space-x-2">
               <button className="flex items-center text-sm py-1 px-3 rounded-md border border-farmio text-farmio hover:bg-farmio hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -476,19 +476,19 @@ const WasteProcessing = () => {
 
   // Table columns
   const columns = [
-    { key: 'id', header: 'ID' },
+    { accessor: 'id', header: 'ID' },
     { 
-      key: 'name', 
+      accessor: 'name', 
       header: 'Facility Name',
       render: (value) => (
         <div className="font-medium">{value}</div>
       )
     },
-    { key: 'location', header: 'Location' },
-    { key: 'processingCapacity', header: 'Capacity' },
-    { key: 'currentUtilization', header: 'Utilization' },
+    { accessor: 'location', header: 'Location' },
+    { accessor: 'processingCapacity', header: 'Capacity' },
+    { accessor: 'currentUtilization', header: 'Utilization' },
     { 
-      key: 'outputProducts', 
+      accessor: 'outputProducts', 
       header: 'Output Products',
       render: (value) => (
         <div className="flex flex-wrap gap-1">
@@ -506,16 +506,16 @@ const WasteProcessing = () => {
       )
     },
     { 
-      key: 'status', 
+      accessor: 'status', 
       header: 'Status',
       render: (value) => <StatusBadge status={value} />
     },
     { 
-      key: 'actions', 
+      accessor: 'actions', 
       header: 'Actions',
       render: (_, row) => (
         <div className="flex space-x-2">
-          <button 
+          <button
             className={`text-blue-600 hover:text-blue-800 ${expandedFacilityId === row.id ? 'text-blue-800' : ''}`}
             title={expandedFacilityId === row.id ? "Hide Details" : "View Details"}
             onClick={(e) => {
@@ -550,7 +550,7 @@ const WasteProcessing = () => {
     >
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard 
+        <StatCard
           title="Processing Facilities"
           value={facilities.length.toString()}
           subtitle="Total facilities"
@@ -558,7 +558,7 @@ const WasteProcessing = () => {
           color="green"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Total Capacity"
           value={totalCapacity}
           subtitle="Daily processing"
@@ -566,7 +566,7 @@ const WasteProcessing = () => {
           color="blue"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Average Utilization"
           value={averageUtilization}
           subtitle="Across all facilities"
@@ -574,7 +574,7 @@ const WasteProcessing = () => {
           color="yellow"
           isLoading={isLoading}
         />
-        <StatCard 
+        <StatCard
           title="Output Products"
           value="8"
           subtitle="Types produced"
@@ -602,7 +602,7 @@ const WasteProcessing = () => {
               </svg>
             </span>
           </div>
-          
+
           {/* Filter Button */}
           <button
             className="flex items-center text-sm py-2 px-4 rounded-md border border-dashboard-border hover:bg-gray-100"
@@ -642,9 +642,9 @@ const WasteProcessing = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-4 flex justify-end space-x-2">
-              <button 
+              <button
                 className="px-3 py-1 text-sm text-gray-600 border border-dashboard-border rounded-md hover:bg-gray-100"
                 onClick={() => setSelectedFilters({})}
               >
