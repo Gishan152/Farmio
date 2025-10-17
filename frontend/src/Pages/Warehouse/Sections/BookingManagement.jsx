@@ -105,16 +105,11 @@ export default function BookingManagement() {
     const [showRejectDialog, setShowRejectDialog] = useState(false);
     const [actionBooking, setActionBooking] = useState(null);
 
-    useEffect(() => {
-        loadWarehouses();
-        loadBookings();
-    }, [loadWarehouses, loadBookings]);
-
     // Show notification helper
-    const showNotification = (message, type = 'success') => {
+    const showNotification = useCallback((message, type = 'success') => {
         setNotification({ message, type });
         setTimeout(() => setNotification(null), 4000);
-    };
+    }, []);
 
     const loadBookings = useCallback(async () => {
         setLoading(true);
@@ -133,7 +128,12 @@ export default function BookingManagement() {
         } finally {
             setLoading(false);
         }
-    }, [selectedWarehouse, filterStatus, searchTerm]);
+    }, [selectedWarehouse, filterStatus, searchTerm, showNotification]);
+
+    useEffect(() => {
+        loadWarehouses();
+        loadBookings();
+    }, [loadWarehouses, loadBookings]);
 
     // Load bookings when filters change
     useEffect(() => {
