@@ -634,19 +634,23 @@ const WasteListings = () => {
 	const handleStartCollection = (listingId) => {
 		const listing = listingsResp.find((l) => l.id === listingId);
 
-		const startTask = () =>
-			new Promise((resolve) =>
-				setTimeout(() => {
-					setListingsResp(
-						listingsResp.map((listing) =>
-							listing.id === listingId
-								? { ...listing, status: "IN_PROGRESS" }
-								: listing
-						)
-					);
-					resolve({ name: listing?.wasteType || "Listing" });
-				}, 2000)
+		const startTask = async () => {
+			const res = await fetch(
+				`http://localhost:8088/waste-listings/${listingId}/status?status=IN_PROGRESS`,
+				{ method: "PUT" }
 			);
+			if (!res.ok) throw new Error("Failed to update status");
+			const updated = await res.json();
+
+			// update local state with backend response
+			setListingsResp((prev) =>
+				prev.map((l) =>
+					l.id === listingId ? { ...l, status: updated.status } : l
+				)
+			);
+
+			return { name: listing?.wasteType || "Listing" };
+		};
 
 		toast.promise(startTask(), {
 			loading: "Starting collection process...",
@@ -658,19 +662,22 @@ const WasteListings = () => {
 	const handleCompleteCollection = (listingId) => {
 		const listing = listingsResp.find((l) => l.id === listingId);
 
-		const completeTask = () =>
-			new Promise((resolve) =>
-				setTimeout(() => {
-					setListingsResp(
-						listingsResp.map((listing) =>
-							listing.id === listingId
-								? { ...listing, status: "COMPLETED" }
-								: listing
-						)
-					);
-					resolve({ name: listing?.wasteType || "Listing" });
-				}, 2000)
+		const completeTask = async () => {
+			const res = await fetch(
+				`http://localhost:8088/waste-listings/${listingId}/status?status=COMPLETED`,
+				{ method: "PUT" }
 			);
+			if (!res.ok) throw new Error("Failed to update status");
+			const updated = await res.json();
+
+			setListingsResp((prev) =>
+				prev.map((l) =>
+					l.id === listingId ? { ...l, status: updated.status } : l
+				)
+			);
+
+			return { name: listing?.wasteType || "Listing" };
+		};
 
 		toast.promise(completeTask(), {
 			loading: "Completing collection...",
@@ -688,16 +695,24 @@ const WasteListings = () => {
 	};
 
 	const handleContactFarmer = (listing) => {
-		toast.success(`Contact information sent for ${listing.requester?.name || listing.farmer}`);
+		toast.success(
+			`Contact information sent for ${
+				listing.requester?.name || listing.farmer
+			}`
+		);
 		// Implementation for contacting farmer
 	};
 
 	const filteredListings = listingsResp.filter((listing) => {
 		// Normalize status for comparison (handle "ACCEPTED", "IN_PROGRESS", etc.)
-		const normalizedStatus = filters.status === "In Progress" ? "IN_PROGRESS" : 
-								  filters.status === "Accepted" ? "ACCEPTED" :
-								  filters.status === "Completed" ? "COMPLETED" :
-								  filters.status;
+		const normalizedStatus =
+			filters.status === "In Progress"
+				? "IN_PROGRESS"
+				: filters.status === "Accepted"
+				? "ACCEPTED"
+				: filters.status === "Completed"
+				? "COMPLETED"
+				: filters.status;
 
 		return (
 			(filters.wasteType === "" ||
@@ -712,9 +727,11 @@ const WasteListings = () => {
 				filters.status === "All" ||
 				listing.status === normalizedStatus) &&
 			(filters.minQuantity === "" ||
-				(listing.quantity || 0) >= parseInt(filters.minQuantity || 0)) &&
+				(listing.quantity || 0) >=
+					parseInt(filters.minQuantity || 0)) &&
 			(filters.maxPrice === "" ||
-				(listing.pricePerUnit || 0) <= parseFloat(filters.maxPrice || 999))
+				(listing.pricePerUnit || 0) <=
+					parseFloat(filters.maxPrice || 999))
 		);
 	});
 	return (
@@ -763,10 +780,11 @@ const WasteListings = () => {
 								value={filteredListings.reduce(
 									(total, listing) => {
 										const quantity = listing.quantity || 0;
-										const unit = listing.unit?.toUpperCase();
+										const unit =
+											listing.unit?.toUpperCase();
 										// Convert to KG for consistency
 										if (unit === "TON" || unit === "TONS") {
-											return total + (quantity * 907.185);
+											return total + quantity * 907.185;
 										}
 										return total + quantity;
 									},
@@ -782,7 +800,8 @@ const WasteListings = () => {
 					<DollarSign className="h-7 w-7 text-yellow-500 mr-3 z-10" />
 					<div className="z-10">
 						<p className="text-xs font-medium text-gray-500">
-							Avg Price/{filteredListings[0]?.unit?.toLowerCase() || "kg"}
+							Avg Price/
+							{filteredListings[0]?.unit?.toLowerCase() || "kg"}
 						</p>
 						<p className="text-lg font-bold text-gray-900">
 							$
@@ -794,7 +813,8 @@ const WasteListings = () => {
 													filteredListings.reduce(
 														(total, listing) =>
 															total +
-															(listing.pricePerUnit || 0),
+															(listing.pricePerUnit ||
+																0),
 														0
 													) / filteredListings.length
 												).toFixed(2)
@@ -1079,13 +1099,13 @@ const WasteListings = () => {
 								<TableCell>
 									<div>
 										<div className="font-medium text-gray-900 dark:text-gray-100">
-											{listing.requester?.name}
+											{listing.requesterName}
 										</div>
 										<div className="text-sm text-gray-500 dark:text-gray-400">
-											{listing.requester?.location}
+											{listing.requesterLocation}
 										</div>
 										<div className="text-xs text-yellow-600 flex items-center mt-1">
-											⭐ {listing.requester?.rating}/5
+											⭐ {listing.requesterRating}/5
 										</div>
 									</div>
 								</TableCell>
@@ -1139,7 +1159,7 @@ const WasteListings = () => {
 										)} leading-normal rounded-full`}
 										variant="outline"
 									>
-										{listing.status.replace("_", " ")}
+										{listing.status ? listing.status.replace("_", " ") : "N/A"}
 									</Badge>
 								</TableCell>
 

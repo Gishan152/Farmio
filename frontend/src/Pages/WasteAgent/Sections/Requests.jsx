@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	Table,
 	TableBody,
@@ -65,117 +65,131 @@ import {
 import { cn } from "@/lib/utils";
 
 const Requests = () => {
-	const [requests, setRequests] = useState([
-		{
-			id: 1,
-			requesterId: "farmer001",
-			requesterName: "Kumara Silva",
-			requesterLocation: "Anuradhapura",
-			requesterAvatar:
-				"https://avatar.iran.liara.run/public/boy?username=kumara",
-			wasteType: "Rice Straw Residue",
-			quantity: "1,500 kg",
-			offeredPrice: "$0.14",
-			totalOffer: "$210",
-			requestDate: "2025-01-05",
-			urgency: "Medium",
-			message:
-				"Need quick pickup for rice straw waste. Can provide transport if needed.",
-			status: "Pending",
-			farmRating: 4.5,
-			contactNumber: "+94 71 234 5678",
-			preferredPickupTime: "Morning (8AM - 12PM)",
-			additionalNotes:
-				"Farm located 2km from main road. Easy truck access available.",
-		},
-		{
-			id: 2,
-			requesterId: "farmer002",
-			requesterName: "Chamara Perera",
-			requesterLocation: "Kurunegala",
-			requesterAvatar:
-				"https://avatar.iran.liara.run/public/boy?username=chamara",
-			wasteType: "Coconut Husk Fiber",
-			quantity: "800 kg",
-			offeredPrice: "$0.11",
-			totalOffer: "$88",
-			requestDate: "2025-01-04",
-			urgency: "High",
-			message:
-				"Urgent request - coconut processing waste needs immediate collection.",
-			status: "Pending",
-			farmRating: 4.8,
-			contactNumber: "+94 77 987 6543",
-			preferredPickupTime: "Anytime",
-			additionalNotes:
-				"Perishable waste - needs collection within 48 hours.",
-		},
-		{
-			id: 3,
-			requesterId: "farmer003",
-			requesterName: "Nimal Jayawardena",
-			requesterLocation: "Kandy",
-			requesterAvatar:
-				"https://avatar.iran.liara.run/public/boy?username=nimal",
-			wasteType: "Tea Leaf Waste",
-			quantity: "2,200 kg",
-			offeredPrice: "$0.09",
-			totalOffer: "$198",
-			requestDate: "2025-01-06",
-			urgency: "Low",
-			message: "Regular tea estate waste pickup. Flexible on timing.",
-			status: "Accepted",
-			farmRating: 4.9,
-			contactNumber: "+94 75 456 7890",
-			preferredPickupTime: "Afternoon (1PM - 5PM)",
-			additionalNotes:
-				"Weekly recurring collection. Well-organized waste storage.",
-		},
-		{
-			id: 4,
-			requesterId: "farmer004",
-			requesterName: "Priyantha Fernando",
-			requesterLocation: "Galle",
-			requesterAvatar:
-				"https://avatar.iran.liara.run/public/boy?username=priyantha",
-			wasteType: "Sugarcane Bagasse",
-			quantity: "3,000 kg",
-			offeredPrice: "$0.06",
-			totalOffer: "$180",
-			requestDate: "2025-01-03",
-			urgency: "Medium",
-			message:
-				"Large quantity of bagasse available from sugar mill operations.",
-			status: "Rejected",
-			farmRating: 4.1,
-			contactNumber: "+94 72 345 6789",
-			preferredPickupTime: "Morning (6AM - 10AM)",
-			additionalNotes:
-				"Industrial waste from processing facility. Requires large vehicle.",
-		},
-		{
-			id: 5,
-			requesterId: "farmer005",
-			requesterName: "Sanduni Wickramasinghe",
-			requesterLocation: "Matara",
-			requesterAvatar:
-				"https://avatar.iran.liara.run/public/girl?username=sanduni",
-			wasteType: "Vegetable Trimmings",
-			quantity: "650 kg",
-			offeredPrice: "$0.08",
-			totalOffer: "$52",
-			requestDate: "2025-01-07",
-			urgency: "High",
-			message:
-				"Fresh vegetable waste from market operations. Quick pickup needed.",
-			status: "Pending",
-			farmRating: 4.3,
-			contactNumber: "+94 76 123 4567",
-			preferredPickupTime: "Evening (5PM - 8PM)",
-			additionalNotes:
-				"Market waste - best quality organic material available.",
-		},
-	]);
+	// const [requests, setRequests] = useState([
+	// 	{
+	// 		id: 1,
+	// 		requesterId: "farmer001",
+	// 		requesterName: "Kumara Silva",
+	// 		requesterLocation: "Anuradhapura",
+	// 		requesterAvatar:
+	// 			"https://avatar.iran.liara.run/public/boy?username=kumara",
+	// 		wasteType: "Rice Straw Residue",
+	// 		quantity: "1,500 kg",
+	// 		offeredPrice: "$0.14",
+	// 		totalOffer: "$210",
+	// 		requestDate: "2025-01-05",
+	// 		urgency: "Medium",
+	// 		message:
+	// 			"Need quick pickup for rice straw waste. Can provide transport if needed.",
+	// 		status: "Pending",
+	// 		farmRating: 4.5,
+	// 		contactNumber: "+94 71 234 5678",
+	// 		preferredPickupTime: "Morning (8AM - 12PM)",
+	// 		additionalNotes:
+	// 			"Farm located 2km from main road. Easy truck access available.",
+	// 	},
+	// 	{
+	// 		id: 2,
+	// 		requesterId: "farmer002",
+	// 		requesterName: "Chamara Perera",
+	// 		requesterLocation: "Kurunegala",
+	// 		requesterAvatar:
+	// 			"https://avatar.iran.liara.run/public/boy?username=chamara",
+	// 		wasteType: "Coconut Husk Fiber",
+	// 		quantity: "800 kg",
+	// 		offeredPrice: "$0.11",
+	// 		totalOffer: "$88",
+	// 		requestDate: "2025-01-04",
+	// 		urgency: "High",
+	// 		message:
+	// 			"Urgent request - coconut processing waste needs immediate collection.",
+	// 		status: "Pending",
+	// 		farmRating: 4.8,
+	// 		contactNumber: "+94 77 987 6543",
+	// 		preferredPickupTime: "Anytime",
+	// 		additionalNotes:
+	// 			"Perishable waste - needs collection within 48 hours.",
+	// 	},
+	// 	{
+	// 		id: 3,
+	// 		requesterId: "farmer003",
+	// 		requesterName: "Nimal Jayawardena",
+	// 		requesterLocation: "Kandy",
+	// 		requesterAvatar:
+	// 			"https://avatar.iran.liara.run/public/boy?username=nimal",
+	// 		wasteType: "Tea Leaf Waste",
+	// 		quantity: "2,200 kg",
+	// 		offeredPrice: "$0.09",
+	// 		totalOffer: "$198",
+	// 		requestDate: "2025-01-06",
+	// 		urgency: "Low",
+	// 		message: "Regular tea estate waste pickup. Flexible on timing.",
+	// 		status: "Accepted",
+	// 		farmRating: 4.9,
+	// 		contactNumber: "+94 75 456 7890",
+	// 		preferredPickupTime: "Afternoon (1PM - 5PM)",
+	// 		additionalNotes:
+	// 			"Weekly recurring collection. Well-organized waste storage.",
+	// 	},
+	// 	{
+	// 		id: 4,
+	// 		requesterId: "farmer004",
+	// 		requesterName: "Priyantha Fernando",
+	// 		requesterLocation: "Galle",
+	// 		requesterAvatar:
+	// 			"https://avatar.iran.liara.run/public/boy?username=priyantha",
+	// 		wasteType: "Sugarcane Bagasse",
+	// 		quantity: "3,000 kg",
+	// 		offeredPrice: "$0.06",
+	// 		totalOffer: "$180",
+	// 		requestDate: "2025-01-03",
+	// 		urgency: "Medium",
+	// 		message:
+	// 			"Large quantity of bagasse available from sugar mill operations.",
+	// 		status: "Rejected",
+	// 		farmRating: 4.1,
+	// 		contactNumber: "+94 72 345 6789",
+	// 		preferredPickupTime: "Morning (6AM - 10AM)",
+	// 		additionalNotes:
+	// 			"Industrial waste from processing facility. Requires large vehicle.",
+	// 	},
+	// 	{
+	// 		id: 5,
+	// 		requesterId: "farmer005",
+	// 		requesterName: "Sanduni Wickramasinghe",
+	// 		requesterLocation: "Matara",
+	// 		requesterAvatar:
+	// 			"https://avatar.iran.liara.run/public/girl?username=sanduni",
+	// 		wasteType: "Vegetable Trimmings",
+	// 		quantity: "650 kg",
+	// 		offeredPrice: "$0.08",
+	// 		totalOffer: "$52",
+	// 		requestDate: "2025-01-07",
+	// 		urgency: "High",
+	// 		message:
+	// 			"Fresh vegetable waste from market operations. Quick pickup needed.",
+	// 		status: "Pending",
+	// 		farmRating: 4.3,
+	// 		contactNumber: "+94 76 123 4567",
+	// 		preferredPickupTime: "Evening (5PM - 8PM)",
+	// 		additionalNotes:
+	// 			"Market waste - best quality organic material available.",
+	// 	},
+	// ]);
+
+	const [requests, setRequests] = useState([]);
+
+	useEffect(() => {
+		fetch("http://localhost:8088/requests")
+			.then((res) => {
+				if (!res.ok) {
+					throw new Error("Failed to fetch requests");
+				}
+				return res.json();
+			})
+			.then((data) => setRequests(data))
+			.catch((err) => console.error("Error fetching requests:", err));
+	}, []);
 
 	const cities = [
 		{ value: "colombo", label: "Colombo" },
@@ -208,29 +222,57 @@ const Requests = () => {
 	const [selectedDistrict, setSelectedDistrict] = useState("");
 
 	const [filters, setFilters] = useState({
-		status: "All",
+		status: "Pending",
 		urgency: "All",
 		wasteType: "",
 		location: "", // Add location filter
 	});
 
 	const handleRequestAction = (requestId, action) => {
-		setRequests((prev) =>
-			prev.map((request) =>
-				request.id === requestId
-					? {
-							...request,
-							status:
-								action === "accept" ? "Accepted" : "Rejected",
-					  }
-					: request
-			)
-		);
-
+		const newStatus = action === "accept" ? "Accepted" : "Rejected";
 		const actionText = action === "accept" ? "accepted" : "rejected";
-		toast.success(`Request ${actionText} successfully!`, {
-			description: `You have ${actionText} the waste collection request.`,
-		});
+
+		// Show loading toast
+		const loadingToast = toast.loading(`${actionText.charAt(0).toUpperCase() + actionText.slice(1)}ing request...`);
+
+		// Call backend API to update status
+		fetch(`http://localhost:8088/requests/${requestId}/status?status=${newStatus}`, {
+			method: "PUT",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((res) => {
+				if (!res.ok) {
+					throw new Error(`Failed to ${actionText} request`);
+				}
+				return res.json();
+			})
+			.then((updatedRequest) => {
+				// Update local state with the updated request
+				setRequests((prev) =>
+					prev.map((request) =>
+						request.id === requestId
+							? { ...request, status: updatedRequest.status }
+							: request
+					)
+				);
+
+				// Dismiss loading toast and show success
+				toast.dismiss(loadingToast);
+				toast.success(`Request ${actionText} successfully!`, {
+					description: `You have ${actionText} the waste collection request.`,
+				});
+			})
+			.catch((error) => {
+				console.error(`Error ${actionText}ing request:`, error);
+				
+				// Dismiss loading toast and show error
+				toast.dismiss(loadingToast);
+				toast.error(`Failed to ${actionText} request`, {
+					description: "Please try again later.",
+				});
+			});
 	};
 
 	const getStatusBadge = (status) => {
@@ -306,7 +348,9 @@ const Requests = () => {
 					<div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
 					<Check className="h-7 w-7 text-green-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Accepted</p>
+						<p className="text-xs font-medium text-gray-500">
+							Accepted
+						</p>
 						<p className="text-lg font-bold text-gray-900">
 							<NumberFlow value={acceptedCount} />
 						</p>
@@ -316,7 +360,9 @@ const Requests = () => {
 					<div className="absolute left-0 top-0 h-full w-1 bg-yellow-500 rounded-l-lg" />
 					<Clock className="h-7 w-7 text-yellow-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Pending Requests</p>
+						<p className="text-xs font-medium text-gray-500">
+							Pending Requests
+						</p>
 						<p className="text-lg font-bold text-gray-900">
 							<NumberFlow value={pendingCount} />
 						</p>
@@ -326,7 +372,9 @@ const Requests = () => {
 					<div className="absolute left-0 top-0 h-full w-1 bg-red-500 rounded-l-lg" />
 					<X className="h-7 w-7 text-red-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Rejected</p>
+						<p className="text-xs font-medium text-gray-500">
+							Rejected
+						</p>
 						<p className="text-lg font-bold text-gray-900">
 							<NumberFlow value={rejectedCount} />
 						</p>
@@ -336,17 +384,20 @@ const Requests = () => {
 					<div className="absolute left-0 top-0 h-full w-1 bg-purple-500 rounded-l-lg" />
 					<DollarSign className="h-7 w-7 text-purple-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Total Value</p>
+						<p className="text-xs font-medium text-gray-500">
+							Total Value
+						</p>
 						<p className="text-lg font-bold text-gray-900">
-							$<NumberFlow
+							$
+							<NumberFlow
 								value={requests
-									.filter((r) => r.status === "Accepted")
+									.filter(
+										(request) =>
+											request.status === "Accepted"
+									)
 									.reduce(
-										(sum, r) =>
-											sum +
-											parseFloat(
-												r.totalOffer.replace("$", "")
-											),
+										(sum, request) =>
+											sum + request.totalOffer,
 										0
 									)}
 							/>
@@ -518,128 +569,130 @@ const Requests = () => {
 									<div className="flex items-center gap-3">
 										<Avatar>
 											<AvatarImage
-												src={request.requesterAvatar}
+												src={
+													request.requesterAvatar
+												}
 												alt={request.requesterName}
 											/>
 											<AvatarFallback>
-												{request.requesterName
-													.split(" ")
-													.map((n) => n[0])
-													.join("")}
-											</AvatarFallback>
-										</Avatar>
+													{request.requesterName
+														.split(" ")
+														.map((n) => n[0])
+														.join("")}
+												</AvatarFallback>
+											</Avatar>
+											<div>
+												<div className="font-medium text-gray-900 dark:text-gray-100">
+													{request.requesterName}
+												</div>
+												<div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+													<MapPin className="h-3 w-3" />
+													{request.requesterLocation}
+												</div>
+												<div className="text-xs text-yellow-600 flex items-center gap-1">
+													⭐ {request.farmRating}/5
+												</div>
+											</div>
+										</div>
+									</TableCell>
+									<TableCell>
+										<div>
+											<div className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-1">
+												<Package className="h-4 w-4" />
+												{request.wasteType}
+											</div>
+											<div className="text-sm text-gray-500 dark:text-gray-400">
+												{request.quantity}
+											</div>
+											<div className="text-xs text-gray-400">
+												{request.preferredPickupTime}
+											</div>
+										</div>
+									</TableCell>
+									<TableCell>
 										<div>
 											<div className="font-medium text-gray-900 dark:text-gray-100">
-												{request.requesterName}
+												{request.offeredPrice}/kg
 											</div>
-											<div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-												<MapPin className="h-3 w-3" />
-												{request.requesterLocation}
-											</div>
-											<div className="text-xs text-yellow-600 flex items-center gap-1">
-												⭐ {request.farmRating}/5
+											<div className="text-sm font-semibold text-green-600">
+												{request.totalOffer} total
 											</div>
 										</div>
-									</div>
-								</TableCell>
-								<TableCell>
-									<div>
-										<div className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-1">
-											<Package className="h-4 w-4" />
-											{request.wasteType}
+									</TableCell>
+									<TableCell>
+										<Badge
+											className={`${getStatusBadge(
+												request.status
+											)} border`}
+											variant="outline"
+										>
+											{request.status}
+										</Badge>
+									</TableCell>
+									<TableCell>
+										<div className="text-sm text-gray-900 dark:text-gray-100">
+											{new Date(
+												request.requestDate
+											).toLocaleDateString()}
 										</div>
-										<div className="text-sm text-gray-500 dark:text-gray-400">
-											{request.quantity}
+									</TableCell>
+									<TableCell className="text-right">
+										<div className="flex justify-end gap-2">
+											{request.status === "Pending" && (
+												<>
+													<Button
+														variant="outline"
+														size="sm"
+														onClick={() =>
+															handleRequestAction(
+																request.id,
+																"reject"
+															)
+														}
+														className="text-red-600 border-red-200 hover:bg-red-50"
+													>
+														<X className="h-4 w-4" />
+														Reject
+													</Button>
+													<Button
+														size="sm"
+														onClick={() =>
+															handleRequestAction(
+																request.id,
+																"accept"
+															)
+														}
+														className="bg-green-600 hover:bg-green-700"
+													>
+														<Check className="h-4 w-4" />
+														Accept
+													</Button>
+												</>
+											)}
+											<DropdownMenu>
+												<DropdownMenuTrigger asChild>
+													<Button
+														variant="outline"
+														size="sm"
+													>
+														<HiDotsVertical className="h-4 w-4" />
+													</Button>
+												</DropdownMenuTrigger>
+												<DropdownMenuContent align="end">
+													<DropdownMenuItem>
+														View Details
+													</DropdownMenuItem>
+													<DropdownMenuItem>
+														Contact Farmer
+													</DropdownMenuItem>
+													<DropdownMenuItem>
+														Download Info
+													</DropdownMenuItem>
+												</DropdownMenuContent>
+											</DropdownMenu>
 										</div>
-										<div className="text-xs text-gray-400">
-											{request.preferredPickupTime}
-										</div>
-									</div>
-								</TableCell>
-								<TableCell>
-									<div>
-										<div className="font-medium text-gray-900 dark:text-gray-100">
-											{request.offeredPrice}/kg
-										</div>
-										<div className="text-sm font-semibold text-green-600">
-											{request.totalOffer} total
-										</div>
-									</div>
-								</TableCell>
-								<TableCell>
-									<Badge
-										className={`${getStatusBadge(
-											request.status
-										)} border`}
-										variant="outline"
-									>
-										{request.status}
-									</Badge>
-								</TableCell>
-								<TableCell>
-									<div className="text-sm text-gray-900 dark:text-gray-100">
-										{new Date(
-											request.requestDate
-										).toLocaleDateString()}
-									</div>
-								</TableCell>
-								<TableCell className="text-right">
-									<div className="flex justify-end gap-2">
-										{request.status === "Pending" && (
-											<>
-												<Button
-													variant="outline"
-													size="sm"
-													onClick={() =>
-														handleRequestAction(
-															request.id,
-															"reject"
-														)
-													}
-													className="text-red-600 border-red-200 hover:bg-red-50"
-												>
-													<X className="h-4 w-4" />
-													Reject
-												</Button>
-												<Button
-													size="sm"
-													onClick={() =>
-														handleRequestAction(
-															request.id,
-															"accept"
-														)
-													}
-													className="bg-green-600 hover:bg-green-700"
-												>
-													<Check className="h-4 w-4" />
-													Accept
-												</Button>
-											</>
-										)}
-										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button
-													variant="outline"
-													size="sm"
-												>
-													<HiDotsVertical className="h-4 w-4" />
-												</Button>
-											</DropdownMenuTrigger>
-											<DropdownMenuContent align="end">
-												<DropdownMenuItem>
-													View Details
-												</DropdownMenuItem>
-												<DropdownMenuItem>
-													Contact Farmer
-												</DropdownMenuItem>
-												<DropdownMenuItem>
-													Download Info
-												</DropdownMenuItem>
-											</DropdownMenuContent>
-										</DropdownMenu>
-									</div>
-								</TableCell>
-							</TableRow>
+									</TableCell>
+								</TableRow>
 						))}
 					</TableBody>
 				</Table>

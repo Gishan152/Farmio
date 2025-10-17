@@ -51,7 +51,15 @@ public class WasteListing {
     @Column(name = "updated_at", insertable = false)
     private java.time.LocalDateTime updatedAt;
 
+    @Column(name = "accepted_by")
+    private Long acceptedBy;
+
     public enum Unit {
         KG, TON, LITER
     }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
 }
