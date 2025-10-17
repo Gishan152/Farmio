@@ -8,6 +8,8 @@ import VehicleInfo from '../Pages/transporter/Sections/VehicleInfo';
 import DeliveryHistory from '../Pages/transporter/Sections/DeliveryHistory';
 import RatingsFeedback from '../Pages/transporter/Sections/RatingsFeedback';
 import TransporterNotifications from '../Pages/transporter/Sections/Notifications';
+import ConfirmDelivery from '@/Pages/transporter/Sections/ConfirmDelivery';
+import ConfirmPickup from '@/Pages/transporter/Sections/ConfirmPickup';
 
 const transporterRoutes = {
     path: '/transporter',
@@ -52,6 +54,14 @@ const transporterRoutes = {
         {
             path: 'notifications',
             Component: TransporterNotifications
+        },
+        {
+            path : 'confirm/:id',
+            Component: ConfirmPickup
+        },
+        {
+            path : 'confirmDelivery',
+            Component: ConfirmDelivery
         }
     ]
 }
