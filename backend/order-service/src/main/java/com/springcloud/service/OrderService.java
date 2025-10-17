@@ -222,5 +222,46 @@ public class OrderService {
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
     }
+    
+    /**
+     * Check if a product is used in any orders
+     * @param productId The ID of the product to check
+     * @return true if the product is used in at least one order, false otherwise
+     */
+    public boolean isProductInUse(Long productId) {
+        if (productId == null) {
+            return false;
+        }
+        
+        try {
+            // Get all orders
+            List<Order> orders = orderRepository.findAll();
+            
+            // Check each order for the product
+            for (Order order : orders) {
+                // Skip cancelled orders
+                if (order.getStatus() == OrderStatus.CANCELLED) {
+                    continue;
+                }
+                
+                if (order.getItems() != null) {
+                    // Check if any item in the order uses this product
+                    for (OrderItem item : order.getItems()) {
+                        if (productId.equals(item.getCropId())) {
+                            return true; // Product is used in this order
+                        }
+                    }
+                }
+            }
+            
+            // Product not found in any non-cancelled order
+            return false;
+        } catch (Exception e) {
+            System.err.println("Error checking if product is in use: " + e.getMessage());
+            e.printStackTrace();
+            // If there's an error, assume the product is in use to prevent accidental deletion
+            return true;
+        }
+    }
 
 }

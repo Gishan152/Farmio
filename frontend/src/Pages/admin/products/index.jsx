@@ -262,9 +262,12 @@ const ProductsManagement = () => {
                         product.availableStock > 0 ? 'Low Stock' : 'Out of Stock',
           certifications: product.badges && product.badges.length > 0 ? product.badges.join(', ') : 'Standard',
           harvested: product.createdAt ? new Date(product.createdAt).toISOString().split('T')[0] : '2023-06-10',
-          image: product.imageUrls && product.imageUrls.length > 0 ? 
+          // Get first image from imageUrls array, or fallback to default image
+          image: product.imageUrls && product.imageUrls.length > 0 && product.imageUrls[0] ? 
                  product.imageUrls[0] : 
                  'https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+          // Store all image URLs for product details view
+          allImages: product.imageUrls || [],
           description: `${product.productName} - ${product.measurement}`,
           lifespan: '7-10 days',
           storageConditions: 'Store in a cool, dry place'
@@ -443,6 +446,7 @@ const ProductsManagement = () => {
       description: product.description,
       certifications: product.certifications,
       image: product.image,
+      allImages: product.allImages || [],
       harvested: product.harvested,
       lifespan: product.lifespan,
       storageConditions: product.storageConditions
@@ -499,21 +503,54 @@ const ProductsManagement = () => {
   };
 
   // Handle delete confirmation
-  const handleDeleteConfirm = () => {
-    // Here you would typically send a request to your backend API to delete the product
-    // For this example, we'll just simulate deletion by filtering it out
-
-    const updatedProducts = filteredData.filter(p => p.id !== selectedProduct.id);
-    setFilteredData(updatedProducts);
-
-    // Show success message
-    setSuccessMessage('Product deleted successfully');
-
-    // Close the modal after a delay
-    setTimeout(() => {
-      setShowDeleteModal(false);
-      setSuccessMessage('');
-    }, 2000);
+  const handleDeleteConfirm = async () => {
+    if (!selectedProduct || !selectedProduct.id) {
+      setSuccessMessage('Error: No product selected');
+      return;
+    }
+    
+    try {
+      // First check if the product can be deleted
+      const canDeleteCheck = await productService.checkProductCanBeDeleted(selectedProduct.id);
+      
+      if (!canDeleteCheck.canDelete) {
+        setSuccessMessage(canDeleteCheck.message || 'Cannot delete this product as it is associated with existing orders');
+        
+        // Show error message for longer
+        setTimeout(() => {
+          setShowDeleteModal(false);
+          setSuccessMessage('');
+        }, 3000);
+        return;
+      }
+      
+      // If product can be deleted, proceed with deletion
+      const result = await productService.deleteProduct(selectedProduct.id);
+      
+      if (result.success) {
+        // Update the local data by filtering out the deleted product
+        const updatedProducts = filteredData.filter(p => p.id !== selectedProduct.id);
+        setFilteredData(updatedProducts);
+        setSuccessMessage(result.message || 'Product deleted successfully');
+      } else {
+        setSuccessMessage(result.message || 'Failed to delete product. Please try again.');
+      }
+      
+      // Close the modal after a delay
+      setTimeout(() => {
+        setShowDeleteModal(false);
+        setSuccessMessage('');
+      }, 2000);
+    } catch (error) {
+      console.error('Error during product deletion:', error);
+      setSuccessMessage('An unexpected error occurred. Please try again.');
+      
+      // Close the modal after a delay
+      setTimeout(() => {
+        setShowDeleteModal(false);
+        setSuccessMessage('');
+      }, 3000);
+    }
   };
 
   // Handle closing the modals
@@ -634,16 +671,26 @@ const ProductsManagement = () => {
   // Product Card Component
   const ProductCard = ({ product }) => {
     const fallbackImage = "https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80";
+    const [isImageError, setIsImageError] = useState(false);
     
     return (
       <div className="bg-white rounded-lg border border-dashboard-border shadow-card hover:shadow-card-hover transition-all">
         <div className="relative h-40 overflow-hidden rounded-t-lg">
           <img
-            src={product.image || fallbackImage}
+            src={isImageError ? fallbackImage : (product.image || fallbackImage)}
             alt={product.name}
             className="w-full h-full object-cover"
-            onError={(e) => {e.target.onerror = null; e.target.src = fallbackImage}}
+            onError={(e) => {
+              e.target.onerror = null; 
+              e.target.src = fallbackImage;
+              setIsImageError(true);
+            }}
           />
+          {product.allImages && product.allImages.length > 1 && (
+            <div className="absolute bottom-2 right-2 bg-white bg-opacity-75 px-2 py-1 rounded-full text-xs font-medium text-gray-700">
+              {product.allImages.length} images
+            </div>
+          )}
           <div className={`absolute top-2 right-2 px-2 py-1 text-xs font-medium rounded-full ${product.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' :
             product.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
               'bg-red-100 text-red-800'
@@ -881,8 +928,40 @@ const ProductsManagement = () => {
                         src={selectedProduct.image}
                         alt={selectedProduct.name}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80";
+                        }}
                       />
                     </div>
+
+                    {/* Additional product images if available */}
+                    {selectedProduct.allImages && selectedProduct.allImages.length > 1 && (
+                      <div className="mt-3 flex space-x-2 overflow-x-auto pb-2">
+                        {selectedProduct.allImages.map((imgUrl, i) => (
+                          <div 
+                            key={i} 
+                            className={`flex-shrink-0 w-14 h-14 rounded border-2 cursor-pointer ${
+                              imgUrl === selectedProduct.image ? 'border-farmio' : 'border-gray-200'
+                            }`}
+                            onClick={() => {
+                              // Update the selected image when thumbnail is clicked
+                              setSelectedProduct({...selectedProduct, image: imgUrl});
+                            }}
+                          >
+                            <img 
+                              src={imgUrl} 
+                              alt={`${selectedProduct.name} - view ${i+1}`} 
+                              className="w-full h-full object-cover rounded" 
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80";
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     <div className="mt-4">
                       <div className="flex justify-between items-center">
@@ -1098,7 +1177,7 @@ const ProductsManagement = () => {
 
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="image" className="block text-sm font-medium text-gray-700">Image URL</label>
+                      <label htmlFor="image" className="block text-sm font-medium text-gray-700">Main Image URL</label>
                       <input
                         type="url"
                         id="image"
@@ -1109,7 +1188,90 @@ const ProductsManagement = () => {
                       />
                       {editFormData.image && (
                         <div className="mt-2 rounded-md overflow-hidden h-24 w-24 border border-gray-200">
-                          <img src={editFormData.image} alt="Product" className="h-full w-full object-cover" />
+                          <img 
+                            src={editFormData.image} 
+                            alt="Product" 
+                            className="h-full w-full object-cover" 
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80";
+                            }}
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Display all available images if any */}
+                      {editFormData.allImages && editFormData.allImages.length > 0 && (
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">All Product Images</label>
+                          <div className="flex flex-wrap gap-2">
+                            {editFormData.allImages.map((imgUrl, index) => (
+                              <div key={index} className="relative group">
+                                <div className={`h-16 w-16 rounded border-2 overflow-hidden ${
+                                  imgUrl === editFormData.image ? 'border-farmio' : 'border-gray-200'
+                                }`}>
+                                  <img 
+                                    src={imgUrl} 
+                                    alt={`Product image ${index + 1}`} 
+                                    className="h-full w-full object-cover"
+                                    onClick={() => setEditFormData({...editFormData, image: imgUrl})} 
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = "https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80";
+                                    }}
+                                  />
+                                </div>
+                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex items-center justify-center transition-all">
+                                  <button 
+                                    type="button"
+                                    className="opacity-0 group-hover:opacity-100 p-1 bg-white rounded-full shadow-sm"
+                                    onClick={() => {
+                                      const newImages = [...editFormData.allImages];
+                                      newImages.splice(index, 1);
+                                      
+                                      // If removing the current main image, set main image to first remaining image or empty
+                                      const newMainImage = imgUrl === editFormData.image 
+                                        ? (newImages.length > 0 ? newImages[0] : '')
+                                        : editFormData.image;
+                                        
+                                      setEditFormData({
+                                        ...editFormData, 
+                                        allImages: newImages,
+                                        image: newMainImage
+                                      });
+                                    }}
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                            
+                            {/* Add new image button */}
+                            <button
+                              type="button"
+                              className="h-16 w-16 border-2 border-dashed border-gray-300 rounded flex items-center justify-center text-gray-400 hover:text-gray-500 hover:border-gray-400"
+                              onClick={() => {
+                                const newImageUrl = prompt("Enter the URL for the new product image:");
+                                if (newImageUrl && newImageUrl.trim()) {
+                                  const newImages = [...(editFormData.allImages || []), newImageUrl.trim()];
+                                  // If this is the first image, also set it as the main image
+                                  const newMainImage = editFormData.image || newImageUrl.trim();
+                                  setEditFormData({
+                                    ...editFormData,
+                                    allImages: newImages,
+                                    image: newMainImage
+                                  });
+                                }
+                              }}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1215,15 +1377,35 @@ const ProductsManagement = () => {
               </div>
 
               {successMessage && (
-                <div className="mx-6 mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+                <div className={`mx-6 mt-4 p-4 ${
+                  successMessage.toLowerCase().includes('cannot') || 
+                  successMessage.toLowerCase().includes('error') || 
+                  successMessage.toLowerCase().includes('failed') 
+                    ? 'bg-red-50 border border-red-200' 
+                    : 'bg-green-50 border border-green-200'
+                } rounded-md`}>
                   <div className="flex">
                     <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
+                      {successMessage.toLowerCase().includes('cannot') || 
+                       successMessage.toLowerCase().includes('error') || 
+                       successMessage.toLowerCase().includes('failed') ? (
+                        <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                      ) : (
+                        <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      )}
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm text-green-800">{successMessage}</p>
+                      <p className={`text-sm ${
+                        successMessage.toLowerCase().includes('cannot') || 
+                        successMessage.toLowerCase().includes('error') || 
+                        successMessage.toLowerCase().includes('failed') 
+                          ? 'text-red-800' 
+                          : 'text-green-800'
+                      }`}>{successMessage}</p>
                     </div>
                   </div>
                 </div>
@@ -1239,6 +1421,7 @@ const ProductsManagement = () => {
                   <div className="ml-3">
                     <h3 className="text-lg font-medium text-gray-900">Delete this product?</h3>
                     <p className="text-sm text-gray-500">Are you sure you want to delete "{selectedProduct.name}"? This action cannot be undone.</p>
+                    <p className="text-xs text-gray-500 mt-1">Note: Products that are associated with existing orders cannot be deleted.</p>
                   </div>
                 </div>
 
@@ -1251,7 +1434,18 @@ const ProductsManagement = () => {
                   </button>
                   <button
                     onClick={handleDeleteConfirm}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                    disabled={successMessage && (
+                      successMessage.toLowerCase().includes('cannot') || 
+                      successMessage.toLowerCase().includes('error') || 
+                      successMessage.toLowerCase().includes('failed')
+                    )}
+                    className={`px-4 py-2 ${
+                      successMessage && (
+                        successMessage.toLowerCase().includes('cannot') || 
+                        successMessage.toLowerCase().includes('error') || 
+                        successMessage.toLowerCase().includes('failed')
+                      ) ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
+                    } text-white rounded-md`}
                   >
                     Delete
                   </button>

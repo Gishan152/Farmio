@@ -3,7 +3,9 @@ package com.springcloud.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,6 +49,44 @@ public class AnalyticServiceController {
     public ResponseEntity<List<ProductDTO>> getAllProductsForAdmin() {
         List<ProductDTO> products = productAnalyticsService.fetchAllProducts();
         return ResponseEntity.ok(products);
+    }
+    
+    // Check if a product can be deleted (not used in any orders)
+    @GetMapping("/admin/products/{productId}/can-delete")
+    public ResponseEntity<Map<String, Object>> canDeleteProduct(@PathVariable Long productId) {
+        boolean canDelete = productAnalyticsService.checkProductCanBeDeleted(productId);
+        Map<String, Object> response = Map.of(
+            "canDelete", canDelete,
+            "message", canDelete ? 
+                "Product can be safely deleted." : 
+                "Cannot delete this product as it is associated with existing orders."
+        );
+        return ResponseEntity.ok(response);
+    }
+    
+    // Delete a product from crop-listing-service
+    @DeleteMapping("/admin/products/{productId}")
+    public ResponseEntity<Map<String, Object>> deleteProduct(@PathVariable Long productId) {
+        boolean canDelete = productAnalyticsService.checkProductCanBeDeleted(productId);
+        
+        if (!canDelete) {
+            Map<String, Object> response = Map.of(
+                "success", false,
+                "message", "Cannot delete this product as it is associated with existing orders."
+            );
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        boolean deleted = productAnalyticsService.deleteProduct(productId);
+        
+        Map<String, Object> response = Map.of(
+            "success", deleted,
+            "message", deleted ? 
+                "Product deleted successfully." : 
+                "Failed to delete the product. Please try again."
+        );
+        
+        return deleted ? ResponseEntity.ok(response) : ResponseEntity.internalServerError().body(response);
     }
 
     // Order endpoints
