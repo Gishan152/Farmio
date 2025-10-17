@@ -632,15 +632,15 @@ const WasteListings = () => {
 	};
 
 	const handleStartCollection = (listingId) => {
-		const listing = listings.find((l) => l.id === listingId);
+		const listing = listingsResp.find((l) => l.id === listingId);
 
 		const startTask = () =>
 			new Promise((resolve) =>
 				setTimeout(() => {
-					setListings(
-						listings.map((listing) =>
+					setListingsResp(
+						listingsResp.map((listing) =>
 							listing.id === listingId
-								? { ...listing, status: "In Progress" }
+								? { ...listing, status: "IN_PROGRESS" }
 								: listing
 						)
 					);
@@ -656,15 +656,15 @@ const WasteListings = () => {
 	};
 
 	const handleCompleteCollection = (listingId) => {
-		const listing = listings.find((l) => l.id === listingId);
+		const listing = listingsResp.find((l) => l.id === listingId);
 
 		const completeTask = () =>
 			new Promise((resolve) =>
 				setTimeout(() => {
-					setListings(
-						listings.map((listing) =>
+					setListingsResp(
+						listingsResp.map((listing) =>
 							listing.id === listingId
-								? { ...listing, status: "Completed" }
+								? { ...listing, status: "COMPLETED" }
 								: listing
 						)
 					);
@@ -680,7 +680,7 @@ const WasteListings = () => {
 	};
 
 	const handleSave = (listingId) => {
-		const listing = listings.find((l) => l.id === listingId);
+		const listing = listingsResp.find((l) => l.id === listingId);
 		toast.success(
 			`${listing?.wasteType || "Listing"} saved to your favorites!`
 		);
@@ -688,29 +688,33 @@ const WasteListings = () => {
 	};
 
 	const handleContactFarmer = (listing) => {
-		toast.success(`Contact information sent for ${listing.farmer}`);
+		toast.success(`Contact information sent for ${listing.requester?.name || listing.farmer}`);
 		// Implementation for contacting farmer
 	};
 
-	const filteredListings = listings.filter((listing) => {
+	const filteredListings = listingsResp.filter((listing) => {
+		// Normalize status for comparison (handle "ACCEPTED", "IN_PROGRESS", etc.)
+		const normalizedStatus = filters.status === "In Progress" ? "IN_PROGRESS" : 
+								  filters.status === "Accepted" ? "ACCEPTED" :
+								  filters.status === "Completed" ? "COMPLETED" :
+								  filters.status;
+
 		return (
 			(filters.wasteType === "" ||
 				listing.wasteType
-					.toLowerCase()
+					?.toLowerCase()
 					.includes(filters.wasteType.toLowerCase())) &&
 			(filters.location === "" ||
-				listing.location
-					.toLowerCase()
+				listing.requester?.location
+					?.toLowerCase()
 					.includes(filters.location.toLowerCase())) &&
 			(filters.status === "" ||
 				filters.status === "All" ||
-				listing.status === filters.status) &&
+				listing.status === normalizedStatus) &&
 			(filters.minQuantity === "" ||
-				parseInt(listing.quantity.replace(/[^\d]/g, "")) >=
-					parseInt(filters.minQuantity || 0)) &&
+				(listing.quantity || 0) >= parseInt(filters.minQuantity || 0)) &&
 			(filters.maxPrice === "" ||
-				parseFloat(listing.pricePerKg.replace("$", "")) <=
-					parseFloat(filters.maxPrice || 999))
+				(listing.pricePerUnit || 0) <= parseFloat(filters.maxPrice || 999))
 		);
 	});
 	return (
@@ -740,7 +744,7 @@ const WasteListings = () => {
 							<NumberFlow
 								value={
 									filteredListings.filter(
-										(l) => l.status === "Accepted"
+										(l) => l.status === "ACCEPTED"
 									).length
 								}
 							/>
@@ -757,14 +761,15 @@ const WasteListings = () => {
 						<p className="text-lg font-bold text-gray-900">
 							<NumberFlow
 								value={filteredListings.reduce(
-									(total, listing) =>
-										total +
-										parseInt(
-											listing.quantity.replace(
-												/[^\d]/g,
-												""
-											)
-										),
+									(total, listing) => {
+										const quantity = listing.quantity || 0;
+										const unit = listing.unit?.toUpperCase();
+										// Convert to KG for consistency
+										if (unit === "TON" || unit === "TONS") {
+											return total + (quantity * 1000);
+										}
+										return total + quantity;
+									},
 									0
 								)}
 								suffix=" kg"
@@ -777,7 +782,7 @@ const WasteListings = () => {
 					<DollarSign className="h-7 w-7 text-yellow-500 mr-3 z-10" />
 					<div className="z-10">
 						<p className="text-xs font-medium text-gray-500">
-							Avg Price/kg
+							Avg Price/{filteredListings[0]?.unit?.toLowerCase() || "kg"}
 						</p>
 						<p className="text-lg font-bold text-gray-900">
 							$
@@ -789,12 +794,7 @@ const WasteListings = () => {
 													filteredListings.reduce(
 														(total, listing) =>
 															total +
-															parseFloat(
-																listing.pricePerKg.replace(
-																	"$",
-																	""
-																)
-															),
+															(listing.pricePerUnit || 0),
 														0
 													) / filteredListings.length
 												).toFixed(2)
@@ -817,10 +817,7 @@ const WasteListings = () => {
 							<NumberFlow
 								value={filteredListings.reduce(
 									(total, listing) =>
-										total +
-										parseFloat(
-											listing.totalValue.replace("$", "")
-										),
+										total + (listing.totalPrice || 0),
 									0
 								)}
 							/>
@@ -1059,145 +1056,7 @@ const WasteListings = () => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{/* {filteredListings.map((listing) => (
-							<TableRow key={listing.id}>
-								<TableCell>
-									<div>
-										<div className="font-medium text-gray-900 dark:text-gray-100">
-											{listing.wasteType}
-										</div>
-										<div className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs">
-											{listing.description.length > 30
-												? listing.description.substring(
-														0,
-														40
-												  ) + "..."
-												: listing.description}
-										</div>
-									</div>
-								</TableCell>
-								<TableCell>
-									<div>
-										<div className="font-medium text-gray-900 dark:text-gray-100">
-											{listing.farmer}
-										</div>
-										<div className="text-sm text-gray-500 dark:text-gray-400">
-											{listing.location}
-										</div>
-										<div className="text-xs text-yellow-600 flex items-center mt-1">
-											⭐ {listing.farmRating}/5
-										</div>
-									</div>
-								</TableCell>
-								<TableCell>
-									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{listing.quantity}
-									</div>
-									<div className="text-sm text-gray-500 dark:text-gray-400">
-										{listing.pickupWindow}
-									</div>
-								</TableCell>
-								<TableCell>
-									<div>
-										<div className="font-medium text-gray-900 dark:text-gray-100">
-											{listing.pricePerKg}/kg
-										</div>
-										<div className="text-sm font-semibold text-green-600">
-											{listing.totalValue} total
-										</div>
-									</div>
-								</TableCell>
-								<TableCell>
-									<div className="text-sm text-gray-900 dark:text-gray-100">
-										<div>
-											Available:{" "}
-											{new Date(
-												listing.availableDate
-											).toLocaleDateString()}
-										</div>
-										<div className="text-gray-500 dark:text-gray-400">
-											Expires:{" "}
-											{new Date(
-												listing.expiryDate
-											).toLocaleDateString()}
-										</div>
-									</div>
-								</TableCell>
-								<TableCell>
-									<Badge
-										className={`${getStatusBadge(
-											listing.status
-										)} leading-normal rounded-full`}
-										variant="outline"
-									>
-										{listing.status}
-									</Badge>
-								</TableCell>
-								<TableCell className="text-right">
-									<div className="flex justify-end space-x-2">
-										<DropdownMenu>
-											<DropdownMenuTrigger>
-												<Button
-													variant="outline"
-													className="cursor-pointer"
-												>
-													<HiDotsVertical />
-												</Button>
-											</DropdownMenuTrigger>
-											<DropdownMenuContent>
-												<DropdownMenuItem
-													onClick={() =>
-														handleSave(listing.id)
-													}
-												>
-													Save
-												</DropdownMenuItem>
-												<DropdownMenuItem
-													onClick={() =>
-														handleContactFarmer(
-															listing
-														)
-													}
-												>
-													Contact Farmer
-												</DropdownMenuItem>
-												{listing.status ===
-													"Accepted" && (
-													<DropdownMenuItem
-														onClick={() =>
-															handleStartCollection(
-																listing.id
-															)
-														}
-													>
-														Start Collection
-													</DropdownMenuItem>
-												)}
-												{listing.status ===
-													"In Progress" && (
-													<DropdownMenuItem
-														onClick={() =>
-															handleCompleteCollection(
-																listing.id
-															)
-														}
-													>
-														Complete Collection
-													</DropdownMenuItem>
-												)}
-												{listing.status ===
-													"Completed" && (
-													<DropdownMenuItem>
-														View Report
-													</DropdownMenuItem>
-												)}
-											</DropdownMenuContent>
-										</DropdownMenu>
-									</div>
-								</TableCell>
-							</TableRow>
-						))} */}
-						{listingsResp.map((listing) => (
+						{filteredListings.map((listing) => (
 							<TableRow key={listing.id}>
 								{/* Waste Details */}
 								<TableCell>
