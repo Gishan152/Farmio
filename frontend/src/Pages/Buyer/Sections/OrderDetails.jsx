@@ -42,11 +42,11 @@ export default function OrderDetails() {
     const checkPaymentStatus = async () => {
         try {
             if(order && order.status === "PENDING"){
-                // const res = await api.get(`/api/order/payment-status/${orderId}`);
-                // console.log('payment status response : ', res.data);
-                // if (res.data && res.data.status === true) {
-                //     updateOrder(orderId, { status: "PROCESSING" });
-                // }
+                const res = await api.get(`/api/order/payment-status/${orderId}`);
+                console.log('payment status response : ', res.data);
+                if (res.data && res.data.status === true) {
+                    updateOrder(orderId, { status: "PROCESSING" });
+                }
             }
         } catch (err) {
             console.error("Failed to check payment status:", err);
@@ -96,7 +96,7 @@ export default function OrderDetails() {
                     merchant_id: res.data.merchantId,
                     return_url: `http://localhost:5173/buyer/orders/${orderId}`, // Hardcoded
                     cancel_url: `http://localhost:5173/buyer/orders/${orderId}`, // Hardcoded
-                    notify_url: "https://wfbdh-61-245-171-3.a.free.pinggy.link/api/payment/payhere/notify", // Hardcoded
+                    notify_url: "https://nrvzmq9j-8080.asse.devtunnels.ms/api/payment/payhere/notify", // Hardcoded
                     first_name: res.data.firstName,
                     last_name: res.data.lastName,
                     email: res.data.email,
