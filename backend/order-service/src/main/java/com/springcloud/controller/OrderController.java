@@ -167,7 +167,7 @@ public class OrderController {
                 // If payment is completed, update the order status to PROCESSING
                 try {
                     Long orderId = Long.valueOf(reference); // assuming reference is orderId
-                    orderService.markPaymentCompleted(orderId);
+                    // orderService.markPaymentCompleted(orderId);
                 } catch (Exception ex) {
                     // Optionally log or handle error
                 }

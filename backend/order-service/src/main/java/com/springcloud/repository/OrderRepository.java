@@ -16,4 +16,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     
     // Find order by payment ID (reference)
     Optional<Order> findByPaymentId(String paymentId);
+    
+    // Find order by payment ID (reference)
+    Optional<Order> findByOrderId(Long paymentId);
 }

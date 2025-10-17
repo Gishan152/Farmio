@@ -24,7 +24,7 @@ public class PaymentMessageListener {
             System.out.println("Received payment confirmation for reference: " + message.reference());
             
             // Find the order by payment ID (reference)
-            Optional<Order> optionalOrder = orderRepository.findByPaymentId(message.reference());
+            Optional<Order> optionalOrder = orderRepository.findByOrderId(Long.valueOf(message.reference()));
             
             if (optionalOrder.isPresent()) {
                 Order order = optionalOrder.get();
