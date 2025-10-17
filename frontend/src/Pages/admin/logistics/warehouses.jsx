@@ -25,7 +25,6 @@ const LocationIcon = () => (
 );
 
 const WarehouseManagement = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
@@ -185,14 +184,9 @@ const WarehouseManagement = () => {
     }
   ];
 
-  // Simulate loading
+  // Initialize data immediately without loading delay
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setFilteredData(warehouses);
-    }, 1000);
-    return () => clearTimeout(timer);
+    setFilteredData(warehouses);
   }, []);
 
   // Handle search
@@ -460,7 +454,6 @@ const WarehouseManagement = () => {
           subtitle="All locations"
           icon={<WarehouseIcon />}
           color="blue"
-          isLoading={isLoading}
         />
         <StatCard 
           title="Total Capacity"
@@ -468,7 +461,6 @@ const WarehouseManagement = () => {
           subtitle="Combined storage"
           icon={<WarehouseIcon />}
           color="green"
-          isLoading={isLoading}
         />
         <StatCard 
           title="Average Utilization"
@@ -476,7 +468,6 @@ const WarehouseManagement = () => {
           subtitle="Across all warehouses"
           icon={<WarehouseIcon />}
           color="purple"
-          isLoading={isLoading}
         />
         <StatCard 
           title="Cold Storage"
@@ -484,7 +475,6 @@ const WarehouseManagement = () => {
           subtitle="Refrigerated & freezer"
           icon={<WarehouseIcon />}
           color="cyan"
-          isLoading={isLoading}
         />
       </div>
 
@@ -567,7 +557,6 @@ const WarehouseManagement = () => {
         noPadding
       >
         <Table
-          isLoading={isLoading}
           columns={columns}
           data={filteredData}
           emptyMessage="No warehouses found matching your criteria."
