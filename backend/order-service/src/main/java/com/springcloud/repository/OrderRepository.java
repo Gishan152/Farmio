@@ -3,6 +3,7 @@ package com.springcloud.repository;
 import com.springcloud.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     // Find all orders for a specific farmer
@@ -12,4 +13,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // Find all orders by payment status
     List<Order> findByStatus(String status);
+    
+    // Find order by payment ID (reference)
+    Optional<Order> findByPaymentId(String paymentId);
 }

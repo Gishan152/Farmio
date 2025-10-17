@@ -28,6 +28,9 @@ public class PaymentService {
     
     @Autowired
     private BankDetailsRepository bankDetailsRepository;
+    
+    @Autowired
+    private PaymentMessagePublisher paymentMessagePublisher;
 
     // Get Wallet Info with Payment History
     public WalletInfo getWalletInfo(Long userId) {
@@ -129,6 +132,18 @@ public class PaymentService {
                 );
             }
             walletRepository.save(payeeWallet);
+            
+            // Publish payment confirmation message to RabbitMQ
+            PaymentConfirmedMessage confirmationMessage = new PaymentConfirmedMessage(
+                payment.getReference(),
+                payment.getAmount(),
+                payment.getId().toString(),
+                newStatus.toString(),
+                LocalDateTime.now(),
+                payment.getPayerId(),
+                payment.getPayeeId()
+            );
+            paymentMessagePublisher.publishPaymentConfirmed(confirmationMessage);
         }
     }
     
