@@ -45,8 +45,7 @@ public interface WasteAgentRepository extends JpaRepository<WasteAgent, Long> {
     
     // Find waste agents within service radius of a city
     @Query("SELECT w FROM WasteAgent w WHERE w.isActive = true AND w.isVerified = true AND " +
-           "(w.city = :city OR w.serviceRadius >= " +
-           "(SELECT 50 FROM WasteAgent wa WHERE wa.city = :city LIMIT 1))")
+           "(w.city = :city OR w.serviceRadius >= 50)")
     List<WasteAgent> findWasteAgentsServingCity(@Param("city") String city);
     
     // Find top rated waste agents
