@@ -25,6 +25,10 @@ const menu = [
     label: 'Available Loads', 
     to: 'availableLoads', 
     icon: TruckIcon 
+  },{
+    label: 'Assigned Loads', 
+    to: 'assignedLoads/all', 
+    icon: ClipboardDocumentCheckIcon
   },
   { 
     label: 'My Deliveries', 
