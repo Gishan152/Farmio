@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/waste-listings")
-@CrossOrigin(origins = "http://localhost:5173")
+@RequestMapping("/api/waste/listings")
+//@CrossOrigin(origins = "http://localhost:5173")
 public class WasteListingController {
 
     private final WasteListingService wasteListingService;
