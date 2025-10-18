@@ -7,6 +7,7 @@ import java.time.LocalDate;
 
 public class RequestDTO {
     private Long id;
+
     @NotBlank(message = "Requester name is required")
     private String requesterName;
 
@@ -18,6 +19,10 @@ public class RequestDTO {
     private BigDecimal farmRating;
 
     private String requesterAvatar;
+
+    // optional notes/description
+    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
+    private String description;
 
     @NotBlank(message = "Waste type is required")
     private String wasteType;
@@ -41,10 +46,11 @@ public class RequestDTO {
     @NotNull(message = "Request date is required")
     private LocalDate requestDate;
 
-    // --- constructor ---
+    // constructor
     public RequestDTO(Long id, String requesterName, String requesterLocation, BigDecimal farmRating,
                       String requesterAvatar, String wasteType, String quantity,
-                      String preferredPickupTime, BigDecimal offeredPrice, BigDecimal totalOffer,
+                      String preferredPickupTime,
+                      BigDecimal offeredPrice, BigDecimal totalOffer,
                       String status, LocalDate requestDate) {
         this.id = id;
         this.requesterName = requesterName;
@@ -52,6 +58,7 @@ public class RequestDTO {
         this.farmRating = farmRating;
         this.requesterAvatar = requesterAvatar;
         this.wasteType = wasteType;
+        this.description = description;
         this.quantity = quantity;
         this.preferredPickupTime = preferredPickupTime;
         this.offeredPrice = offeredPrice;
@@ -60,7 +67,7 @@ public class RequestDTO {
         this.requestDate = requestDate;
     }
 
-    // --- getters only (immutable DTO) ---
+    // getters
     public Long getId() { return id; }
     public String getRequesterName() { return requesterName; }
     public String getRequesterLocation() { return requesterLocation; }
@@ -69,6 +76,7 @@ public class RequestDTO {
     public String getWasteType() { return wasteType; }
     public String getQuantity() { return quantity; }
     public String getPreferredPickupTime() { return preferredPickupTime; }
+    public String getDescription() { return description; }
     public BigDecimal getOfferedPrice() { return offeredPrice; }
     public BigDecimal getTotalOffer() { return totalOffer; }
     public String getStatus() { return status; }

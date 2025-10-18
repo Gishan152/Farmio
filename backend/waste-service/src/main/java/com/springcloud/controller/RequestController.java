@@ -6,6 +6,7 @@ import com.springcloud.dto.RequestCreateDTO;
 import com.springcloud.mapper.RequestMapper;
 import com.springcloud.mapper.WasteListingMapper;
 import com.springcloud.service.RequestService;
+import com.springcloud.client.AuthClient;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,11 +22,13 @@ public class RequestController {
     private final RequestService requestService;
     private final RequestMapper requestMapper;
     private final WasteListingMapper wasteListingMapper;
+    private final AuthClient authClient;
 
-    public RequestController(RequestService requestService, RequestMapper requestMapper, WasteListingMapper wasteListingMapper) {
+    public RequestController(RequestService requestService, RequestMapper requestMapper, WasteListingMapper wasteListingMapper, AuthClient authClient) {
         this.requestService = requestService;
         this.requestMapper = requestMapper;
         this.wasteListingMapper = wasteListingMapper;
+        this.authClient = authClient;
     }
 
     // Get all requests
@@ -71,8 +74,16 @@ public class RequestController {
 
     // Create a new request (CreateDTO → Entity → DTO)
     @PostMapping
-    public RequestDTO createRequest(@Valid @RequestBody RequestCreateDTO dto) {
+    public RequestDTO createRequest(@Valid @RequestBody RequestCreateDTO dto,
+                                    @RequestHeader(value = "X-User-Name", required = false) String username) {
+        if (username == null || username.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "X-User-Name header is required");
+        }
+        var user = authClient.getUser(new AuthClient.UserRequest(username));
+
         var entity = requestMapper.fromCreateDTO(dto);
+        // Override requesterName with resolved username from auth-service
+        entity.setRequesterName(user.username());
         var saved = requestService.createRequestFromCreateDTO(entity);
         return requestMapper.toDTO(saved);
     }

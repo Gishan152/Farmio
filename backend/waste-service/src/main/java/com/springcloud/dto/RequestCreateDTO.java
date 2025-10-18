@@ -9,7 +9,7 @@ import java.math.BigDecimal;
  */
 public class RequestCreateDTO {
 
-    @NotBlank(message = "Requester name is required")
+    // requesterName is resolved by backend through auth-service; optional here
     private String requesterName;
 
     @NotBlank(message = "Requester location is required")
