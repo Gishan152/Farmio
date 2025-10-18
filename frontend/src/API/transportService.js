@@ -1,12 +1,4 @@
-import axios from "axios";
-import { get, update } from "lodash";
-
-const base = import.meta.env.VITE_API_GATEWAY_URL || 'http://localhost:8080';
-
-const api = axios.create({
-  baseURL: base,
-  timeout: 10000,
-});
+import api from './client';
 
 const transportService = {
   // ---- ROUTES ----
