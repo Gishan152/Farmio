@@ -10,7 +10,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { update } from 'lodash';
-import transportService from '../../../API/transportService';
+import api from '../../../API/client';
 
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, itemType }) => {
   if (!isOpen) return null;

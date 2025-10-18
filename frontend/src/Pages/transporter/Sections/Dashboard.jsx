@@ -9,6 +9,7 @@ import {
   CheckBadgeIcon,
   ExclamationCircleIcon
 } from '@heroicons/react/24/outline';
+import api from '../../../API/client';
 
 export default function Dashboard() {
   // Sample data

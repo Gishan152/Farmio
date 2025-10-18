@@ -11,7 +11,7 @@ const mockLoads = [
     routeMatch: true,
     pickupTime: '2023-05-15 08:30',
     estimatedDelivery: '2023-05-15 14:00',
-    produce: 'Vegetables'
+    product: 'Vegetables'
   },
   {
     id: 'LD-1061',
@@ -22,7 +22,7 @@ const mockLoads = [
     routeMatch: false,
     pickupTime: '2023-05-16 09:15',
     estimatedDelivery: '2023-05-16 16:30',
-    produce: 'Fruits'
+    product: 'Fruits'
   },
 ];
 
@@ -147,8 +147,8 @@ export default function AvailableLoads() {
 
                     {/* Produce */}
                     <div className="space-y-2">
-                      <h3 className="text-sm font-medium text-gray-500">Produce</h3>
-                      <p className="font-medium">{load.produce}</p>
+                      <h3 className="text-sm font-medium text-gray-500">Product</h3>
+                      <p className="font-medium">{load.product}</p>
                     </div>
 
                     {/* Schedule */}
