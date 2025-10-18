@@ -11,6 +11,7 @@ public interface WasteListingMapper {
     @Mapping(target = "requesterName", expression = "java(entity.getRequester() != null ? entity.getRequester().getName() : null)")
     @Mapping(target = "requesterLocation", expression = "java(entity.getRequester() != null ? entity.getRequester().getLocation() : null)")
     @Mapping(target = "requesterRating", expression = "java(entity.getRequester() != null ? entity.getRequester().getRating() : null)")
+    @Mapping(target = "acceptedBy", source = "acceptedBy")
     WasteListingDTO toDTO(WasteListing entity);
 
     @Mapping(target = "requester", ignore = true)

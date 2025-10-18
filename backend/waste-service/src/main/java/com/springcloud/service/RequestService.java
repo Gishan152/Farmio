@@ -1,18 +1,31 @@
 package com.springcloud.service;
 
 import com.springcloud.model.Request;
+import com.springcloud.model.Requester;
+import com.springcloud.model.WasteListing;
 import com.springcloud.repository.RequestRepository;
+import com.springcloud.repository.RequesterRepository;
+import com.springcloud.repository.WasteListingRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public class RequestService {
 
     private final RequestRepository requestRepository;
+    private final WasteListingRepository wasteListingRepository;
+    private final RequesterRepository requesterRepository;
 
-    public RequestService(RequestRepository requestRepository) {
+    public RequestService(RequestRepository requestRepository,
+                          WasteListingRepository wasteListingRepository,
+                          RequesterRepository requesterRepository) {
         this.requestRepository = requestRepository;
+        this.wasteListingRepository = wasteListingRepository;
+        this.requesterRepository = requesterRepository;
     }
 
     // Get all requests
@@ -49,4 +62,76 @@ public class RequestService {
         requestRepository.deleteById(id);
     }
 
+    // ✅ Accept a request and create a WasteListing
+    @Transactional
+    public WasteListing acceptRequest(Long requestId, Long agentId) {
+        return acceptRequest(requestId, agentId, null);
+    }
+
+    // Overload supporting description from related listing
+    @Transactional
+    public WasteListing acceptRequest(Long requestId, Long agentId, Long relatedListingId) {
+        Request request = getRequestById(requestId);
+
+        if (!"Pending".equalsIgnoreCase(request.getStatus())) {
+            throw new IllegalStateException("Request already processed");
+        }
+
+        // Parse quantity string like "280 kg"
+        BigDecimal quantity = parseQuantity(request.getQuantity());
+        WasteListing.Unit unit = extractUnit(request.getQuantity());
+
+        // Create farmer requester entity from request data
+        Requester farmer = Requester.builder()
+                .name(request.getRequesterName())
+                .location(request.getRequesterLocation())
+                .rating(request.getFarmRating() != null ? request.getFarmRating().doubleValue() : null)
+                .role(Requester.Role.FARMER)
+                .build();
+        requesterRepository.save(farmer);
+
+        // Determine description: from related listing when provided, else fallback
+        String description = null;
+        if (relatedListingId != null) {
+            description = wasteListingRepository.findById(relatedListingId)
+                    .map(WasteListing::getDescription)
+                    .orElse(null);
+        }
+        if (description == null || description.isBlank()) {
+            description = "From request " + request.getId();
+        }
+
+        WasteListing listing = WasteListing.builder()
+                .wasteType(request.getWasteType())
+                .description(description)
+                .quantity(quantity)
+                .unit(unit)
+                .timeSlot(request.getPreferredPickupTime())
+                .pricePerUnit(request.getOfferedPrice())
+                .availableFrom(LocalDate.now())
+                .expiresOn(LocalDate.now().plusDays(7)) // business rule
+                .status("ACCEPTED")
+                .requester(farmer)   // farmer info
+                .acceptedBy(agentId) // warehouse owner ID (no FK constraint)
+                .build();
+
+        wasteListingRepository.save(listing);
+
+        request.setStatus("Accepted");
+        requestRepository.save(request);
+
+        return listing;
+    }
+
+    private BigDecimal parseQuantity(String quantityStr) {
+        if (quantityStr == null) return BigDecimal.ZERO;
+        String[] parts = quantityStr.split(" ");
+        return new BigDecimal(parts[0]);
+    }
+
+    private WasteListing.Unit extractUnit(String quantityStr) {
+        if (quantityStr == null) return WasteListing.Unit.KG;
+        String[] parts = quantityStr.split(" ");
+        return WasteListing.Unit.valueOf(parts[1].toUpperCase());
+    }
 }

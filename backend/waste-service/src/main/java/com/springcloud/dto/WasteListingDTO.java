@@ -26,6 +26,8 @@ public class WasteListingDTO {
     private String requesterLocation;
     private Double requesterRating;
 
+    private Long acceptedBy;
+
     // Explicit accessors for MapStruct
     public String getRequesterName() { return requesterName; }
     public void setRequesterName(String requesterName) { this.requesterName = requesterName; }

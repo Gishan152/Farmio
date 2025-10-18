@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
 	Table,
 	TableBody,
@@ -229,14 +229,21 @@ const Requests = () => {
 	});
 
 	const handleRequestAction = (requestId, action) => {
-		const newStatus = action === "accept" ? "Accepted" : "Rejected";
-		const actionText = action === "accept" ? "accepted" : "rejected";
+		const actionText = action === "accept" ? "Accepted" : "Rejected";
+
+		// TODO: Replace hardcoded agentId with user.id from UserContext when implemented
+		const agentId = 19;
 
 		// Show loading toast
 		const loadingToast = toast.loading(`${actionText.charAt(0).toUpperCase() + actionText.slice(1)}ing request...`);
 
+		// Determine the endpoint based on action
+		const endpoint = action === "accept" 
+			? `http://localhost:8088/requests/${requestId}/accept?agentId=${agentId}`
+			: `http://localhost:8088/requests/${requestId}/reject`;
+
 		// Call backend API to update status
-		fetch(`http://localhost:8088/requests/${requestId}/status?status=${newStatus}`, {
+		fetch(endpoint, {
 			method: "PUT",
 			headers: {
 				"Content-Type": "application/json",

@@ -1,7 +1,9 @@
 package com.springcloud.controller;
 
 import com.springcloud.dto.RequestDTO;
+import com.springcloud.dto.WasteListingDTO;
 import com.springcloud.mapper.RequestMapper;
+import com.springcloud.mapper.WasteListingMapper;
 import com.springcloud.service.RequestService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -15,10 +17,12 @@ public class RequestController {
 
     private final RequestService requestService;
     private final RequestMapper requestMapper;
+    private final WasteListingMapper wasteListingMapper;
 
-    public RequestController(RequestService requestService, RequestMapper requestMapper) {
+    public RequestController(RequestService requestService, RequestMapper requestMapper, WasteListingMapper wasteListingMapper) {
         this.requestService = requestService;
         this.requestMapper = requestMapper;
+        this.wasteListingMapper = wasteListingMapper;
     }
 
     // Get all requests
@@ -67,10 +71,19 @@ public class RequestController {
         return requestMapper.toDTO(saved);
     }
 
-
     // Delete a request
     @DeleteMapping("/{id}")
     public void deleteRequest(@PathVariable Long id) {
         requestService.deleteRequest(id);
+    }
+
+    @PutMapping("/{id}/accept")
+    public WasteListingDTO acceptRequest(
+            @PathVariable Long id,
+            @RequestParam Long agentId,
+            @RequestParam(required = false) Long relatedListingId
+    ) {
+        var listing = requestService.acceptRequest(id, agentId, relatedListingId);
+        return wasteListingMapper.toDTO(listing);
     }
 }
