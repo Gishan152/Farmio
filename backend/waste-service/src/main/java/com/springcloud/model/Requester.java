@@ -31,6 +31,8 @@ public class Requester {
     @Column(name = "updated_at", insertable = false)
     private java.time.LocalDateTime updatedAt;
 
+    private String accountNumber;
+
     public enum Role {
         FARMER, WAREHOUSE_OWNER
     }

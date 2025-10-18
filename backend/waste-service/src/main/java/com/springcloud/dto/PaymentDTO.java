@@ -23,4 +23,13 @@ public class PaymentDTO {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // ✅ Extra fields for frontend display
+    private LocalDateTime paymentDate;   // map from createdAt
+    private String farmer;               // requester name
+    private String farmerAccount;        // requester account number or identifier
+    private String wasteType;            // from WasteListing
+    private BigDecimal rate;
+
+// alias for pricePerUnit
 }

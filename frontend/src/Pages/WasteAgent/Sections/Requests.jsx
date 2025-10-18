@@ -286,7 +286,6 @@ const Requests = () => {
 		const styles = {
 			Pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
 			Accepted: "bg-green-100 text-green-800 border-green-200",
-			Rejected: "bg-red-100 text-red-800 border-red-200",
 		};
 		return styles[status] || "bg-gray-100 text-gray-800 border-gray-200";
 	};
@@ -330,9 +329,6 @@ const Requests = () => {
 	const acceptedCount = requests.filter(
 		(r) => r.status === "Accepted"
 	).length;
-	const rejectedCount = requests.filter(
-		(r) => r.status === "Rejected"
-	).length;
 
 	return (
 		<div className="space-y-6 mt-6">
@@ -350,7 +346,7 @@ const Requests = () => {
 			</div>
 
 			{/* Summary Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
 					<div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
 					<Check className="h-7 w-7 text-green-500 mr-3 z-10" />
@@ -372,18 +368,6 @@ const Requests = () => {
 						</p>
 						<p className="text-lg font-bold text-gray-900">
 							<NumberFlow value={pendingCount} />
-						</p>
-					</div>
-				</div>
-				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-					<div className="absolute left-0 top-0 h-full w-1 bg-red-500 rounded-l-lg" />
-					<X className="h-7 w-7 text-red-500 mr-3 z-10" />
-					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">
-							Rejected
-						</p>
-						<p className="text-lg font-bold text-gray-900">
-							<NumberFlow value={rejectedCount} />
 						</p>
 					</div>
 				</div>
@@ -525,9 +509,6 @@ const Requests = () => {
 									<SelectItem value="Accepted">
 										Accepted
 									</SelectItem>
-									<SelectItem value="Rejected">
-										Rejected
-									</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
@@ -564,7 +545,7 @@ const Requests = () => {
 							<TableHead>Offer</TableHead>
 							<TableHead>Status</TableHead>
 							<TableHead>Request Date</TableHead>
-							<TableHead className="text-right">
+							<TableHead className="text-center">
 								Actions
 							</TableHead>
 						</TableRow>
@@ -647,7 +628,7 @@ const Requests = () => {
 										<div className="flex justify-end gap-2">
 											{request.status === "Pending" && (
 												<>
-													<Button
+													{/* <Button
 														variant="outline"
 														size="sm"
 														onClick={() =>
@@ -660,7 +641,7 @@ const Requests = () => {
 													>
 														<X className="h-4 w-4" />
 														Reject
-													</Button>
+													</Button> */}
 													<Button
 														size="sm"
 														onClick={() =>

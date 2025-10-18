@@ -22,10 +22,7 @@ public class PaymentController {
 
     @GetMapping
     public List<PaymentDTO> getAllPayments() {
-        return paymentService.getAllPayments()
-                .stream()
-                .map(paymentMapper::toDTO)
-                .toList();
+        return paymentService.getAllPaymentDTOs();
     }
 
     @GetMapping("/{id}")
