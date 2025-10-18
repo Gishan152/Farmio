@@ -8,7 +8,7 @@ import {
   CameraIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
-import transportService from '../../../API/transportService';
+import api from '../../../API/client';
 
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) return null;
