@@ -69,4 +69,16 @@ public class Order {
         items.remove(item);
         item.setOrder(null);
     }
+
+    public Long getId() {
+        return this.orderId;
+    }
+
+    public Double getTotalAmount() {
+        return this.total != null ? this.total.doubleValue() : 0.0;
+    }
+
+    public Long getSellerId() {
+        return this.farmerId;
+    }
 }

@@ -11,7 +11,8 @@ public class RouterValidator {
     private static final List<String> openEndpoints = Arrays.asList(
         "/auth/login", 
         "/auth/register",
-        "/api/analytics/admin/users", 
+        "/api/payment/payhere/notify",
+        "/api/analytics/admin/users",
         "/api/analytics/admin/users/count",
         "/api/analytics/admin/users/status-count",
         "/api/analytics/admin/users/by-status",
