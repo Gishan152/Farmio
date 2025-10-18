@@ -25,7 +25,7 @@ const menu = [
     {
         label: 'Warehouses',
         children: [
-            { label: 'Warehouses', to: 'warehouses/all' },
+            { label: 'Warehouses', to: 'warehouses' },
             { label: 'Reserved Storage Units', to: 'warehouses/reserved' },
         ],
     },
@@ -45,12 +45,23 @@ export default function Sidebar() {
     return (
         <aside className="w-64 bg-white border-r border-gray-200 p-6 flex flex-col justify-between min-h-screen">
             <div>
-                <div className="flex items-center mb-8">
-                    <div className="w-10 h-10 bg-green-500 rounded flex items-center justify-center text-white font-bold text-xl mr-3">F</div>
-                    <span className="font-bold text-lg">Farmio</span>
+               <div className="flex items-center gap-6 mb-7">
+
+                        {/* 1. The Logo Circle */}
+                        {/* We removed the text from inside for a cleaner look */}
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-md">
+                            {/* An initial like 'F' is a common and clean design choice */}
+                            <span className="text-white text-lg font-bold">F</span>
+                        </div>
+
+                        {/* 2. The Brand Name */}
+                        <div className="text-2xl font-extrabold text-gray-800 tracking-tight">
+                            farmio.
+                        </div> 
+
                 </div>
-             <Link  to="/farmer/profile"  className="flex items-center gap-4 text-gray-700 hover:text-green-500 transition text-sm"  aria-label="User Profile"
-                >
+               <Link  to="/farmer/profile"  className="flex items-center gap-4 text-gray-700 hover:text-green-500 transition text-sm"  aria-label="User Profile"
+                >  
                 <div className="flex items-center mb-8">
                     <img src={Profilepicture} alt="profile" className="w-10 h-10 rounded-full mr-3" />
                     <div>
