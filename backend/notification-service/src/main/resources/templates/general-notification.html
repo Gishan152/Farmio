@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${notificationTitle}">Notification</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background-color: #f8f9fa; 
+            color: #333;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 12px; 
+            padding: 40px 30px; 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header { 
+            text-align: center; 
+            border-bottom: 3px solid #4CAF50; 
+            padding-bottom: 20px; 
+            margin-bottom: 30px; 
+        }
+        .logo { 
+            font-size: 28px; 
+            font-weight: bold; 
+            color: #4CAF50; 
+            margin-bottom: 5px;
+        }
+        .tagline {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+        .content { 
+            line-height: 1.7; 
+            color: #333; 
+            font-size: 16px;
+        }
+        .notification-title {
+            color: #2c3e50;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .message-content {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #4CAF50;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .button { 
+            display: inline-block; 
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white !important; 
+            padding: 14px 28px; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            margin: 20px 0;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .button:hover {
+            background: linear-gradient(135deg, #45a049, #3d8b40);
+            transform: translateY(-2px);
+        }
+        .footer { 
+            margin-top: 40px; 
+            padding-top: 20px; 
+            border-top: 1px solid #eee; 
+            font-size: 13px; 
+            color: #666; 
+            text-align: center;
+        }
+        .social-links {
+            margin: 15px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🌾 Farmio</div>
+            <p class="tagline">Your Agricultural Marketplace</p>
+        </div>
+        
+        <div class="content">
+            <h2 class="notification-title" th:text="${notificationTitle}">Notification Title</h2>
+            
+            <p>Hello <strong th:text="${userName}">User</strong>,</p>
+            
+            <div class="message-content">
+                <p th:text="${notificationMessage}">Notification message content here.</p>
+            </div>
+            
+            <div th:if="${actionUrl}" style="text-align: center;">
+                <a th:href="${actionUrl}" class="button">Take Action</a>
+            </div>
+            
+            <div th:if="${category == 'system'}" class="warning">
+                <strong>System Notice:</strong> This is an important system notification. Please read carefully.
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated message from Farmio. Please do not reply to this email.</p>
+            
+            <div class="social-links">
+                <a href="#">Help Center</a> |
+                <a href="#">Contact Support</a> |
+                <a href="#">Unsubscribe</a>
+            </div>
+            
+            <p>&copy; 2024 Farmio Agricultural Marketplace. All rights reserved.</p>
+            <p>Making agriculture accessible to everyone 🌱</p>
+        </div>
+    </div>
+</body>
+</html>
