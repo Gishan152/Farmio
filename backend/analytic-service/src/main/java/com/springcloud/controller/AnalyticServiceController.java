@@ -17,10 +17,13 @@ import com.springcloud.dto.UserDTO;
 import com.springcloud.dto.UserRequest;
 import com.springcloud.dto.OrderDTO;
 import com.springcloud.dto.ProductDTO;
+import com.springcloud.dto.WasteListingDTO;
+import com.springcloud.dto.WasteAgentDTO;
 import com.springcloud.service.UserAnalyticsService;
 import com.springcloud.service.OrderAnalyticsService;
 import com.springcloud.service.ProductAnalyticsService;
 import com.springcloud.service.ModeratorAnalyticsService;
+import com.springcloud.service.WasteAnalyticsService;
 import com.springcloud.dto.ModeratorDTO;
 
 @RestController
@@ -37,6 +40,9 @@ public class AnalyticServiceController {
     
     @Autowired
     private ModeratorAnalyticsService moderatorAnalyticsService;
+    
+    @Autowired
+    private WasteAnalyticsService wasteAnalyticsService;
 
     @GetMapping("/hello")
     public String hello() {
@@ -183,5 +189,55 @@ public class AnalyticServiceController {
     public ResponseEntity<Void> activateUser(@RequestBody UserRequest request) {
         userAnalyticsService.activateUser(request);
         return ResponseEntity.noContent().build();
+    }
+    
+    // Waste Management Endpoints
+    
+    @GetMapping("/admin/waste/listings")
+    public ResponseEntity<List<WasteListingDTO>> getAllWasteListingsForAdmin() {
+        List<WasteListingDTO> listings = wasteAnalyticsService.fetchAllWasteListings();
+        return ResponseEntity.ok(listings);
+    }
+    
+    @GetMapping("/admin/waste/agents")
+    public ResponseEntity<List<WasteAgentDTO>> getAllWasteAgentsForAdmin() {
+        List<WasteAgentDTO> agents = wasteAnalyticsService.fetchAllWasteAgents();
+        return ResponseEntity.ok(agents);
+    }
+    
+    @GetMapping("/admin/waste/listings/count")
+    public ResponseEntity<Long> getTotalWasteListingCount() {
+        long count = wasteAnalyticsService.getTotalWasteListingCount();
+        return ResponseEntity.ok(count);
+    }
+    
+    @GetMapping("/admin/waste/agents/count")
+    public ResponseEntity<Long> getTotalWasteAgentCount() {
+        long count = wasteAnalyticsService.getTotalWasteAgentCount();
+        return ResponseEntity.ok(count);
+    }
+    
+    @GetMapping("/admin/waste/listings/status-count")
+    public ResponseEntity<Map<String, Long>> getWasteListingCountByStatus() {
+        Map<String, Long> statusCounts = wasteAnalyticsService.getWasteListingCountByStatus();
+        return ResponseEntity.ok(statusCounts);
+    }
+    
+    @GetMapping("/admin/waste/listings/by-status")
+    public ResponseEntity<List<WasteListingDTO>> getWasteListingsByStatus(@RequestParam String status) {
+        List<WasteListingDTO> listings = wasteAnalyticsService.getWasteListingsByStatus(status);
+        return ResponseEntity.ok(listings);
+    }
+    
+    @GetMapping("/admin/waste/listings/type-count")
+    public ResponseEntity<Map<String, Long>> getWasteListingCountByType() {
+        Map<String, Long> typeCounts = wasteAnalyticsService.getWasteListingCountByType();
+        return ResponseEntity.ok(typeCounts);
+    }
+    
+    @GetMapping("/admin/waste/listings/by-type")
+    public ResponseEntity<List<WasteListingDTO>> getWasteListingsByType(@RequestParam String type) {
+        List<WasteListingDTO> listings = wasteAnalyticsService.getWasteListingsByType(type);
+        return ResponseEntity.ok(listings);
     }
 }

@@ -130,7 +130,9 @@ const Sidebar = ({ userRole = 'admin' }) => {
         submenu: [
           { name: 'Collection Points', path: '/admin/waste/collection' },
           { name: 'Processing', path: '/admin/waste/processing' },
-          { name: 'Recycling Stats', path: '/admin/waste/stats' }
+          { name: 'Recycling Stats', path: '/admin/waste/stats' },
+          { name: 'Waste Listings', path: '/admin/waste/listings' },
+          { name: 'Waste Agents', path: '/admin/waste/agents' }
         ]
       },
       { 

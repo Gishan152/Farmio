@@ -53,6 +53,12 @@ crop-listing:
   service:
     url: http://crop-listing-service:8087/api/products/admin/all # This is the endpoint that returns Product[]
 
+waste:
+  service:
+    url:
+      listings: http://waste-service:8095/waste-listings # This is the endpoint that returns WasteListingDTO[]
+      agents: http://waste-service:8095/waste-agents # This is the endpoint that returns WasteAgentDTO[]
+
 eureka:
   client:
     service-url:

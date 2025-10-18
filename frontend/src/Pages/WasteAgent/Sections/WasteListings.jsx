@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	Table,
 	TableBody,
@@ -22,13 +22,13 @@ import {
 } from "@/Components/WasteUI/select";
 import { Label } from "@/Components/WasteUI/label";
 import { HiDotsVertical } from "react-icons/hi";
-import { 
-	ChevronsUpDown, 
-	Check, 
-	CheckCircle, 
-	RotateCcw, 
-	DollarSign, 
-	Banknote 
+import {
+	ChevronsUpDown,
+	Check,
+	CheckCircle,
+	RotateCcw,
+	DollarSign,
+	Banknote,
 } from "lucide-react";
 import {
 	DropdownMenu,
@@ -79,7 +79,8 @@ const WasteListings = () => {
 			farmRating: 4.5,
 			contactNumber: "+94 71 234 5678",
 			acceptedDate: "2025-01-05",
-			additionalNotes: "Farm located 2km from main road. Easy truck access available."
+			additionalNotes:
+				"Farm located 2km from main road. Easy truck access available.",
 		},
 		{
 			id: 2,
@@ -98,7 +99,8 @@ const WasteListings = () => {
 			farmRating: 4.9,
 			contactNumber: "+94 75 456 7890",
 			acceptedDate: "2025-01-06",
-			additionalNotes: "Weekly recurring collection. Well-organized waste storage."
+			additionalNotes:
+				"Weekly recurring collection. Well-organized waste storage.",
 		},
 		{
 			id: 3,
@@ -109,7 +111,8 @@ const WasteListings = () => {
 			quantity: "420 kg",
 			pricePerKg: "$0.11",
 			totalValue: "$46.20",
-			description: "Fresh coconut husk and coir fiber from processing plant",
+			description:
+				"Fresh coconut husk and coir fiber from processing plant",
 			availableDate: "2025-01-10",
 			expiryDate: "2025-01-25",
 			pickupWindow: "Morning (7AM - 11AM)",
@@ -117,7 +120,8 @@ const WasteListings = () => {
 			farmRating: 4.7,
 			contactNumber: "+94 77 789 0123",
 			acceptedDate: "2025-01-07",
-			additionalNotes: "Large quantities available. Truck parking available on site."
+			additionalNotes:
+				"Large quantities available. Truck parking available on site.",
 		},
 		{
 			id: 4,
@@ -136,7 +140,7 @@ const WasteListings = () => {
 			farmRating: 4.3,
 			contactNumber: "+94 78 456 1234",
 			acceptedDate: "2025-01-08",
-			additionalNotes: "Organic farm. Regular monthly collection needed."
+			additionalNotes: "Organic farm. Regular monthly collection needed.",
 		},
 		{
 			id: 5,
@@ -155,7 +159,8 @@ const WasteListings = () => {
 			farmRating: 4.8,
 			contactNumber: "+94 72 345 6789",
 			acceptedDate: "2025-01-04",
-			additionalNotes: "High-quality bagasse. Consistent supplier with good storage facilities."
+			additionalNotes:
+				"High-quality bagasse. Consistent supplier with good storage facilities.",
 		},
 		{
 			id: 6,
@@ -174,7 +179,8 @@ const WasteListings = () => {
 			farmRating: 4.6,
 			contactNumber: "+94 76 123 4567",
 			acceptedDate: "2025-01-09",
-			additionalNotes: "Mill located near main highway. Easy access for large vehicles."
+			additionalNotes:
+				"Mill located near main highway. Easy access for large vehicles.",
 		},
 		{
 			id: 7,
@@ -185,7 +191,8 @@ const WasteListings = () => {
 			quantity: "180 kg",
 			pricePerKg: "$0.18",
 			totalValue: "$32.40",
-			description: "Mixed vegetable waste from carrot and cabbage farming",
+			description:
+				"Mixed vegetable waste from carrot and cabbage farming",
 			availableDate: "2025-01-14",
 			expiryDate: "2025-01-21",
 			pickupWindow: "Morning (9AM - 1PM)",
@@ -193,7 +200,8 @@ const WasteListings = () => {
 			farmRating: 4.4,
 			contactNumber: "+94 77 890 1234",
 			acceptedDate: "2025-01-10",
-			additionalNotes: "High-altitude farm. Quality organic waste suitable for composting."
+			additionalNotes:
+				"High-altitude farm. Quality organic waste suitable for composting.",
 		},
 		{
 			id: 8,
@@ -212,7 +220,8 @@ const WasteListings = () => {
 			farmRating: 4.2,
 			contactNumber: "+94 75 567 8901",
 			acceptedDate: "2025-01-11",
-			additionalNotes: "Rubber plantation with regular leaf fall. Seasonal collection available."
+			additionalNotes:
+				"Rubber plantation with regular leaf fall. Seasonal collection available.",
 		},
 		{
 			id: 9,
@@ -223,7 +232,8 @@ const WasteListings = () => {
 			quantity: "300 kg",
 			pricePerKg: "$0.15",
 			totalValue: "$45",
-			description: "Mango and papaya peels from fruit processing facility",
+			description:
+				"Mango and papaya peels from fruit processing facility",
 			availableDate: "2025-01-16",
 			expiryDate: "2025-01-23",
 			pickupWindow: "Morning (8AM - 12PM)",
@@ -231,7 +241,8 @@ const WasteListings = () => {
 			farmRating: 4.9,
 			contactNumber: "+94 78 234 5678",
 			acceptedDate: "2025-01-06",
-			additionalNotes: "Processing facility with consistent waste generation. High nutritional value."
+			additionalNotes:
+				"Processing facility with consistent waste generation. High nutritional value.",
 		},
 		{
 			id: 10,
@@ -250,7 +261,8 @@ const WasteListings = () => {
 			farmRating: 4.1,
 			contactNumber: "+94 71 345 6789",
 			acceptedDate: "2025-01-12",
-			additionalNotes: "Hill country farm. Seasonal corn harvest waste. Good for biofuel production."
+			additionalNotes:
+				"Hill country farm. Seasonal corn harvest waste. Good for biofuel production.",
 		},
 		{
 			id: 11,
@@ -269,7 +281,8 @@ const WasteListings = () => {
 			farmRating: 4.5,
 			contactNumber: "+94 76 890 1234",
 			acceptedDate: "2025-01-13",
-			additionalNotes: "Starch processing facility. High moisture content. Requires quick collection."
+			additionalNotes:
+				"Starch processing facility. High moisture content. Requires quick collection.",
 		},
 		{
 			id: 12,
@@ -288,7 +301,8 @@ const WasteListings = () => {
 			farmRating: 4.7,
 			contactNumber: "+94 77 567 8901",
 			acceptedDate: "2025-01-14",
-			additionalNotes: "Pineapple plantation. Regular harvest waste. Good for enzyme extraction."
+			additionalNotes:
+				"Pineapple plantation. Regular harvest waste. Good for enzyme extraction.",
 		},
 		{
 			id: 13,
@@ -307,7 +321,8 @@ const WasteListings = () => {
 			farmRating: 4.8,
 			contactNumber: "+94 78 123 4567",
 			acceptedDate: "2025-01-08",
-			additionalNotes: "Spice processing facility. Aromatic waste with essential oil potential."
+			additionalNotes:
+				"Spice processing facility. Aromatic waste with essential oil potential.",
 		},
 		{
 			id: 14,
@@ -326,7 +341,8 @@ const WasteListings = () => {
 			farmRating: 4.3,
 			contactNumber: "+94 75 234 5678",
 			acceptedDate: "2025-01-15",
-			additionalNotes: "Betel cultivation. Medicinal properties. Regular supply available."
+			additionalNotes:
+				"Betel cultivation. Medicinal properties. Regular supply available.",
 		},
 		{
 			id: 15,
@@ -345,7 +361,8 @@ const WasteListings = () => {
 			farmRating: 4.6,
 			contactNumber: "+94 72 456 7890",
 			acceptedDate: "2025-01-16",
-			additionalNotes: "Cashew processing plant. Hard shell waste. Suitable for activated carbon production."
+			additionalNotes:
+				"Cashew processing plant. Hard shell waste. Suitable for activated carbon production.",
 		},
 		{
 			id: 16,
@@ -364,7 +381,8 @@ const WasteListings = () => {
 			farmRating: 4.4,
 			contactNumber: "+94 77 678 9012",
 			acceptedDate: "2025-01-17",
-			additionalNotes: "Fruit processing center. Nutritious waste with high starch content."
+			additionalNotes:
+				"Fruit processing center. Nutritious waste with high starch content.",
 		},
 		{
 			id: 17,
@@ -383,7 +401,8 @@ const WasteListings = () => {
 			farmRating: 4.9,
 			contactNumber: "+94 76 789 0123",
 			acceptedDate: "2025-01-09",
-			additionalNotes: "Spice plantation. Aromatic waste with antimicrobial properties."
+			additionalNotes:
+				"Spice plantation. Aromatic waste with antimicrobial properties.",
 		},
 		{
 			id: 18,
@@ -402,7 +421,8 @@ const WasteListings = () => {
 			farmRating: 4.2,
 			contactNumber: "+94 78 890 1234",
 			acceptedDate: "2025-01-18",
-			additionalNotes: "Coconut oil mill. Hard shell waste. Excellent for charcoal production."
+			additionalNotes:
+				"Coconut oil mill. Hard shell waste. Excellent for charcoal production.",
 		},
 		{
 			id: 19,
@@ -421,7 +441,8 @@ const WasteListings = () => {
 			farmRating: 4.0,
 			contactNumber: "+94 71 123 4567",
 			acceptedDate: "2025-01-19",
-			additionalNotes: "Tobacco processing facility. Requires proper handling. Good for pest control products."
+			additionalNotes:
+				"Tobacco processing facility. Requires proper handling. Good for pest control products.",
 		},
 		{
 			id: 20,
@@ -440,7 +461,8 @@ const WasteListings = () => {
 			farmRating: 4.7,
 			contactNumber: "+94 75 345 6789",
 			acceptedDate: "2025-01-20",
-			additionalNotes: "Spice processing unit. High curcumin content. Valuable for extract production."
+			additionalNotes:
+				"Spice processing unit. High curcumin content. Valuable for extract production.",
 		},
 		{
 			id: 21,
@@ -459,7 +481,8 @@ const WasteListings = () => {
 			farmRating: 4.5,
 			contactNumber: "+94 72 567 8901",
 			acceptedDate: "2025-01-12",
-			additionalNotes: "Ginger processing facility. Aromatic waste with medicinal properties."
+			additionalNotes:
+				"Ginger processing facility. Aromatic waste with medicinal properties.",
 		},
 		{
 			id: 22,
@@ -478,7 +501,8 @@ const WasteListings = () => {
 			farmRating: 4.8,
 			contactNumber: "+94 77 234 5678",
 			acceptedDate: "2025-01-21",
-			additionalNotes: "Food processing plant. High-volume regular waste. Good for animal feed."
+			additionalNotes:
+				"Food processing plant. High-volume regular waste. Good for animal feed.",
 		},
 		{
 			id: 23,
@@ -497,7 +521,8 @@ const WasteListings = () => {
 			farmRating: 4.6,
 			contactNumber: "+94 76 456 7890",
 			acceptedDate: "2025-01-22",
-			additionalNotes: "Cardamom plantation. Premium spice waste. Suitable for essential oil extraction."
+			additionalNotes:
+				"Cardamom plantation. Premium spice waste. Suitable for essential oil extraction.",
 		},
 		{
 			id: 24,
@@ -508,7 +533,8 @@ const WasteListings = () => {
 			quantity: "230 kg",
 			pricePerKg: "$0.12",
 			totalValue: "$27.60",
-			description: "Passion fruit pulp and seed waste from juice production",
+			description:
+				"Passion fruit pulp and seed waste from juice production",
 			availableDate: "2025-01-31",
 			expiryDate: "2025-02-07",
 			pickupWindow: "Morning (7AM - 11AM)",
@@ -516,7 +542,8 @@ const WasteListings = () => {
 			farmRating: 4.4,
 			contactNumber: "+94 78 678 9012",
 			acceptedDate: "2025-01-23",
-			additionalNotes: "Fruit processing plant. Seasonal waste with high nutritional value."
+			additionalNotes:
+				"Fruit processing plant. Seasonal waste with high nutritional value.",
 		},
 		{
 			id: 25,
@@ -527,7 +554,8 @@ const WasteListings = () => {
 			quantity: "150 kg",
 			pricePerKg: "$0.19",
 			totalValue: "$28.50",
-			description: "Lemongrass stems and leaves from essential oil extraction",
+			description:
+				"Lemongrass stems and leaves from essential oil extraction",
 			availableDate: "2025-02-01",
 			expiryDate: "2025-02-14",
 			pickupWindow: "Afternoon (2PM - 6PM)",
@@ -535,8 +563,9 @@ const WasteListings = () => {
 			farmRating: 4.5,
 			contactNumber: "+94 77 678 9012",
 			acceptedDate: "2025-01-24",
-			additionalNotes: "Essential oil distillery. Aromatic waste with therapeutic properties."
-		}
+			additionalNotes:
+				"Essential oil distillery. Aromatic waste with therapeutic properties.",
+		},
 	]);
 
 	const cities = [
@@ -577,32 +606,59 @@ const WasteListings = () => {
 		status: "All",
 	});
 
+	const [listingsResp, setListingsResp] = useState([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		setLoading(true);
+		fetch("http://localhost:8088/waste-listings")
+			.then((res) => res.json())
+			.then((data) => {
+				setListingsResp(data);
+				setLoading(false);
+			})
+			.catch((err) => {
+				console.error("Error fetching listings:", err);
+				setLoading(false);
+			});
+	}, []);
+
 	const getStatusBadge = (status) => {
+		if (!status) return "bg-gray-100 text-gray-800";
+
+		// Normalize backend values to match your style keys
+		const normalized = status.replace("_", " ").toLowerCase();
+
 		const styles = {
-			Accepted: "bg-green-100 text-green-800",
-			"In Progress": "bg-blue-100 text-blue-800",
-			Completed: "bg-purple-100 text-purple-800",
-			Reserved: "bg-yellow-100 text-yellow-800",
+			accepted: "bg-green-100 text-green-800",
+			"in progress": "bg-blue-100 text-blue-800",
+			completed: "bg-purple-100 text-purple-800",
+			reserved: "bg-yellow-100 text-yellow-800",
 		};
-		return styles[status] || "bg-gray-100 text-gray-800";
+
+		return styles[normalized] || "bg-gray-100 center text-gray-800";
 	};
 
 	const handleStartCollection = (listingId) => {
-		const listing = listings.find((l) => l.id === listingId);
+		const listing = listingsResp.find((l) => l.id === listingId);
 
-		const startTask = () =>
-			new Promise((resolve) =>
-				setTimeout(() => {
-					setListings(
-						listings.map((listing) =>
-							listing.id === listingId
-								? { ...listing, status: "In Progress" }
-								: listing
-						)
-					);
-					resolve({ name: listing?.wasteType || "Listing" });
-				}, 2000)
+		const startTask = async () => {
+			const res = await fetch(
+				`http://localhost:8088/waste-listings/${listingId}/status?status=IN_PROGRESS`,
+				{ method: "PUT" }
 			);
+			if (!res.ok) throw new Error("Failed to update status");
+			const updated = await res.json();
+
+			// update local state with backend response
+			setListingsResp((prev) =>
+				prev.map((l) =>
+					l.id === listingId ? { ...l, status: updated.status } : l
+				)
+			);
+
+			return { name: listing?.wasteType || "Listing" };
+		};
 
 		toast.promise(startTask(), {
 			loading: "Starting collection process...",
@@ -612,21 +668,24 @@ const WasteListings = () => {
 	};
 
 	const handleCompleteCollection = (listingId) => {
-		const listing = listings.find((l) => l.id === listingId);
+		const listing = listingsResp.find((l) => l.id === listingId);
 
-		const completeTask = () =>
-			new Promise((resolve) =>
-				setTimeout(() => {
-					setListings(
-						listings.map((listing) =>
-							listing.id === listingId
-								? { ...listing, status: "Completed" }
-								: listing
-						)
-					);
-					resolve({ name: listing?.wasteType || "Listing" });
-				}, 2000)
+		const completeTask = async () => {
+			const res = await fetch(
+				`http://localhost:8088/waste-listings/${listingId}/status?status=COMPLETED`,
+				{ method: "PUT" }
 			);
+			if (!res.ok) throw new Error("Failed to update status");
+			const updated = await res.json();
+
+			setListingsResp((prev) =>
+				prev.map((l) =>
+					l.id === listingId ? { ...l, status: updated.status } : l
+				)
+			);
+
+			return { name: listing?.wasteType || "Listing" };
+		};
 
 		toast.promise(completeTask(), {
 			loading: "Completing collection...",
@@ -636,7 +695,7 @@ const WasteListings = () => {
 	};
 
 	const handleSave = (listingId) => {
-		const listing = listings.find((l) => l.id === listingId);
+		const listing = listingsResp.find((l) => l.id === listingId);
 		toast.success(
 			`${listing?.wasteType || "Listing"} saved to your favorites!`
 		);
@@ -644,33 +703,45 @@ const WasteListings = () => {
 	};
 
 	const handleContactFarmer = (listing) => {
-		toast.success(`Contact information sent for ${listing.farmer}`);
+		toast.success(
+			`Contact information sent for ${
+				listing.requester?.name || listing.farmer
+			}`
+		);
 		// Implementation for contacting farmer
 	};
 
-	const filteredListings = listings.filter((listing) => {
+	const filteredListings = listingsResp.filter((listing) => {
+		// Normalize status for comparison (handle "ACCEPTED", "IN_PROGRESS", etc.)
+		const normalizedStatus =
+			filters.status === "In Progress"
+				? "IN_PROGRESS"
+				: filters.status === "Accepted"
+				? "ACCEPTED"
+				: filters.status === "Completed"
+				? "COMPLETED"
+				: filters.status;
 
 		return (
 			(filters.wasteType === "" ||
 				listing.wasteType
-					.toLowerCase()
+					?.toLowerCase()
 					.includes(filters.wasteType.toLowerCase())) &&
 			(filters.location === "" ||
-				listing.location
-					.toLowerCase()
+				listing.requester?.location
+					?.toLowerCase()
 					.includes(filters.location.toLowerCase())) &&
 			(filters.status === "" ||
 				filters.status === "All" ||
-				listing.status === filters.status) &&
+				listing.status === normalizedStatus) &&
 			(filters.minQuantity === "" ||
-				parseInt(listing.quantity.replace(/[^\d]/g, "")) >=
+				(listing.quantity || 0) >=
 					parseInt(filters.minQuantity || 0)) &&
 			(filters.maxPrice === "" ||
-				parseFloat(listing.pricePerKg.replace("$", "")) <=
+				(listing.pricePerUnit || 0) <=
 					parseFloat(filters.maxPrice || 999))
 		);
 	});
-
 	return (
 		<div className="space-y-6 mt-6">
 			<div className="flex justify-between items-center">
@@ -682,8 +753,7 @@ const WasteListings = () => {
 						Manage waste collection requests that you have accepted
 					</p>
 				</div>
-				<div className="flex space-x-2">
-				</div>
+				<div className="flex space-x-2"></div>
 			</div>
 
 			{/* Summary Cards */}
@@ -692,12 +762,14 @@ const WasteListings = () => {
 					<div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
 					<CheckCircle className="h-7 w-7 text-green-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Accepted Requests</p>
+						<p className="text-xs font-medium text-gray-500">
+							Accepted Requests
+						</p>
 						<p className="text-lg font-bold text-gray-900">
 							<NumberFlow
 								value={
 									filteredListings.filter(
-										(l) => l.status === "Accepted"
+										(l) => l.status === "ACCEPTED"
 									).length
 								}
 							/>
@@ -708,15 +780,22 @@ const WasteListings = () => {
 					<div className="absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-l-lg" />
 					<RotateCcw className="h-7 w-7 text-blue-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Total Quantity</p>
+						<p className="text-xs font-medium text-gray-500">
+							Total Quantity
+						</p>
 						<p className="text-lg font-bold text-gray-900">
 							<NumberFlow
 								value={filteredListings.reduce(
-									(total, listing) =>
-										total +
-										parseInt(
-											listing.quantity.replace(/[^\d]/g, "")
-										),
+									(total, listing) => {
+										const quantity = listing.quantity || 0;
+										const unit =
+											listing.unit?.toUpperCase();
+										// Convert to KG for consistency
+										if (unit === "TON" || unit === "TONS") {
+											return total + quantity * 907.185;
+										}
+										return total + quantity;
+									},
 									0
 								)}
 								suffix=" kg"
@@ -728,9 +807,13 @@ const WasteListings = () => {
 					<div className="absolute left-0 top-0 h-full w-1 bg-yellow-500 rounded-l-lg" />
 					<DollarSign className="h-7 w-7 text-yellow-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Avg Price/kg</p>
+						<p className="text-xs font-medium text-gray-500">
+							Avg Price/
+							{filteredListings[0]?.unit?.toLowerCase() || "kg"}
+						</p>
 						<p className="text-lg font-bold text-gray-900">
-							$<NumberFlow
+							$
+							<NumberFlow
 								value={
 									filteredListings.length > 0
 										? parseFloat(
@@ -738,12 +821,8 @@ const WasteListings = () => {
 													filteredListings.reduce(
 														(total, listing) =>
 															total +
-															parseFloat(
-																listing.pricePerKg.replace(
-																	"$",
-																	""
-																)
-															),
+															(listing.pricePerUnit ||
+																0),
 														0
 													) / filteredListings.length
 												).toFixed(2)
@@ -758,15 +837,15 @@ const WasteListings = () => {
 					<div className="absolute left-0 top-0 h-full w-1 bg-purple-500 rounded-l-lg" />
 					<Banknote className="h-7 w-7 text-purple-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Potential Value</p>
+						<p className="text-xs font-medium text-gray-500">
+							Potential Value
+						</p>
 						<p className="text-lg font-bold text-gray-900">
-							$<NumberFlow
+							$
+							<NumberFlow
 								value={filteredListings.reduce(
 									(total, listing) =>
-										total +
-										parseFloat(
-											listing.totalValue.replace("$", "")
-										),
+										total + (listing.totalPrice || 0),
 									0
 								)}
 							/>
@@ -782,7 +861,8 @@ const WasteListings = () => {
 						Waste Listings ({filteredListings.length})
 					</CardTitle>
 					<CardDescription>
-						Manage and track waste collection requests that you have accepted from farmers
+						Manage and track waste collection requests that you have
+						accepted from farmers
 					</CardDescription>
 					<div id="waste-search" className="flex mt-5 gap-1">
 						<div className="flex-1">
@@ -901,7 +981,9 @@ const WasteListings = () => {
 									<SelectValue placeholder="Status" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="All">All status</SelectItem>
+									<SelectItem value="All">
+										All status
+									</SelectItem>
 									<SelectItem value="Accepted">
 										Accepted
 									</SelectItem>
@@ -1002,68 +1084,137 @@ const WasteListings = () => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{filteredListings.map((listing) => (
-							<TableRow key={listing.id}>
-								<TableCell>
-									<div>
-										<div className="font-medium text-gray-900 dark:text-gray-100">
-											{listing.wasteType}
+						{loading ? (
+							// Loading skeleton
+							Array.from({ length: 5 }).map((_, index) => (
+								<TableRow key={`skeleton-${index}`}>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-36 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-48 bg-gray-200 rounded animate-pulse" />
 										</div>
-										<div className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs">
-											{listing.description.length > 30 
-												? listing.description.substring(0, 40) + "..."
-												: listing.description
-											}
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
 										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-28 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="h-6 w-24 bg-gray-200 rounded-full animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="flex justify-end gap-2">
+											<div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
+											<div className="h-8 w-10 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+								</TableRow>
+							))
+						) : filteredListings.length === 0 ? (
+							<TableRow>
+								<TableCell colSpan={7} className="text-center py-8">
+									<div className="text-gray-500">
+										No listings found
 									</div>
 								</TableCell>
-								<TableCell>
-									<div>
-										<div className="font-medium text-gray-900 dark:text-gray-100">
-											{listing.farmer}
+							</TableRow>
+						) : (
+							filteredListings.map((listing) => (
+								<TableRow key={listing.id}>
+									{/* Waste Details */}
+									<TableCell>
+										<div>
+											<div className="font-medium text-gray-900 dark:text-gray-100">
+												{listing.wasteType}
+											</div>
+											<div className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs">
+												{listing.description?.length > 30
+													? listing.description.substring(
+															0,
+															40
+													  ) + "..."
+													: listing.description}
+											</div>
 										</div>
-										<div className="text-sm text-gray-500 dark:text-gray-400">
-											{listing.location}
+									</TableCell>
+
+									{/* Farmer / Location */}
+									<TableCell>
+										<div>
+											<div className="font-medium text-gray-900 dark:text-gray-100">
+												{listing.requesterName}
+											</div>
+											<div className="text-sm text-gray-500 dark:text-gray-400">
+												{listing.requesterLocation}
+											</div>
+											<div className="text-xs text-yellow-600 flex items-center mt-1">
+												⭐ {listing.requesterRating}/5
+											</div>
 										</div>
-										<div className="text-xs text-yellow-600 flex items-center mt-1">
-											⭐ {listing.farmRating}/5
-										</div>
-									</div>
 								</TableCell>
+
+								{/* Quantity */}
 								<TableCell>
 									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{listing.quantity}
+										{listing.quantity} {listing.unit}
 									</div>
 									<div className="text-sm text-gray-500 dark:text-gray-400">
-										{listing.pickupWindow}
+										{listing.timeSlot}
 									</div>
 								</TableCell>
+
+								{/* Pricing */}
 								<TableCell>
 									<div>
 										<div className="font-medium text-gray-900 dark:text-gray-100">
-											{listing.pricePerKg}/kg
+											{listing.pricePerUnit}/
+											{listing.unit?.toLowerCase()}
 										</div>
 										<div className="text-sm font-semibold text-green-600">
-											{listing.totalValue} total
+											{listing.totalPrice} total
 										</div>
 									</div>
 								</TableCell>
+
+								{/* Availability */}
 								<TableCell>
 									<div className="text-sm text-gray-900 dark:text-gray-100">
 										<div>
 											Available:{" "}
 											{new Date(
-												listing.availableDate
+												listing.availableFrom
 											).toLocaleDateString()}
 										</div>
 										<div className="text-gray-500 dark:text-gray-400">
 											Expires:{" "}
 											{new Date(
-												listing.expiryDate
+												listing.expiresOn
 											).toLocaleDateString()}
 										</div>
 									</div>
 								</TableCell>
+
+								{/* Status */}
 								<TableCell>
 									<Badge
 										className={`${getStatusBadge(
@@ -1071,9 +1222,11 @@ const WasteListings = () => {
 										)} leading-normal rounded-full`}
 										variant="outline"
 									>
-										{listing.status}
+										{listing.status ? listing.status.replace("_", " ") : "N/A"}
 									</Badge>
 								</TableCell>
+
+								{/* Actions */}
 								<TableCell className="text-right">
 									<div className="flex justify-end space-x-2">
 										<DropdownMenu>
@@ -1102,7 +1255,8 @@ const WasteListings = () => {
 												>
 													Contact Farmer
 												</DropdownMenuItem>
-												{listing.status === "Accepted" && (
+												{listing.status ===
+													"ACCEPTED" && (
 													<DropdownMenuItem
 														onClick={() =>
 															handleStartCollection(
@@ -1113,7 +1267,8 @@ const WasteListings = () => {
 														Start Collection
 													</DropdownMenuItem>
 												)}
-												{listing.status === "In Progress" && (
+												{listing.status ===
+													"IN_PROGRESS" && (
 													<DropdownMenuItem
 														onClick={() =>
 															handleCompleteCollection(
@@ -1124,7 +1279,8 @@ const WasteListings = () => {
 														Complete Collection
 													</DropdownMenuItem>
 												)}
-												{listing.status === "Completed" && (
+												{listing.status ===
+													"COMPLETED" && (
 													<DropdownMenuItem>
 														View Report
 													</DropdownMenuItem>
@@ -1134,16 +1290,21 @@ const WasteListings = () => {
 									</div>
 								</TableCell>
 							</TableRow>
-						))}
+							))
+						)}
 					</TableBody>
 				</Table>
 			</div>
-			<Toaster position="bottom-right" richColors toastOptions={{
-				classNames: {
-					icon: '360px',
-					description: 'mt[-5px]'
-				}
-			}}/>
+			<Toaster
+				position="bottom-right"
+				richColors
+				toastOptions={{
+					classNames: {
+						icon: "360px",
+						description: "mt[-5px]",
+					},
+				}}
+			/>
 		</div>
 	);
 };
