@@ -414,6 +414,16 @@ const Payments = () => {
 			});
 	}, []);
 
+	// Convert quantity to KG if it's in TON
+	const convertToKg = (quantity, unit) => {
+		if (!unit) return quantity;
+		const unitUpper = unit.toUpperCase();
+		if (unitUpper === 'TON' || unitUpper === 'TONS') {
+			return quantity * 907.185; // 1 US short ton = 907.185 kg
+		}
+		return quantity;
+	};
+
 	const getStatusBadge = (status) => {
 		if (!status) return "bg-gray-100 text-gray-800";
 
@@ -460,13 +470,14 @@ const Payments = () => {
 			"Date,Farmer Name,Waste Type,Quantity (kg),Rate (Rs/kg),Total Payment,Status,Transaction ID\n";
 		const csvData = filteredPayments
 			.map((payment) => {
+				const quantityInKg = convertToKg(payment.quantity, payment.quantityUnit);
 				const rate = (
 					parseFloat(payment.amount.replace("$", "")) /
-					payment.quantity
+					quantityInKg
 				).toFixed(2);
 				return `${payment.paymentDate},"${payment.farmer}","${
 					payment.wasteType
-				}",${payment.quantity},${rate},${payment.amount},${
+				}",${quantityInKg.toFixed(2)},${rate},${payment.amount},${
 					payment.status
 				},"${payment.transactionId || "N/A"}"`;
 			})
@@ -691,7 +702,7 @@ const Payments = () => {
 		);
 
 	const totalWeightCollected = filteredPayments.reduce(
-		(total, payment) => total + payment.quantity,
+		(total, payment) => total + convertToKg(payment.quantity, payment.quantityUnit),
 		0
 	);
 
@@ -1262,17 +1273,17 @@ const Payments = () => {
 								</TableCell>
 								<TableCell>
 									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{payment.quantity.toLocaleString()} kg
+										{convertToKg(payment.quantity, payment.quantityUnit).toLocaleString()} {payment.unit.toLowerCase()}
 									</div>
 								</TableCell>
 								<TableCell>
 									<div className="font-medium text-gray-900 dark:text-gray-100">
-										${payment.rate.toFixed(2)}/kg
+										${payment.rate.toFixed(2)}/{payment.unit.toLowerCase()}
 									</div>
 								</TableCell>
 								<TableCell>
 									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{payment.amount}
+										${payment.grossAmount?.toFixed(2) || '0.00'}
 									</div>
 								</TableCell>
 								<TableCell>
