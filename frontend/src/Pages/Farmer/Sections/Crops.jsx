@@ -32,7 +32,7 @@ export async function FarmercropsLoader() {
             farm: 'My Farm', 
             location : product.location ,
             badges : product.badges, 
-            rating: 4.5, // Placeholder rating
+            rating: product.averageRating, // Placeholder rating
             verified: true, // Placeholder verification
         }));
     } catch (err) {

@@ -42,7 +42,7 @@ export async function MyProductsLoader() {
             farm: 'My Farm', 
             location : product.location ,
             badges : product.badges, 
-            rating: 4.5, // Placeholder rating
+            rating: product.averageRating, // Placeholder rating
             verified: true, // Placeholder verification
         }));
     } catch (err) {
@@ -161,6 +161,7 @@ export default function MyProducts() {
         setSelectedProduct(product);
         setIsEditPopupOpen(true);
     };
+
      
     if (loading) return <p className="p-6 text-gray-500">Loading products...</p>;
     if (!loading ) {
@@ -184,6 +185,7 @@ export default function MyProducts() {
                     >
                         <div>
                             <div className="relative h-48 bg-gray-200">
+                            
                                 <img
                                     src={crop.imageUrls?.[0] || wheat} // Use first image from array
                                     alt={crop.type}
@@ -205,6 +207,10 @@ export default function MyProducts() {
                                 <div className="text-sm text-gray-500 dark:text-gray-400">
                                     <span className="font-medium dark:text-gray-300">{crop.farm}</span>{' '}
                                     • {crop.location}
+                                </div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="font-medium dark:text-gray-300">{crop.farm}</span>{' '}
+                                    • {crop.imageUrls}
                                 </div>
 
                                 <div className="text-sm text-gray-500 dark:text-gray-400">

@@ -1,9 +1,15 @@
 package com.springcloud.service;
 
 import com.springcloud.model.Product;
+import com.springcloud.model.Rating;
 import com.springcloud.repository.ProductRepository;
 import com.springcloud.dto.AddProductDTO;
 import com.springcloud.dto.EditProductDTO;
+import com.springcloud.dto.ProductResponseDTO;
+import com.springcloud.repository.RatingRepository; // Import Rating 
+import com.springcloud.model.Rating; // Import Rating model
+import com.springcloud.dto.ProductResponseDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,6 +18,7 @@ import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,13 +29,65 @@ public class ProductService {
 
     @Autowired
     private FileStorageService fileStorageService;
+
+    @Autowired 
+    private RatingRepository ratingRepository;
     
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+   public List<ProductResponseDTO> getAllProducts() {
+        List<Product> products = productRepository.findAll();
+        return products.stream()
+                .map(this::mapToProductResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public List<Product> getProductsByUserId(Long userId) {
-        return productRepository.findByUserId(userId);
+    // MODIFIED: Return the new DTO
+    public List<ProductResponseDTO> getProductsByUserId(Long userId) {
+        List<Product> products = productRepository.findByUserId(userId);
+        return products.stream()
+                .map(this::mapToProductResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public void addOrUpdateRating(Long productId, Long userId, int ratingValue) {
+        // Ensure product exists
+        productRepository.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+
+        // Check if a rating already exists for this user and product
+        Optional<Rating> existingRatingOpt = ratingRepository.findByProductIdAndUserId(productId, userId);
+
+        Rating rating;
+        if (existingRatingOpt.isPresent()) {
+            // Update existing rating
+            rating = existingRatingOpt.get();
+        } else {
+            // Create a new rating
+            rating = new Rating();
+            rating.setProductId(productId);
+            rating.setUserId(userId);
+        }
+        rating.setRating(ratingValue);
+        ratingRepository.save(rating);
+    }
+
+    private ProductResponseDTO mapToProductResponseDTO(Product product) {
+        // 1. Create the DTO from the product
+        ProductResponseDTO dto = new ProductResponseDTO(product);
+        
+        // 2. Fetch all ratings for this product from the database
+        List<Rating> ratings = ratingRepository.findByProductId(product.getId());
+        
+        // 3. Calculate the average using a Java Stream
+        double average = ratings.stream()
+                .mapToInt(Rating::getRating)
+                .average()
+                .orElse(0.0); // If there are no ratings, default to 0.0
+                
+        // 4. Set the calculated values on the DTO
+        dto.setAverageRating(average);
+        dto.setRatingCount(ratings.size());
+        
+        return dto;
     }
 
     public Product addProduct(AddProductDTO dto, Long userId) {
@@ -51,7 +110,7 @@ public class ProductService {
                     // 1. Store the file using the new service method
                     String filename = fileStorageService.storeFile(file);
                     // 2. Construct the correct URL path
-                    String url = "/uploads/" + filename;
+                    String url =  filename;
                     imageUrls.add(url);
                 }
             }
@@ -91,7 +150,7 @@ public class ProductService {
                     // 1. Store the new file
                     String filename = fileStorageService.storeFile(file);
                     // 2. Construct its URL and add it to the list
-                    String url = "/uploads/" + filename;
+                    String url =  filename;
                     updatedImageUrls.add(url);
                 }
             }

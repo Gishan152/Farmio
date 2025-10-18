@@ -4,6 +4,9 @@ import com.springcloud.model.Product;
 import com.springcloud.service.ProductService;
 import com.springcloud.dto.AddProductDTO;
 import com.springcloud.dto.EditProductDTO;
+import com.springcloud.dto.ProductResponseDTO;
+import com.springcloud.dto.RatingDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,20 +20,20 @@ public class ProductController {
     private ProductService productService;
     
     @GetMapping("/admin/all")
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
+    public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
+        List<ProductResponseDTO> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
     }
     
     @GetMapping("/all")
-    public ResponseEntity<List<Product>> getAllProductss() {
-        List<Product> products = productService.getAllProducts();
+    public ResponseEntity<List<ProductResponseDTO>> getAllProductss() {
+        List<ProductResponseDTO> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
     }
     
     @GetMapping("/my-products")
-    public ResponseEntity<List<Product>> getMyProducts(@RequestHeader("X-User-Id") Long userId) {
-        List<Product> products = productService.getProductsByUserId(userId);
+    public ResponseEntity<List<ProductResponseDTO>> getMyProducts(@RequestHeader("X-User-Id") Long userId) {
+        List<ProductResponseDTO> products = productService.getProductsByUserId(userId);
         return ResponseEntity.ok(products);
     }
 
@@ -60,6 +63,21 @@ public class ProductController {
         try {
             Product product = productService.editProduct(id, dto, userId);
             return ResponseEntity.ok(product);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // NEW ENDPOINT: To add or update a rating
+    @PostMapping("/{id}/rate")
+    public ResponseEntity<?> rateProduct(
+            @PathVariable Long id,
+            @RequestBody RatingDTO ratingDTO,
+            @RequestHeader("X-User-Id") Long userId
+    ) {
+        try {
+            productService.addOrUpdateRating(id, userId, ratingDTO.getRating());
+            return ResponseEntity.ok().body("Rating submitted successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
