@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +31,13 @@ public class PaymentService {
     private BankDetailsRepository bankDetailsRepository;
     
     @Autowired
+    private CommissionRepository commissionRepository;
+    
+    @Autowired
     private PaymentMessagePublisher paymentMessagePublisher;
+
+    // Commission rate - 3%
+    private static final BigDecimal COMMISSION_RATE = new BigDecimal("3.00");
 
     // Get Wallet Info with Payment History
     public WalletInfo getWalletInfo(Long userId) {
@@ -104,13 +111,36 @@ public class PaymentService {
         payment.setUpdatedAt(LocalDateTime.now());
         paymentRepository.save(payment);
         
-        // If payment is successful, split amount between escrow and direct credit
+        // If payment is successful, deduct commission and split amount between escrow and direct credit
         if ("2".equals(statusCode)) { // Success
+            // Calculate 3% commission
+            BigDecimal commissionAmount = amount.multiply(COMMISSION_RATE)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            BigDecimal netAmount = amount.subtract(commissionAmount);
+            
+            // Record commission details
+            Commission commission = Commission.builder()
+                .paymentReference(payment.getReference())
+                .paymentId(payment.getId())
+                .originalAmount(amount)
+                .commissionRate(COMMISSION_RATE)
+                .commissionAmount(commissionAmount)
+                .netAmount(netAmount)
+                .payerId(payment.getPayerId())
+                .payeeId(payment.getPayeeId())
+                .description("Payment commission for transaction: " + payment.getDescription())
+                .createdBy("SYSTEM")
+                .build();
+            commissionRepository.save(commission);
+            
+            // Calculate escrow and direct amounts from NET amount (after commission)
             BigDecimal escrowPercentage = payment.getEscrowPercentage() != null ? 
                 payment.getEscrowPercentage() : BigDecimal.ZERO;
-            BigDecimal escrowAmount = amount.multiply(escrowPercentage.divide(BigDecimal.valueOf(100)));
-            BigDecimal directAmount = amount.subtract(escrowAmount);
+            BigDecimal escrowAmount = netAmount.multiply(escrowPercentage.divide(BigDecimal.valueOf(100)));
+            BigDecimal directAmount = netAmount.subtract(escrowAmount);
+            
             Wallet payeeWallet = getOrCreateWallet(payment.getPayeeId());
+            
             if (escrowAmount.compareTo(BigDecimal.ZERO) > 0) {
                 payeeWallet.addToEscrow(escrowAmount);
                 createTransaction(
@@ -118,9 +148,10 @@ public class PaymentService {
                     escrowAmount,
                     TransactionType.ESCROW,
                     payment.getReference(),
-                    "Escrowed from PayHere payment: " + payment.getDescription()
+                    "Escrowed from PayHere payment (after 3% commission): " + payment.getDescription()
                 );
             }
+            
             if (directAmount.compareTo(BigDecimal.ZERO) > 0) {
                 payeeWallet.addToBalance(directAmount);
                 createTransaction(
@@ -128,15 +159,25 @@ public class PaymentService {
                     directAmount,
                     TransactionType.CREDIT,
                     payment.getReference(),
-                    "Direct credit from PayHere payment: " + payment.getDescription()
+                    "Direct credit from PayHere payment (after 3% commission): " + payment.getDescription()
                 );
             }
+            
             walletRepository.save(payeeWallet);
+            
+            // Create a transaction record for commission deduction for transparency
+            createTransaction(
+                payment.getPayeeId(),
+                commissionAmount,
+                TransactionType.DEBIT,
+                payment.getReference(),
+                "Platform commission (3%) deducted from payment: " + payment.getDescription()
+            );
             
             // Publish payment confirmation message to RabbitMQ
             PaymentConfirmedMessage confirmationMessage = new PaymentConfirmedMessage(
                 payment.getReference(),
-                payment.getAmount(),
+                netAmount, // Send net amount after commission
                 payment.getId().toString(),
                 newStatus.toString(),
                 LocalDateTime.now(),
@@ -365,7 +406,7 @@ public class PaymentService {
         }
     }
     
-    // Get Payment Statistics (Admin/Moderator)
+    // Get Payment Statistics (Admin/Moderator) - Updated to include commission data
     public PaymentStatistics getPaymentStatistics() {
         List<Payment> allPayments = paymentRepository.findAll();
         List<Transaction> allTransactions = transactionRepository.findAll();
@@ -412,6 +453,78 @@ public class PaymentService {
             (int) failedPayments,
             (int) pendingPayments,
             totalWithdrawals
+        );
+    }
+    
+    // Get Commission Summary (Admin/Moderator)
+    public CommissionSummaryResponse getCommissionSummary() {
+        BigDecimal totalCommissionAmount = commissionRepository.getTotalCommissionAmount();
+        BigDecimal totalProcessedAmount = commissionRepository.getTotalProcessedAmount();
+        Long totalTransactionCount = commissionRepository.getTotalCommissionCount();
+        BigDecimal averageCommissionRate = commissionRepository.getAverageCommissionRate();
+        
+        // Get recent commissions (last 30 days)
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+        List<Commission> recentCommissions = commissionRepository.findRecentCommissions(thirtyDaysAgo);
+        
+        List<CommissionDetailsResponse> recentCommissionResponses = recentCommissions.stream()
+            .map(this::mapToCommissionDetailsResponse)
+            .collect(Collectors.toList());
+        
+        return new CommissionSummaryResponse(
+            totalCommissionAmount != null ? totalCommissionAmount : BigDecimal.ZERO,
+            totalProcessedAmount != null ? totalProcessedAmount : BigDecimal.ZERO,
+            totalTransactionCount != null ? totalTransactionCount : 0L,
+            averageCommissionRate != null ? averageCommissionRate : BigDecimal.ZERO,
+            recentCommissionResponses
+        );
+    }
+    
+    // Get Commission Details for a specific payment (Admin/Moderator)
+    public CommissionDetailsResponse getCommissionByPaymentReference(String paymentReference) {
+        Commission commission = commissionRepository.findByPaymentReference(paymentReference)
+            .orElseThrow(() -> new RuntimeException("Commission record not found for payment: " + paymentReference));
+        
+        return mapToCommissionDetailsResponse(commission);
+    }
+    
+    // Get Commission History (Admin/Moderator)
+    public List<CommissionDetailsResponse> getCommissionHistory(LocalDateTime startDate, LocalDateTime endDate) {
+        List<Commission> commissions = commissionRepository.findByCreatedAtBetweenOrderByCreatedAtDesc(startDate, endDate);
+        
+        return commissions.stream()
+            .map(this::mapToCommissionDetailsResponse)
+            .collect(Collectors.toList());
+    }
+    
+    // Get Commission Statistics for a date range (Admin/Moderator)
+    public CommissionSummaryResponse getCommissionStatistics(LocalDateTime startDate, LocalDateTime endDate) {
+        BigDecimal totalCommissionAmount = commissionRepository.getTotalCommissionAmountBetweenDates(startDate, endDate);
+        List<Commission> commissionsInRange = commissionRepository.findByCreatedAtBetweenOrderByCreatedAtDesc(startDate, endDate);
+        
+        BigDecimal totalProcessedAmount = commissionsInRange.stream()
+            .map(Commission::getOriginalAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        Long totalTransactionCount = (long) commissionsInRange.size();
+        
+        BigDecimal averageCommissionRate = commissionsInRange.isEmpty() ? 
+            BigDecimal.ZERO : 
+            commissionsInRange.stream()
+                .map(Commission::getCommissionRate)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .divide(BigDecimal.valueOf(commissionsInRange.size()), 2, RoundingMode.HALF_UP);
+        
+        List<CommissionDetailsResponse> commissionResponses = commissionsInRange.stream()
+            .map(this::mapToCommissionDetailsResponse)
+            .collect(Collectors.toList());
+        
+        return new CommissionSummaryResponse(
+            totalCommissionAmount != null ? totalCommissionAmount : BigDecimal.ZERO,
+            totalProcessedAmount,
+            totalTransactionCount,
+            averageCommissionRate,
+            commissionResponses
         );
     }
     
@@ -476,6 +589,23 @@ public class PaymentService {
             transaction.getReference(),
             transaction.getTimestamp(),
             transaction.getDescription()
+        );
+    }
+    
+    private CommissionDetailsResponse mapToCommissionDetailsResponse(Commission commission) {
+        return new CommissionDetailsResponse(
+            commission.getId(),
+            commission.getPaymentReference(),
+            commission.getPaymentId(),
+            commission.getOriginalAmount(),
+            commission.getCommissionRate(),
+            commission.getCommissionAmount(),
+            commission.getNetAmount(),
+            commission.getPayerId(),
+            commission.getPayeeId(),
+            commission.getDescription(),
+            commission.getCreatedAt(),
+            commission.getCreatedBy()
         );
     }
     
