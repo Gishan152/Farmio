@@ -178,8 +178,10 @@ const Requests = () => {
 	// ]);
 
 	const [requests, setRequests] = useState([]);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
+		setLoading(true);
 		fetch("http://localhost:8088/requests")
 			.then((res) => {
 				if (!res.ok) {
@@ -187,8 +189,14 @@ const Requests = () => {
 				}
 				return res.json();
 			})
-			.then((data) => setRequests(data))
-			.catch((err) => console.error("Error fetching requests:", err));
+			.then((data) => {
+				setRequests(data);
+				setLoading(false);
+			})
+			.catch((err) => {
+				console.error("Error fetching requests:", err);
+				setLoading(false);
+			});
 	}, []);
 
 	const cities = [
@@ -551,38 +559,88 @@ const Requests = () => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{filteredRequests.map((request) => (
-							<TableRow key={request.id}>
-								<TableCell>
-									<div className="flex items-center gap-3">
-										<Avatar>
-											<AvatarImage
-												src={
-													request.requesterAvatar
-												}
-												alt={request.requesterName}
-											/>
-											<AvatarFallback>
-													{request.requesterName
-														.split(" ")
-														.map((n) => n[0])
-														.join("")}
-												</AvatarFallback>
-											</Avatar>
-											<div>
-												<div className="font-medium text-gray-900 dark:text-gray-100">
-													{request.requesterName}
-												</div>
-												<div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-													<MapPin className="h-3 w-3" />
-													{request.requesterLocation}
-												</div>
-												<div className="text-xs text-yellow-600 flex items-center gap-1">
-													⭐ {request.farmRating}/5
-												</div>
+						{loading ? (
+							// Loading skeleton
+							Array.from({ length: 5 }).map((_, index) => (
+								<TableRow key={`skeleton-${index}`}>
+									<TableCell>
+										<div className="flex items-center gap-3">
+											<div className="h-10 w-10 rounded-full bg-gray-200 animate-pulse" />
+											<div className="space-y-2">
+												<div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+												<div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+												<div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
 											</div>
 										</div>
 									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-36 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-28 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="h-6 w-20 bg-gray-200 rounded-full animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="flex justify-end gap-2">
+											<div className="h-8 w-20 bg-gray-200 rounded animate-pulse" />
+											<div className="h-8 w-10 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+								</TableRow>
+							))
+						) : filteredRequests.length === 0 ? (
+							<TableRow>
+								<TableCell colSpan={6} className="text-center py-8">
+									<div className="text-gray-500">
+										No requests found
+									</div>
+								</TableCell>
+							</TableRow>
+						) : (
+							filteredRequests.map((request) => (
+								<TableRow key={request.id}>
+									<TableCell>
+										<div className="flex items-center gap-3">
+											<Avatar>
+												<AvatarImage
+													src={
+														request.requesterAvatar
+													}
+													alt={request.requesterName}
+												/>
+												<AvatarFallback>
+														{request.requesterName
+															.split(" ")
+															.map((n) => n[0])
+															.join("")}
+													</AvatarFallback>
+												</Avatar>
+												<div>
+													<div className="font-medium text-gray-900 dark:text-gray-100">
+														{request.requesterName}
+													</div>
+													<div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+														<MapPin className="h-3 w-3" />
+														{request.requesterLocation}
+													</div>
+													<div className="text-xs text-yellow-600 flex items-center gap-1">
+														⭐ {request.farmRating}/5
+													</div>
+												</div>
+											</div>
+										</TableCell>
 									<TableCell>
 										<div>
 											<div className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-1">
@@ -681,7 +739,8 @@ const Requests = () => {
 										</div>
 									</TableCell>
 								</TableRow>
-						))}
+							))
+						)}
 					</TableBody>
 				</Table>
 			</div>

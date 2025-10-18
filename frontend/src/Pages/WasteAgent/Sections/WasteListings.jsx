@@ -607,12 +607,20 @@ const WasteListings = () => {
 	});
 
 	const [listingsResp, setListingsResp] = useState([]);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
+		setLoading(true);
 		fetch("http://localhost:8088/waste-listings")
 			.then((res) => res.json())
-			.then((data) => setListingsResp(data))
-			.catch((err) => console.error("Error fetching listings:", err));
+			.then((data) => {
+				setListingsResp(data);
+				setLoading(false);
+			})
+			.catch((err) => {
+				console.error("Error fetching listings:", err);
+				setLoading(false);
+			});
 	}, []);
 
 	const getStatusBadge = (status) => {
@@ -1076,38 +1084,93 @@ const WasteListings = () => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{filteredListings.map((listing) => (
-							<TableRow key={listing.id}>
-								{/* Waste Details */}
-								<TableCell>
-									<div>
-										<div className="font-medium text-gray-900 dark:text-gray-100">
-											{listing.wasteType}
+						{loading ? (
+							// Loading skeleton
+							Array.from({ length: 5 }).map((_, index) => (
+								<TableRow key={`skeleton-${index}`}>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-36 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-48 bg-gray-200 rounded animate-pulse" />
 										</div>
-										<div className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs">
-											{listing.description?.length > 30
-												? listing.description.substring(
-														0,
-														40
-												  ) + "..."
-												: listing.description}
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
 										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-28 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="h-6 w-24 bg-gray-200 rounded-full animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="flex justify-end gap-2">
+											<div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
+											<div className="h-8 w-10 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+								</TableRow>
+							))
+						) : filteredListings.length === 0 ? (
+							<TableRow>
+								<TableCell colSpan={7} className="text-center py-8">
+									<div className="text-gray-500">
+										No listings found
 									</div>
 								</TableCell>
+							</TableRow>
+						) : (
+							filteredListings.map((listing) => (
+								<TableRow key={listing.id}>
+									{/* Waste Details */}
+									<TableCell>
+										<div>
+											<div className="font-medium text-gray-900 dark:text-gray-100">
+												{listing.wasteType}
+											</div>
+											<div className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs">
+												{listing.description?.length > 30
+													? listing.description.substring(
+															0,
+															40
+													  ) + "..."
+													: listing.description}
+											</div>
+										</div>
+									</TableCell>
 
-								{/* Farmer / Location */}
-								<TableCell>
-									<div>
-										<div className="font-medium text-gray-900 dark:text-gray-100">
-											{listing.requesterName}
+									{/* Farmer / Location */}
+									<TableCell>
+										<div>
+											<div className="font-medium text-gray-900 dark:text-gray-100">
+												{listing.requesterName}
+											</div>
+											<div className="text-sm text-gray-500 dark:text-gray-400">
+												{listing.requesterLocation}
+											</div>
+											<div className="text-xs text-yellow-600 flex items-center mt-1">
+												⭐ {listing.requesterRating}/5
+											</div>
 										</div>
-										<div className="text-sm text-gray-500 dark:text-gray-400">
-											{listing.requesterLocation}
-										</div>
-										<div className="text-xs text-yellow-600 flex items-center mt-1">
-											⭐ {listing.requesterRating}/5
-										</div>
-									</div>
 								</TableCell>
 
 								{/* Quantity */}
@@ -1227,7 +1290,8 @@ const WasteListings = () => {
 									</div>
 								</TableCell>
 							</TableRow>
-						))}
+							))
+						)}
 					</TableBody>
 				</Table>
 			</div>

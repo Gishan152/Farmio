@@ -373,6 +373,7 @@ const Payments = () => {
 	];
 
 	const [payments, setPayments] = useState([]);
+	const [loading, setLoading] = useState(true);
 	const [open, setOpen] = useState(false);
 	const [selectedDistrict, setSelectedDistrict] = useState("");
 
@@ -399,13 +400,18 @@ const Payments = () => {
 	const farmerNames = [...new Set(payments.map((p) => p.farmer))].sort();
 
 	useEffect(() => {
+		setLoading(true);
 		fetch("http://localhost:8088/payments")
 			.then((res) => res.json())
 			.then((data) => {
 				console.log("Payments data:", data);
 				setPayments(data);
+				setLoading(false);
 			})
-			.catch((err) => console.error("Error fetching payments:", err));
+			.catch((err) => {
+				console.error("Error fetching payments:", err);
+				setLoading(false);
+			});
 	}, []);
 
 	const getStatusBadge = (status) => {
@@ -1006,48 +1012,95 @@ const Payments = () => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{filteredPayments.map((payment) => (
-							<TableRow key={payment.id}>
-								<TableCell>
-									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{new Date(payment.paymentDate).toLocaleDateString()}
-									</div>
-									<div className="text-xs text-gray-500 dark:text-gray-400">
-										{payment.id}
+						{loading ? (
+							// Loading skeleton
+							Array.from({ length: 5 }).map((_, index) => (
+								<TableRow key={`skeleton-${index}`}>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="h-6 w-28 bg-gray-200 rounded-full animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-6 w-20 bg-gray-200 rounded-full animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="flex justify-end gap-2">
+											<div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+								</TableRow>
+							))
+						) : filteredPayments.length === 0 ? (
+							<TableRow>
+								<TableCell colSpan={8} className="text-center py-8">
+									<div className="text-gray-500">
+										No payments found
 									</div>
 								</TableCell>
-								<TableCell>
-									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{payment.farmer}
-									</div>
-									<div className="text-sm text-gray-500 dark:text-gray-400">
-										{payment.farmerAccount}
-									</div>
-								</TableCell>
-								<TableCell>
-									<span
-										className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getWasteTypeBadge(
-											payment.wasteType
-										)}`}
-									>
-										{payment.wasteType}
-									</span>
-								</TableCell>
-								<TableCell>
-									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{payment.quantity.toLocaleString()} kg
-									</div>
-								</TableCell>
-								<TableCell>
-									<div className="font-medium text-gray-900 dark:text-gray-100">
-										${payment.rate.toFixed(2)}/kg
-									</div>
-								</TableCell>
-								<TableCell>
-									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{payment.amount}
-									</div>
-									<div className="text-xs text-gray-500 dark:text-gray-400">
+							</TableRow>
+						) : (
+							filteredPayments.map((payment) => (
+								<TableRow key={payment.id}>
+									<TableCell>
+										<div className="font-medium text-gray-900 dark:text-gray-100">
+											{new Date(payment.paymentDate).toLocaleDateString()}
+										</div>
+										<div className="text-xs text-gray-500 dark:text-gray-400">
+											{payment.id}
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="font-medium text-gray-900 dark:text-gray-100">
+											{payment.farmer}
+										</div>
+										<div className="text-sm text-gray-500 dark:text-gray-400">
+											{payment.farmerAccount}
+										</div>
+									</TableCell>
+									<TableCell>
+										<span
+											className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getWasteTypeBadge(
+												payment.wasteType
+											)}`}
+										>
+											{payment.wasteType}
+										</span>
+									</TableCell>
+									<TableCell>
+										<div className="font-medium text-gray-900 dark:text-gray-100">
+											{payment.quantity.toLocaleString()} kg
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="font-medium text-gray-900 dark:text-gray-100">
+											${payment.rate.toFixed(2)}/kg
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="font-medium text-gray-900 dark:text-gray-100">
+											{payment.amount}
+										</div>
+										<div className="text-xs text-gray-500 dark:text-gray-400">
 										Fee: {payment.processingFee}
 									</div>
 									<div className="text-sm font-semibold text-green-600">
@@ -1131,7 +1184,54 @@ const Payments = () => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{filteredPayments.map((payment) => (
+						{loading ? (
+							// Loading skeleton
+							Array.from({ length: 5 }).map((_, index) => (
+								<TableRow key={`skeleton-${index}`}>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="h-6 w-28 bg-gray-200 rounded-full animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-6 w-20 bg-gray-200 rounded-full animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="flex justify-end gap-2">
+											<div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+								</TableRow>
+							))
+						) : filteredPayments.length === 0 ? (
+							<TableRow>
+								<TableCell colSpan={8} className="text-center py-8">
+									<div className="text-gray-500">
+										No payments found
+									</div>
+								</TableCell>
+							</TableRow>
+						) : (
+							filteredPayments.map((payment) => (
 							<TableRow key={payment.id}>
 								<TableCell>
 									<div className="font-medium text-gray-900 dark:text-gray-100">
@@ -1221,7 +1321,8 @@ const Payments = () => {
 									</div>
 								</TableCell>
 							</TableRow>
-						))}
+						))
+						)}
 					</TableBody>
 				</Table>
 			</Card>
