@@ -21,9 +21,19 @@ public class WasteListingController {
         this.wasteListingMapper = wasteListingMapper;
     }
 
+    // @GetMapping
+    // public List<WasteListingDTO> getAllWasteListings() {
+    //     return wasteListingService.getAllWasteListings()
+    //             .stream()
+    //             .map(wasteListingMapper::toDTO)
+    //             .toList();
+    // }
+
+    // Return listings assigned to the current waste agent (accepted_by = X-User-Id)
     @GetMapping
-    public List<WasteListingDTO> getAllWasteListings() {
-        return wasteListingService.getAllWasteListings()
+    public List<WasteListingDTO> getMyWasteListings(@RequestHeader("X-User-Id") String userId) {
+        Long agentId = Long.valueOf(userId);
+        return wasteListingService.getAllByAcceptedBy(agentId)
                 .stream()
                 .map(wasteListingMapper::toDTO)
                 .toList();

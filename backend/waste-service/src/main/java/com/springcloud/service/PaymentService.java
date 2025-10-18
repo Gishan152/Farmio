@@ -58,6 +58,42 @@ public class PaymentService {
                 })
                 .toList();
     }
+
+    // New: filter by current agent (waste user) id
+    public List<PaymentDTO> getPaymentDTOsByAgentId(Long agentId) {
+        return paymentRepository.findByAgentId(agentId)
+                .stream()
+                .map(payment -> {
+                    WasteListing listing = wasteListingRepository.findById(payment.getWasteListingId())
+                            .orElse(null);
+
+                    PaymentDTO dto = new PaymentDTO();
+                    dto.setId(payment.getId());
+                    dto.setWasteListingId(payment.getWasteListingId());
+                    dto.setRequesterId(payment.getRequesterId());
+                    dto.setAgentId(payment.getAgentId());
+                    dto.setQuantity(payment.getQuantity());
+                    dto.setUnit(payment.getUnit());
+                    dto.setPricePerUnit(payment.getPricePerUnit());
+                    dto.setGrossAmount(payment.getGrossAmount());
+                    dto.setStatus(payment.getStatus());
+                    dto.setPaymentMethod(payment.getPaymentMethod());
+                    dto.setTransactionRef(payment.getTransactionRef());
+                    dto.setCreatedAt(payment.getCreatedAt());
+                    dto.setUpdatedAt(payment.getUpdatedAt());
+
+                    // Enrichment
+                    dto.setPaymentDate(payment.getCreatedAt());
+                    if (listing != null && listing.getRequester() != null) {
+                        dto.setFarmer(listing.getRequester().getName());
+                        dto.setFarmerAccount(listing.getRequester().getAccountNumber());
+                        dto.setWasteType(listing.getWasteType());
+                    }
+                    dto.setRate(payment.getPricePerUnit());
+                    return dto;
+                })
+                .toList();
+    }
     public Payment getPaymentById(Long id) {
         return paymentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payment not found with id " + id));

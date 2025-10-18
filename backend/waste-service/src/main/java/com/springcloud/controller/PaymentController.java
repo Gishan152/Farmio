@@ -20,9 +20,16 @@ public class PaymentController {
         this.paymentMapper = paymentMapper;
     }
 
+    // @GetMapping
+    // public List<PaymentDTO> getAllPayments() {
+    //     return paymentService.getAllPaymentDTOs();
+    // }
+
+    // Return payments related to the current agent (X-User-Id)
     @GetMapping
-    public List<PaymentDTO> getAllPayments() {
-        return paymentService.getAllPaymentDTOs();
+    public List<PaymentDTO> getMyPayments(@RequestHeader("X-User-Id") String userId) {
+        Long agentId = Long.valueOf(userId);
+        return paymentService.getPaymentDTOsByAgentId(agentId);
     }
 
     @GetMapping("/{id}")

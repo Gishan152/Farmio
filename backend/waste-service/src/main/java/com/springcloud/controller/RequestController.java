@@ -6,6 +6,8 @@ import com.springcloud.mapper.RequestMapper;
 import com.springcloud.mapper.WasteListingMapper;
 import com.springcloud.service.RequestService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -83,10 +85,13 @@ public class RequestController {
     @PutMapping("/{id}/accept")
     public WasteListingDTO acceptRequest(
             @PathVariable Long id,
-            @RequestParam Long agentId,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
             @RequestParam(required = false) Long relatedListingId
     ) {
-        var listing = requestService.acceptRequest(id, agentId, relatedListingId);
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "X-User-Id header is required");
+        }
+        var listing = requestService.acceptRequest(id, userId, relatedListingId);
         return wasteListingMapper.toDTO(listing);
     }
 }

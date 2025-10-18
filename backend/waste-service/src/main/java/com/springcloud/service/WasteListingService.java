@@ -29,6 +29,11 @@ public class WasteListingService {
         return wasteListingRepository.findById(id).orElse(null);
     }
 
+    // New: fetch all listings accepted by the given agent (user)
+    public List<WasteListing> getAllByAcceptedBy(Long acceptedBy) {
+        return wasteListingRepository.findByAcceptedBy(acceptedBy);
+    }
+
     public WasteListing updateStatus(Long id, String newStatus) {
         WasteListing listing = wasteListingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Listing not found"));
