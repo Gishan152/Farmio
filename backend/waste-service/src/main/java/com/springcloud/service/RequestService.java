@@ -47,6 +47,16 @@ public class RequestService {
     // Create a new request
     public Request createRequest(Request request) {
         request.setStatus("Pending"); // default status
+        if (request.getRequestDate() == null) {
+            request.setRequestDate(LocalDate.now());
+        }
+        return requestRepository.save(request);
+    }
+
+    // Overload for convenience when using Create DTO mapping
+    public Request createRequestFromCreateDTO(Request request) {
+        request.setStatus("Pending");
+        request.setRequestDate(LocalDate.now());
         return requestRepository.save(request);
     }
 

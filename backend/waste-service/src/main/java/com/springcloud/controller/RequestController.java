@@ -2,6 +2,7 @@ package com.springcloud.controller;
 
 import com.springcloud.dto.RequestDTO;
 import com.springcloud.dto.WasteListingDTO;
+import com.springcloud.dto.RequestCreateDTO;
 import com.springcloud.mapper.RequestMapper;
 import com.springcloud.mapper.WasteListingMapper;
 import com.springcloud.service.RequestService;
@@ -68,11 +69,11 @@ public class RequestController {
         return requestMapper.toDTO(updated);
     }
 
-    // Create a new request (DTO → Entity → DTO)
+    // Create a new request (CreateDTO → Entity → DTO)
     @PostMapping
-    public RequestDTO createRequest(@Valid @RequestBody RequestDTO dto) {
-        var entity = requestMapper.toEntity(dto);
-        var saved = requestService.createRequest(entity);
+    public RequestDTO createRequest(@Valid @RequestBody RequestCreateDTO dto) {
+        var entity = requestMapper.fromCreateDTO(dto);
+        var saved = requestService.createRequestFromCreateDTO(entity);
         return requestMapper.toDTO(saved);
     }
 

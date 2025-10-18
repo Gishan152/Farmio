@@ -1,6 +1,7 @@
 package com.springcloud.mapper;
 
 import com.springcloud.dto.RequestDTO;
+import com.springcloud.dto.RequestCreateDTO;
 import com.springcloud.model.Request;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -30,4 +31,9 @@ public interface RequestMapper {
     // DTO → Entity
     @Mapping(target = "description", ignore = true)
     Request toEntity(RequestDTO dto);
+
+    // Create DTO → Entity (includes description)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "requestDate", ignore = true)
+    Request fromCreateDTO(RequestCreateDTO dto);
 }
