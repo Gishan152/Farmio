@@ -9,6 +9,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -21,6 +23,9 @@ public class EmailService {
     
     @Autowired
     private JavaMailSender mailSender;
+    
+    @Autowired
+    private TemplateEngine templateEngine;
     
     @Value("${spring.mail.from:noreply@farmio.com}")
     private String fromEmail;
@@ -47,7 +52,7 @@ public class EmailService {
     }
     
     /**
-     * Send HTML email using template
+     * Send HTML email using Thymeleaf template
      */
     public void sendHtmlEmail(String to, String subject, String templateName, Map<String, Object> variables) {
         try {
@@ -58,46 +63,28 @@ public class EmailService {
             helper.setTo(to);
             helper.setSubject(subject);
             
-            // Simple template processing - replace variables in template
-            String htmlContent = processTemplate(templateName, variables);
+            // Process template with Thymeleaf
+            Context context = new Context();
+            if (variables != null) {
+                context.setVariables(variables);
+            }
+            
+            // Default template is general-notification
+            String template = templateName != null && !templateName.isEmpty() 
+                ? templateName 
+                : "general-notification";
+            
+            String htmlContent = templateEngine.process(template, context);
             helper.setText(htmlContent, true);
             
             mailSender.send(message);
-            log.info("HTML email sent successfully to: {}", to);
+            log.info("HTML email sent successfully to: {} using template: {}", to, template);
             
         } catch (MessagingException | MailException e) {
             log.error("Failed to send HTML email to: {}", to, e);
             // Fallback to logging for development/testing
             log.info("HTML EMAIL FALLBACK - To: {}, Subject: {}, Template: {}, Variables: {}", 
                     to, subject, templateName, variables);
-        }
-    }
-    
-    private String processTemplate(String templateName, Map<String, Object> variables) {
-        // Simple template processing - in a real system you'd use Thymeleaf or similar
-        String template = getTemplateContent(templateName);
-        
-        if (variables != null) {
-            for (Map.Entry<String, Object> entry : variables.entrySet()) {
-                String placeholder = "{{" + entry.getKey() + "}}";
-                template = template.replace(placeholder, String.valueOf(entry.getValue()));
-            }
-        }
-        
-        return template;
-    }
-    
-    private String getTemplateContent(String templateName) {
-        // Basic email templates - in production, these would be external template files
-        switch (templateName) {
-            case "order_confirmation":
-                return "<html><body><h2>Order Confirmation</h2><p>Dear {{userName}},</p><p>Your order #{{orderId}} has been confirmed.</p><p>Thank you for using Farmio!</p></body></html>";
-            case "payment_success":
-                return "<html><body><h2>Payment Successful</h2><p>Dear {{userName}},</p><p>Your payment of ${{amount}} has been processed successfully.</p><p>Thank you for your business!</p></body></html>";
-            case "new_message":
-                return "<html><body><h2>New Message</h2><p>Dear {{userName}},</p><p>You have received a new message: {{message}}</p><p>Login to Farmio to view details.</p></body></html>";
-            default:
-                return "<html><body><h2>Notification</h2><p>Dear {{userName}},</p><p>{{message}}</p><p>Best regards,<br>Farmio Team</p></body></html>";
         }
     }
     
