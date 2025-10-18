@@ -14,9 +14,12 @@ public class WarehouseResponseDTO {
     private StorageType storageType;
     private Integer temperatureMin;
     private Integer temperatureMax;
+
+    /* ===== SLOT DETAILS ===== */
     private Integer totalSlots;
     private Integer capacityPerSlot;
     private Integer totalCapacity;
+
     private Double pricePerKg;
     private String certifications;
     private WarehouseStatus status;

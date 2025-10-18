@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,49 +84,7 @@ public class SlotService {
         
         log.info("Created slot with id: {}", savedSlot.getId());
         return mapToResponseDTO(savedSlot);
-    }
-    
-    // Bulk create slots
-    public List<SlotResponseDTO> createSlotsInBulk(BulkSlotCreationDTO requestDTO, Long userId) {
-        log.info("Creating {} slots in bulk for warehouse: {} by user: {}", 
-                requestDTO.getNumberOfSlots(), requestDTO.getWarehouseId(), userId);
-        
-        // Verify warehouse exists and user has access
-        Warehouse warehouse = warehouseRepository.findById(requestDTO.getWarehouseId())
-            .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found with id: " + requestDTO.getWarehouseId()));
-        
-        if (!warehouse.getOwnerId().equals(userId)) {
-            throw new BadRequestException("You don't have access to this warehouse");
-        }
-        
-        List<Slot> slots = new ArrayList<>();
-        int startNum = requestDTO.getStartingNumber();
-        
-        for (int i = 0; i < requestDTO.getNumberOfSlots(); i++) {
-            String slotNumber = requestDTO.getSlotNumberPrefix() + String.format("%03d", startNum + i);
-            
-            // Check if slot number already exists
-            if (slotRepository.existsByWarehouseIdAndSlotNumber(requestDTO.getWarehouseId(), slotNumber)) {
-                log.warn("Skipping slot number {} as it already exists", slotNumber);
-                continue;
-            }
-            
-            Slot slot = new Slot();
-            slot.setSlotNumber(slotNumber);
-            slot.setWarehouseId(requestDTO.getWarehouseId());
-            slot.setStatus(SlotStatus.AVAILABLE);
-            slot.setCapacityKg(requestDTO.getCapacityPerSlot());
-            slot.setCurrentLoadKg(0);
-            slot.setReservedLoadKg(0);
-            
-            slots.add(slot);
-        }
-        
-        List<Slot> savedSlots = slotRepository.saveAll(slots);
-        log.info("Created {} slots in bulk", savedSlots.size());
-        
-        return savedSlots.stream().map(this::mapToResponseDTO).collect(Collectors.toList());
-    }
+    }   
     
     // Update slot
     public SlotResponseDTO updateSlot(Long slotId, SlotRequestDTO requestDTO, Long userId) {

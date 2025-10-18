@@ -1,155 +1,39 @@
 import api from './client';
 
-const bookingsAPI = {
-    // Get all bookings for warehouses owned by the authenticated user
-    getBookings: (warehouseId = null, status = null, search = '') => {
-        const params = {};
-        if (warehouseId) params.warehouseId = warehouseId;
-        if (status && status !== 'all') params.status = status;
-        if (search) params.search = search;
-        
-        return api.get('/api/bookings', { 
-            params,
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+const headers = { 'X-User-Id': '1' }; // todo: real user
 
-    // Get bookings for a specific warehouse
-    getWarehouseBookings: (warehouseId, status = null) => {
-        const params = status && status !== 'all' ? { status } : {};
-        return api.get(`/api/bookings/warehouse/${warehouseId}`, {
-            params,
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+export default {
+  getBookings(warehouseId, status, search) {
+    const params = {};
+    if (warehouseId) params.warehouseId = warehouseId;
+    if (status && status !== 'all') params.status = status;
+    if (search) params.search = search;
+    return api.get('/api/bookings', { params, headers });
+  },
 
-    // Get a specific booking by ID
-    getBooking: (id) => {
-        return api.get(`/api/bookings/${id}`, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  getWarehouseBookings(warehouseId, status) {
+    const params = status && status !== 'all' ? { status } : {};
+    return api.get(`/api/bookings/warehouse/${warehouseId}`, { params, headers });
+  },
 
-    // Get booking statistics for dashboard
-    getBookingStats: (warehouseId = null) => {
-        const params = warehouseId ? { warehouseId } : {};
-        return api.get('/api/bookings/stats', {
-            params,
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  getBooking(id) {
+    return api.get(`/api/bookings/${id}`, { headers });
+  },
 
-    // Approve a booking
-    approveBooking: (bookingId, approvalData = {}) => {
-        return api.put(`/api/bookings/${bookingId}/approve`, approvalData, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  getBookingStats(warehouseId) {
+    const params = warehouseId ? { warehouseId } : {};
+    return api.get('/api/bookings/stats', { params, headers });
+  },
 
-    // Reject a booking
-    rejectBooking: (bookingId, rejectionData) => {
-        return api.put(`/api/bookings/${bookingId}/reject`, rejectionData, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  approveBooking(id) {
+    return api.put(`/api/bookings/${id}/approve`, {}, { headers });
+  },
 
-    // Update booking status
-    updateBookingStatus: (bookingId, status, additionalData = {}) => {
-        return api.put(`/api/bookings/${bookingId}/status`, {
-            status,
-            ...additionalData
-        }, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  rejectBooking(id, reason) {
+    return api.put(`/api/bookings/${id}/reject`, { reason }, { headers });
+  },
 
-    // Handle early retrieval request
-    handleEarlyRetrieval: (bookingId, action, data = {}) => {
-        return api.put(`/api/bookings/${bookingId}/early-retrieval`, {
-            action, // 'approve' or 'reject'
-            ...data
-        }, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
-
-    // Get booking activity logs
-    getBookingActivity: (bookingId) => {
-        return api.get(`/api/bookings/${bookingId}/activity`, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
-
-    // Get bookings by date range
-    getBookingsByDateRange: (startDate, endDate, warehouseId = null) => {
-        const params = { startDate, endDate };
-        if (warehouseId) params.warehouseId = warehouseId;
-        
-        return api.get('/api/bookings/date-range', {
-            params,
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
-
-    // Get revenue analytics
-    getRevenueAnalytics: (warehouseId = null, period = 'month') => {
-        const params = { period };
-        if (warehouseId) params.warehouseId = warehouseId;
-        
-        return api.get('/api/bookings/revenue-analytics', {
-            params,
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
-
-    // Send notification to farmer
-    sendNotification: (bookingId, notificationData) => {
-        return api.post(`/api/bookings/${bookingId}/notify`, notificationData, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
-
-    // Get booking utilization report
-    getUtilizationReport: (warehouseId = null, period = 'month') => {
-        const params = { period };
-        if (warehouseId) params.warehouseId = warehouseId;
-        
-        return api.get('/api/bookings/utilization-report', {
-            params,
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
-
-    // Health check
-    healthCheck: () => {
-        return api.get('/api/bookings/health');
-    }
+  handleEarlyRetrieval(id, approve) {
+    return api.put(`/api/bookings/${id}/early-retrieval?approve=${approve}`, {}, { headers });
+  }
 };
-
-export default bookingsAPI;
