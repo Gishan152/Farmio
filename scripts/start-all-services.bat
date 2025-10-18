@@ -125,17 +125,23 @@ wt -w 0 nt -d "%~dp0../backend/payment-service" --title "Payment Service" cmd /k
 REM Wait a bit
 timeout /t 5 /nobreak >nul
 
-REM Step 12: Start Test Service
-echo [12/14] Starting Test Service...
+REM Step 12: Start Notification Service
+echo [12/15] Starting Notification Service...
+wt -w 0 nt -d "%~dp0../backend/notification-service" --title "Notification Service" cmd /k "echo Starting Notification Service... && mvn spring-boot:run -Dspring.profiles.active=local"
+REM Wait a bit
+timeout /t 5 /nobreak >nul
+
+REM Step 13: Start Test Service
+echo [13/15] Starting Test Service...
 wt -w 0 nt -d "%~dp0../backend/test-service" --title "Test Service" cmd /k "echo Starting Test Service... && mvn spring-boot:run -Dspring.profiles.active=local"
 REM Wait a bit
 timeout /t 5 /nobreak >nul
 
-REM Step 13: Start Product Service (if needed)
-echo [13/14] Starting Product Service...
+REM Step 14: Start Product Service (if needed)
+echo [14/15] Starting Product Service...
 wt -w 0 nt -d "%~dp0../backend/product-service" --title "Product Service" cmd /k "echo Starting Product Service... && mvn spring-boot:run -Dspring.profiles.active=local"
-REM Step 14: Start Frontend (React)
-echo [14/14] Starting Frontend (React)...
+REM Step 15: Start Frontend (React)
+echo [15/15] Starting Frontend (React)...
 wt -w 0 nt -d "%~dp0../frontend" --title "Frontend (React)" cmd /k "echo Starting Frontend... && npm run dev"
 
 echo.
@@ -155,6 +161,7 @@ echo - Warehouse Service: http://localhost:8090
 echo - Analytics Service: http://localhost:8091
 echo - Chat Service: http://localhost:8092
 echo - Payment Service: http://localhost:8093
+echo - Notification Service: http://localhost:8094
 echo - Test Service: http://localhost:8083
 echo - Product Service: http://localhost:8081
 echo.
