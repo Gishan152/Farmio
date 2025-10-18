@@ -107,18 +107,31 @@ const Payments = () => {
 
 	const farmerNames = [...new Set(payments.map((p) => p.farmer))].sort();
 
-	useEffect(() => {
-		setLoading(true);
-		api.get("/api/waste/payments")
-			.then((res) => res.data)
-			.then((data) => {
-				setPayments(data);
-				setLoading(false);
-			})
-			.catch((err) => {
-				console.error("Error fetching payments:", err);
-				setLoading(false);
+	// Polling interval to pick up backend updates from the payment listener
+	const POLL_MS = 15000; // 15 seconds
+
+	const fetchPayments = async ({ showLoading = false } = {}) => {
+		try {
+			if (showLoading) setLoading(true);
+			const userId = localStorage.getItem("userId"); // adjust if using an auth context
+			const res = await api.get("/api/waste/payments", {
+				headers: userId ? { "X-User-Id": userId } : undefined,
 			});
+			setPayments(res.data || []);
+		} catch (err) {
+			console.error("Error fetching payments:", err);
+		} finally {
+			if (showLoading) setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		// initial fetch with loading state
+		fetchPayments({ showLoading: true });
+		// periodic refresh to reflect backend listener updates (e.g., PAID)
+		const t = setInterval(() => fetchPayments({ showLoading: false }), POLL_MS);
+		return () => clearInterval(t);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	// Convert quantity to KG if it's in TON
@@ -177,7 +190,7 @@ const Payments = () => {
 			"Date,Farmer Name,Waste Type,Quantity (kg),Rate (Rs/kg),Total Payment,Status,Transaction ID\n";
 		const csvData = filteredPayments
 			.map((payment) => {
-				const quantityInKg = convertToKg(payment.quantity, payment.quantityUnit);
+				const quantityInKg = convertToKg(payment.quantity, payment.unit);
 				const rate = (
 					parseFloat(payment.amount.replace("$", "")) /
 					quantityInKg
@@ -914,7 +927,7 @@ const Payments = () => {
 								</TableCell>
 								<TableCell>
 									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{convertToKg(payment.quantity, payment.quantityUnit).toLocaleString()} {payment.unit.toLowerCase()}
+										{convertToKg(payment.quantity, payment.unit).toLocaleString()} {payment.unit?.toLowerCase?.() ?? ""}
 									</div>
 								</TableCell>
 								<TableCell>
