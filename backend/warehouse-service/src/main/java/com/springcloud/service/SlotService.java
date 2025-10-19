@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -317,7 +318,6 @@ public class SlotService {
         dto.setProductType(slot.getProductType());
         dto.setReservedByUserId(slot.getReservedByUserId());
         dto.setReservedUntil(slot.getReservedUntil());
-        dto.setLastCleaned(slot.getLastCleaned());
         dto.setTemperature(slot.getTemperature());
         dto.setHumidity(slot.getHumidity());
         dto.setNotes(slot.getNotes());
@@ -325,12 +325,16 @@ public class SlotService {
         dto.setUpdatedAt(slot.getUpdatedAt());
         dto.setAvailable(slot.isAvailable());
         dto.setReserved(slot.isReserved());
-        
+
+        dto.setReservedByUserName(
+            slot.getReservedByUserId() == null ? "-" : "User#" + slot.getReservedByUserId());
+        dto.setReservedByUserContact("-");
+
         // Set warehouse name if warehouse is loaded
         if (slot.getWarehouse() != null) {
             dto.setWarehouseName(slot.getWarehouse().getName());
         }
-        
+
         return dto;
     }
     
@@ -345,7 +349,6 @@ public class SlotService {
         slot.setProductType(dto.getProductType());
         slot.setReservedByUserId(dto.getReservedByUserId());
         slot.setReservedUntil(dto.getReservedUntil());
-        slot.setLastCleaned(dto.getLastCleaned());
         slot.setTemperature(dto.getTemperature());
         slot.setHumidity(dto.getHumidity());
         slot.setNotes(dto.getNotes());
@@ -384,4 +387,103 @@ public class SlotService {
         }
         return 0L;
     }
+
+   
+
+@Transactional
+public SlotResponseDTO createBooking(Long warehouseId, SlotBookingDTO dto, Long userId) {
+    Warehouse w = warehouseRepository.findByIdAndOwnerId(warehouseId, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
+
+    if (slotRepository.existsByWarehouseIdAndSlotNumber(warehouseId, dto.getSlotNumber()))
+        throw new BadRequestException("Slot already booked");
+
+    Slot slot = new Slot();
+    slot.setWarehouseId(warehouseId);
+    slot.setSlotNumber(dto.getSlotNumber());
+    slot.setStatus(SlotStatus.RESERVED);
+    slot.setCapacityKg(dto.getCapacityKg());
+    slot.setReservedLoadKg(dto.getReservedLoadKg());
+    slot.setProductType(dto.getProductType());
+    slot.setStoredItems(dto.getStoredItems());
+    slot.setReservedByUserId(userId);
+    slot.setReservedUntil(dto.getReservedUntil());
+    slot.setNotes(dto.getNotes());
+
+    Slot saved = slotRepository.save(slot);
+    return mapToResponseDTO(saved);
+}
+
+public BookedAndAvailableDTO getBookedAndAvailable(Long warehouseId, Long userId) {
+    Warehouse w = warehouseRepository.findByIdAndOwnerId(warehouseId, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
+
+    List<SlotResponseDTO> booked = slotRepository.findBookedSlots(warehouseId)
+            .stream().map(this::mapToResponseDTO).toList();
+
+    List<Integer> available = slotRepository.findAvailableNumbers(warehouseId, w.getTotalSlots());
+
+    return new BookedAndAvailableDTO(booked, available);
+}
+
+// Get all slots for a warehouse (booked + available as virtual slots)
+public List<SlotResponseDTO> getAllSlotsForWarehouse(Long warehouseId, Long userId) {
+    Warehouse warehouse = warehouseRepository.findByIdAndOwnerId(warehouseId, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
+
+    // Get existing slots (booked/reserved/occupied)
+    List<Slot> existingSlots = slotRepository.findByWarehouseIdOrderBySlotNumberAsc(warehouseId);
+    List<SlotResponseDTO> allSlots = new ArrayList<>();
+    
+    // Convert existing slots to DTOs
+    Map<String, SlotResponseDTO> existingSlotsMap = existingSlots.stream()
+            .map(this::mapToResponseDTO)
+            .collect(Collectors.toMap(SlotResponseDTO::getSlotNumber, slot -> slot));
+    
+    // Generate all slots (1 to totalSlots)
+    for (int i = 1; i <= warehouse.getTotalSlots(); i++) {
+        String slotNumber = String.format("%03d", i); // Format as 001, 002, etc.
+        
+        if (existingSlotsMap.containsKey(slotNumber)) {
+            // Use existing slot data
+            allSlots.add(existingSlotsMap.get(slotNumber));
+        } else {
+            // Create virtual available slot
+            SlotResponseDTO virtualSlot = createVirtualAvailableSlot(warehouseId, slotNumber, warehouse.getName());
+            allSlots.add(virtualSlot);
+        }
+    }
+    
+    return allSlots;
+}
+
+// Helper method to create virtual available slot
+private SlotResponseDTO createVirtualAvailableSlot(Long warehouseId, String slotNumber, String warehouseName) {
+    SlotResponseDTO slot = new SlotResponseDTO();
+    slot.setId(null); // Virtual slot has no ID
+    slot.setSlotNumber(slotNumber);
+    slot.setWarehouseId(warehouseId);
+    slot.setWarehouseName(warehouseName);
+    slot.setStatus(SlotStatus.AVAILABLE);
+    slot.setCapacityKg(1000); // Default capacity
+    slot.setCurrentLoadKg(0);
+    slot.setReservedLoadKg(0);
+    slot.setAvailableCapacity(1000);
+    slot.setUtilizationPercentage(0.0);
+    slot.setProductType(null);
+    slot.setReservedByUserId(null);
+    slot.setReservedByUserName("-");
+    slot.setReservedByUserContact("-");
+    slot.setReservedUntil(null);
+    slot.setTemperature(null);
+    slot.setHumidity(null);
+    slot.setNotes(null);
+    slot.setCreatedAt(null);
+    slot.setUpdatedAt(null);
+    slot.setAvailable(true);
+    slot.setReserved(false);
+    return slot;
+}
+
+    
 }

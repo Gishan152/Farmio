@@ -69,4 +69,16 @@ public interface SlotRepository extends JpaRepository<Slot, Long> {
     // Get slots that are due for maintenance (various criteria)
     @Query("SELECT s FROM Slot s WHERE s.status = 'MAINTENANCE' OR s.status = 'OUT_OF_ORDER' ORDER BY s.updatedAt ASC")
     List<Slot> findSlotsUnderMaintenance();
+
+   
+        /*  Add inside the existing interface  */
+    @Query("SELECT s FROM Slot s WHERE s.warehouseId = :w AND s.status IN ('RESERVED','OCCUPIED') ORDER BY s.slotNumber")
+    List<Slot> findBookedSlots(@Param("w") Long warehouseId);
+
+    @Query(value = """
+            SELECT generate_series(1, :total) EXCEPT SELECT slot_number::int FROM slots WHERE warehouse_id = :w
+            """, nativeQuery = true)
+    List<Integer> findAvailableNumbers(@Param("w") Long warehouseId, @Param("total") int total);
+
 }
+

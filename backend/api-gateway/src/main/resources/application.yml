@@ -12,10 +12,6 @@ spring:
       default-filters:
         - name: AuthenticationFilter
       routes:
-#        - id: product-service
-#          uri: lb://product-service
-#          predicates:
-#            - Path=/products/**
         - id: auth-service
           uri: lb://auth-service
           predicates:

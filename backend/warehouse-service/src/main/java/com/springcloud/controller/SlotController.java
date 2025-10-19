@@ -93,6 +93,25 @@ public class SlotController {
         return ResponseEntity.ok("Expired reservations cleaned");
     }
 
+    @PostMapping("/warehouse/{warehouseId}/book")
+    public SlotResponseDTO createBooking(@PathVariable Long warehouseId,
+                                        @Valid @RequestBody SlotBookingDTO dto,
+                                        @RequestHeader("X-User-Id") Long userId) {
+        return slotService.createBooking(warehouseId, dto, userId);
+    }
+
+    @GetMapping("/warehouse/{warehouseId}/booked-available")
+    public BookedAndAvailableDTO getBookedAndAvailable(@PathVariable Long warehouseId,
+                                                    @RequestHeader("X-User-Id") Long userId) {
+        return slotService.getBookedAndAvailable(warehouseId, userId);
+    }
+
+    @GetMapping("/warehouse/{warehouseId}/all")
+    public List<SlotResponseDTO> getAllSlotsForWarehouse(@PathVariable Long warehouseId,
+                                                        @RequestHeader(value = "X-User-Id", defaultValue = "1") Long userId) {
+        return slotService.getAllSlotsForWarehouse(warehouseId, userId);
+    }
+    
     /* ----------- health ----------- */
     @GetMapping("/health")
     public ResponseEntity<String> health() {

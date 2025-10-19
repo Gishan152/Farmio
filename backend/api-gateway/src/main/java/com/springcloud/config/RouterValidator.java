@@ -14,7 +14,8 @@ public class RouterValidator {
             "/auth/register",
             "/actuator/health",
             "/api/warehouses", // Temporarily open for testing
-            "/api/slots" // Temporarily open for testing
+            "/api/slots", // Temporarily open for testing
+            "/api/user/get" // Temporarily open for testing
     );
 
     public boolean isSecured(ServerHttpRequest request) {
