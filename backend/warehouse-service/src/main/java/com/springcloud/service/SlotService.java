@@ -3,10 +3,7 @@ package com.springcloud.service;
 import com.springcloud.dto.*;
 import com.springcloud.exception.ResourceNotFoundException;
 import com.springcloud.exception.BadRequestException;
-import com.springcloud.model.Booking;
-import com.springcloud.model.Slot;
-import com.springcloud.model.SlotStatus;
-import com.springcloud.model.Warehouse;
+import com.springcloud.model.*;
 import com.springcloud.repository.BookingRepository;
 import com.springcloud.repository.SlotRepository;
 import com.springcloud.repository.WarehouseRepository;
@@ -488,34 +485,47 @@ private SlotResponseDTO createVirtualAvailableSlot(Long warehouseId, String slot
     return slot;
 }
 
-    // Booking Request Workflow Methods
+    // Booking Request Workflow Methods - Updated for new payment flow
     public Map<String, Object> createBookingRequest(Long warehouseId, Map<String, Object> payload, Long userId) {
+        // Find warehouse and owner
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
+            .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
+        
         // Create a pending booking in the bookings table
         Booking booking = new Booking();
         booking.setWarehouseId(warehouseId);
         booking.setFarmerId(userId); // Customer who made the request
-        booking.setStatus("PENDING");
-        booking.setQuantityKg(Double.valueOf(payload.get("quantity").toString()));
-        
-        // Find warehouse owner
-        Warehouse warehouse = warehouseRepository.findById(warehouseId)
-            .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
         booking.setOwnerId(warehouse.getOwnerId());
+        booking.setStatus(BookingStatus.PENDING);
+        booking.setPaymentStatus(PaymentStatus.NOT_REQUIRED);
+        booking.setQuantityKg(Double.valueOf(payload.get("quantity").toString()));
+        if (payload.containsKey("durationDays")) {
+            booking.setDurationDays(Integer.valueOf(payload.get("durationDays").toString()));
+        }
+        if (payload.containsKey("productType")) {
+            booking.setProductType(payload.get("productType").toString());
+        }
         
         Booking saved = bookingRepository.save(booking);
         
         return Map.of(
             "id", saved.getId(),
-            "status", "PENDING",
-            "message", "Booking request created successfully"
+            "status", saved.getStatus().name(),
+            "message", "Booking request created successfully. Awaiting warehouse owner approval."
         );
     }
     
     public List<Map<String, Object>> getBookingRequests(Long warehouseId, String status, Long userId) {
-        // Get pending bookings for this warehouse
+        // Get bookings for this warehouse
         List<Booking> bookings;
         if (status != null && !status.equals("all")) {
-            bookings = bookingRepository.findByWarehouseIdAndOwnerIdAndStatus(warehouseId, userId, status.toUpperCase());
+            try {
+                BookingStatus bookingStatus = BookingStatus.valueOf(status.toUpperCase());
+                bookings = bookingRepository.findByWarehouseIdAndOwnerIdAndStatus(warehouseId, userId, bookingStatus);
+            } catch (IllegalArgumentException e) {
+                // Invalid status, return empty list
+                bookings = List.of();
+            }
         } else {
             bookings = bookingRepository.findByWarehouseIdAndOwnerId(warehouseId, userId);
         }
@@ -526,53 +536,32 @@ private SlotResponseDTO createVirtualAvailableSlot(Long warehouseId, String slot
             map.put("farmerId", booking.getFarmerId());
             map.put("farmerName", "Farmer " + booking.getFarmerId()); // TODO: Get actual farmer name
             map.put("farmerPhone", "+947XXXXXXXX"); // TODO: Get actual farmer phone
-            map.put("produce", "Rice"); // TODO: Get actual produce type
+            map.put("produce", booking.getProductType() != null ? booking.getProductType() : "Rice"); // TODO: Get actual produce type
             map.put("quantity", booking.getQuantityKg());
-            map.put("status", booking.getStatus().toLowerCase());
+            map.put("duration", booking.getDurationDays());
+            map.put("status", booking.getStatus().name().toLowerCase());
+            map.put("paymentStatus", booking.getPaymentStatus().name().toLowerCase());
             map.put("requestDate", booking.getCreatedAt().toString());
             map.put("warehouseId", booking.getWarehouseId());
+            
+            // Add payment-related info if applicable
+            if (booking.getTotalAmount() != null) {
+                map.put("totalAmount", booking.getTotalAmount());
+            }
+            if (booking.getSlotNumber() != null) {
+                map.put("slotNumber", booking.getSlotNumber());
+            }
+            
             return map;
         }).collect(Collectors.toList());
     }
     
+    // This method is now deprecated - use BookingService.approveBookingRequest instead
+    @Deprecated
     @Transactional
     public Map<String, Object> approveBookingRequest(Long warehouseId, Long requestId, Map<String, Object> slotPayload, Long userId) {
-        // Find the booking request
-        Booking booking = bookingRepository.findById(requestId)
-            .filter(b -> b.getWarehouseId().equals(warehouseId) && b.getOwnerId().equals(userId))
-            .orElseThrow(() -> new ResourceNotFoundException("Booking request not found"));
-        
-        if (!"PENDING".equals(booking.getStatus())) {
-            throw new BadRequestException("Only pending booking requests can be approved");
-        }
-        
-        // Create the slot
-        Slot slot = new Slot();
-        slot.setSlotNumber(slotPayload.get("slotNumber").toString());
-        slot.setWarehouseId(warehouseId);
-        slot.setStatus(SlotStatus.RESERVED);
-        slot.setCapacityKg(Integer.valueOf(slotPayload.get("capacityKg").toString()));
-        slot.setProductType(slotPayload.get("productType").toString());
-        slot.setReservedByUserId(booking.getFarmerId());
-        if (slotPayload.containsKey("temperature")) {
-            slot.setTemperature(Double.valueOf(slotPayload.get("temperature").toString()));
-        }
-        if (slotPayload.containsKey("notes")) {
-            slot.setNotes(slotPayload.get("notes").toString());
-        }
-        
-        slotRepository.save(slot);
-        
-        // Update booking status
-        booking.setStatus("APPROVED");
-        bookingRepository.save(booking);
-        
-        return Map.of(
-            "slotId", slot.getId(),
-            "bookingId", booking.getId(),
-            "status", "APPROVED",
-            "message", "Booking request approved and slot created"
-        );
+        // This functionality has been moved to BookingService to handle the payment flow properly
+        throw new BadRequestException("This method is deprecated. Use /api/bookings/{id}/approve endpoint instead.");
     }
     
     public Map<String, Object> rejectBookingRequest(Long warehouseId, Long requestId, Map<String, Object> payload, Long userId) {
@@ -581,12 +570,13 @@ private SlotResponseDTO createVirtualAvailableSlot(Long warehouseId, String slot
             .filter(b -> b.getWarehouseId().equals(warehouseId) && b.getOwnerId().equals(userId))
             .orElseThrow(() -> new ResourceNotFoundException("Booking request not found"));
         
-        if (!"PENDING".equals(booking.getStatus())) {
+        if (booking.getStatus() != BookingStatus.PENDING) {
             throw new BadRequestException("Only pending booking requests can be rejected");
         }
         
         // Update booking status
-        booking.setStatus("REJECTED");
+        booking.setStatus(BookingStatus.REJECTED);
+        booking.setPaymentStatus(PaymentStatus.NOT_REQUIRED);
         if (payload.containsKey("reason")) {
             booking.setRejectionReason(payload.get("reason").toString());
         }
@@ -594,10 +584,9 @@ private SlotResponseDTO createVirtualAvailableSlot(Long warehouseId, String slot
         
         return Map.of(
             "bookingId", booking.getId(),
-            "status", "REJECTED",
+            "status", booking.getStatus().name().toLowerCase(),
             "message", "Booking request rejected"
         );
     }
 
-    
 }
