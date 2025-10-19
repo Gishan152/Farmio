@@ -16,6 +16,8 @@ public class LoadDetailsDto {
     private String loadId;
     private String fromLocation;
     private String toLocation;
+    private String from;
+    private String to;
     private Double weight;
     private Double payment;
     private String produce;

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   TruckIcon, 
   CheckCircleIcon, 
@@ -10,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const AssignedLoads = () => {
+  const navigate = useNavigate();
   const [loads, setLoads] = useState([
     {
       id: 1,
@@ -200,7 +202,7 @@ const AssignedLoads = () => {
                     {/* Pickup Confirmation */}
                     {!load.confirmedBy.driverPickup && load.status === 'Pending Pickup' && (
                       <button
-                        onClick={() => handleConfirm(load.id, 'Pickup')}
+                        onClick={() => navigate(`/transporter/confirmPickup/${load.id}`)}
                         className="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200 flex items-center space-x-2"
                       >
                         <CheckCircleIcon className="h-5 w-5" />
@@ -211,7 +213,7 @@ const AssignedLoads = () => {
                     {/* Delivery Confirmation */}
                     {!load.confirmedBy.driverDelivery && load.status === 'In Transit' && (
                       <button
-                        onClick={() => handleConfirm(load.id, 'Delivery')}
+                        onClick={() => navigate(`/transporter/confirmDelivery/${load.id}`)}
                         className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center space-x-2"
                       >
                         <CheckCircleIcon className="h-5 w-5" />

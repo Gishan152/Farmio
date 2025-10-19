@@ -32,7 +32,7 @@ const transporterRoutes = {
             Component: AssignedLoads
         },
         {
-            parth: 'pickupDropPoints',
+            path: 'pickupDropPoints',
             Component: PickupDropPoints
         },
         {
@@ -56,11 +56,11 @@ const transporterRoutes = {
             Component: TransporterNotifications
         },
         {
-            path : 'confirm/:id',
+            path : 'confirmPickup/:id',
             Component: ConfirmPickup
         },
         {
-            path : 'confirmDelivery',
+            path : 'confirmDelivery/:id',
             Component: ConfirmDelivery
         }
     ]

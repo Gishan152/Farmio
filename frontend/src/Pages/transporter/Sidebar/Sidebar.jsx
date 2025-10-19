@@ -30,24 +30,19 @@ const menu = [
     to: 'assignedLoads/all', 
     icon: ClipboardDocumentCheckIcon
   },
-  { 
-    label: 'My Deliveries', 
-    to: 'assignedLoads/all',
-    icon: ClipboardDocumentCheckIcon,
-    children: [
-      { label: 'Confirm Pickup', to: 'confirm/id' },
-      { label: 'Confirm Delivery', to: 'confirmDelivery' },
-    ]
-  },
+  // { 
+  //   label: 'My Deliveries', 
+  //   to: 'assignedLoads/all',
+  //   icon: ClipboardDocumentCheckIcon,
+  //   children: [
+  //     { label: 'Confirm Pickup', to: 'confirm/id' },
+  //     { label: 'Confirm Delivery', to: 'confirmDelivery' },
+  //   ]
+  // },
   { 
     label: 'Route Planner', 
     to: 'routePlanner', 
     icon: MapIcon 
-  },
-  { 
-    label: 'Vehicle Info', 
-    to: 'vehicleInfo', 
-    icon: CogIcon 
   },
   { 
     label: 'Delivery History', 
@@ -58,6 +53,11 @@ const menu = [
     label: 'Ratings & Feedback', 
     to: 'ratingsFeedback', 
     icon: StarIcon 
+  },
+   { 
+    label: 'Vehicle Info', 
+    to: 'vehicleInfo', 
+    icon: CogIcon 
   },
   { 
     label: 'Notifications', 
