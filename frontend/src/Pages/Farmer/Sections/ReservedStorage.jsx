@@ -360,24 +360,13 @@ export default function FarmerReservedStorage() {
                         className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
                     >
                         <div className="md:flex">
-                            {/* Image Section */}
-                            <div className="md:w-1/3">
-                                <div className="h-48 md:h-full relative">
-                                    <img
-                                        src={booking.warehouseImage}
-                                        alt={booking.warehouseName}
-                                        className="w-full h-full object-cover"
-                                    />
-                                    <div className="absolute top-4 left-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-                                            {booking.status}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
                             {/* Content Section */}
-                            <div className="md:w-2/3 p-6">
+                            <div className="w-full p-6 relative">
+                                <div className="absolute top-4 right-4">
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
+                                        {booking.status}
+                                    </span>
+                                </div>
                                 <div className="space-y-4">
                                     {/* Header */}
                                     <div className="flex justify-between items-start">

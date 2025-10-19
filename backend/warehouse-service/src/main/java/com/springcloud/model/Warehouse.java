@@ -48,6 +48,12 @@ public class Warehouse {
 
     private String certifications;
 
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
     @Enumerated(EnumType.STRING)
     private WarehouseStatus status;
 

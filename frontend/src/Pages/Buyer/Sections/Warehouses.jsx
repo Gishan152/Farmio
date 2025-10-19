@@ -13,7 +13,24 @@ export default function Warehouses() {
     const [filteredWarehouses, setFilteredWarehouses] = useState([]);
 
     useEffect(() => {
-        loadWarehouses();
+        const loadWarehousesOnMount = async () => {
+            try {
+                setLoading(true);
+                // Use the public endpoint for buyers - load all warehouses initially
+                const response = await warehouseAPI.getPublicWarehouses({
+                    verifiedOnly: true // Only show verified warehouses
+                });
+                setWarehouses(response.data || []);
+                setFilteredWarehouses(response.data || []);
+            } catch (err) {
+                console.error('Error loading warehouses:', err);
+                setError('Failed to load warehouses');
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        loadWarehousesOnMount();
     }, []);
 
     useEffect(() => {
@@ -32,7 +49,11 @@ export default function Warehouses() {
     const loadWarehouses = async () => {
         try {
             setLoading(true);
-            const response = await warehouseAPI.getWarehouses();
+            // Use the public endpoint for buyers
+            const response = await warehouseAPI.getPublicWarehouses({
+                search: searchTerm || undefined,
+                verifiedOnly: true // Only show verified warehouses
+            });
             setWarehouses(response.data || []);
             setFilteredWarehouses(response.data || []);
         } catch (err) {

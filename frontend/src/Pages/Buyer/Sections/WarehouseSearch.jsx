@@ -1,16 +1,16 @@
 import React, { useState } from "react";
-import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMap, Marker } from "@react-google-maps/api";
 import { Link } from "react-router-dom";
 import { CheckBadgeIcon, StarIcon } from "@heroicons/react/24/solid";
 import LocationPickerModal from "../../../Components/LocationPickerModel";
+import warehouseAPI from "../../../API/warehouse";
 import warehouesImg1 from "../../../Assets/Buyer/Warehouses/warehouse.webp";
-import warehouesImg2 from "../../../Assets/Buyer/Warehouses/warehouse2.webp";
 
 const containerStyle = { width: "100%", height: "300px" };
 const centerDefault = { lat: 6.9271, lng: 79.8612 };
 const storageTypes = ["Cold", "Dry"];
 
-function Warehouses({ warehouses }) {
+function Warehouses({ warehouses, onBookWarehouse }) {
     return (
         <section className="py-6">
             {/* <h1 className="text-2xl font-semibold mb-6 dark:text-gray-100">Warehouses</h1> */}
@@ -25,24 +25,24 @@ function Warehouses({ warehouses }) {
                         className="flex flex-col justify-between bg-gradient-to-br from-green-50 to-white dark:from-green-900 dark:to-gray-900 border border-green-100 dark:border-green-800 rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden transition-all duration-300 transform hover:-translate-y-1"
                     >
                         <div>
-                            <div className="relative h-48 bg-gray-200">
-                                <img
-                                    src={w.imageUrl}
-                                    alt={w.name}
-                                    className="object-cover w-full h-full"
-                                />
+                            <div className="p-5 space-y-2 relative">
                                 {w.verified && (
                                     <div className="absolute top-2 right-2 bg-white p-1 border-none rounded-full shadow-md">
                                         <CheckBadgeIcon className="h-6 w-6 text-green-500" />
                                     </div>
                                 )}
-                            </div>
-                            <div className="p-5 space-y-2">
+                                {w.distance && (
+                                    <div className="absolute top-2 left-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                                        {w.distance} km
+                                    </div>
+                                )}
                                 <Link to={`../all/${w.id}`}>
                                     <h2 className="flex items-center text-xl font-bold text-green-700 dark:text-green-300">
                                         {w.name}
                                     </h2>
                                 </Link>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">{w.city}</p>
+                                
                                 <div className="flex flex-wrap gap-2 mt-2">
                                     {w.badges.map(badge => (
                                         <span
@@ -53,30 +53,26 @@ function Warehouses({ warehouses }) {
                                         </span>
                                     ))}
                                 </div>
+                                
                                 <div className="grid grid-cols-2 gap-2 mt-2">
                                     <div className="bg-white dark:bg-gray-800 rounded-lg p-2 border border-gray-100 dark:border-gray-700 flex flex-col items-center">
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">Owner</span>
-                                        <span className="font-semibold text-gray-800 dark:text-gray-100">{w.owner}</span>
-                                    </div>
-                                    <div className="bg-white dark:bg-gray-800 rounded-lg p-2 border border-gray-100 dark:border-gray-700 flex flex-col items-center">
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">Type</span>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">Storage Type</span>
                                         <span className="font-semibold text-gray-800 dark:text-gray-100">{w.storageType}</span>
                                     </div>
                                     <div className="bg-white dark:bg-gray-800 rounded-lg p-2 border border-gray-100 dark:border-gray-700 flex flex-col items-center">
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">Slots</span>
-                                        <span className="font-semibold text-gray-800 dark:text-gray-100">{w.slots}</span>
-                                    </div>
-                                    <div className="bg-white dark:bg-gray-800 rounded-lg p-2 border border-gray-100 dark:border-gray-700 flex flex-col items-center">
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">Capacity</span>
-                                        <span className="font-semibold text-gray-800 dark:text-gray-100">{w.capacityTons} tons</span>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">Available</span>
+                                        <span className="font-semibold text-gray-800 dark:text-gray-100">{Math.round((w.availableCapacity || 0) / 1000)} tons</span>
                                     </div>
                                     <div className="bg-white dark:bg-gray-800 rounded-lg p-2 border border-gray-100 dark:border-gray-700 flex flex-col items-center">
                                         <span className="text-xs text-gray-500 dark:text-gray-400">Price</span>
-                                        <span className="font-bold text-green-700 dark:text-green-300">${w.pricePerTonn.toFixed(2)}/ton</span>
+                                        <span className="font-bold text-green-700 dark:text-green-300">Rs. {w.price}/kg/day</span>
                                     </div>
                                     <div className="bg-white dark:bg-gray-800 rounded-lg p-2 border border-gray-100 dark:border-gray-700 flex flex-col items-center">
                                         <span className="text-xs text-gray-500 dark:text-gray-400">Rating</span>
-                                        <span className="flex items-center font-semibold text-yellow-600 dark:text-yellow-400"><StarIcon className="h-4 w-4 mr-1" />{w.rating}</span>
+                                        <span className="flex items-center font-semibold text-yellow-600 dark:text-yellow-400">
+                                            <StarIcon className="h-4 w-4 mr-1" />
+                                            {w.rating || 'N/A'}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -84,10 +80,16 @@ function Warehouses({ warehouses }) {
                         <div className="flex gap-2 items-center p-4">
                             <Link
                                 to={`../all/${w.id}`}
-                                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-semibold shadow-md text-center"
+                                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 font-semibold text-center border"
                             >
                                 View Details
                             </Link>
+                            <button
+                                onClick={() => onBookWarehouse && onBookWarehouse(w)}
+                                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 font-semibold shadow-md"
+                            >
+                                Book Now
+                            </button>
                         </div>
                     </div>
                 ))}
@@ -102,7 +104,26 @@ export default function WarehouseSearch() {
     const [storageType, setStorageType] = useState("");
     const [capacity, setCapacity] = useState("");
     const [warehouses, setWarehouses] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [mapCenter, setMapCenter] = useState(centerDefault);
+    
+    // Search filters
+    const [searchCity, setSearchCity] = useState("");
+    const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+    const [sortBy, setSortBy] = useState("distance"); // distance, price, rating
+    
+    // Booking form state
+    const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+    const [showBookingForm, setShowBookingForm] = useState(false);
+    const [bookingData, setBookingData] = useState({
+        productType: "",
+        quantity: "",
+        duration: "",
+        notes: "",
+        farmerName: "",
+        farmerPhone: "",
+        farmerEmail: ""
+    });
 
     // const { isLoaded } = useJsApiLoader({
     //     id: "google-map-script",
@@ -115,61 +136,235 @@ export default function WarehouseSearch() {
             return;
         }
         navigator.geolocation.getCurrentPosition((pos) => {
-            setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-            setMapCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+            const newLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            setLocation(newLocation);
+            setMapCenter(newLocation);
+            // Auto-search when location is obtained
+            handleLocationSearch(newLocation);
         });
     };
 
-    const handleSearch = (e) => {
-        e.preventDefault();
-        if (!location.lat || !location.lng) {
-            alert("Please provide a location");
+    const handleLocationSearch = async (searchLocation = location) => {
+        if (!searchLocation.lat || !searchLocation.lng) {
+            alert("Please provide your location to search nearby warehouses");
             return;
         }
-        // Simulate fetching filtered warehouses — replace with real API call
-        const data = [
-            {
-                id: 1,
-                name: "Colombo Cold Storage",
-                lat: 6.9271,
-                lng: 79.8612,
-                distance: 0,
-                storageType: "Cold",
-                availableSlots: 10,
-                capacityTons: 500,
-                pricePerTonn: 15,
-                imageUrl: warehouesImg1,
-                verified: true,
-                owner: "John Doe",
-                rating: 4.5,
-                slots: 10,
-                badges: ["Certified", "24/7 Access"],
-            },
-            {
-                id: 2,
-                name: "Dry Warehouse Negombo",
-                lat: 7.2081,
-                lng: 79.835,
-                distance: 35,
-                storageType: "Dry",
-                availableSlots: 5,
-                capacityTons: 300,
-                pricePerTonn: 10,
-                imageUrl: warehouesImg2,
-                verified: false,
-                owner: "Jane Smith",
-                rating: 4.0,
-                slots: 5,
-                badges: ["Secure", "Affordable"],
-            },
-        ].filter(
-            (wh) =>
-                (!storageType || wh.storageType === storageType) &&
-                (!capacity || wh.capacityTons >= capacity)
-        );
 
-        setWarehouses(data);
-        if (data.length > 0) setMapCenter({ lat: data[0].lat, lng: data[0].lng });
+        try {
+            setLoading(true);
+            
+            // First try the nearby API, fallback to public API with frontend filtering
+            let response;
+            let warehousesData = [];
+            
+            try {
+                response = await warehouseAPI.getNearbyWarehouses({
+                    latitude: searchLocation.lat,
+                    longitude: searchLocation.lng,
+                    radiusKm: radius,
+                    storageType: storageType || undefined,
+                    minCapacity: capacity || undefined,
+                    limit: 20
+                });
+                warehousesData = response.data || [];
+            } catch {
+                console.log('Nearby API failed, falling back to public API with frontend filtering');
+                // Fallback: Get all public warehouses and filter by distance on frontend
+                response = await warehouseAPI.getPublicWarehouses({
+                    storageType: storageType || undefined,
+                    minCapacity: capacity || undefined
+                });
+                
+                const allWarehouses = response.data || [];
+                
+                // Filter warehouses by distance on the frontend
+                warehousesData = allWarehouses
+                    .map(w => ({
+                        ...w,
+                        calculatedDistance: w.latitude && w.longitude ? 
+                            calculateDistance(searchLocation.lat, searchLocation.lng, w.latitude, w.longitude) : 
+                            null
+                    }))
+                    .filter(w => w.calculatedDistance !== null && w.calculatedDistance <= radius)
+                    .sort((a, b) => (a.calculatedDistance || 0) - (b.calculatedDistance || 0))
+                    .slice(0, 20);
+            }
+            
+            processWarehouseResults(warehousesData, searchLocation);
+        } catch (error) {
+            console.error('Error searching nearby warehouses:', error);
+            alert('Failed to search nearby warehouses. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const processWarehouseResults = (warehousesData, searchLocation = null) => {
+        const transformedWarehouses = warehousesData.map(w => {
+            // Calculate distance if location is provided
+            let distance = null;
+            if (searchLocation && w.latitude && w.longitude) {
+                distance = calculateDistance(
+                    searchLocation.lat, searchLocation.lng, 
+                    w.latitude, w.longitude
+                );
+            }
+            
+            // Use already calculated distance from fallback API if available
+            if (w.calculatedDistance !== undefined) {
+                distance = w.calculatedDistance;
+            }
+            
+            // Use distance from API if available
+            if (w.distanceKm !== undefined && w.distanceKm !== null) {
+                distance = w.distanceKm;
+            }
+
+            return {
+                id: w.id,
+                name: w.name,
+                lat: w.latitude,
+                lng: w.longitude,
+                city: w.city || w.location,
+                address: w.address,
+                storageType: w.storageType?.toLowerCase() || 'unknown',
+                availableCapacity: w.availableCapacityKg || (w.totalCapacity - (w.usedCapacity || 0)),
+                price: w.pricePerKg || w.pricePerTonn / 1000,
+                rating: w.rating || 4.0,
+                verified: w.verified || false,
+                badges: w.badges || ["Storage Facility"],
+                imageUrl: w.imageUrl || warehouesImg1,
+                distance: distance,
+                description: w.description || `${w.name} offers ${w.storageType} storage facilities.`
+            };
+        });
+        
+        setWarehouses(transformedWarehouses);
+    };
+
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+        const R = 6371; // Radius of the Earth in kilometers
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return Math.round(R * c * 100) / 100; // Round to 2 decimal places
+    };
+
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        
+        try {
+            setLoading(true);
+            
+            let response;
+            
+            // If location is provided, use nearby search
+            if (location.lat && location.lng) {
+                response = await warehouseAPI.getNearbyWarehouses({
+                    latitude: location.lat,
+                    longitude: location.lng,
+                    radiusKm: radius,
+                    storageType: storageType || undefined,
+                    minCapacity: capacity || undefined,
+                    limit: 20
+                });
+            } else {
+                // Fallback to general search without location
+                response = await warehouseAPI.getPublicWarehouses({
+                    storageType: storageType || undefined,
+                    minCapacity: capacity || undefined,
+                    verifiedOnly: true
+                });
+            }
+            
+            const warehousesData = response.data || [];
+            
+            // Transform the data to match frontend expectations
+            const transformedWarehouses = warehousesData.map(w => ({
+                id: w.id,
+                name: w.name,
+                lat: w.latitude,
+                lng: w.longitude,
+                distance: w.distanceKm,
+                storageType: w.storageType?.toLowerCase() || 'unknown',
+                availableSlots: w.slots || 0,
+                capacityTons: w.capacityTons || 0,
+                pricePerTonn: w.pricePerTonn || 0,
+                imageUrl: w.imageUrl || warehouesImg1,
+                verified: w.verified || false,
+                owner: w.owner || `Warehouse #${w.id}`,
+                rating: w.rating || 4.0,
+                slots: w.slots || 0,
+                badges: w.badges || ["Storage Facility"]
+            }));
+
+            setWarehouses(transformedWarehouses);
+            if (transformedWarehouses.length > 0) {
+                setMapCenter({ 
+                    lat: transformedWarehouses[0].lat, 
+                    lng: transformedWarehouses[0].lng 
+                });
+            }
+        } catch (error) {
+            console.error('Error searching warehouses:', error);
+            alert('Failed to search warehouses. Please try again.');
+            setWarehouses([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleBookWarehouse = (warehouse) => {
+        setSelectedWarehouse(warehouse);
+        setShowBookingForm(true);
+    };
+
+    const handleBookingSubmit = async () => {
+        try {
+            if (!selectedWarehouse) return;
+
+            const requestPayload = {
+                warehouseId: selectedWarehouse.id,
+                quantity: parseFloat(bookingData.quantity),
+                durationDays: parseInt(bookingData.duration),
+                productType: bookingData.productType,
+                notes: bookingData.notes,
+                farmerName: bookingData.farmerName,
+                farmerPhone: bookingData.farmerPhone,
+                farmerEmail: bookingData.farmerEmail
+            };
+
+            // Create booking request using the slots API
+            await warehouseAPI.createBookingRequest 
+                ? warehouseAPI.createBookingRequest(selectedWarehouse.id, requestPayload)
+                : fetch(`/api/slots/warehouse/${selectedWarehouse.id}/request-booking`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-Id': '1' // TODO: Get from auth context
+                    },
+                    body: JSON.stringify(requestPayload)
+                }).then(res => res.json());
+
+            alert('Booking request submitted successfully! The warehouse owner will review your request.');
+            setShowBookingForm(false);
+            setSelectedWarehouse(null);
+            setBookingData({
+                productType: "",
+                quantity: "",
+                duration: "",
+                notes: "",
+                farmerName: "",
+                farmerPhone: "",
+                farmerEmail: ""
+            });
+        } catch (error) {
+            console.error('Error submitting booking request:', error);
+            alert('Failed to submit booking request. Please try again.');
+        }
     };
 
     return (
@@ -259,16 +454,161 @@ export default function WarehouseSearch() {
                             className="w-28 px-2 py-1 text-sm border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-gray-50 dark:bg-gray-700"
                         />
                     </div>
-                    {/* Search Button */}
-                    <button
-                        type="submit"
-                        className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 text-sm mt-5"
-                    >
-                        Search
-                    </button>
+                    {/* Search Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-3 mt-5">
+                        <button
+                            type="submit"
+                            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 text-sm disabled:bg-gray-400"
+                            disabled={loading}
+                        >
+                            {loading ? 'Searching...' : location.lat && location.lng ? 'Search Nearby' : 'Search All Warehouses'}
+                        </button>
+
+                    </div>
                 </form>
 
-                <Warehouses warehouses={warehouses} />
+                <Warehouses 
+                    warehouses={warehouses} 
+                    onBookWarehouse={handleBookWarehouse}
+                />
+
+                {/* Booking Form Modal */}
+                {showBookingForm && selectedWarehouse && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-y-auto">
+                            <div className="p-6">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-xl font-bold text-gray-900">Book Storage</h2>
+                                    <button 
+                                        onClick={() => setShowBookingForm(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                                    <h3 className="font-semibold text-gray-900">{selectedWarehouse.name}</h3>
+                                    <p className="text-sm text-gray-600">{selectedWarehouse.city}</p>
+                                    <p className="text-sm text-gray-600">Rs. {selectedWarehouse.price}/kg per day</p>
+                                </div>
+
+                                <form onSubmit={(e) => { e.preventDefault(); handleBookingSubmit(); }} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Product Type *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            required
+                                            value={bookingData.productType}
+                                            onChange={(e) => setBookingData(prev => ({ ...prev, productType: e.target.value }))}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                            placeholder="e.g., Rice, Vegetables"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Quantity (kg) *
+                                            </label>
+                                            <input
+                                                type="number"
+                                                required
+                                                min="1"
+                                                value={bookingData.quantity}
+                                                onChange={(e) => setBookingData(prev => ({ ...prev, quantity: e.target.value }))}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Duration (days) *
+                                            </label>
+                                            <input
+                                                type="number"
+                                                required
+                                                min="1"
+                                                value={bookingData.duration}
+                                                onChange={(e) => setBookingData(prev => ({ ...prev, duration: e.target.value }))}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-3">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Your Name *
+                                            </label>
+                                            <input
+                                                type="text"
+                                                required
+                                                value={bookingData.farmerName}
+                                                onChange={(e) => setBookingData(prev => ({ ...prev, farmerName: e.target.value }))}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Phone Number *
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                required
+                                                value={bookingData.farmerPhone}
+                                                onChange={(e) => setBookingData(prev => ({ ...prev, farmerPhone: e.target.value }))}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Email *
+                                            </label>
+                                            <input
+                                                type="email"
+                                                required
+                                                value={bookingData.farmerEmail}
+                                                onChange={(e) => setBookingData(prev => ({ ...prev, farmerEmail: e.target.value }))}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Additional Notes
+                                        </label>
+                                        <textarea
+                                            rows="3"
+                                            value={bookingData.notes}
+                                            onChange={(e) => setBookingData(prev => ({ ...prev, notes: e.target.value }))}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                                            placeholder="Special requirements, handling instructions, etc."
+                                        />
+                                    </div>
+
+                                    <div className="flex gap-3 pt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowBookingForm(false)}
+                                            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                                        >
+                                            Submit Request
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* <div className="mt-8">
                     <h3 className="text-xl font-semibold mb-2">Map View</h3>

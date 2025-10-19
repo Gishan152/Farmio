@@ -2,38 +2,61 @@
 import { useState, useEffect } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import { StarIcon, CheckBadgeIcon, MapPinIcon, CurrencyDollarIcon, BuildingStorefrontIcon, TagIcon, UserIcon, ShieldCheckIcon } from "@heroicons/react/24/solid";
-import warehouseImage from "../../../Assets/Buyer/Warehouses/warehouse.webp";
+
 
 export async function warehouseDetailsLoader({ params }) {
     const { warehouseId } = params;
-    // TODO: fetch data from API
-    return {
-        id: warehouseId,
-        name: "Sunrise Warehouse",
-        owner: {
-            name: "John Doe",
-            // avatarUrl: "/images/owner-john.jpg",
-            avatarUrl: "https://randomuser.me/api/portraits/men/44.jpg",
-            rating: 4.7,
-        },
-        location: "Iowa, USA",
-        warehouseRating: 4.6,
-        slots: [
-            { id: 1, status: "available" },
-            { id: 2, status: "reserved", reservedUntil: "2h 30m" },
-            { id: 3, status: "reserved", reservedUntil: "1d 4h" },
-            // ...
-        ],
-        capacityTons: 250,
-        pricePerTonn: 20,
-        storageType: "Temperature controlled",
-        verified: true,
-        badges: ["24/7 Security", "Fumigation Certified"],
-        // imageUrl: "/images/warehouse1.jpg",
-        imageUrl: warehouseImage,
-        description:
-            "Sunrise Warehouse offers modern, secure & temperature controlled storage. Ideal for agricultural produce and packaged goods. Located near main roads with 24/7 security.",
-    };
+    
+    try {
+        // Fetch warehouse data from API
+        const response = await fetch(`http://localhost:8090/api/warehouses/public/${warehouseId}`);
+        
+        if (!response.ok) {
+            throw new Error('Warehouse not found');
+        }
+        
+        const warehouse = await response.json();
+        
+        return {
+            id: warehouse.id,
+            name: warehouse.name,
+            address: warehouse.address,
+            city: warehouse.city,
+            owner: {
+                name: warehouse.keeperName || warehouse.owner || "Warehouse Manager",
+                contact: warehouse.keeperContact,
+                email: warehouse.keeperEmail,
+                rating: warehouse.rating || 4.0,
+            },
+            location: `${warehouse.address}, ${warehouse.city}`,
+            warehouseRating: warehouse.rating || 4.0,
+            totalSlots: warehouse.totalSlots,
+            availableSlots: warehouse.slots,
+            capacityTons: warehouse.capacityTons,
+            totalCapacity: warehouse.totalCapacity,
+            availableCapacity: warehouse.availableCapacityKg,
+            usedCapacity: warehouse.usedCapacityKg,
+            pricePerTonn: warehouse.pricePerTonn,
+            pricePerKg: warehouse.pricePerKg,
+            storageType: warehouse.storageType,
+            temperatureMin: warehouse.temperatureMin,
+            temperatureMax: warehouse.temperatureMax,
+            verified: warehouse.verified || false,
+            badges: warehouse.badges || [],
+            certifications: warehouse.certifications,
+            status: warehouse.status,
+            description: warehouse.description,
+            createdAt: warehouse.createdAt,
+            updatedAt: warehouse.updatedAt,
+            coordinates: {
+                latitude: warehouse.latitude,
+                longitude: warehouse.longitude
+            }
+        };
+    } catch (error) {
+        console.error('Error fetching warehouse details:', error);
+        throw new Response("Warehouse not found", { status: 404 });
+    }
 }
 
 export const warehouseSlots = [
@@ -125,24 +148,15 @@ export default function WarehouseDetails() {
                 </ul>
             </nav>
             {/* Warehouse Info Card */}
-            <div className="flex flex-col lg:flex-row gap-6">
-                <div className="relative w-full lg:w-1/3 h-72 rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-green-50 to-white dark:from-green-900 dark:to-gray-900 border border-green-100 dark:border-green-800">
-                    <img
-                        src={w.imageUrl}
-                        alt={w.name}
-                        className="object-cover w-full h-full opacity-90"
-                    />
-                    {w.verified && (
-                        <div className="absolute top-2 right-2 bg-white p-1 border-none rounded-full shadow-md">
-                            <CheckBadgeIcon className="h-6 w-6 text-green-500" />
-                        </div>
-                    )}
-                </div>
-                <div className="flex-1 space-y-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow p-6">
+            <div className="w-full">
+                <div className="space-y-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow p-6">
                     <div className="flex flex-col md:flex-row md:items-center md:gap-4 gap-2">
                         <h1 className="text-3xl font-bold text-green-800 dark:text-green-200 flex items-center gap-2">
                             <BuildingStorefrontIcon className="h-7 w-7 text-green-500" />
                             {w.name}
+                            {w.verified && (
+                                <CheckBadgeIcon className="h-6 w-6 text-green-500" />
+                            )}
                         </h1>
                         <span className="flex items-center gap-1 text-yellow-600 font-semibold ml-2">
                             <StarIcon className="h-5 w-5" />{w.warehouseRating}
@@ -163,21 +177,89 @@ export default function WarehouseDetails() {
                         <span>{w.location}</span>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                        <img src={w.owner.avatarUrl} alt={w.owner.name} className="h-8 w-8 rounded-full border-2 border-green-400" />
+                        <div className="h-8 w-8 rounded-full border-2 border-green-400 bg-green-100 flex items-center justify-center">
+                            <UserIcon className="h-5 w-5 text-green-600" />
+                        </div>
                         <span className="ml-2 font-medium text-gray-800 dark:text-gray-100 flex items-center gap-1">
-                            <UserIcon className="h-4 w-4 text-green-500" />{w.owner.name}
+                            <span>{w.owner.name}</span>
                         </span>
                         <span className="flex items-center gap-1 text-yellow-600 ml-2">
                             <StarIcon className="h-4 w-4" />{w.owner.rating}
                         </span>
                     </div>
+                    
+                    {/* Contact Information */}
+                    <div className="mt-3 space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                        {w.owner.contact && (
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium">Contact:</span> {w.owner.contact}
+                            </div>
+                        )}
+                        {w.owner.email && (
+                            <div className="flex items-center gap-2">
+                                <span className="font-medium">Email:</span> {w.owner.email}
+                            </div>
+                        )}
+                    </div>
                     <p className="mt-2 text-gray-700 dark:text-gray-200 text-base">{w.description}</p>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-                        <div className="flex items-center gap-2"><TagIcon className="h-5 w-5 text-green-500" /><span className="font-medium">{w.storageType}</span></div>
-                        <div className="flex items-center gap-2"><ShieldCheckIcon className="h-5 w-5 text-blue-500" /><span className="font-medium">{w.capacityTons} tons</span></div>
-                        <div className="flex items-center gap-2"><CurrencyDollarIcon className="h-5 w-5 text-yellow-500" /><span className="font-medium">${w.pricePerTonn.toFixed(2)}/ton</span></div>
-                        <div className="flex items-center gap-2"><span className="font-medium">Total Slots:</span> {w.slots.length}</div>
-                        <div className="flex items-center gap-2"><span className="font-medium">Available:</span> {w.slots.filter(s => s.status === "available").length}</div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                            <div className="flex items-center gap-2 mb-1">
+                                <TagIcon className="h-5 w-5 text-green-500" />
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Storage Type</span>
+                            </div>
+                            <span className="font-medium text-gray-800 dark:text-gray-100">{w.storageType}</span>
+                        </div>
+                        
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                            <div className="flex items-center gap-2 mb-1">
+                                <ShieldCheckIcon className="h-5 w-5 text-blue-500" />
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Total Capacity</span>
+                            </div>
+                            <span className="font-medium text-gray-800 dark:text-gray-100">{w.capacityTons} tons</span>
+                        </div>
+                        
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                            <div className="flex items-center gap-2 mb-1">
+                                <CurrencyDollarIcon className="h-5 w-5 text-yellow-500" />
+                                <span className="text-sm text-gray-600 dark:text-gray-400">Price per Kg</span>
+                            </div>
+                            <span className="font-medium text-gray-800 dark:text-gray-100">Rs. {w.pricePerKg}/kg</span>
+                        </div>
+                        
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Slots</div>
+                            <span className="font-medium text-gray-800 dark:text-gray-100">{w.totalSlots}</span>
+                        </div>
+                        
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Available Slots</div>
+                            <span className="font-medium text-green-600">{w.availableSlots}</span>
+                        </div>
+                        
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Available Capacity</div>
+                            <span className="font-medium text-green-600">{Math.round(w.availableCapacity/1000)} kg</span>
+                        </div>
+                        
+                        {w.temperatureMin && w.temperatureMax && (
+                            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Temperature Range</div>
+                                <span className="font-medium text-gray-800 dark:text-gray-100">{w.temperatureMin}°C - {w.temperatureMax}°C</span>
+                            </div>
+                        )}
+                        
+                        {w.certifications && (
+                            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Certifications</div>
+                                <span className="font-medium text-gray-800 dark:text-gray-100">{w.certifications}</span>
+                            </div>
+                        )}
+                        
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Status</div>
+                            <span className={`font-medium ${w.status === 'OPEN' ? 'text-green-600' : 'text-gray-600'}`}>{w.status}</span>
+                        </div>
                     </div>
                 </div>
             </div>

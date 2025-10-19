@@ -71,7 +71,6 @@ export async function FarmerwarehouseDetailsLoader({ params }) {
 
 export default function FarmerWarehouseDetails() {
     const w = useLoaderData();
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState("");
     const [produceType, setProduceType] = useState("");
@@ -127,18 +126,13 @@ export default function FarmerWarehouseDetails() {
             {/* Header */}
             <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="flex flex-col lg:flex-row lg:items-start gap-6">
-                    <div className="relative w-50 lg:w-1/4 min-w-80">
-                        <img
-                            src={w.images[currentImageIndex]}
-                            alt={w.name}
-                            className="object-cover w-80 h-80"
-                        />
+                    <div className="flex-1 space-y-2 relative">
                         {w.verified && (
                             <div className="absolute top-2 right-2 bg-white p-1 border-none rounded-[50%]">
                                 <CheckBadgeIcon className="h-6 w-6 text-green-500" />
                             </div>
                         )}
-                        <div className="absolute bottom-0 left-3 flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 mb-4">
                             {w.badges.map((b) => (
                                 <span
                                     key={b}
@@ -148,26 +142,6 @@ export default function FarmerWarehouseDetails() {
                                 </span>
                             ))}
                         </div>
-                        <br />
-                        {/* Thumbnail Gallery */}
-                        <div className="flex gap-2">
-                            {w.images.map((img, index) => (
-                                <img
-                                    key={index}
-                                    src={img}
-                                    alt={`Warehouse image ${index + 1}`}
-                                    className={`w-24 h-24 object-cover rounded cursor-pointer transition-all ${
-                                        index === currentImageIndex
-                                            ? "border-2 border-green-500"
-                                            : "border-2 border-transparent"
-                                    } hover:border-green-300`}
-                                    onClick={() => setCurrentImageIndex(index)}
-                                />
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-4">
                             <h1 className="text-3xl font-bold">{w.name}</h1>
                             <div className="flex items-center min-w-65">

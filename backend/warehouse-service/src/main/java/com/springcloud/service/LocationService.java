@@ -124,6 +124,50 @@ public class LocationService {
     }
     
     /**
+     * Calculate distance between two points using Haversine formula (in kilometers)
+     */
+    public Double calculateDistance(Double lat1, Double lon1, Double lat2, Double lon2) {
+        if (!isValidCoordinates(lat1, lon1) || !isValidCoordinates(lat2, lon2)) {
+            return null;
+        }
+        
+        final double R = 6371; // Radius of the Earth in kilometers
+        
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        
+        return R * c; // Distance in kilometers
+    }
+    
+    /**
+     * Calculate estimated travel time using Google Distance Matrix API
+     */
+    public Optional<Integer> calculateTravelTime(Double originLat, Double originLon, 
+                                               Double destLat, Double destLon) {
+        try {
+            log.info("Calculating travel time from {},{} to {},{}", originLat, originLon, destLat, destLon);
+            
+            // For now, returning a simple calculation based on distance
+            Double distance = calculateDistance(originLat, originLon, destLat, destLon);
+            if (distance != null) {
+                // Rough estimate: average speed of 40 km/h in urban areas
+                return Optional.of((int) Math.ceil(distance * 60 / 40)); // in minutes
+            }
+            
+        } catch (Exception e) {
+            log.error("Error calculating travel time", e);
+        }
+        
+        return Optional.empty();
+    }
+    
+    /**
      * Validate if the provided coordinates are within reasonable bounds
      */
     public boolean isValidCoordinates(Double latitude, Double longitude) {

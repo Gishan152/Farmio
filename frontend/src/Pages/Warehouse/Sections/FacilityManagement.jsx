@@ -2,17 +2,19 @@ import { useState } from 'react';
 import { useWarehouseContext } from '../../../Contexts/Warehouse/WarehouseContext';
 import { PencilIcon, TrashIcon, EyeIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import LocationInput from '../../../Components/Common/LocationInput';
+import { smartGeocode } from '../../../Utils/Geocoding';
+import { useGoogleMaps } from '../../../Contexts/GoogleMapContext';
 
 export default function FacilityManagement() {
-    const { warehouses, loading, error, loadWarehouses, addWarehouse, updateWarehouse, deleteWarehouse } = useWarehouseContext();
+    const { warehouses, loadWarehouses, addWarehouse, updateWarehouse, deleteWarehouse } = useWarehouseContext();
     const [editingWarehouse, setEditingWarehouse] = useState(null);
     const [viewingWarehouse, setViewingWarehouse] = useState(null);
     const [deletingWarehouse, setDeletingWarehouse] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [submitLoading, setSubmitLoading] = useState(false);
+    const [_submitLoading, setSubmitLoading] = useState(false);
     const [notification, setNotification] = useState(null);
-    const [activeTab, setActiveTab] = useState('basic'); // basic, contact, suppliers
+    const [_activeTab, setActiveTab] = useState('basic');
     
     // Form states for different sections
     const [supplierForm, setSupplierForm] = useState({ 
@@ -96,6 +98,9 @@ export default function FacilityManagement() {
         warehouseCode: ''
     });
 
+    const { apiKey } = useGoogleMaps();
+    const [geocoding, setGeocoding] = useState(false);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         // Prevent negative price and capacity
@@ -106,6 +111,37 @@ export default function FacilityManagement() {
         }));
     };
 
+    // Auto-geocode city input and set lat/lng when possible
+    const handleCityChange = async (e) => {
+        const city = e.target.value;
+        setFormData(prev => ({ ...prev, city }));
+        
+        // Auto-geocode when city is entered (at least 3 characters)
+        if (city.length >= 3) {
+            setGeocoding(true);
+            try {
+                const coords = await smartGeocode(city, apiKey);
+                setFormData(prev => ({
+                    ...prev,
+                    lat: coords.lat,
+                    lng: coords.lng
+                }));
+                showNotification(
+                    `Coordinates found for ${city} (${coords.source === 'google_maps' ? 'Google Maps' : 'Database'})`,
+                    'success'
+                );
+            } catch (error) {
+                console.error('Geocoding failed:', error);
+                showNotification(
+                    'Could not find coordinates for this city. Please enter them manually.',
+                    'info'
+                );
+            } finally {
+                setGeocoding(false);
+            }
+        }
+    };
+
     // Show notification helper
     const showNotification = (message, type = 'success') => {
         setNotification({ message, type });
@@ -113,7 +149,7 @@ export default function FacilityManagement() {
     };
 
     // Supplier Contact Management
-    const addSupplier = () => {
+    const _addSupplier = () => {
         if (supplierForm.name && supplierForm.category) {
             setFormData(prev => ({
                 ...prev,
@@ -123,7 +159,7 @@ export default function FacilityManagement() {
         }
     };
 
-    const removeSupplier = (id) => {
+    const _removeSupplier = (id) => {
         setFormData(prev => ({
             ...prev,
             supplierContacts: prev.supplierContacts.filter(supplier => supplier.id !== id)
@@ -155,13 +191,23 @@ export default function FacilityManagement() {
         setSubmitLoading(true);
         try {
             const warehouseData = {
-                ...formData,
-                totalCapacityKg: parseInt(formData.totalCapacityKg),
+                name: formData.name,
+                address: formData.address,
+                city: formData.city,
+                totalSlots: Math.ceil(parseInt(formData.totalCapacityKg) / 100), // Assume 100kg per slot
+                capacityPerSlot: 100,
+                totalCapacity: parseInt(formData.totalCapacityKg),
                 pricePerKg: parseFloat(formData.pricePerKg),
                 temperatureMin: parseInt(formData.temperatureMin) || 0,
                 temperatureMax: parseInt(formData.temperatureMax) || 14,
                 storageType: getStorageTypeEnum(formData.storageType),
-                status: formData.status.toUpperCase()
+                certifications: formData.certifications || '',
+                status: formData.status.toUpperCase(),
+                keeperName: formData.keeperName,
+                keeperContact: formData.keeperContact,
+                keeperEmail: formData.keeperEmail,
+                latitude: formData.lat || null,
+                longitude: formData.lng || null
             };
 
             if (editingWarehouse) {
@@ -525,6 +571,7 @@ export default function FacilityManagement() {
                                         value={formData.address}
                                         onChange={(address) => setFormData(prev => ({ ...prev, address }))}
                                         onLocationSelect={(locationData) => {
+                                            console.log('Location selected:', locationData);
                                             setFormData(prev => ({
                                                 ...prev,
                                                 address: locationData.address,
@@ -538,21 +585,40 @@ export default function FacilityManagement() {
                                         required
                                     />
                                     {formData.lat && formData.lng && (
-                                        <p className="mt-1 text-xs text-gray-500">Lat: {formData.lat.toFixed(6)}, Lng: {formData.lng.toFixed(6)}</p>
+                                        <p className="mt-1 text-xs text-green-600 bg-green-50 p-2 rounded border-l-4 border-green-400">
+                                            📍 Coordinates: {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}
+                                        </p>
+                                    )}
+                                    {formData.address && !formData.lat && !formData.lng && (
+                                        <p className="mt-1 text-xs text-yellow-600 bg-yellow-50 p-2 rounded border-l-4 border-yellow-400">
+                                            ⚠️ Manual address mode - coordinates not available
+                                        </p>
                                     )}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        City *
+                                        {geocoding && (
+                                            <span className="ml-2 text-xs text-blue-600">
+                                                🔍 Finding coordinates...
+                                            </span>
+                                        )}
+                                    </label>
                                     <input
                                         type="text"
                                         name="city"
                                         value={formData.city}
-                                        onChange={handleInputChange}
+                                        onChange={handleCityChange}
                                         placeholder="Enter city name"
                                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
                                         required
                                     />
+                                    {formData.lat && formData.lng && (
+                                        <p className="mt-1 text-xs text-green-600 bg-green-50 p-2 rounded border-l-4 border-green-400">
+                                            📍 Coordinates: {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div>

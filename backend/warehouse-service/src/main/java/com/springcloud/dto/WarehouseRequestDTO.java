@@ -61,4 +61,8 @@ public class WarehouseRequestDTO {
     @Email
     @NotBlank(message = "Keeper email required")
     private String keeperEmail;
+    
+    // Location coordinates (optional, can be populated from Google Maps)
+    private Double latitude;
+    private Double longitude;
 }

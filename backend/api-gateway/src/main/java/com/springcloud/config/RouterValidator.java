@@ -16,7 +16,11 @@ public class RouterValidator {
             "/api/warehouses", // Temporarily open for testing
             "/api/slots", // Temporarily open for testing
             "/api/bookings", // Temporarily open for testing
-            "/api/user/get" // Temporarily open for testing
+            "/api/user/get", // Temporarily open for testing
+            "/api/buyer/", // Public buyer endpoints for farmers
+            "/api/warehouses/public/", // Public warehouse browsing endpoints
+            "/api/warehouses/available", // Public available warehouses endpoint
+            "/api/warehouses/capacity/" // Public warehouse capacity checking
     );
 
     public boolean isSecured(ServerHttpRequest request) {
