@@ -90,6 +90,7 @@ export function AwaitingShipment({ order, onMarkAwaitingPickup, onMarkInTranspor
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const normStatus = (status || '').toString().trim().toUpperCase();
+  const normTransport = (order?.transport || '').toString().trim().toUpperCase();
   const anyTransportAvailable = (items || []).some(it => it.__product?.transportationAvailable);
   console.log("anyTransportAvailable : ", anyTransportAvailable)
 
@@ -101,19 +102,37 @@ export function AwaitingShipment({ order, onMarkAwaitingPickup, onMarkInTranspor
     setIsModalOpen(false);
   };
 
+  // Derive action type to bind label and handler
+  const primaryActionType = (() => {
+    if (normStatus === 'PROCESSING') {
+      if (normTransport === 'BY_FARMER') return 'MARK_IN_TRANSPORT';
+      if (normTransport === 'BY_BUYER' || normTransport === 'BY_BUYER_SYSTEM') return 'MARK_AWAITING_PICKUP';
+      return 'NONE';
+    }
+    if (normStatus === 'AWAITING_PICKUP' && anyTransportAvailable) return 'OPEN_MODAL';
+    return 'NONE';
+  })();
+
   const primaryAction = () => {
     const oid = id || orderId;
     if (!oid) return;
-    if (normStatus === 'PROCESSING') return onMarkAwaitingPickup(oid);
-    if (normStatus === 'AWAITING_PICKUP' && anyTransportAvailable) return setIsModalOpen(true);
+    switch (primaryActionType) {
+      case 'MARK_IN_TRANSPORT':
+        return onMarkInTransport(oid);
+      case 'MARK_AWAITING_PICKUP':
+        return onMarkAwaitingPickup(oid);
+      case 'OPEN_MODAL':
+        return setIsModalOpen(true);
+      default:
+        return;
+    }
   };
 
   const primaryLabel = (
-    normStatus === 'PROCESSING'
-      ? 'Mark Ready for Pickup'
-      : normStatus === 'AWAITING_PICKUP'
-        ? (anyTransportAvailable ? 'Add Transport Details' : 'Transport Not Available')
-        : 'No Actions Available'
+    primaryActionType === 'MARK_IN_TRANSPORT' ? 'Mark In Transport'
+      : primaryActionType === 'MARK_AWAITING_PICKUP' ? 'Mark Ready for Pickup'
+      : primaryActionType === 'OPEN_MODAL' ? 'Add Transport Details'
+      : 'No Actions Available'
   );
 
   const firstItem = items?.[0];
@@ -163,8 +182,8 @@ export function AwaitingShipment({ order, onMarkAwaitingPickup, onMarkInTranspor
         <div className="flex flex-col items-center space-y-4">
           <button
             onClick={primaryAction}
-            disabled={!(normStatus === 'PROCESSING' || (normStatus === 'AWAITING_PICKUP' && anyTransportAvailable))}
-            className={`mt-auto w-full py-2 rounded-lg text-white ${(normStatus === 'PROCESSING' || (normStatus === 'AWAITING_PICKUP' && anyTransportAvailable)) ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'}`}
+            disabled={primaryActionType === 'NONE'}
+            className={`mt-auto w-full py-2 rounded-lg text-white ${primaryActionType !== 'NONE' ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'}`}
           >
             {primaryLabel}
           </button>

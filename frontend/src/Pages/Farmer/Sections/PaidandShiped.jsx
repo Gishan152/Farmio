@@ -4,28 +4,16 @@ import api from "../../../API/client";
 
 // Paid and Shipped card
 export function PaidAndShipped({ order }) {
-  const {
-    id,
-    orderId,
-    buyerId,
-    status,
-    total,
-    items = [],
-  } = order;
-
-  const transportData = { vehicleReg: '-', driverName: '-', driverPhone: '-', driverEmail: '-', loadNumber: '-', loadPicked: true, loadDelivered: true, buyerConfirmation: true };
+  const { id, orderId, buyerId, status, total, items = [] } = order;
   const [showDetails, setShowDetails] = useState(false);
   const totalNumber = typeof total === 'number' ? total : Number(total || 0);
   const firstItem = items?.[0];
-  const itemSummary = firstItem ? `${firstItem.quantity} ${firstItem.unitMeasurement} of ${firstItem.__product?.type || ('#'+firstItem.cropId)}` : '—';
+  const itemSummary = firstItem ? `${firstItem.quantity} ${firstItem.unitMeasurement} of ${firstItem.__product?.type || ('#' + firstItem.cropId)}` : '—';
+  const canViewTransport = order.transport === 'BY_FARMER_SYSTEM' || order.transport === 'BY_BUYER_SYSTEM';
+  const transportData = { vehicleReg: '-', driverName: '-', driverPhone: '-', driverEmail: '-', loadNumber: '-', loadPicked: true, loadDelivered: true, buyerConfirmation: true };
 
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
-      {/* Order Successful Text */}
-      <div className="px-6 pt-6">
-        <span className="text-green-600 font-semibold text-lg">Order Successful!</span>
-      </div>
-      
       <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
         {/* Order Details */}
         <div className="sm:col-span-2 grid grid-cols-2 gap-4">
@@ -42,13 +30,14 @@ export function PaidAndShipped({ order }) {
               <span className="text-md font-medium text-gray-800">{field.value}</span>
             </div>
           ))}
+          {/* Detailed items list */}
           <div className="col-span-2">
             <div className="mt-4 border-t pt-3">
               <p className="text-sm font-medium text-gray-700 mb-2">Order Items</p>
               <div className="space-y-1">
                 {(items || []).map((it, idx) => (
                   <div key={idx} className="text-sm text-gray-700 flex gap-3">
-                    <span className="min-w-24">Crop #{it.cropId}</span>
+                    <span className="min-w-24">{it.__product?.type || `Crop #${it.cropId}`}</span>
                     <span>
                       {Number(it.quantity || 0)} {it.unitMeasurement || ''}
                     </span>
@@ -62,41 +51,41 @@ export function PaidAndShipped({ order }) {
           </div>
         </div>
 
-        {/* Transport Info & Image */}
+        {/* Transport details viewer (only for system-managed transports) */}
         <div className="flex flex-col items-center space-y-4">
-          {/* Image omitted - backend does not provide */}
-          {!showDetails ? (
-            <button
-              onClick={() => setShowDetails(true)}
-              className="flex items-center space-x-2 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700"
-            >
-              <TruckIcon className="h-5 w-5" />
-              <span>View Transport</span>
-            </button>
-          ) : (
-            <>
-              <div className="w-full space-y-2">
-                {['vehicleReg','driverName','driverPhone','driverEmail','loadNumber'].map(key => (
-                  <p key={key} className="text-gray-800">
-                    <span className="font-medium">{key.replace(/([A-Z])/g,' $1')}:</span> {transportData[key]}
-                  </p>
-                ))}
-                <div className="flex items-center space-x-4 mt-2">
-                  {['loadPicked','loadDelivered','buyerConfirmation'].map(flag => (
-                    <div key={flag} className="flex items-center space-x-1">
-                      {transportData[flag] ? <CheckIcon className="h-5 w-5 text-green-500" /> : <XMarkIcon className="h-5 w-5 text-red-500" />}
-                      <span className="text-sm text-gray-700">{flag.replace(/([A-Z])/g,' $1')}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {canViewTransport && (
+            !showDetails ? (
               <button
-                onClick={() => setShowDetails(false)}
-                className="mt-4 py-2 px-4 border rounded-lg hover:bg-gray-100"
+                onClick={() => setShowDetails(true)}
+                className="mt-auto w-full py-2 px-4 rounded-lg bg-green-600 hover:bg-green-700 text-white"
               >
-                Hide Transport
+                <span className="inline-flex items-center gap-2"><TruckIcon className="h-5 w-5" /> View Transport</span>
               </button>
-            </>
+            ) : (
+              <div className="w-full">
+                <div className="space-y-2 text-sm text-gray-800">
+                  {['vehicleReg','driverName','driverPhone','driverEmail','loadNumber'].map(key => (
+                    <p key={key}>
+                      <span className="font-medium">{key.replace(/([A-Z])/g,' $1')}:</span> {transportData[key]}
+                    </p>
+                  ))}
+                  <div className="flex items-center space-x-4 mt-2">
+                    {['loadPicked','loadDelivered','buyerConfirmation'].map(flag => (
+                      <div key={flag} className="flex items-center space-x-1">
+                        {transportData[flag] ? <CheckIcon className="h-5 w-5 text-green-500" /> : <XMarkIcon className="h-5 w-5 text-red-500" />}
+                        <span className="text-sm text-gray-700">{flag.replace(/([A-Z])/g,' $1')}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowDetails(false)}
+                  className="mt-4 w-full py-2 rounded-lg border hover:bg-gray-100"
+                >
+                  Hide Transport
+                </button>
+              </div>
+            )
           )}
         </div>
       </div>

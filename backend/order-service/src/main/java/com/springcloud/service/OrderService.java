@@ -190,18 +190,25 @@ public class OrderService {
                     if(!order.getFarmerId().equals(userId)){
                         throw new RuntimeException("Unauthorized");
                     }
-                    if(!order.getStatus().equals(OrderStatus.AWAITING_PICKUP)){
-                        throw new RuntimeException("Order must be in AWAITING_PICKUP to mark IN_TRANSPORT");
+                    // Allow transition when:
+                    // - status == AWAITING_PICKUP (existing path), or
+                    // - status == PROCESSING and transport == BY_FARMER (farmer provides transport)
+                    boolean allowFromAwaiting = order.getStatus() == OrderStatus.AWAITING_PICKUP;
+                    boolean allowFromProcessingFarmer = order.getStatus() == OrderStatus.PROCESSING && "BY_FARMER".equals(order.getTransport());
+                    if (!(allowFromAwaiting || allowFromProcessingFarmer)) {
+                        throw new RuntimeException("Order must be AWAITING_PICKUP or PROCESSING with BY_FARMER transport to mark IN_TRANSPORT");
                     }
-                    // Check transportation availability from any of order's items' crops
-                    boolean transportAvailable = order.getItems().stream().anyMatch(oi -> {
-                        try {
-                            var crop = cropListingServiceClient.getProductById(oi.getCropId());
-                            return Boolean.TRUE.equals(crop.isTransportationAvailable());
-                        } catch (Exception e) { return false; }
-                    });
-                    if (!transportAvailable) {
-                        throw new IllegalStateException("Transportation is not available for this order's product(s)");
+                    // For AWAITING_PICKUP path, ensure transportationAvailable from product(s)
+                    if (allowFromAwaiting) {
+                        boolean transportAvailable = order.getItems().stream().anyMatch(oi -> {
+                            try {
+                                var crop = cropListingServiceClient.getProductById(oi.getCropId());
+                                return Boolean.TRUE.equals(crop.isTransportationAvailable());
+                            } catch (Exception e) { return false; }
+                        });
+                        if (!transportAvailable) {
+                            throw new IllegalStateException("Transportation is not available for this order's product(s)");
+                        }
                     }
                     order.setStatus(OrderStatus.IN_TRANSPORT);
                     return orderRepository.save(order);
