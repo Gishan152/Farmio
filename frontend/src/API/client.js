@@ -46,16 +46,18 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Optional: clear token or user info if stored
       localStorage.removeItem('token');
-      
-      // Get current role from localStorage or default to admin
-      const currentRole = localStorage.getItem('role') || 'admin';
+
+      // Get current role from localStorage or default to user
+      const currentRole = localStorage.getItem('role') || 'user';
       
       // Redirect based on role
       if (currentRole === 'moderator') {
         window.location.href = '/moderator/login';
-      } else {
-        // Default to admin login
+      } else if (currentRole === 'admin') {
         window.location.href = '/admin/login';
+      } else {
+        // Default to user login
+        window.location.href = '/login';
       }
     }
     return Promise.reject(error);

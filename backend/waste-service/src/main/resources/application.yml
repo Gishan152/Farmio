@@ -6,8 +6,8 @@ server:
 spring:
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
-#  application:
-#    name: waste-service
+  application:
+    name: waste-service
   cloud:
     config:
       enabled: false
@@ -43,12 +43,7 @@ spring:
 
 eureka:
   client:
-<<<<<<< HEAD
     service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
-=======
-    register-with-eureka: false
-    fetch-registry: false
-#    service-url:
-#      defaultZone: http://eureka-server:8761/eureka
->>>>>>> 835e4da7e85d0824f03d271a294f3c4ba3c8e085
+      defaultZone: ${EUREKA_URL:http://eureka-server:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true

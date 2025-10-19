@@ -3,6 +3,8 @@ import DashboardLayout from '../../../components/layout/DashboardLayout';
 import Card from '../../../components/ui/Card';
 import Table from '../../../components/ui/Table';
 import StatCard from '../../../components/ui/StatCard';
+import ApiErrorHandler from '../../../Components/error/ApiErrorHandler';
+import ConnectionStatus from '../../../Components/status/ConnectionStatus';
 import { 
   fetchAllWasteListings, 
   fetchAllWasteAgents, 
@@ -10,6 +12,7 @@ import {
   formatWasteStatus,
   getWasteStatusColor
 } from '../../../Utils/wasteUtils';
+import { checkApiAvailability, getDiagnosticInfo, clearServiceStatusCache } from '../../../Utils/serviceStatus';
 
 // Icons
 const RecycleIcon = () => (
@@ -46,36 +49,153 @@ const WasteListings = () => {
     statusCounts: {},
   });
 
-  // Fetch waste data
-  useEffect(() => {
-    const fetchWasteData = async () => {
-      setIsLoading(true);
-      try {
-        const [listings, agents, statusCounts] = await Promise.all([
-          fetchAllWasteListings(),
-          fetchAllWasteAgents(),
-          getWasteListingCountByStatus()
-        ]);
-        
-        setWasteListings(listings || []);
-        setWasteAgents(agents || []);
-        setFilteredData(listings || []);
-        
-        setWasteStats({
-          totalListings: listings?.length || 0,
-          totalAgents: agents?.length || 0,
-          statusCounts: statusCounts || {},
-        });
-      } catch (error) {
-        console.error("Error fetching waste data:", error);
-        setFilteredData([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // State for errors
+  const [authError, setAuthError] = useState(false);
+  const [apiError, setApiError] = useState(false);
+  const [corsError, setCorsError] = useState(false);
+  const [diagnosticInfo, setDiagnosticInfo] = useState(null);
+
+  // Define fetchWasteData at component level for reuse
+  const fetchWasteData = async () => {
+    setIsLoading(true);
+    setAuthError(false);
+    setApiError(false);
+    setCorsError(false);
     
+    try {
+      // First check if the API is available
+      const isApiAvailable = await checkApiAvailability();
+      if (!isApiAvailable) {
+        setApiError(true);
+        const info = await getDiagnosticInfo();
+        setDiagnosticInfo(info);
+        console.error("API Gateway is not available", info);
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('Fetching waste data for dashboard...');
+      
+      // Fetch all data in parallel, even if some fail
+      const [listings, agents, statusCounts] = await Promise.allSettled([
+        fetchAllWasteListings(),
+        fetchAllWasteAgents(),
+        getWasteListingCountByStatus()
+      ]);
+      
+      // Check if any errors are authentication related
+      const errors = [listings, agents, statusCounts]
+        .filter(result => result.status === 'rejected')
+        .map(result => result.reason);
+      
+      if (errors.length > 0) {
+        const hasAuthError = errors.some(error => 
+          error && error.message && (
+            error.message.includes('401') || 
+            error.message.includes('403') || 
+            error.message.toLowerCase().includes('unauthorized') ||
+            error.message.toLowerCase().includes('forbidden')
+          )
+        );
+        
+        if (hasAuthError) {
+          console.error("Authentication error detected");
+          setAuthError(true);
+        } else {
+          // Check if there might be connection issues
+          const hasConnectionError = errors.some(error => 
+            error && error.message && (
+              error.message.includes('Failed to fetch') ||
+              error.message.includes('NetworkError') ||
+              error.message.toLowerCase().includes('network')
+            )
+          );
+          
+          const hasCorsError = errors.some(error => 
+            error && error.message && (
+              error.message.toLowerCase().includes('cors')
+            )
+          );
+          
+          if (hasConnectionError) {
+            console.error("API connection error detected");
+            setApiError(true);
+            const info = await getDiagnosticInfo();
+            setDiagnosticInfo(info);
+          }
+          
+          if (hasCorsError) {
+            console.error("CORS error detected");
+            setCorsError(true);
+            const info = await getDiagnosticInfo();
+            setDiagnosticInfo(info);
+          }
+        }
+      }
+      
+      // Process results, using empty arrays/objects for rejected promises
+      const listingsData = listings.status === 'fulfilled' ? listings.value : [];
+      const agentsData = agents.status === 'fulfilled' ? agents.value : [];
+      const statusCountsData = statusCounts.status === 'fulfilled' ? statusCounts.value : {};
+      
+      console.log(`Successfully processed: ${listingsData.length} listings, ${agentsData.length} agents`);
+      
+      setWasteListings(listingsData);
+      setWasteAgents(agentsData);
+      setFilteredData(listingsData);
+      
+      setWasteStats({
+        totalListings: listingsData.length,
+        totalAgents: agentsData.length,
+        statusCounts: statusCountsData,
+      });
+    } catch (error) {
+      console.error("Error fetching waste data:", error);
+      
+      // Check if it's an authentication error
+      if (error && error.message && (
+        error.message.includes('401') || 
+        error.message.includes('403') || 
+        error.message.toLowerCase().includes('unauthorized') ||
+        error.message.toLowerCase().includes('forbidden')
+      )) {
+        setAuthError(true);
+      } else if (error && error.message && (
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('NetworkError') ||
+        error.message.toLowerCase().includes('network')
+      )) {
+        setApiError(true);
+        getDiagnosticInfo().then(info => setDiagnosticInfo(info));
+      } else if (error && error.message && error.message.toLowerCase().includes('cors')) {
+        setCorsError(true);
+        getDiagnosticInfo().then(info => setDiagnosticInfo(info));
+      }
+      
+      // Set default values even if everything fails
+      setFilteredData([]);
+      setWasteListings([]);
+      setWasteAgents([]);
+      setWasteStats({
+        totalListings: 0,
+        totalAgents: 0,
+        statusCounts: {},
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch waste data on component mount
+  useEffect(() => {
     fetchWasteData();
   }, []);
+  
+  // Function to handle manual refresh
+  const handleRefresh = () => {
+    clearServiceStatusCache();
+    fetchWasteData();
+  };
 
   // Handle search
   useEffect(() => {
@@ -349,6 +469,30 @@ const WasteListings = () => {
       breadcrumbs="Waste Management / Listings"
       userRole="admin"
     >
+      {/* API Errors */}
+      <ApiErrorHandler 
+        isAuthError={authError}
+        isApiError={apiError}
+        isCorsError={corsError}
+        diagnosticInfo={diagnosticInfo}
+        onRetry={() => {
+          clearServiceStatusCache();
+          fetchWasteData();
+        }}
+      />
+      
+      {/* Connection status */}
+      <div className="mb-6">
+        <ConnectionStatus 
+          onStatusChange={(status) => {
+            if (status.status === 'connected' && (apiError || corsError)) {
+              // If connection is restored, try to fetch data again
+              fetchWasteData();
+            }
+          }}
+        />
+      </div>
+
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <StatCard
@@ -413,6 +557,18 @@ const WasteListings = () => {
             <span className="ml-2">Filter</span>
           </button>
 
+          {/* Refresh Button */}
+          <button 
+            className="flex items-center text-sm py-2 px-4 rounded-md border border-dashboard-border hover:bg-gray-100"
+            onClick={handleRefresh}
+            disabled={isLoading}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span className="ml-2">{isLoading ? 'Loading...' : 'Refresh'}</span>
+          </button>
+          
           {/* Add Waste Listing Button */}
           <button className="flex items-center text-sm py-2 px-4 rounded-md bg-farmio text-white hover:bg-green-600">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

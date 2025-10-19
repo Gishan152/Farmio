@@ -1,14 +1,19 @@
 FROM eclipse-temurin:24-jdk-noble
 
-WORKDIR /app/waste-service
+WORKDIR /app
 
-# Copy wrapper and .mvn so Maven can bootstrap
+# Copy parent pom.xml first
+COPY pom.xml .
+
+# Then create and go to waste-service directory
+WORKDIR /app/service
+
+# Copy waste-service files
 COPY waste-service/mvnw .
 COPY waste-service/.mvn .mvn
-RUN chmod +x mvnw
-
-# Copy pom.xml so dependencies can be resolved
 COPY waste-service/pom.xml .
+COPY waste-service/src ./src
+RUN chmod +x mvnw
 
 # Default entrypoint: run Spring Boot via wrapper
 ENTRYPOINT ["./mvnw", "spring-boot:run"]

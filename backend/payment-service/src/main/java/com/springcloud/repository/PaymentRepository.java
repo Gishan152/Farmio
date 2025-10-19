@@ -1,24 +1,16 @@
 package com.springcloud.repository;
 
-import com.springcloud.model.Payment;
+import com.springcloud.entity.Payment;
+import com.springcloud.common.enums.PaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    
+    Optional<Payment> findByReference(String reference);
     List<Payment> findByPayerId(Long payerId);
-    
-    List<Payment> findByPayeeId(Long payeeId);
-    
-    List<Payment> findByOrderId(Long orderId);
-    
-    List<Payment> findByStatus(String status);
-    
-    List<Payment> findByPaymentMethod(String paymentMethod);
-    
-    List<Payment> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
+    List<Payment> findByPayerIdAndStatus(Long payerId, PaymentStatus status);
+    List<Payment> findByStatus(PaymentStatus status);
 }

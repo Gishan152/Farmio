@@ -66,13 +66,70 @@ const OrderConfirmation = () => {
         // }, 2000)
     }
 
-    const handlePayment = () => {
+    const handlePayment = async () => {
         setLoadingPayment(true);
-        // Simulate payment process
-        setTimeout(() => {
+        try {
+            // Get the latest order from context (should have been placed already)
+            const latestOrder = orders[orders.length - 1];
+            if (!latestOrder) {
+                console.error("No order found to make payment for");
+                setLoadingPayment(false);
+                return;
+            }
+
+            // Call backend to make payment
+            const res = await api.post('/api/order/pay', { orderId: latestOrder.id });
+            console.log("init pay : ", res.data);
+            
+            // If all required PayHere params are present, create and submit a form
+            if (res.data && res.data.hash) {
+                // Required PayHere params from backend response
+                const params = {
+                    merchant_id: res.data.merchantId,
+                    return_url: `http://localhost:5173/buyer/orders/${latestOrder.id}`, // Redirect to order details
+                    cancel_url: `http://localhost:5173/buyer/orders/${latestOrder.id}`, // Redirect to order details
+                    notify_url: "https://nrvzmq9j-8080.asse.devtunnels.ms/api/payment/payhere/notify", // PayHere webhook
+                    first_name: res.data.firstName,
+                    last_name: res.data.lastName,
+                    email: res.data.email,
+                    phone: res.data.phone,
+                    address: res.data.address,
+                    city: res.data.city,
+                    country: res.data.country,
+                    order_id: res.data.orderId,
+                    items: res.data.description,
+                    currency: res.data.currency,
+                    amount: Number(res.data.amount).toFixed(2),
+                    hash: res.data.hash,
+                    custom_1: res.data.paymentId
+                };
+
+                console.log("PayHere params: ", params);
+                
+                // Create form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'https://sandbox.payhere.lk/pay/checkout';
+                Object.entries(params).forEach(([key, value]) => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    form.appendChild(input);
+                });
+                document.body.appendChild(form);
+                form.submit();
+                
+            } else {
+                console.error("Invalid payment response from server");
+                push("❌ Payment initialization failed. Please try again.");
+            }
+        } catch (err) {
+            console.error("Payment failed:", err);
+            push("❌ Payment failed. Please try again.");
+        } finally {
             setLoadingPayment(false);
-            // navigate("../transport-confirmation")
-        }, 2000);
+        }
     }
 
     return (

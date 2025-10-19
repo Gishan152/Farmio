@@ -3,7 +3,12 @@ import DashboardLayout from '../../../components/layout/DashboardLayout';
 import Card from '../../../components/ui/Card';
 import Table from '../../../components/ui/Table';
 import StatCard from '../../../components/ui/StatCard';
-import wasteService from '../../../API/wasteService';
+import { 
+  fetchAllWasteListings, 
+  fetchAllWasteAgents,
+  getWasteListingCountByStatus,
+  getWasteListingCountByType 
+} from '../../../Utils/wasteUtils';
 
 // Icons
 const RecycleIcon = () => (
@@ -175,28 +180,46 @@ const CollectionPoints = () => {
     const fetchWasteData = async () => {
       setIsLoading(true);
       try {
-        const [listings, agents, statusCounts, typeCounts] = await Promise.all([
-          wasteService.getAllWasteListings(),
-          wasteService.getAllWasteAgents(),
-          wasteService.getWasteListingCountByStatus(),
-          wasteService.getWasteListingCountByType()
+        console.log('Fetching waste data for collection points dashboard...');
+        
+        // Use Promise.allSettled to continue even if some requests fail
+        const [listings, agents, statusCounts, typeCounts] = await Promise.allSettled([
+          fetchAllWasteListings(), // Direct import from wasteUtils
+          fetchAllWasteAgents(), // Direct import from wasteUtils
+          getWasteListingCountByStatus(), // Direct import from wasteUtils
+          getWasteListingCountByType() // Direct import from wasteUtils
         ]);
         
-        setWasteListings(listings || []);
-        setWasteAgents(agents || []);
+        // Process results, using empty arrays/objects for rejected promises
+        const listingsData = listings.status === 'fulfilled' ? listings.value : [];
+        const agentsData = agents.status === 'fulfilled' ? agents.value : [];
+        const statusCountsData = statusCounts.status === 'fulfilled' ? statusCounts.value : {};
+        const typeCountsData = typeCounts.status === 'fulfilled' ? typeCounts.value : {};
+        
+        console.log(`Successfully processed: ${listingsData.length} listings, ${agentsData.length} agents`);
+        
+        setWasteListings(listingsData);
+        setWasteAgents(agentsData);
+        
         setWasteStats({
-          totalListings: listings?.length || 0,
-          totalAgents: agents?.length || 0,
-          statusCounts: statusCounts || {},
-          typeCounts: typeCounts || {}
+          totalListings: listingsData.length,
+          totalAgents: agentsData.length,
+          statusCounts: statusCountsData,
+          typeCounts: typeCountsData
         });
         
-        // While real data is loading, use sample data for UI testing
+        // Always use sample data for UI testing for now
         setFilteredData(collectionPoints);
       } catch (error) {
         console.error("Error fetching waste data:", error);
         // Use sample data as fallback
         setFilteredData(collectionPoints);
+        setWasteStats({
+          totalListings: 0,
+          totalAgents: 0,
+          statusCounts: {},
+          typeCounts: {}
+        });
       } finally {
         setIsLoading(false);
       }

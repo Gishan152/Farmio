@@ -33,15 +33,17 @@ public class OrderController {
      * Endpoint for buyer to make payment for an order
      */
     @PostMapping("/pay")
-    public ResponseEntity<Order> payForOrder(
+    public ResponseEntity<?> payForOrder(
             @RequestHeader("X-User-Id") String userId,
             @RequestHeader("X-User-Name") String username,
             @RequestHeader("X-Roles") String rolesCsv,
             @RequestBody PaymentRequest request
     ) {
-        var order = paymentService.makePayment(Long.valueOf(userId), request);
-        return ResponseEntity.ok(order);
+        // Updated to handle PaymentInitiationResponse DTO
+        var response = paymentService.makePayment(Long.valueOf(userId), request);
+        return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/create")
     public ResponseEntity<List<Order>> createOrder(
@@ -159,6 +161,44 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Endpoint to get payment status by reference (calls payment-service via Feign)
+     */
+    @GetMapping("/payment-status/{reference}")
+    public ResponseEntity<?> getPaymentStatusByReference(@PathVariable String reference) {
+
+        System.out.println("Checking payment status for reference: " + reference);
+
+        try {
+            var statusResponse = paymentService.getPaymentStatusByReference(reference);
+            String status = null;
+            if (statusResponse instanceof ResponseEntity) {
+                Object body = ((ResponseEntity<?>) statusResponse).getBody();
+                if (body != null) status = body.toString();
+            } else if (statusResponse != null) {
+                status = statusResponse.toString();
+            }
+
+            System.out.println("Payment status for reference " + reference + ": " + status);
+
+            boolean isCompleted = "COMPLETED".equalsIgnoreCase(status);
+            if (isCompleted) {
+                // If payment is completed, update the order status to PROCESSING
+                try {
+                    Long orderId = Long.valueOf(reference); // assuming reference is orderId
+                    // orderService.markPaymentCompleted(orderId);
+                } catch (Exception ex) {
+                    // Optionally log or handle error
+                }
+            }
+
+            System.out.println("Is payment completed: " + isCompleted);
+
+            return ResponseEntity.ok(java.util.Collections.singletonMap("status", isCompleted));
+        } catch (Exception e) {
+            return ResponseEntity.ok(java.util.Collections.singletonMap("status", false));
+        }
+    }
 
 
 //    @PostMapping("/create")

@@ -1,16 +1,15 @@
 package com.springcloud.controller;
 
-import com.springcloud.model.Payment;
+import com.springcloud.dto.*;
 import com.springcloud.service.PaymentService;
+import com.springcloud.service.PayHereService;
+import com.springcloud.util.PayHereFormGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payment")
@@ -19,109 +18,160 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
     
-    @GetMapping("/hello")
-    public String hello() {
-        return "Hello from Payment Service!";
+    @Autowired
+    private PayHereService payHereService;
+    
+    @Autowired
+    private PayHereFormGenerator payHereFormGenerator;
+    
+    // PayHere Integration Endpoints
+    
+    // Payment Initialization (called by order-service, transport-service, etc.)
+    @PostMapping("/payhere/initiate")
+    public ResponseEntity<PayHerePaymentResponse> initiatePayHerePayment(@RequestBody PaymentInitiationRequest request) {
+        System.out.println("reference: " + request.reference());
+        System.out.println("amount: " + request.amount());
+        System.out.println("payerId: " + request.payerId());
+        System.out.println("payeeId: " + request.payeeId());
+        System.out.println("escrowPercentage: " + request.escrowPercentage());
+        System.out.println("description: " + request.description());
+        PayHerePaymentResponse response = payHereService.initiatePayment(request);
+        return ResponseEntity.ok(response);
     }
     
-    @PostMapping("/create")
-    public ResponseEntity<Payment> createPayment(@RequestBody Payment payment) {
-        Payment created = paymentService.createPayment(payment);
-        return ResponseEntity.ok(created);
-    }
-    
-    @GetMapping("/{id}")
-    public ResponseEntity<Payment> getPayment(@PathVariable Long id) {
-        return paymentService.getPaymentById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-    }
-    
-    @GetMapping("/payer/{payerId}")
-    public ResponseEntity<List<Payment>> getPayerPayments(
-            @PathVariable Long payerId,
-            @RequestHeader("X-User-Id") String requestUserId) {
-        
-        // Security check - user can only see their own payments unless admin
-        if (!payerId.toString().equals(requestUserId)) {
-            return ResponseEntity.status(403).build();
+    // PUBLIC
+    // PayHere Payment Notification Handler (Webhook)
+    @PostMapping("/payhere/notify")
+    public ResponseEntity<String> handlePayHereNotification(
+            @RequestParam("merchant_id") String merchantId,
+            @RequestParam("order_id") String orderId,
+            @RequestParam("payment_id") String paymentId,
+            @RequestParam("payhere_amount") String payhereAmount,
+            @RequestParam("payhere_currency") String payhereCurrency,
+            @RequestParam("status_code") String statusCode,
+            @RequestParam("md5sig") String md5sig,
+            @RequestParam(value = "custom_1", required = false) String custom1,
+            @RequestParam(value = "custom_2", required = false) String custom2,
+            @RequestParam(value = "method", required = false) String method,
+            @RequestParam(value = "status_message", required = false) String statusMessage,
+            @RequestParam(value = "card_holder_name", required = false) String cardHolderName,
+            @RequestParam(value = "card_no", required = false) String cardNo,
+            @RequestParam(value = "card_expiry", required = false) String cardExpiry) {
+
+        System.out.println("Payment notification received");
+
+        try {
+            PayHereNotificationRequest notification = new PayHereNotificationRequest(
+                merchantId,
+                orderId,
+                paymentId,
+                new java.math.BigDecimal(payhereAmount),
+                payhereCurrency,
+                statusCode,
+                md5sig,
+                custom1,
+                custom2,
+                method,
+                statusMessage,
+                cardHolderName,
+                cardNo,
+                cardExpiry
+            );
+            
+            payHereService.handlePaymentNotification(notification);
+            return ResponseEntity.ok("OK");
+            
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("ERROR: " + e.getMessage());
         }
-        
-        List<Payment> payments = paymentService.getPaymentsByPayerId(payerId);
-        return ResponseEntity.ok(payments);
     }
     
-    @GetMapping("/payee/{payeeId}")
-    public ResponseEntity<List<Payment>> getPayeePayments(
-            @PathVariable Long payeeId,
-            @RequestHeader("X-User-Id") String requestUserId) {
-        
-        // Security check - user can only see their own received payments unless admin
-        if (!payeeId.toString().equals(requestUserId)) {
-            return ResponseEntity.status(403).build();
-        }
-        
-        List<Payment> payments = paymentService.getPaymentsByPayeeId(payeeId);
-        return ResponseEntity.ok(payments);
+    // Escrow Management Endpoints
+    
+    // Release Escrow Amount
+    @PostMapping("/release-escrow")
+    public ResponseEntity<PaymentResponse> releaseEscrow(@RequestBody EscrowReleaseRequest request) {
+        PaymentResponse response = paymentService.releaseEscrow(request);
+        return ResponseEntity.ok(response);
     }
     
-    @GetMapping("/order/{orderId}")
-    public ResponseEntity<List<Payment>> getOrderPayments(@PathVariable Long orderId) {
-        List<Payment> payments = paymentService.getPaymentsByOrderId(orderId);
-        return ResponseEntity.ok(payments);
+    // Refund Escrow Amount
+    @PostMapping("/refund-escrow")
+    public ResponseEntity<PaymentResponse> refundEscrow(@RequestBody EscrowRefundRequest request) {
+        PaymentResponse response = paymentService.refundEscrow(request);
+        return ResponseEntity.ok(response);
     }
     
-    @PutMapping("/{id}/status")
-    public ResponseEntity<Payment> updatePaymentStatus(
-            @PathVariable Long id,
-            @RequestParam String status) {
-        
-        Payment updated = paymentService.updatePaymentStatus(id, status);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
-        }
-        return ResponseEntity.notFound().build();
+    // Wallet Management Endpoints
+    
+    // PUBLIC
+    // Get Wallet Info (including payment history)
+    @GetMapping("/wallet")
+    public ResponseEntity<WalletInfo> getWalletInfo(@RequestHeader("X-User-Id") Long userId) {
+        System.out.println("Fetching wallet info for the user : " + userId);
+        WalletInfo walletInfo = paymentService.getWalletInfo(userId);
+        return ResponseEntity.ok(walletInfo);
     }
     
-    @GetMapping("/by-date-range")
-    public ResponseEntity<List<Payment>> getPaymentsByDateRange(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        
-        List<Payment> payments = paymentService.getPaymentsByDateRange(startDate, endDate);
-        return ResponseEntity.ok(payments);
+    // PUBLIC
+    // Withdraw Wallet Amount (excluding escrow)
+    @PostMapping("/withdraw")
+    public ResponseEntity<WithdrawalResponse> withdrawToBank(
+        @RequestHeader("X-User-Id") Long userId,
+        @RequestBody WithdrawalRequest request
+    ) {
+        WithdrawalResponse response = paymentService.withdrawToBank(userId, request);
+        return ResponseEntity.ok(response);
     }
     
+    // Bank Details Management
+
+    // PUBLIC
+    @PostMapping("/bank-details")
+    public ResponseEntity<Void> addOrUpdateBankDetails(
+        @RequestHeader("X-User-Id") Long userId,
+        @RequestBody BankDetailsRequest request
+    ) {
+        paymentService.addOrUpdateBankDetails(userId, request);
+        return ResponseEntity.noContent().build();
+    }
+    
+    // PUBLIC
+    @GetMapping("/bank-details")
+    public ResponseEntity<BankDetailsResponse> getBankDetails(
+        @RequestHeader("X-User-Id") Long userId
+    ) {
+        BankDetailsResponse response = paymentService.getBankDetails(userId);
+        return ResponseEntity.ok(response);
+    }
+    
+    // Admin/Moderator Endpoints
+    
+    // Get Payment Statistics
     @GetMapping("/statistics")
-    public ResponseEntity<Map<String, Object>> getPaymentStatistics() {
-        Map<String, Object> stats = paymentService.getPaymentStatistics();
-        return ResponseEntity.ok(stats);
+    public ResponseEntity<PaymentStatistics> getPaymentStatistics() {
+        PaymentStatistics statistics = paymentService.getPaymentStatistics();
+        return ResponseEntity.ok(statistics);
     }
     
-    @GetMapping("/total")
-    public ResponseEntity<BigDecimal> getTotalAmount() {
-        BigDecimal total = paymentService.calculateTotalPaymentAmount();
-        return ResponseEntity.ok(total);
+    // Additional endpoints for transaction history
+    @GetMapping("/history/{userId}")
+    public ResponseEntity<List<TransactionHistory>> getTransactionHistory(@PathVariable Long userId) {
+        List<TransactionHistory> history = paymentService.getTransactionHistory(userId);
+        return ResponseEntity.ok(history);
     }
-    
-    // Admin endpoints - for testing purposes, these endpoints don't require authentication headers
-    @GetMapping("/admin/all")
-    public ResponseEntity<List<Payment>> getAllPaymentsForAdmin() {
-        // For development purposes, we're allowing this endpoint without authorization checks
-        List<Payment> payments = paymentService.getAllPayments();
-        return ResponseEntity.ok(payments);
-    }
-    
-    // Added a public endpoint for easy testing
-    @GetMapping("/public/all")
-    public ResponseEntity<List<Payment>> getAllPaymentsPublic() {
-        List<Payment> payments = paymentService.getAllPayments();
-        return ResponseEntity.ok(payments);
-    }
-    
-    @GetMapping("/admin/by-status")
-    public ResponseEntity<List<Payment>> getPaymentsByStatus(@RequestParam String status) {
-        List<Payment> payments = paymentService.getPaymentsByStatus(status);
-        return ResponseEntity.ok(payments);
+
+    // Check Payment Status by Reference
+    @GetMapping("/status/{reference}")
+    public ResponseEntity<?> getPaymentStatusByReference(@PathVariable String reference) {
+        try {
+            var payment = paymentService.getPaymentByReference(reference);
+            if (payment == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(payment.getStatus().toString());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("ERROR: " + e.getMessage());
+        }
     }
 }
