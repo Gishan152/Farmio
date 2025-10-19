@@ -21,31 +21,41 @@ import com.springcloud.common.enums.OrderStatus;
 @RequiredArgsConstructor
 public class OrderService {
     private final com.springcloud.feign.PaymentServiceClient paymentServiceClient;
+    private final com.springcloud.feign.CropListingServiceClient cropListingServiceClient;
 
     private final OrderRepository orderRepository;
-
-    // Remove: temporary dataset and getter
-    @Getter
-    List<CropInfo> crops = List.of(
-            new CropInfo(1L, "Corn", new BigDecimal("120"), "Sunny Farm", 101L, "Iowa, USA", 4.5, true, "corn.jpg", "kg", true, false, List.of("Organic", "On Sale")),
-            new CropInfo(2L, "Wheat", new BigDecimal("120"), "Golden Fields", 101L, "Kansas, USA", 4.2, false, "wheat.jpg", "kg", true, false, List.of()),
-            new CropInfo(3L, "Rice", new BigDecimal("110"), "Green Valley", 101L, "Kandy, Sri Lanka", 4.7, true, "rice.jpg", "kg", true, false, List.of("Organic")),
-            new CropInfo(4L, "Tomato", new BigDecimal("95"), "Highland Farms", 104L, "Nuwara Eliya, Sri Lanka", 4.0, false, "tomato.jpg", "kg", true, false, List.of("On Sale")),
-            new CropInfo(5L, "Potato", new BigDecimal("80"), "Riverbend Farm", 105L, "Badulla, Sri Lanka", 4.3, true, "potato.jpg", "kg", true, false, List.of()),
-            new CropInfo(6L, "Green Gram", new BigDecimal("210"), "AgroCare Co‑op", 106L, "Kurunegala, Sri Lanka", 4.8, true, "green_gram.jpg", "kg", true, false, List.of("Organic", "Certified"))
-    );
 
 
     public List<Order> create(Long userId, CreateOrderRequest request) {
 
-        // Create a lookup map: cropId -> farmerId
-        Map<Long, Long> cropToFarmer = crops.stream()
-                .collect(Collectors.toMap(CropInfo::getId, CropInfo::getFarmerId));
-        // TODO : Fetch crop items in the order from the crop-listing-service
-        // TODO : Deduce stock by the quantity requested by the buyer for each item in the order
-
-        // Given request.items() is List<OrderItemRequest> with getCropId()
+        // Extract the list of crop IDs from the order request
         List<OrderItemRequest> items = request.items();
+        List<Long> cropIds = items.stream()
+                .map(OrderItemRequest::getCropId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // TODO (COMPLETED): Fetch crop items in the order from the crop-listing-service
+        List<CropInfo> requestedCrops = cropListingServiceClient.getProductsByIds(cropIds);
+        System.out.println("Fetched " + requestedCrops.size() + " crops from crop-listing-service: " + requestedCrops);
+        
+        // Create a lookup map: cropId -> CropInfo
+        Map<Long, CropInfo> cropMap = requestedCrops.stream()
+                .collect(Collectors.toMap(CropInfo::getId, crop -> crop));
+        
+        // Create a lookup map: cropId -> farmerId
+        Map<Long, Long> cropToFarmer = requestedCrops.stream()
+                .collect(Collectors.toMap(CropInfo::getId, CropInfo::getFarmerId));
+
+        // TODO (COMPLETED): Deduce stock by the quantity requested by the buyer for each item in the order
+        // Deduct stock for each item before creating the order
+        items.forEach(item -> {
+            try {
+                cropListingServiceClient.deductStock(item.getCropId(), item.getQuantity().intValue());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to deduct stock for crop " + item.getCropId() + ": " + e.getMessage());
+            }
+        });
 
         Map<Long, List<OrderItemRequest>> itemsByFarmer = items.stream()
                 .filter(item -> cropToFarmer.containsKey(item.getCropId()))
@@ -241,6 +251,13 @@ public class OrderService {
                     return orderRepository.save(order);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+    }
+    
+    /**
+     * Fetch all available crops from crop-listing-service
+     */
+    public List<CropInfo> getCrops() {
+        return cropListingServiceClient.getAllProducts();
     }
 
 }

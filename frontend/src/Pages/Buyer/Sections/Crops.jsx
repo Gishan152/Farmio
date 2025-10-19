@@ -11,9 +11,34 @@ import api from '@/API/client';
 
 export async function cropsLoader() {
 
-    const res = await api.post('/api/order/get-crops')
-    const crops = res.data;
-    console.log("Crops loaded: ", crops);
+    const res = await api.get('/api/products/suggest')
+    // const products = res.data;
+    console.log("Products loaded: ", res.data);
+
+    // Map ProductResponseDTO fields to match current frontend expectations
+    // const crops = products.map(product => ({
+    //     id: product.id,
+    //     type: product.productName,
+    //     pricePerUnit: product.pricePerUnit,
+    //     farm: `Farmer ${product.userId}`,  // TODO: Fetch actual farmer name
+    //     location: product.location,
+    //     rating: product.averageRating,
+    //     ratingCount: product.ratingCount,
+    //     verified: true,  // Default to true, could add verification logic
+    //     imageUrl: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : null,
+    //     unitMeasurement: product.measurement,
+    //     transportationAvailable: product.transportAvailability === "Yes" ? true : false,
+    //     returnsAccepted: product.returnAccepted === "Yes" ? true : false,
+    //     badges: product.badges || [],
+    //     totalStock: product.availableStock,
+    //     createdAt: product.createdAt,
+    //     updatedAt: product.updatedAt,
+    // }));
+    const crops = res.data.map(crop=>{
+        crop.totalStock = crop.availableStock;
+        console.log("crop : ", crop);
+        return crop;
+    });
 
     return crops;
 
@@ -154,6 +179,7 @@ export default function Crops() {
     const handleBuy = (qty) => {
         const item = selectedCrop.data;
         item.quantity = qty;
+        console.log("item selected : g : ", item)
         navigate("../order-confirmation", { state: { items: [item] } })
     }
 
@@ -322,7 +348,7 @@ export default function Crops() {
                                     </div>
                                 </div>
                                 <div className="flex flex-wrap gap-2 mt-2">
-                                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${crop.transpotationAvailable ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-500'}`}>{crop.transpotationAvailable ? 'Transport Available' : 'No Transport'}</span>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${crop.transportationAvailable ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-500'}`}>{crop.transportationAvailable ? 'Transport Available' : 'No Transport'}</span>
                                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${crop.returnsAccepted ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}`}>{crop.returnsAccepted ? 'Returns Accepted' : 'No Returns'}</span>
                                     {crop.totalStock && <span className="px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">{crop.totalStock} {crop.unitMeasurement} Available</span>}
                                 </div>
