@@ -1,5 +1,6 @@
 package com.springcloud.controller;
 
+import com.springcloud.dto.PayHerePaymentResponse;
 import com.springcloud.dto.PaymentDTO;
 import com.springcloud.mapper.PaymentMapper;
 import com.springcloud.service.PaymentService;
@@ -45,5 +46,15 @@ public class PaymentController {
             @RequestParam(required = false) String transactionRef
     ) {
         return paymentMapper.toDTO(paymentService.updatePaymentStatus(id, status, method, transactionRef));
+    }
+
+    /**
+     * Initiate PayHere payment for a waste payout. Escrow 100%, type WASTE.
+     */
+    @PostMapping("/{id}/pay")
+    public PayHerePaymentResponse initiatePay(@RequestHeader("X-User-Id") String userId,
+                                              @PathVariable("id") Long paymentId) {
+        Long agentId = Long.valueOf(userId);
+        return paymentService.initiateWastePayment(agentId, paymentId);
     }
 }

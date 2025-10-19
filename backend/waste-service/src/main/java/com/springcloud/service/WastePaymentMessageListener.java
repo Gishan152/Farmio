@@ -4,6 +4,7 @@ import com.springcloud.model.Payment;
 import com.springcloud.repository.PaymentRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 
 @Service
 @Slf4j
+@ConditionalOnProperty(name = "spring.rabbitmq.host")
 public class WastePaymentMessageListener {
 
     private final PaymentRepository paymentRepository;

@@ -219,74 +219,75 @@ const Payments = () => {
 		});
 	};
 
-	const handleMakePayment = (paymentId) => {
-		const startTask = async () => {
-			try {
-				// Update status to PROCESSING
-				const res = await api.put(
-					`/api/waste/payments/${paymentId}/status?status=PROCESSING`
-				);
-				
-				const updatedPayment = res.data;
-				
-				// Update local state with backend response
-				setPayments((prev) =>
-					prev.map((payment) =>
-						payment.id === paymentId
-							? { ...payment, status: updatedPayment.status }
-							: payment
-					)
-				);
+	const handleMakePayment = async (paymentId) => {
+		try {
+			// Call backend to initiate payment
+			const res = await api.post(`/api/waste/payments/${paymentId}/pay`);
+			console.log("Payment initiation response:", res.data);
 
-				// Open payment gateway in new tab (for testing)
-				window.open("about:blank", "_blank");
+			// If all required PayHere params are present, create and submit a form
+			if (res.data && res.data.hash) {
+				const {
+					merchantId,
+					orderId,
+					amount,
+					currency,
+					hash,
+					firstName,
+					lastName,
+					email,
+					phone,
+					address,
+					city,
+					country,
+				} = res.data;
 
-				// Set timeout to revert to PENDING after 2 minutes if not PAID
-				setTimeout(async () => {
-					try {
-						// Fetch current payment status to check if it changed to PAID
-						const checkRes = await api.get(`/api/waste/payments/${paymentId}`);
-						const currentPayment = checkRes.data;
-						
-						if (currentPayment.status?.toUpperCase() !== "PAID") {
-							// Revert to PENDING if still not PAID
-							const revertRes = await api.put(
-								`/api/waste/payments/${paymentId}/status?status=PENDING`
-							);
-							
-							const revertedPayment = revertRes.data;
-							setPayments((prev) =>
-								prev.map((payment) =>
-									payment.id === paymentId
-										? { ...payment, status: revertedPayment.status }
-										: payment
-								)
-							);
-							
-							toast.warning("Payment timed out", {
-								description: `Payment ${paymentId} has been reverted to pending status.`,
-							});
-						}
-					} catch (error) {
-						console.error("Error checking payment status:", error);
-					}
-				}, 120000); // 2 minutes = 120000ms
+				// Create a form dynamically
+				const form = document.createElement("form");
+				form.method = "POST";
+				form.action = "https://sandbox.payhere.lk/pay/checkout";
 
-				return { paymentId };
-			} catch (error) {
-				console.error("Error processing payment:", error);
-				throw error;
+				const fields = {
+					merchant_id: merchantId,
+					return_url: `${window.location.origin}/waste-agent/payments`,
+					cancel_url: `${window.location.origin}/waste-agent/payments`,
+					notify_url: "http://localhost:8080/api/payment/payhere/notify",
+					order_id: orderId,
+					items: res.data.description || "Waste payment",
+					currency: currency,
+					amount: amount,
+					first_name: firstName,
+					last_name: lastName,
+					email: email,
+					phone: phone,
+					address: address,
+					city: city,
+					country: country,
+					hash: hash,
+				};
+
+				for (const [key, value] of Object.entries(fields)) {
+					const input = document.createElement("input");
+					input.type = "hidden";
+					input.name = key;
+					input.value = value;
+					form.appendChild(input);
+				}
+
+				document.body.appendChild(form);
+				form.submit();
+			} else {
+				console.error("Payment initiation failed: missing hash or data");
+				toast.error("Payment initialization failed", {
+					description: "Please try again or contact support.",
+				});
 			}
-		};
-
-		toast.promise(startTask(), {
-			loading: "Initiating payment...",
-			success: (data) => ({
-				message: "Payment processing started!",
-				description: `Payment ${data.paymentId} is now being processed. Complete payment in the new tab.`,
-			}),
-			error: "Failed to initiate payment. Please try again.",
-		});
+		} catch (err) {
+			console.error("Payment failed:", err);
+			toast.error("Payment failed", {
+				description: "Please try again.",
+			});
+		}
 	};
 
 	const handleSchedulePayment = (paymentId) => {

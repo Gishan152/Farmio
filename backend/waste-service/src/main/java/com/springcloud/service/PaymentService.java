@@ -1,10 +1,13 @@
 package com.springcloud.service;
 
 import com.springcloud.dto.PaymentDTO;
+import com.springcloud.dto.PaymentInitiationRequest;
+import com.springcloud.dto.PayHerePaymentResponse;
 import com.springcloud.model.Payment;
 import com.springcloud.model.WasteListing;
 import com.springcloud.repository.PaymentRepository;
 import com.springcloud.repository.WasteListingRepository;
+import com.springcloud.client.PaymentServiceClient;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,11 +18,14 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final WasteListingRepository wasteListingRepository;
+    private final PaymentServiceClient paymentServiceClient;
 
     public PaymentService(PaymentRepository paymentRepository,
-                          WasteListingRepository wasteListingRepository) {
+                          WasteListingRepository wasteListingRepository,
+                          PaymentServiceClient paymentServiceClient) {
         this.paymentRepository = paymentRepository;
         this.wasteListingRepository = wasteListingRepository;
+        this.paymentServiceClient = paymentServiceClient;
     }
 
     // Return enriched DTOs for frontend
@@ -112,6 +118,52 @@ public class PaymentService {
 
         payment.setUpdatedAt(LocalDateTime.now());
         return paymentRepository.save(payment);
+    }
+
+    /**
+     * Initiate PayHere payment for a waste payout. 
+     * Escrow 100%, type WASTE.
+     */
+    public PayHerePaymentResponse initiateWastePayment(Long agentId, Long paymentId) {
+        // Get the payment record
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found with id " + paymentId));
+
+        // Verify the agent owns this payment
+        if (!payment.getAgentId().equals(agentId)) {
+            throw new SecurityException("You are not authorized to make this payment");
+        }
+
+        // Only allow payment if status is PENDING
+        if (!"PENDING".equalsIgnoreCase(payment.getStatus())) {
+            throw new IllegalStateException("Payment is not in a payable state. Current status: " + payment.getStatus());
+        }
+
+        // Get waste listing for additional context
+        WasteListing listing = wasteListingRepository.findById(payment.getWasteListingId())
+                .orElseThrow(() -> new RuntimeException("Waste listing not found"));
+
+        // Prepare payment initiation request
+        // Agent (payerId) pays the farmer (payeeId)
+        PaymentInitiationRequest paymentInitRequest = new PaymentInitiationRequest(
+            payment.getId().toString(), // reference
+            payment.getGrossAmount().doubleValue(), // amount
+            payment.getAgentId(), // payerId (waste agent)
+            payment.getRequesterId(), // payeeId (farmer/requester)
+            "WASTE", // paymentType
+            100.0, // escrowPercentage - 100% goes to escrow
+            "Waste payment for listing #" + listing.getId() + " - " + listing.getWasteType()
+        );
+
+        System.out.println("Initiating waste payment: " + paymentInitRequest);
+
+        // Call payment-service via Feign client
+        PayHerePaymentResponse response = paymentServiceClient.initiatePayment(paymentInitRequest);
+
+        System.out.println("Payment initiation response: " + response.hash());
+
+        // Return payment initiation response to client
+        return response;
     }
 
 }
