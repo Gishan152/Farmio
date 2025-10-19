@@ -15,6 +15,7 @@ public class RouterValidator {
             "/actuator/health",
             "/api/warehouses", // Temporarily open for testing
             "/api/slots", // Temporarily open for testing
+            "/api/bookings", // Temporarily open for testing
             "/api/user/get" // Temporarily open for testing
     );
 

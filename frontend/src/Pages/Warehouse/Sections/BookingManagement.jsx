@@ -11,10 +11,13 @@ import {
     BuildingStorefrontIcon,
     FunnelIcon,
     ArrowPathIcon,
-    ChevronDownIcon
+    ChevronDownIcon,
+    PlusIcon
 } from '@heroicons/react/24/outline';
 import { useWarehouseContext } from '../../../Contexts/Warehouse/WarehouseContext';
+import { useUserContext } from '../../../Contexts/UserContext';
 import bookingsAPI from '../../../API/bookings';
+import slotsAPI from '../../../API/slots';
 import { formatSlotId } from '../../../Utils/slotUtils';
 
 // Sample booking data
@@ -88,8 +91,10 @@ const sampleBookings = [
 ];
 
 export default function BookingManagement() {
+    const { user } = useUserContext();
     const { warehouses, loadWarehouses } = useWarehouseContext();
     const [bookings, setBookings] = useState([]);
+    const [bookingRequests, setBookingRequests] = useState([]);
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showEarlyRetrievalModal, setShowEarlyRetrievalModal] = useState(false);
@@ -100,11 +105,21 @@ export default function BookingManagement() {
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
+    const [viewMode, setViewMode] = useState('requests'); // 'requests' or 'bookings'
 
     // Dialog states for approve/reject
     const [showApproveDialog, setShowApproveDialog] = useState(false);
     const [showRejectDialog, setShowRejectDialog] = useState(false);
+    const [showSlotCreationDialog, setShowSlotCreationDialog] = useState(false);
     const [actionBooking, setActionBooking] = useState(null);
+    
+    // Slot creation form
+    const [slotForm, setSlotForm] = useState({
+        capacityKg: '',
+        productType: '',
+        temperature: '',
+        notes: ''
+    });
 
     // Show notification helper
     const showNotification = useCallback((message, type = 'success') => {
@@ -131,15 +146,50 @@ export default function BookingManagement() {
         }
     }, [selectedWarehouse, filterStatus, searchTerm, showNotification]);
 
+    const loadBookingRequests = useCallback(async () => {
+        if (selectedWarehouse === 'all') return;
+        
+        setLoading(true);
+        try {
+            const response = await slotsAPI.getBookingRequests(selectedWarehouse, filterStatus);
+            setBookingRequests(response.data || []);
+        } catch (error) {
+            console.error('Error loading booking requests:', error);
+            // Fallback to sample data if API fails
+            setBookingRequests([
+                {
+                    id: "REQ001",
+                    farmerId: "F001",
+                    farmerName: "Farmer Kumara",
+                    farmerPhone: "+94771234567",
+                    farmerEmail: "kumara@email.com",
+                    produce: "Rice",
+                    cropType: "Basmati Rice",
+                    quantity: 500,
+                    duration: 14,
+                    requestDate: "2024-01-15",
+                    startDate: "2024-01-20",
+                    endDate: "2024-02-03",
+                    status: "pending",
+                    notes: "Need temperature controlled storage"
+                }
+            ]);
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedWarehouse, filterStatus]);
+
     useEffect(() => {
         loadWarehouses();
         loadBookings();
-    }, [loadWarehouses, loadBookings]);
+        loadBookingRequests();
+    }, [loadWarehouses, loadBookings, loadBookingRequests]);
 
     // Load bookings when filters change
     useEffect(() => {
         loadBookings();
-    }, [selectedWarehouse, filterStatus, searchTerm, loadBookings]);
+        loadBookingRequests();
+    }, [selectedWarehouse, filterStatus, searchTerm, loadBookings, loadBookingRequests]);
 
     const handleApproveBooking = async (bookingId) => {
         try {
@@ -169,6 +219,58 @@ export default function BookingManagement() {
         } catch (error) {
             console.error('Error rejecting booking:', error);
             showNotification('Failed to reject booking. Please try again.', 'error');
+        }
+    };
+
+    // New functions for booking request workflow
+    const handleApproveBookingRequest = async (requestId) => {
+        if (!slotForm.capacityKg || !slotForm.productType) {
+            showNotification('Please fill in slot capacity and product type', 'error');
+            return;
+        }
+
+        try {
+            const slotPayload = {
+                slotNumber: `S-${String(Date.now()).slice(-6)}`, // Generate unique slot number
+                capacityKg: parseFloat(slotForm.capacityKg),
+                productType: slotForm.productType,
+                temperature: slotForm.temperature ? parseFloat(slotForm.temperature) : null,
+                notes: slotForm.notes
+            };
+
+            await slotsAPI.approveBookingRequest(selectedWarehouse, requestId, slotPayload);
+            
+            // Remove from requests and add to bookings
+            setBookingRequests(prev => prev.filter(req => req.id !== requestId));
+            
+            // Reset form and close dialog
+            setSlotForm({ capacityKg: '', productType: '', temperature: '', notes: '' });
+            setShowSlotCreationDialog(false);
+            setActionBooking(null);
+            
+            showNotification('Booking request approved and slot created!', 'success');
+            
+            // Reload bookings to show the new booking
+            loadBookings();
+        } catch (error) {
+            console.error('Error approving booking request:', error);
+            showNotification('Failed to approve booking request. Please try again.', 'error');
+        }
+    };
+
+    const handleRejectBookingRequest = async (requestId, reason) => {
+        try {
+            await slotsAPI.rejectBookingRequest(selectedWarehouse, requestId, reason);
+            
+            setBookingRequests(prev => prev.filter(req => req.id !== requestId));
+            setRejectionReason('');
+            setShowRejectDialog(false);
+            setActionBooking(null);
+            
+            showNotification('Booking request rejected!', 'success');
+        } catch (error) {
+            console.error('Error rejecting booking request:', error);
+            showNotification('Failed to reject booking request. Please try again.', 'error');
         }
     };
 
@@ -253,7 +355,7 @@ export default function BookingManagement() {
     });
 
     // Check if any modal is open
-    const isModalOpen = showDetailsModal || showEarlyRetrievalModal || showApproveDialog || showRejectDialog;
+    const isModalOpen = showDetailsModal || showEarlyRetrievalModal || showApproveDialog || showRejectDialog || showSlotCreationDialog;
 
     return (
         <div className="p-6 bg-gradient-to-br white min-h-screen">
@@ -263,7 +365,31 @@ export default function BookingManagement() {
                     <div className="flex justify-between items-center">
                         <div>
                             <h1 className="text-3xl font-bold text-gray-900">Booking Management</h1>
-                            <p className="text-gray-600 mt-1">Approve/reject bookings and manage early retrievals</p>
+                            <p className="text-gray-600 mt-1">Manage booking requests and approved bookings</p>
+                            
+                            {/* View Mode Toggle */}
+                            <div className="flex mt-4 space-x-2">
+                                <button
+                                    onClick={() => setViewMode('requests')}
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                        viewMode === 'requests' 
+                                            ? 'bg-green-600 text-white shadow-md' 
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                >
+                                    📋 Booking Requests ({bookingRequests.filter(req => req.status === 'pending').length})
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('bookings')}
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                        viewMode === 'bookings' 
+                                            ? 'bg-green-600 text-white shadow-md' 
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                >
+                                    ✅ Approved Bookings ({filteredBookings.filter(b => b.status === 'approved').length})
+                                </button>
+                            </div>
                         </div>
                         <div className="flex items-center space-x-4">
                             {/* Warehouse Filter */}
@@ -299,16 +425,6 @@ export default function BookingManagement() {
                                 </select>
                                 <ChevronDownIcon className="h-4 w-4 absolute right-2 top-3 text-gray-400 pointer-events-none" />
                             </div>
-
-                            {/* Refresh Button */}
-                            <button
-                                onClick={loadBookings}
-                                disabled={loading}
-                                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-                            >
-                                <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                                <span>Refresh</span>
-                            </button>
                         </div>
                     </div>
 
@@ -331,192 +447,438 @@ export default function BookingManagement() {
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                        <div className="flex items-center">
-                            <div className="p-2 bg-yellow-100 rounded-lg">
-                                <ClockIcon className="h-6 w-6 text-yellow-600" />
+                    {viewMode === 'requests' ? (
+                        <>
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-orange-200">
+                                <div className="flex items-center">
+                                    <div className="p-2 bg-orange-100 rounded-lg">
+                                        <ClockIcon className="h-6 w-6 text-orange-600" />
+                                    </div>
+                                    <div className="ml-3">
+                                        <p className="text-sm font-medium text-gray-500">Pending Requests</p>
+                                        <p className="text-lg font-semibold text-gray-900">
+                                            {bookingRequests.filter(r => r.status === 'pending').length}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="ml-3">
-                                <p className="text-sm font-medium text-gray-500">Pending</p>
-                                <p className="text-lg font-semibold text-gray-900">
-                                    {bookings.filter(b => b.status === 'pending').length}
-                                </p>
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-green-200">
+                                <div className="flex items-center">
+                                    <div className="p-2 bg-green-100 rounded-lg">
+                                        <CheckIcon className="h-6 w-6 text-green-600" />
+                                    </div>
+                                    <div className="ml-3">
+                                        <p className="text-sm font-medium text-gray-500">Approved Today</p>
+                                        <p className="text-lg font-semibold text-gray-900">
+                                            {bookingRequests.filter(r => r.status === 'approved' && 
+                                                new Date(r.approvedDate || '').toDateString() === new Date().toDateString()).length}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                        <div className="flex items-center">
-                            <div className="p-2 bg-green-100 rounded-lg">
-                                <CheckIcon className="h-6 w-6 text-green-600" />
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-red-200">
+                                <div className="flex items-center">
+                                    <div className="p-2 bg-red-100 rounded-lg">
+                                        <XMarkIcon className="h-6 w-6 text-red-600" />
+                                    </div>
+                                    <div className="ml-3">
+                                        <p className="text-sm font-medium text-gray-500">Rejected</p>
+                                        <p className="text-lg font-semibold text-gray-900">
+                                            {bookingRequests.filter(r => r.status === 'rejected').length}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="ml-3">
-                                <p className="text-sm font-medium text-gray-500">Approved</p>
-                                <p className="text-lg font-semibold text-gray-900">
-                                    {bookings.filter(b => b.status === 'approved').length}
-                                </p>
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-blue-200">
+                                <div className="flex items-center">
+                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                        <PlusIcon className="h-6 w-6 text-blue-600" />
+                                    </div>
+                                    <div className="ml-3">
+                                        <p className="text-sm font-medium text-gray-500">Slots Created</p>
+                                        <p className="text-lg font-semibold text-gray-900">
+                                            {bookings.filter(b => new Date(b.createdDate || '').toDateString() === new Date().toDateString()).length}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                        <div className="flex items-center">
-                            <div className="p-2 bg-red-100 rounded-lg">
-                                <XMarkIcon className="h-6 w-6 text-red-600" />
+                        </>
+                    ) : (
+                        <>
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-green-200">
+                                <div className="flex items-center">
+                                    <div className="p-2 bg-green-100 rounded-lg">
+                                        <CheckIcon className="h-6 w-6 text-green-600" />
+                                    </div>
+                                    <div className="ml-3">
+                                        <p className="text-sm font-medium text-gray-500">Active Bookings</p>
+                                        <p className="text-lg font-semibold text-gray-900">
+                                            {bookings.filter(b => b.status === 'approved' || b.status === 'occupied').length}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="ml-3">
-                                <p className="text-sm font-medium text-gray-500">Rejected</p>
-                                <p className="text-lg font-semibold text-gray-900">
-                                    {bookings.filter(b => b.status === 'rejected').length}
-                                </p>
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-blue-200">
+                                <div className="flex items-center">
+                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                        <BuildingStorefrontIcon className="h-6 w-6 text-blue-600" />
+                                    </div>
+                                    <div className="ml-3">
+                                        <p className="text-sm font-medium text-gray-500">Occupied Slots</p>
+                                        <p className="text-lg font-semibold text-gray-900">
+                                            {bookings.filter(b => b.status === 'occupied').length}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                        <div className="flex items-center">
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                                <ArrowPathIcon className="h-6 w-6 text-blue-600" />
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-orange-200">
+                                <div className="flex items-center">
+                                    <div className="p-2 bg-orange-100 rounded-lg">
+                                        <ArrowPathIcon className="h-6 w-6 text-orange-600" />
+                                    </div>
+                                    <div className="ml-3">
+                                        <p className="text-sm font-medium text-gray-500">Early Retrieval</p>
+                                        <p className="text-lg font-semibold text-gray-900">
+                                            {bookings.filter(b => b.hasEarlyRetrieval).length}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="ml-3">
-                                <p className="text-sm font-medium text-gray-500">Early Retrieval</p>
-                                <p className="text-lg font-semibold text-gray-900">
-                                    {bookings.filter(b => b.hasEarlyRetrieval).length}
-                                </p>
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                <div className="flex items-center">
+                                    <div className="p-2 bg-gray-100 rounded-lg">
+                                        <CalendarIcon className="h-6 w-6 text-gray-600" />
+                                    </div>
+                                    <div className="ml-3">
+                                        <p className="text-sm font-medium text-gray-500">Completed</p>
+                                        <p className="text-lg font-semibold text-gray-900">
+                                            {bookings.filter(b => b.status === 'completed').length}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                        </>
+                    )}
                 </div>
 
-                {/* Bookings Table */}
-                <div className="bg-white rounded-lg shadow-md border border-green-200 overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gradient-to-r from-green-100 to-green-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Booking ID</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Farmer/Buyer</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Warehouse</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Produce</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Quantity</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Duration</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Slot</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-green-100">
-                                {loading ? (
+                {/* Main Content - Conditional based on view mode */}
+                {viewMode === 'requests' ? (
+                    /* Booking Requests Table */
+                    <div className="bg-white rounded-lg shadow-md border border-orange-200 overflow-hidden">
+                        <div className="bg-gradient-to-r from-orange-50 to-yellow-50 px-6 py-4 border-b border-orange-200">
+                            <h3 className="text-lg font-semibold text-orange-800">📋 Pending Booking Requests</h3>
+                            <p className="text-sm text-orange-600 mt-1">Review and approve/reject customer booking requests</p>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-gradient-to-r from-orange-100 to-yellow-50">
                                     <tr>
-                                        <td colSpan="9" className="px-6 py-4 text-center text-gray-500">
-                                            Loading bookings...
-                                        </td>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Request ID</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Customer</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Produce</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Quantity</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Duration</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Request Date</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Actions</th>
                                     </tr>
-                                ) : filteredBookings.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="9" className="px-6 py-4 text-center text-gray-500">
-                                            No bookings found
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    filteredBookings.map((booking) => (
-                                        <tr key={booking.id} className="hover:bg-green-50 transition-colors duration-200">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center">
-                                                    <span className="font-medium text-gray-900">{booking.id}</span>
-                                                    {booking.hasEarlyRetrieval && (
-                                                        <ClockIcon className="h-4 w-4 text-orange-500 ml-2" title="Early Retrieval Request" />
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">{booking.farmerName}</div>
-                                                <div className="text-sm text-gray-500">{booking.farmerPhone}</div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center">
-                                                    <BuildingStorefrontIcon className="h-4 w-4 text-gray-400 mr-2" />
-                                                    <div>
-                                                        <div className="text-sm font-medium text-gray-900">{booking.warehouseName || 'Unknown Warehouse'}</div>
-                                                        <div className="text-xs text-gray-500">Slot {formatSlotId(booking.slotId)}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">{booking.produce}</div>
-                                                <div className="text-sm text-gray-500">{booking.cropType}</div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {booking.quantity} kg
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {booking.duration} days
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">
-                                                    {formatSlotId(booking.slotId)}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
-                                                    {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedBooking(booking);
-                                                        setShowDetailsModal(true);
-                                                    }}
-                                                    className="text-blue-600 hover:text-blue-900 p-1 rounded-md hover:bg-blue-50 transition-all duration-200"
-                                                    title="View Details"
-                                                >
-                                                    <EyeIcon className="h-4 w-4" />
-                                                </button>
-                                                
-                                                {booking.status === 'pending' && (
-                                                    <>
-                                                        <button
-                                                            onClick={() => {
-                                                                setActionBooking(booking);
-                                                                setShowApproveDialog(true);
-                                                            }}
-                                                            className="text-green-600 hover:text-green-900 p-1 rounded-md hover:bg-green-50 transition-all duration-200"
-                                                            title="Approve"
-                                                        >
-                                                            <CheckIcon className="h-4 w-4" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => {
-                                                                setActionBooking(booking);
-                                                                setShowRejectDialog(true);
-                                                            }}
-                                                            className="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50 transition-all duration-200"
-                                                            title="Reject"
-                                                        >
-                                                            <XMarkIcon className="h-4 w-4" />
-                                                        </button>
-                                                    </>
-                                                )}
-                                                
-                                                {booking.hasEarlyRetrieval && (
-                                                    <button
-                                                        onClick={() => {
-                                                            setEarlyRetrievalData(booking);
-                                                            setShowEarlyRetrievalModal(true);
-                                                        }}
-                                                        className="text-orange-600 hover:text-orange-900 p-1 rounded-md hover:bg-orange-50 transition-all duration-200"
-                                                        title="Handle Early Retrieval"
-                                                    >
-                                                        <ClockIcon className="h-4 w-4" />
-                                                    </button>
-                                                )}
+                                </thead>
+                                <tbody className="bg-white divide-y divide-orange-100">
+                                    {loading ? (
+                                        <tr>
+                                            <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
+                                                Loading booking requests...
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                    ) : bookingRequests.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="8" className="px-6 py-12 text-center">
+                                                <div className="text-gray-500">
+                                                    <div className="text-4xl mb-2">📋</div>
+                                                    <p className="text-lg font-medium">No booking requests</p>
+                                                    <p className="text-sm">Pending requests will appear here</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        bookingRequests.filter(req => req.status === 'pending').map((request) => (
+                                            <tr key={request.id} className="hover:bg-orange-50 transition-colors duration-200">
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className="font-medium text-gray-900">{request.id}</span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-medium text-gray-900">{request.farmerName}</div>
+                                                    <div className="text-sm text-gray-500">{request.farmerPhone}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-medium text-gray-900">{request.produce}</div>
+                                                    <div className="text-sm text-gray-500">{request.cropType}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {request.quantity} kg
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {request.duration} days
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {new Date(request.requestDate).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                        Pending Review
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            setActionBooking(request);
+                                                            setShowSlotCreationDialog(true);
+                                                        }}
+                                                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-xs font-medium transition-colors"
+                                                        title="Approve & Create Slot"
+                                                    >
+                                                        ✅ Approve
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setActionBooking(request);
+                                                            setShowRejectDialog(true);
+                                                        }}
+                                                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-xs font-medium transition-colors"
+                                                        title="Reject Request"
+                                                    >
+                                                        ❌ Reject
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedBooking(request);
+                                                            setShowDetailsModal(true);
+                                                        }}
+                                                        className="text-blue-600 hover:text-blue-900 p-1 rounded-md hover:bg-blue-50 transition-all duration-200"
+                                                        title="View Details"
+                                                    >
+                                                        <EyeIcon className="h-4 w-4" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ) : (
+                    /* Approved Bookings Table */
+                    <div className="bg-white rounded-lg shadow-md border border-green-200 overflow-hidden">
+                        <div className="bg-gradient-to-r from-green-50 to-blue-50 px-6 py-4 border-b border-green-200">
+                            <h3 className="text-lg font-semibold text-green-800">✅ Approved Bookings & Active Slots</h3>
+                            <p className="text-sm text-green-600 mt-1">Manage approved bookings and active storage slots</p>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-gradient-to-r from-green-100 to-green-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Booking ID</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Customer</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Warehouse</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Produce</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Quantity</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Duration</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Slot</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-green-800 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-green-100">
+                                    {loading ? (
+                                        <tr>
+                                            <td colSpan="9" className="px-6 py-4 text-center text-gray-500">
+                                                Loading approved bookings...
+                                            </td>
+                                        </tr>
+                                    ) : filteredBookings.filter(b => b.status !== 'pending').length === 0 ? (
+                                        <tr>
+                                            <td colSpan="9" className="px-6 py-12 text-center">
+                                                <div className="text-gray-500">
+                                                    <div className="text-4xl mb-2">✅</div>
+                                                    <p className="text-lg font-medium">No approved bookings</p>
+                                                    <p className="text-sm">Approved requests will appear here</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredBookings.filter(b => b.status !== 'pending').map((booking) => (
+                                            <tr key={booking.id} className="hover:bg-green-50 transition-colors duration-200">
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        <span className="font-medium text-gray-900">{booking.id}</span>
+                                                        {booking.hasEarlyRetrieval && (
+                                                            <ClockIcon className="h-4 w-4 text-orange-500 ml-2" title="Early Retrieval Request" />
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-medium text-gray-900">{booking.farmerName}</div>
+                                                    <div className="text-sm text-gray-500">{booking.farmerPhone}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        <BuildingStorefrontIcon className="h-4 w-4 text-gray-400 mr-2" />
+                                                        <div>
+                                                            <div className="text-sm font-medium text-gray-900">{booking.warehouseName || 'Unknown Warehouse'}</div>
+                                                            <div className="text-xs text-gray-500">Slot {formatSlotId(booking.slotId)}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-medium text-gray-900">{booking.produce}</div>
+                                                    <div className="text-sm text-gray-500">{booking.cropType}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {booking.quantity} kg
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {booking.duration} days
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">
+                                                        {formatSlotId(booking.slotId)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
+                                                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedBooking(booking);
+                                                            setShowDetailsModal(true);
+                                                        }}
+                                                        className="text-blue-600 hover:text-blue-900 p-1 rounded-md hover:bg-blue-50 transition-all duration-200"
+                                                        title="View Details"
+                                                    >
+                                                        <EyeIcon className="h-4 w-4" />
+                                                    </button>
+                                                    
+                                                    {booking.hasEarlyRetrieval && (
+                                                        <button
+                                                            onClick={() => {
+                                                                setEarlyRetrievalData(booking);
+                                                                setShowEarlyRetrievalModal(true);
+                                                            }}
+                                                            className="text-orange-600 hover:text-orange-900 p-1 rounded-md hover:bg-orange-50 transition-all duration-200"
+                                                            title="Handle Early Retrieval"
+                                                        >
+                                                            <ClockIcon className="h-4 w-4" />
+                                                        </button>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Slot Creation Dialog for Booking Request Approval */}
+            {showSlotCreationDialog && actionBooking && (
+                <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4">
+                    <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full border border-green-200 animate-scaleIn">
+                        <h3 className="text-xl font-semibold mb-4 text-green-800">✅ Approve Request & Create Slot</h3>
+                        <p className="text-gray-600 mb-4">
+                            Create a slot for booking request <span className="font-bold">{actionBooking.id}</span> from {actionBooking.farmerName}
+                        </p>
+                        
+                        <div className="bg-gray-50 rounded-lg p-3 mb-4 text-sm">
+                            <div><span className="font-medium">Requested:</span> {actionBooking.quantity} kg of {actionBooking.produce}</div>
+                            <div><span className="font-medium">Duration:</span> {actionBooking.duration} days</div>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Slot Capacity (kg) <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    value={slotForm.capacityKg}
+                                    onChange={(e) => setSlotForm(prev => ({ ...prev, capacityKg: e.target.value }))}
+                                    placeholder="Enter slot capacity"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500"
+                                    min={actionBooking.quantity}
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Minimum: {actionBooking.quantity} kg (requested amount)</p>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Product Type <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    value={slotForm.productType}
+                                    onChange={(e) => setSlotForm(prev => ({ ...prev, productType: e.target.value }))}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500"
+                                >
+                                    <option value="">Select product type</option>
+                                    <option value="Grains">Grains</option>
+                                    <option value="Fruits">Fruits</option>
+                                    <option value="Vegetables">Vegetables</option>
+                                    <option value="Dairy">Dairy Products</option>
+                                    <option value="Meat">Meat Products</option>
+                                    <option value="General">General Storage</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Temperature (°C)</label>
+                                <input
+                                    type="number"
+                                    value={slotForm.temperature}
+                                    onChange={(e) => setSlotForm(prev => ({ ...prev, temperature: e.target.value }))}
+                                    placeholder="Optional temperature requirement"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                                <textarea
+                                    value={slotForm.notes}
+                                    onChange={(e) => setSlotForm(prev => ({ ...prev, notes: e.target.value }))}
+                                    placeholder="Optional notes about the slot"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500"
+                                    rows="2"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button
+                                onClick={() => {
+                                    setShowSlotCreationDialog(false);
+                                    setActionBooking(null);
+                                    setSlotForm({ capacityKg: '', productType: '', temperature: '', notes: '' });
+                                }}
+                                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleApproveBookingRequest(actionBooking.id)}
+                                disabled={!slotForm.capacityKg || !slotForm.productType}
+                                className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
+                            >
+                                Create Slot & Approve
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Approve Dialog */}
             {showApproveDialog && actionBooking && (
@@ -551,16 +913,29 @@ export default function BookingManagement() {
 
             {showRejectDialog && actionBooking && (
                 <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4">
-                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full border border-green-200 animate-scaleIn">
-                        <h3 className="text-lg font-semibold mb-4">Reject Booking</h3>
-                        <p>Are you sure you want to reject booking <span className="font-bold">{actionBooking.id}</span>?</p>
-                        <input
-                            type="text"
-                            placeholder="Reason for rejection"
-                            value={rejectionReason}
-                            onChange={e => setRejectionReason(e.target.value)}
-                            className="w-full mt-4 px-3 py-2 border rounded"
-                        />
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full border border-red-200 animate-scaleIn">
+                        <h3 className="text-lg font-semibold mb-4 text-red-800">❌ Reject {viewMode === 'requests' ? 'Request' : 'Booking'}</h3>
+                        <p className="text-gray-600 mb-4">
+                            Are you sure you want to reject {viewMode === 'requests' ? 'request' : 'booking'} <span className="font-bold">{actionBooking.id}</span>?
+                        </p>
+                        
+                        <div className="bg-gray-50 rounded-lg p-3 mb-4 text-sm">
+                            <div><span className="font-medium">Customer:</span> {actionBooking.farmerName}</div>
+                            <div><span className="font-medium">Produce:</span> {actionBooking.produce} ({actionBooking.quantity} kg)</div>
+                        </div>
+                        
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Reason for rejection <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                placeholder="Please provide a reason for rejection..."
+                                value={rejectionReason}
+                                onChange={e => setRejectionReason(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
+                                rows="3"
+                            />
+                        </div>
                         <div className="flex justify-end space-x-3 mt-6">
                             <button
                                 onClick={() => {
@@ -575,17 +950,21 @@ export default function BookingManagement() {
                             <button
                                 onClick={() => {
                                     if (rejectionReason.trim()) {
-                                        handleRejectBooking(actionBooking.id, rejectionReason);
-                                        setShowRejectDialog(false);
-                                        setActionBooking(null);
-                                        setRejectionReason('');
+                                        if (viewMode === 'requests') {
+                                            handleRejectBookingRequest(actionBooking.id, rejectionReason);
+                                        } else {
+                                            handleRejectBooking(actionBooking.id, rejectionReason);
+                                            setShowRejectDialog(false);
+                                            setActionBooking(null);
+                                            setRejectionReason('');
+                                        }
                                     } else {
                                         alert('Please provide a reason for rejection');
                                     }
                                 }}
-                                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium"
                             >
-                                Reject
+                                Reject {viewMode === 'requests' ? 'Request' : 'Booking'}
                             </button>
                         </div>
                     </div>

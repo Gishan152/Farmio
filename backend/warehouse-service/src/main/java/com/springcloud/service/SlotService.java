@@ -3,9 +3,11 @@ package com.springcloud.service;
 import com.springcloud.dto.*;
 import com.springcloud.exception.ResourceNotFoundException;
 import com.springcloud.exception.BadRequestException;
+import com.springcloud.model.Booking;
 import com.springcloud.model.Slot;
 import com.springcloud.model.SlotStatus;
 import com.springcloud.model.Warehouse;
+import com.springcloud.repository.BookingRepository;
 import com.springcloud.repository.SlotRepository;
 import com.springcloud.repository.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class SlotService {
     
     private final SlotRepository slotRepository;
     private final WarehouseRepository warehouseRepository;
+    private final BookingRepository bookingRepository;
     
     // Get all slots for a warehouse
     public List<SlotResponseDTO> getSlotsByWarehouse(Long warehouseId, Long userId) {
@@ -484,6 +487,117 @@ private SlotResponseDTO createVirtualAvailableSlot(Long warehouseId, String slot
     slot.setReserved(false);
     return slot;
 }
+
+    // Booking Request Workflow Methods
+    public Map<String, Object> createBookingRequest(Long warehouseId, Map<String, Object> payload, Long userId) {
+        // Create a pending booking in the bookings table
+        Booking booking = new Booking();
+        booking.setWarehouseId(warehouseId);
+        booking.setFarmerId(userId); // Customer who made the request
+        booking.setStatus("PENDING");
+        booking.setQuantityKg(Double.valueOf(payload.get("quantity").toString()));
+        
+        // Find warehouse owner
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
+            .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
+        booking.setOwnerId(warehouse.getOwnerId());
+        
+        Booking saved = bookingRepository.save(booking);
+        
+        return Map.of(
+            "id", saved.getId(),
+            "status", "PENDING",
+            "message", "Booking request created successfully"
+        );
+    }
+    
+    public List<Map<String, Object>> getBookingRequests(Long warehouseId, String status, Long userId) {
+        // Get pending bookings for this warehouse
+        List<Booking> bookings;
+        if (status != null && !status.equals("all")) {
+            bookings = bookingRepository.findByWarehouseIdAndOwnerIdAndStatus(warehouseId, userId, status.toUpperCase());
+        } else {
+            bookings = bookingRepository.findByWarehouseIdAndOwnerId(warehouseId, userId);
+        }
+        
+        return bookings.stream().map(booking -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", booking.getId());
+            map.put("farmerId", booking.getFarmerId());
+            map.put("farmerName", "Farmer " + booking.getFarmerId()); // TODO: Get actual farmer name
+            map.put("farmerPhone", "+947XXXXXXXX"); // TODO: Get actual farmer phone
+            map.put("produce", "Rice"); // TODO: Get actual produce type
+            map.put("quantity", booking.getQuantityKg());
+            map.put("status", booking.getStatus().toLowerCase());
+            map.put("requestDate", booking.getCreatedAt().toString());
+            map.put("warehouseId", booking.getWarehouseId());
+            return map;
+        }).collect(Collectors.toList());
+    }
+    
+    @Transactional
+    public Map<String, Object> approveBookingRequest(Long warehouseId, Long requestId, Map<String, Object> slotPayload, Long userId) {
+        // Find the booking request
+        Booking booking = bookingRepository.findById(requestId)
+            .filter(b -> b.getWarehouseId().equals(warehouseId) && b.getOwnerId().equals(userId))
+            .orElseThrow(() -> new ResourceNotFoundException("Booking request not found"));
+        
+        if (!"PENDING".equals(booking.getStatus())) {
+            throw new BadRequestException("Only pending booking requests can be approved");
+        }
+        
+        // Create the slot
+        Slot slot = new Slot();
+        slot.setSlotNumber(slotPayload.get("slotNumber").toString());
+        slot.setWarehouseId(warehouseId);
+        slot.setStatus(SlotStatus.RESERVED);
+        slot.setCapacityKg(Integer.valueOf(slotPayload.get("capacityKg").toString()));
+        slot.setProductType(slotPayload.get("productType").toString());
+        slot.setReservedByUserId(booking.getFarmerId());
+        if (slotPayload.containsKey("temperature")) {
+            slot.setTemperature(Double.valueOf(slotPayload.get("temperature").toString()));
+        }
+        if (slotPayload.containsKey("notes")) {
+            slot.setNotes(slotPayload.get("notes").toString());
+        }
+        
+        slotRepository.save(slot);
+        
+        // Update booking status
+        booking.setStatus("APPROVED");
+        bookingRepository.save(booking);
+        
+        return Map.of(
+            "slotId", slot.getId(),
+            "bookingId", booking.getId(),
+            "status", "APPROVED",
+            "message", "Booking request approved and slot created"
+        );
+    }
+    
+    public Map<String, Object> rejectBookingRequest(Long warehouseId, Long requestId, Map<String, Object> payload, Long userId) {
+        // Find the booking request
+        Booking booking = bookingRepository.findById(requestId)
+            .filter(b -> b.getWarehouseId().equals(warehouseId) && b.getOwnerId().equals(userId))
+            .orElseThrow(() -> new ResourceNotFoundException("Booking request not found"));
+        
+        if (!"PENDING".equals(booking.getStatus())) {
+            throw new BadRequestException("Only pending booking requests can be rejected");
+        }
+        
+        // Update booking status
+        booking.setStatus("REJECTED");
+        if (payload.containsKey("reason")) {
+            booking.setRejectionReason(payload.get("reason").toString());
+        }
+        bookingRepository.save(booking);
+        
+        return Map.of(
+            "bookingId", booking.getId(),
+            "status", "REJECTED",
+            "message", "Booking request rejected"
+        );
+    }
 
     
 }

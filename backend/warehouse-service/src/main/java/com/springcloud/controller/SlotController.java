@@ -111,6 +111,58 @@ public class SlotController {
                                                         @RequestHeader(value = "X-User-Id", defaultValue = "1") Long userId) {
         return slotService.getAllSlotsForWarehouse(warehouseId, userId);
     }
+
+    // Booking Request Workflow Endpoints
+    @PostMapping("/warehouse/{warehouseId}/request-booking")
+    public ResponseEntity<?> createBookingRequest(@PathVariable Long warehouseId,
+                                                 @RequestBody Map<String, Object> payload,
+                                                 @RequestHeader("X-User-Id") Long userId) {
+        // For now, create a pending booking in the bookings table
+        try {
+            Map<String, Object> result = slotService.createBookingRequest(warehouseId, payload, userId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/warehouse/{warehouseId}/booking-requests")
+    public ResponseEntity<?> getBookingRequests(@PathVariable Long warehouseId,
+                                               @RequestParam(required = false) String status,
+                                               @RequestHeader("X-User-Id") Long userId) {
+        try {
+            List<Map<String, Object>> requests = slotService.getBookingRequests(warehouseId, status, userId);
+            return ResponseEntity.ok(Map.of("data", requests));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/warehouse/{warehouseId}/booking-requests/{requestId}/approve")
+    public ResponseEntity<?> approveBookingRequest(@PathVariable Long warehouseId,
+                                                  @PathVariable Long requestId,
+                                                  @RequestBody Map<String, Object> slotPayload,
+                                                  @RequestHeader("X-User-Id") Long userId) {
+        try {
+            Map<String, Object> result = slotService.approveBookingRequest(warehouseId, requestId, slotPayload, userId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/warehouse/{warehouseId}/booking-requests/{requestId}/reject")
+    public ResponseEntity<?> rejectBookingRequest(@PathVariable Long warehouseId,
+                                                 @PathVariable Long requestId,
+                                                 @RequestBody Map<String, Object> payload,
+                                                 @RequestHeader("X-User-Id") Long userId) {
+        try {
+            Map<String, Object> result = slotService.rejectBookingRequest(warehouseId, requestId, payload, userId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
     
     /* ----------- health ----------- */
     @GetMapping("/health")
