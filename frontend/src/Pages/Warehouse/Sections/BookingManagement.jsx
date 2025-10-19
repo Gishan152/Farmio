@@ -12,13 +12,95 @@ import {
     FunnelIcon,
     ArrowPathIcon,
     ChevronDownIcon,
-    PlusIcon
+    PlusIcon,
+    ClipboardDocumentCheckIcon,
+    ClipboardDocumentListIcon,
+    ArrowDownTrayIcon,
+    ArrowUturnLeftIcon,
+    ArrowRightIcon,
+    ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
+import { Loader2 } from 'lucide-react';
 import { useWarehouseContext } from '../../../Contexts/Warehouse/WarehouseContext';
 import { useUserContext } from '../../../Contexts/UserContext';
 import bookingsAPI from '../../../API/bookings';
 import slotsAPI from '../../../API/slots';
 import { formatSlotId } from '../../../Utils/slotUtils';
+import EarlyRetrievalPanel from '../../../Components/Warehouse/EarlyRetrievalPanel';
+import ExtensionRequestPanel from '../../../Components/Warehouse/ExtensionRequestPanel';
+
+// Sample booking requests for development
+const sampleBookingRequests = [
+    {
+        id: "REQ001",
+        farmerId: "F001",
+        farmerName: "Malik Jayawardena",
+        farmerPhone: "+94771234567",
+        farmerEmail: "malik@farms.lk",
+        produce: "Rice",
+        cropType: "White Basmati",
+        quantity: 500,
+        duration: 30,
+        warehouseName: "Colombo Cold Storage A",
+        status: "pending",
+        requestDate: "2025-10-18",
+        pricePerKg: 0.25,
+        totalAmount: 3750
+    },
+    {
+        id: "REQ002",
+        farmerId: "F002",
+        farmerName: "Anura Perera",
+        farmerPhone: "+94765432198",
+        farmerEmail: "anura@greenfield.lk",
+        produce: "Vegetables",
+        cropType: "Carrots",
+        quantity: 200,
+        duration: 14,
+        warehouseName: "Colombo Cold Storage A",
+        status: "pending",
+        requestDate: "2025-10-19",
+        pricePerKg: 0.35,
+        totalAmount: 980
+    }
+];
+
+// Simple Spinner component
+const Spinner = ({ size = "md" }) => {
+    const sizeClasses = {
+        sm: "h-4 w-4",
+        md: "h-6 w-6",
+        lg: "h-8 w-8"
+    };
+    
+    return (
+        <Loader2 className={`animate-spin ${sizeClasses[size] || sizeClasses.md} text-blue-600`} />
+    );
+};
+
+// Tab Button Component
+const TabButton = ({ isActive, onClick, icon, label, count = 0 }) => {
+    return (
+        <button
+            className={`flex items-center px-4 py-3 border-b-2 ${
+                isActive 
+                    ? 'border-blue-500 text-blue-600' 
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            } focus:outline-none transition-colors duration-200`}
+            onClick={onClick}
+        >
+            <span className="mr-2">{icon}</span>
+            <span className="font-medium">{label}</span>
+            {count > 0 && (
+                <span className={`ml-2 px-2 py-0.5 text-xs font-medium rounded-full ${
+                    isActive ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'
+                }`}>
+                    {count}
+                </span>
+            )}
+        </button>
+    );
+};
 
 // Sample booking data
 const sampleBookings = [
@@ -28,19 +110,17 @@ const sampleBookings = [
         farmerName: "Farmer Kumara",
         farmerPhone: "+94771234567",
         farmerEmail: "kumara@email.com",
-        produce: "Rice",
-        cropType: "Basmati Rice",
-        quantity: 500,
+        productType: "Rice",
+        quantityKg: 500,
         duration: 14,
         slotId: "S-15",
         warehouseName: "Colombo Cold Storage A",
-        status: "pending",
-        requestDate: "2024-01-15",
-        startDate: "2024-01-20",
-        endDate: "2024-02-03",
+        status: "SENT",
+        requestDate: "2024-10-15",
+        startDate: "2024-10-20",
+        endDate: "2024-11-03",
         pricePerKg: 0.25,
-        totalAmount: 1750,
-        hasEarlyRetrieval: false
+        totalAmount: 1750
     },
     {
         id: "BK002",
@@ -48,22 +128,21 @@ const sampleBookings = [
         farmerName: "Green Valley Co-op",
         farmerPhone: "+94777654321",
         farmerEmail: "info@greenvalley.lk",
-        produce: "Vegetables",
-        cropType: "Mixed Vegetables",
-        quantity: 300,
+        productType: "Vegetables",
+        quantityKg: 300,
         duration: 7,
         slotId: "S-08",
         warehouseName: "Kandy Dry Storage Facility",
-        status: "approved",
-        requestDate: "2024-01-14",
-        startDate: "2024-01-18",
-        endDate: "2024-01-25",
+        status: "ACTIVE",
+        requestDate: "2024-10-14",
+        startDate: "2024-10-18",
+        endDate: "2024-10-25",
         pricePerKg: 0.30,
         totalAmount: 630,
         hasEarlyRetrieval: true,
         earlyRetrievalRequest: {
-            requestDate: "2024-01-22",
-            proposedEndDate: "2024-01-23",
+            requestDate: "2024-10-22",
+            proposedEndDate: "2024-10-23",
             unusedDays: 2,
             usedDays: 5,
             refundAmount: 180,
@@ -76,14 +155,13 @@ const sampleBookings = [
         farmerName: "Silva Farms",
         farmerPhone: "+94712345678",
         farmerEmail: "silva@farms.lk",
-        produce: "Fruits",
-        cropType: "Mangoes",
-        quantity: 200,
+        productType: "Mangoes",
+        quantityKg: 200,
         duration: 10,
         slotId: "S-12",
         warehouseName: "Colombo Cold Storage A",
-        status: "rejected",
-        requestDate: "2024-01-13",
+        status: "REJECTED",
+        requestDate: "2024-10-13",
         rejectionReason: "Insufficient cold storage capacity for requested quantity",
         pricePerKg: 0.35,
         totalAmount: 700
@@ -93,25 +171,40 @@ const sampleBookings = [
 export default function BookingManagement() {
     const { user } = useUserContext();
     const { warehouses, loadWarehouses } = useWarehouseContext();
+    
+    // Main data states
     const [bookings, setBookings] = useState([]);
     const [bookingRequests, setBookingRequests] = useState([]);
+    const [earlyRetrievalRequests, setEarlyRetrievalRequests] = useState([]);
+    const [extensionRequests, setExtensionRequests] = useState([]);
+    
+    // Selected item state
     const [selectedBooking, setSelectedBooking] = useState(null);
+    
+    // Modal visibility states
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showEarlyRetrievalModal, setShowEarlyRetrievalModal] = useState(false);
-    const [earlyRetrievalData, setEarlyRetrievalData] = useState(null);
-    const [rejectionReason, setRejectionReason] = useState('');
-    const [filterStatus, setFilterStatus] = useState('all');
-    const [selectedWarehouse, setSelectedWarehouse] = useState('all');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [notification, setNotification] = useState(null);
-    const [viewMode, setViewMode] = useState('requests'); // 'requests' or 'bookings'
-
-    // Dialog states for approve/reject
+    const [showExtensionModal, setShowExtensionModal] = useState(false);
     const [showApproveDialog, setShowApproveDialog] = useState(false);
     const [showRejectDialog, setShowRejectDialog] = useState(false);
     const [showSlotCreationDialog, setShowSlotCreationDialog] = useState(false);
+    
+    // Form data states
+    const [earlyRetrievalData, setEarlyRetrievalData] = useState(null);
+    const [extensionData, setExtensionData] = useState(null);
+    const [rejectionReason, setRejectionReason] = useState('');
     const [actionBooking, setActionBooking] = useState(null);
+    
+    // Filter states
+    const [filterStatus, setFilterStatus] = useState('all');
+    const [selectedWarehouse, setSelectedWarehouse] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
+    
+    // UI states
+    const [loading, setLoading] = useState(false);
+    const [notification, setNotification] = useState(null);
+    const [activeTab, setActiveTab] = useState('requests'); // 'requests', 'active', 'earlyRetrieval', 'extension', 'completed'
+    const [viewMode, setViewMode] = useState('requests'); // 'requests' or 'bookings'
     
     // Slot creation form
     const [slotForm, setSlotForm] = useState({
@@ -135,49 +228,109 @@ export default function BookingManagement() {
                 filterStatus,
                 searchTerm
             );
-            setBookings(response.data || []);
+            
+            // Categorize bookings
+            const allBookings = response.data || [];
+            
+            // Filter active bookings (those that have been paid for and are currently active)
+            const activeBookings = allBookings.filter(booking => 
+                ['ACTIVE', 'IN_PROGRESS', 'ONGOING', 'STORAGE_IN_USE', 'PAID', 'PAYMENT_COMPLETED', 
+                'APPROVED', 'CONFIRMED', 'PAYMENT_IN_ESCROW'].includes(booking.status)
+            );
+            
+            // Filter completed bookings
+            const completedBookings = allBookings.filter(booking => 
+                ['COMPLETED', 'FINISHED', 'DONE', 'RELEASED'].includes(booking.status)
+            );
+            
+            setBookings({
+                active: activeBookings,
+                completed: completedBookings
+            });
         } catch (error) {
             console.error('Error loading bookings:', error);
             // Fallback to sample data if API fails
-            setBookings(sampleBookings);
+            setBookings({
+                active: sampleBookings.filter(b => b.status === 'approved'),
+                completed: sampleBookings.filter(b => b.status !== 'approved' && b.status !== 'pending' && b.status !== 'rejected')
+            });
             showNotification('Using sample data - API connection failed', 'warning');
         } finally {
             setLoading(false);
         }
     }, [selectedWarehouse, filterStatus, searchTerm, showNotification]);
 
+    // Use the sample booking requests defined above
+
     const loadBookingRequests = useCallback(async () => {
         if (selectedWarehouse === 'all') return;
         
         setLoading(true);
         try {
-            const response = await slotsAPI.getBookingRequests(selectedWarehouse, filterStatus);
-            setBookingRequests(response.data || []);
+            const response = await slotsAPI.getBookingRequests(selectedWarehouse, 'SENT');
+            if (response.data && response.data.length > 0) {
+                setBookingRequests(response.data);
+            } else {
+                // Use sample data if no data is returned
+                console.log('No booking requests found, using sample data');
+                setBookingRequests(sampleBookingRequests);
+            }
+            
+            // Also load early retrieval and extension requests
+            try {
+                const earlyRetrievalResponse = await bookingsAPI.getEarlyRetrievalRequests(selectedWarehouse);
+                setEarlyRetrievalRequests(earlyRetrievalResponse.data || []);
+            } catch (err) {
+                console.warn('Early retrieval requests API not available:', err);
+                setEarlyRetrievalRequests([]);
+            }
+            
+            try {
+                const extensionResponse = await bookingsAPI.getExtensionRequests(selectedWarehouse);
+                setExtensionRequests(extensionResponse.data || []);
+            } catch (err) {
+                console.warn('Extension requests API not available:', err);
+                setExtensionRequests([]);
+            }
         } catch (error) {
             console.error('Error loading booking requests:', error);
             // Fallback to sample data if API fails
-            setBookingRequests([
+            setBookingRequests(sampleBookingRequests);
+            
+            // Sample early retrieval requests
+            setEarlyRetrievalRequests([
                 {
-                    id: "REQ001",
-                    farmerId: "F001",
-                    farmerName: "Farmer Kumara",
-                    farmerPhone: "+94771234567",
-                    farmerEmail: "kumara@email.com",
-                    produce: "Rice",
-                    cropType: "Basmati Rice",
-                    quantity: 500,
-                    duration: 14,
-                    requestDate: "2024-01-15",
-                    startDate: "2024-01-20",
-                    endDate: "2024-02-03",
-                    status: "pending",
-                    notes: "Need temperature controlled storage"
+                    id: "EARLY001",
+                    bookingId: "BK002",
+                    farmerId: "F002",
+                    farmerName: "Green Valley Co-op",
+                    requestDate: "2024-10-17",
+                    originalEndDate: "2024-10-25",
+                    proposedEndDate: "2024-10-20",
+                    reason: "Unexpected market demand, need product earlier",
+                    status: "PENDING"
+                }
+            ]);
+            
+            // Sample extension requests
+            setExtensionRequests([
+                {
+                    id: "EXT001",
+                    bookingId: "BK002",
+                    farmerId: "F002",
+                    farmerName: "Green Valley Co-op",
+                    requestDate: "2024-10-17",
+                    originalEndDate: "2024-10-25", 
+                    proposedEndDate: "2024-11-05",
+                    additionalDays: 11,
+                    reason: "Storage needed for longer period due to transport delays",
+                    status: "PENDING"
                 }
             ]);
         } finally {
             setLoading(false);
         }
-    }, [selectedWarehouse, filterStatus]);
+    }, [selectedWarehouse]);
 
     useEffect(() => {
         loadWarehouses();
@@ -313,6 +466,12 @@ export default function BookingManagement() {
             console.error('Error rejecting early retrieval:', error);
         }
     };
+    
+    // Handler for viewing booking details from child components
+    const handleViewBooking = (booking) => {
+        setSelectedBooking(booking);
+        setShowDetailsModal(true);
+    };
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -323,8 +482,15 @@ export default function BookingManagement() {
             default: return 'bg-gray-100 text-gray-800';
         }
     };
+    
+    // Get the correct booking array based on active tab
+    const bookingsArray = activeTab === 'completed' 
+        ? (bookings.completed || []) 
+        : activeTab === 'active' 
+            ? (bookings.active || [])
+            : [];
 
-    const filteredBookings = bookings.filter(booking => {
+    const filteredBookings = bookingsArray.filter(booking => {
         // Status filter
         let statusMatch = true;
         if (filterStatus === 'early-retrieval') {
@@ -371,23 +537,23 @@ export default function BookingManagement() {
                             <div className="flex mt-4 space-x-2">
                                 <button
                                     onClick={() => setViewMode('requests')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center ${
                                         viewMode === 'requests' 
                                             ? 'bg-green-600 text-white shadow-md' 
                                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                                 >
-                                    📋 Booking Requests ({bookingRequests.filter(req => req.status === 'pending').length})
+                                    <span className="mr-2">📋</span> Booking Requests (0)
                                 </button>
                                 <button
                                     onClick={() => setViewMode('bookings')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center ${
                                         viewMode === 'bookings' 
                                             ? 'bg-green-600 text-white shadow-md' 
                                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                                 >
-                                    ✅ Approved Bookings ({filteredBookings.filter(b => b.status === 'approved').length})
+                                    <span className="mr-2">✅</span> Approved Bookings (0)
                                 </button>
                             </div>
                         </div>
@@ -444,10 +610,49 @@ export default function BookingManagement() {
                         </div>
                     </div>
                 </div>
+                
+                {/* Tab Navigation */}
+                <div className="flex space-x-1 border-b border-gray-200 mb-6">
+                    <TabButton 
+                        isActive={activeTab === 'requests'} 
+                        onClick={() => setActiveTab('requests')}
+                        icon={<ClipboardDocumentListIcon className="h-5 w-5" />}
+                        label="Booking Requests"
+                        count={bookingRequests.length}
+                    />
+                    <TabButton 
+                        isActive={activeTab === 'active'} 
+                        onClick={() => setActiveTab('active')}
+                        icon={<ClipboardDocumentCheckIcon className="h-5 w-5" />}
+                        label="Active Bookings"
+                        count={bookings.active ? bookings.active.length : 0}
+                    />
+                    <TabButton 
+                        isActive={activeTab === 'earlyRetrieval'} 
+                        onClick={() => setActiveTab('earlyRetrieval')}
+                        icon={<ArrowDownTrayIcon className="h-5 w-5" />}
+                        label="Early Retrieval Requests"
+                        count={earlyRetrievalRequests.length}
+                    />
+                    <TabButton 
+                        isActive={activeTab === 'extension'} 
+                        onClick={() => setActiveTab('extension')}
+                        icon={<ArrowRightIcon className="h-5 w-5" />}
+                        label="Extension Requests"
+                        count={extensionRequests.length}
+                    />
+                    <TabButton 
+                        isActive={activeTab === 'completed'} 
+                        onClick={() => setActiveTab('completed')}
+                        icon={<ArrowUturnLeftIcon className="h-5 w-5" />}
+                        label="Completed Bookings"
+                        count={bookings.completed ? bookings.completed.length : 0}
+                    />
+                </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {viewMode === 'requests' ? (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    {activeTab === 'requests' && (
                         <>
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-orange-200">
                                 <div className="flex items-center">
@@ -457,7 +662,7 @@ export default function BookingManagement() {
                                     <div className="ml-3">
                                         <p className="text-sm font-medium text-gray-500">Pending Requests</p>
                                         <p className="text-lg font-semibold text-gray-900">
-                                            {bookingRequests.filter(r => r.status === 'pending').length}
+                                            {bookingRequests.filter(r => r.status === 'SENT' || r.status === 'PENDING').length}
                                         </p>
                                     </div>
                                 </div>
@@ -470,8 +675,10 @@ export default function BookingManagement() {
                                     <div className="ml-3">
                                         <p className="text-sm font-medium text-gray-500">Approved Today</p>
                                         <p className="text-lg font-semibold text-gray-900">
-                                            {bookingRequests.filter(r => r.status === 'approved' && 
-                                                new Date(r.approvedDate || '').toDateString() === new Date().toDateString()).length}
+                                            {bookingRequests.filter(r => 
+                                                (r.status === 'APPROVED' || r.status === 'APPROVED_AWAITING_PAYMENT') && 
+                                                new Date(r.approvedDate || '').toDateString() === new Date().toDateString()
+                                            ).length}
                                         </p>
                                     </div>
                                 </div>
@@ -484,7 +691,7 @@ export default function BookingManagement() {
                                     <div className="ml-3">
                                         <p className="text-sm font-medium text-gray-500">Rejected</p>
                                         <p className="text-lg font-semibold text-gray-900">
-                                            {bookingRequests.filter(r => r.status === 'rejected').length}
+                                            {bookingRequests.filter(r => r.status === 'REJECTED').length}
                                         </p>
                                     </div>
                                 </div>
@@ -492,18 +699,22 @@ export default function BookingManagement() {
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-blue-200">
                                 <div className="flex items-center">
                                     <div className="p-2 bg-blue-100 rounded-lg">
-                                        <PlusIcon className="h-6 w-6 text-blue-600" />
+                                        <CalendarIcon className="h-6 w-6 text-blue-600" />
                                     </div>
                                     <div className="ml-3">
-                                        <p className="text-sm font-medium text-gray-500">Slots Created</p>
+                                        <p className="text-sm font-medium text-gray-500">Today's Requests</p>
                                         <p className="text-lg font-semibold text-gray-900">
-                                            {bookings.filter(b => new Date(b.createdDate || '').toDateString() === new Date().toDateString()).length}
+                                            {bookingRequests.filter(r => 
+                                                new Date(r.requestDate || '').toDateString() === new Date().toDateString()
+                                            ).length}
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         </>
-                    ) : (
+                    )}
+                    
+                    {activeTab === 'active' && (
                         <>
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-green-200">
                                 <div className="flex items-center">
@@ -513,7 +724,7 @@ export default function BookingManagement() {
                                     <div className="ml-3">
                                         <p className="text-sm font-medium text-gray-500">Active Bookings</p>
                                         <p className="text-lg font-semibold text-gray-900">
-                                            {bookings.filter(b => b.status === 'approved' || b.status === 'occupied').length}
+                                            {bookings.active ? bookings.active.length : 0}
                                         </p>
                                     </div>
                                 </div>
@@ -526,7 +737,7 @@ export default function BookingManagement() {
                                     <div className="ml-3">
                                         <p className="text-sm font-medium text-gray-500">Occupied Slots</p>
                                         <p className="text-lg font-semibold text-gray-900">
-                                            {bookings.filter(b => b.status === 'occupied').length}
+                                            {bookings.active ? bookings.active.filter(b => b.status === 'occupied').length : 0}
                                         </p>
                                     </div>
                                 </div>
@@ -539,7 +750,7 @@ export default function BookingManagement() {
                                     <div className="ml-3">
                                         <p className="text-sm font-medium text-gray-500">Early Retrieval</p>
                                         <p className="text-lg font-semibold text-gray-900">
-                                            {bookings.filter(b => b.hasEarlyRetrieval).length}
+                                            {bookings.active ? bookings.active.filter(b => b.hasEarlyRetrieval).length : 0}
                                         </p>
                                     </div>
                                 </div>
@@ -552,7 +763,7 @@ export default function BookingManagement() {
                                     <div className="ml-3">
                                         <p className="text-sm font-medium text-gray-500">Completed</p>
                                         <p className="text-lg font-semibold text-gray-900">
-                                            {bookings.filter(b => b.status === 'completed').length}
+                                            {bookings.completed ? bookings.completed.length : 0}
                                         </p>
                                     </div>
                                 </div>
@@ -561,12 +772,15 @@ export default function BookingManagement() {
                     )}
                 </div>
 
-                {/* Main Content - Conditional based on view mode */}
-                {viewMode === 'requests' ? (
+                {/* Main Content - Based on active tab */}
+                {activeTab === 'requests' ? (
                     /* Booking Requests Table */
                     <div className="bg-white rounded-lg shadow-md border border-orange-200 overflow-hidden">
                         <div className="bg-gradient-to-r from-orange-50 to-yellow-50 px-6 py-4 border-b border-orange-200">
-                            <h3 className="text-lg font-semibold text-orange-800">📋 Pending Booking Requests</h3>
+                            <h3 className="text-lg font-semibold text-orange-800">
+                                <ClipboardDocumentListIcon className="inline-block h-6 w-6 mr-2" />
+                                Pending Booking Requests
+                            </h3>
                             <p className="text-sm text-orange-600 mt-1">Review and approve/reject customer booking requests</p>
                         </div>
                         <div className="overflow-x-auto">
@@ -575,9 +789,9 @@ export default function BookingManagement() {
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Request ID</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Customer</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Produce</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Quantity</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Duration</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Product Type</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Quantity (kg)</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Storage Period</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Request Date</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Status</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-orange-800 uppercase tracking-wider">Actions</th>
@@ -601,7 +815,7 @@ export default function BookingManagement() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        bookingRequests.filter(req => req.status === 'pending').map((request) => (
+                                        bookingRequests.map((request) => (
                                             <tr key={request.id} className="hover:bg-orange-50 transition-colors duration-200">
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <span className="font-medium text-gray-900">{request.id}</span>
@@ -667,7 +881,7 @@ export default function BookingManagement() {
                             </table>
                         </div>
                     </div>
-                ) : (
+                ) : activeTab === 'active' ? (
                     /* Approved Bookings Table */
                     <div className="bg-white rounded-lg shadow-md border border-green-200 overflow-hidden">
                         <div className="bg-gradient-to-r from-green-50 to-blue-50 px-6 py-4 border-b border-green-200">
@@ -696,7 +910,7 @@ export default function BookingManagement() {
                                                 Loading approved bookings...
                                             </td>
                                         </tr>
-                                    ) : filteredBookings.filter(b => b.status !== 'pending').length === 0 ? (
+                                    ) : filteredBookings.length === 0 ? (
                                         <tr>
                                             <td colSpan="9" className="px-6 py-12 text-center">
                                                 <div className="text-gray-500">
@@ -707,7 +921,7 @@ export default function BookingManagement() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        filteredBookings.filter(b => b.status !== 'pending').map((booking) => (
+                                        filteredBookings.map((booking) => (
                                             <tr key={booking.id} className="hover:bg-green-50 transition-colors duration-200">
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center">
@@ -781,6 +995,107 @@ export default function BookingManagement() {
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                ) : activeTab === 'earlyRetrieval' ? (
+                    /* Early Retrieval Requests Panel */
+                    <EarlyRetrievalPanel 
+                        requests={earlyRetrievalRequests}
+                        loading={loading}
+                        onApprove={handleEarlyRetrievalApprove}
+                        onReject={handleEarlyRetrievalReject}
+                        onViewDetails={handleViewBooking}
+                    />
+                ) : activeTab === 'extension' ? (
+                    /* Extension Requests Panel */
+                    <ExtensionRequestPanel 
+                        requests={extensionRequests}
+                        loading={loading}
+                        onApprove={(id) => console.log('Approve extension', id)}
+                        onReject={(id, reason) => console.log('Reject extension', id, reason)}
+                        onViewDetails={handleViewBooking}
+                    />
+                ) : activeTab === 'completed' ? (
+                    /* Completed bookings tab */
+                    <div className="bg-white shadow rounded-lg overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking ID</th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Farmer</th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slot ID</th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {loading ? (
+                                        <tr>
+                                            <td colSpan="8" className="px-6 py-4 whitespace-nowrap text-center">
+                                                <Spinner size="md" />
+                                            </td>
+                                        </tr>
+                                    ) : filteredBookings.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="8" className="px-6 py-4 whitespace-nowrap text-center text-gray-500">
+                                                No completed bookings found
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        filteredBookings.map(booking => (
+                                            <tr key={booking.id}>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-medium text-gray-900">{booking.id}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm text-gray-900">{booking.farmerName}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm text-gray-900">{booking.produce}</div>
+                                                    <div className="text-sm text-gray-500">{booking.cropType}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {booking.quantity} kg
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {booking.duration} days
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">
+                                                        {formatSlotId(booking.slotId)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
+                                                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedBooking(booking);
+                                                            setShowDetailsModal(true);
+                                                        }}
+                                                        className="text-blue-600 hover:text-blue-900 p-1 rounded-md hover:bg-blue-50 transition-all duration-200"
+                                                        title="View Details"
+                                                    >
+                                                        <EyeIcon className="h-4 w-4" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ) : (
+                    /* Default tab when none selected */
+                    <div className="p-4 text-center text-gray-500">
+                        Select a tab to view bookings
                     </div>
                 )}
             </div>

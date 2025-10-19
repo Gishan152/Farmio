@@ -24,7 +24,42 @@ export default {
     const params = warehouseId ? { warehouseId } : {};
     return api.get('/api/bookings/stats', { params, headers });
   },
-
+  
+  // Early Retrieval Request APIs
+  getEarlyRetrievalRequests(warehouseId) {
+    return api.get(`/api/bookings/warehouse/${warehouseId}/early-retrieval-requests`, { headers });
+  },
+  
+  createEarlyRetrievalRequest(bookingId, payload) {
+    return api.post(`/api/bookings/${bookingId}/early-retrieval`, payload, { headers });
+  },
+  
+  approveEarlyRetrievalRequest(requestId, payload) {
+    return api.put(`/api/bookings/early-retrieval/${requestId}/approve`, payload, { headers });
+  },
+  
+  rejectEarlyRetrievalRequest(requestId, reason) {
+    return api.put(`/api/bookings/early-retrieval/${requestId}/reject`, { reason }, { headers });
+  },
+  
+  // Extension Request APIs
+  getExtensionRequests(warehouseId) {
+    return api.get(`/api/bookings/warehouse/${warehouseId}/extension-requests`, { headers });
+  },
+  
+  createExtensionRequest(bookingId, payload) {
+    return api.post(`/api/bookings/${bookingId}/extension`, payload, { headers });
+  },
+  
+  approveExtensionRequest(requestId, payload) {
+    return api.put(`/api/bookings/extension/${requestId}/approve`, payload, { headers });
+  },
+  
+  rejectExtensionRequest(requestId, reason) {
+    return api.put(`/api/bookings/extension/${requestId}/reject`, { reason }, { headers });
+  },
+  
+  // Regular Booking APIs
   approveBooking(id) {
     return api.put(`/api/bookings/${id}/approve`, {}, { headers });
   },
