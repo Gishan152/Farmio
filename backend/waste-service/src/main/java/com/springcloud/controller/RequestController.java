@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/requests")
-@CrossOrigin(origins = "http://localhost:5173") // allow React frontend
+@RequestMapping("/api/waste/requests")
+//@CrossOrigin(origins = "http://localhost:5173") // allow React frontend
 public class RequestController {
 
     private final RequestService requestService;
@@ -43,7 +43,10 @@ public class RequestController {
 
     // Get requests by status
     @GetMapping("/status/{status}")
-    public List<RequestDTO> getRequestsByStatus(@PathVariable String status) {
+    public List<RequestDTO> getRequestsByStatus(
+            @PathVariable String status,
+            @RequestHeader("X-User-Id") Long userId
+    ) {
         return requestService.getRequestsByStatus(status)
                 .stream()
                 .map(requestMapper::toDTO)

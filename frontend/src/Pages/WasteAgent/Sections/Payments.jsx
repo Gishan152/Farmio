@@ -61,301 +61,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Label } from "@/Components/WasteUI/label";
 import { FaDownload } from "react-icons/fa6";
+import api from "@/API/client";
 
 const Payments = () => {
-	// const [payments, setPayments] = useState([
-	// 	{
-	// 		id: "PAY-2025-001",
-	// 		orderId: "WO-2025-001",
-	// 		farmer: "Paddy Green Farms",
-	// 		farmerAccount: "****-1234",
-	// 		wasteType: "Compostable",
-	// 		quantity: 2500,
-	// 		rate: 0.15,
-	// 		amount: "$375.00",
-	// 		paymentDate: "2025-01-08",
-	// 		dueDate: "2025-01-10",
-	// 		status: "Paid",
-	// 		paymentMethod: "Bank Transfer",
-	// 		transactionId: "TXN-789123456",
-	// 		processingFee: "$5.25",
-	// 		netAmount: "$369.75",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-002",
-	// 		orderId: "WO-2025-002",
-	// 		farmer: "Nuwara Eliya Fresh Co.",
-	// 		farmerAccount: "****-5678",
-	// 		wasteType: "Spoiled Produce",
-	// 		quantity: 850,
-	// 		rate: 0.08,
-	// 		amount: "$68.00",
-	// 		paymentDate: "2025-01-06",
-	// 		dueDate: "2025-01-08",
-	// 		status: "Paid",
-	// 		paymentMethod: "Bank Transfer",
-	// 		transactionId: "TXN-789123456",
-	// 		processingFee: "$2.40",
-	// 		netAmount: "$65.60",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-003",
-	// 		orderId: "WO-2025-003",
-	// 		farmer: "Lanka Coconut Estate",
-	// 		farmerAccount: "****-9012",
-	// 		wasteType: "Plastic",
-	// 		quantity: 1200,
-	// 		rate: 0.12,
-	// 		amount: "$144.00",
-	// 		paymentDate: "2025-01-09",
-	// 		dueDate: "2025-01-11",
-	// 		status: "Pending",
-	// 		paymentMethod: "ACH Transfer",
-	// 		transactionId: "",
-	// 		processingFee: "$3.60",
-	// 		netAmount: "$140.40",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-004",
-	// 		orderId: "WO-2025-004",
-	// 		farmer: "Kandy Hill Tea Estate",
-	// 		farmerAccount: "****-3456",
-	// 		wasteType: "Compostable",
-	// 		quantity: 3800,
-	// 		rate: 0.1,
-	// 		amount: "$380.00",
-	// 		paymentDate: "2025-01-12",
-	// 		dueDate: "2025-01-14",
-	// 		status: "Pending",
-	// 		paymentMethod: "Bank Transfer",
-	// 		transactionId: "",
-	// 		processingFee: "$7.60",
-	// 		netAmount: "$372.40",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-005",
-	// 		orderId: "WO-2025-005",
-	// 		farmer: "Galle Sugar Mills",
-	// 		farmerAccount: "****-7890",
-	// 		wasteType: "Agricultural Waste",
-	// 		quantity: 5000,
-	// 		rate: 0.05,
-	// 		amount: "$250.00",
-	// 		paymentDate: "2025-01-06",
-	// 		dueDate: "2025-01-08",
-	// 		status: "Paid",
-	// 		paymentMethod: "Wire Transfer",
-	// 		transactionId: "TXN-456789123",
-	// 		processingFee: "$5.00",
-	// 		netAmount: "$245.00",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-006",
-	// 		orderId: "WO-2024-098",
-	// 		farmer: "Matara Spice Gardens",
-	// 		farmerAccount: "****-2468",
-	// 		wasteType: "Spoiled Produce",
-	// 		quantity: 1800,
-	// 		rate: 0.12,
-	// 		amount: "$216.00",
-	// 		paymentDate: "2024-12-30",
-	// 		dueDate: "2025-01-02",
-	// 		status: "Rejected",
-	// 		paymentMethod: "Bank Transfer",
-	// 		transactionId: "",
-	// 		processingFee: "$4.32",
-	// 		netAmount: "$211.68",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-007",
-	// 		orderId: "WO-2025-007",
-	// 		farmer: "Jaffna Vegetable Co-op",
-	// 		farmerAccount: "****-5432",
-	// 		wasteType: "Compostable",
-	// 		quantity: 2200,
-	// 		rate: 0.13,
-	// 		amount: "$286.00",
-	// 		paymentDate: "2025-07-08",
-	// 		dueDate: "2025-07-10",
-	// 		status: "Paid",
-	// 		paymentMethod: "Bank Transfer",
-	// 		transactionId: "TXN-789456123",
-	// 		processingFee: "$4.29",
-	// 		netAmount: "$281.71",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-008",
-	// 		orderId: "WO-2025-008",
-	// 		farmer: "Negombo Fish Market",
-	// 		farmerAccount: "****-9876",
-	// 		wasteType: "Spoiled Produce",
-	// 		quantity: 950,
-	// 		rate: 0.09,
-	// 		amount: "$85.50",
-	// 		paymentDate: "2025-07-09",
-	// 		dueDate: "2025-07-11",
-	// 		status: "Pending",
-	// 		paymentMethod: "ACH Transfer",
-	// 		transactionId: "",
-	// 		processingFee: "$2.85",
-	// 		netAmount: "$82.65",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-009",
-	// 		orderId: "WO-2025-009",
-	// 		farmer: "Anuradhapura Rice Mills",
-	// 		farmerAccount: "****-3210",
-	// 		wasteType: "Agricultural Waste",
-	// 		quantity: 4500,
-	// 		rate: 0.06,
-	// 		amount: "$270.00",
-	// 		paymentDate: "2025-07-09",
-	// 		dueDate: "2025-07-11",
-	// 		status: "Paid",
-	// 		paymentMethod: "Wire Transfer",
-	// 		transactionId: "TXN-654321987",
-	// 		processingFee: "$5.40",
-	// 		netAmount: "$264.60",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-010",
-	// 		orderId: "WO-2025-010",
-	// 		farmer: "Batticaloa Coconut Estate",
-	// 		farmerAccount: "****-6789",
-	// 		wasteType: "Plastic",
-	// 		quantity: 1600,
-	// 		rate: 0.11,
-	// 		amount: "$176.00",
-	// 		paymentDate: "2025-07-08",
-	// 		dueDate: "2025-07-10",
-	// 		status: "Paid",
-	// 		paymentMethod: "Bank Transfer",
-	// 		transactionId: "TXN-987654321",
-	// 		processingFee: "$3.52",
-	// 		netAmount: "$172.48",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-011",
-	// 		orderId: "WO-2025-011",
-	// 		farmer: "Kurunegala Fruit Growers",
-	// 		farmerAccount: "****-1357",
-	// 		wasteType: "Compostable",
-	// 		quantity: 3200,
-	// 		rate: 0.14,
-	// 		amount: "$448.00",
-	// 		paymentDate: "2025-07-07",
-	// 		dueDate: "2025-07-09",
-	// 		status: "Paid",
-	// 		paymentMethod: "Bank Transfer",
-	// 		transactionId: "TXN-123789456",
-	// 		processingFee: "$6.72",
-	// 		netAmount: "$441.28",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-012",
-	// 		orderId: "WO-2025-012",
-	// 		farmer: "Trincomalee Seafood Co.",
-	// 		farmerAccount: "****-2468",
-	// 		wasteType: "Spoiled Produce",
-	// 		quantity: 1100,
-	// 		rate: 0.08,
-	// 		amount: "$88.00",
-	// 		paymentDate: "2025-07-06",
-	// 		dueDate: "2025-07-08",
-	// 		status: "Pending",
-	// 		paymentMethod: "Bank Transfer",
-	// 		transactionId: "",
-	// 		processingFee: "$2.64",
-	// 		netAmount: "$85.36",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-013",
-	// 		orderId: "WO-2025-013",
-	// 		farmer: "Badulla Tea Estates",
-	// 		farmerAccount: "****-8642",
-	// 		wasteType: "Compostable",
-	// 		quantity: 2800,
-	// 		rate: 0.12,
-	// 		amount: "$336.00",
-	// 		paymentDate: "2025-07-05",
-	// 		dueDate: "2025-07-07",
-	// 		status: "Paid",
-	// 		paymentMethod: "Wire Transfer",
-	// 		transactionId: "TXN-456123789",
-	// 		processingFee: "$5.04",
-	// 		netAmount: "$330.96",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-014",
-	// 		orderId: "WO-2025-014",
-	// 		farmer: "Ratnapura Gem Miners",
-	// 		farmerAccount: "****-9753",
-	// 		wasteType: "Metal",
-	// 		quantity: 650,
-	// 		rate: 0.25,
-	// 		amount: "$162.50",
-	// 		paymentDate: "2025-07-04",
-	// 		dueDate: "2025-07-06",
-	// 		status: "Paid",
-	// 		paymentMethod: "Bank Transfer",
-	// 		transactionId: "TXN-789123654",
-	// 		processingFee: "$3.25",
-	// 		netAmount: "$159.25",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-015",
-	// 		orderId: "WO-2025-015",
-	// 		farmer: "Kegalle Paper Mills",
-	// 		farmerAccount: "****-1470",
-	// 		wasteType: "Paper",
-	// 		quantity: 2100,
-	// 		rate: 0.07,
-	// 		amount: "$147.00",
-	// 		paymentDate: "2025-07-03",
-	// 		dueDate: "2025-07-05",
-	// 		status: "Rejected",
-	// 		paymentMethod: "ACH Transfer",
-	// 		transactionId: "",
-	// 		processingFee: "$2.94",
-	// 		netAmount: "$144.06",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-016",
-	// 		orderId: "WO-2025-016",
-	// 		farmer: "Colombo Electronics Hub",
-	// 		farmerAccount: "****-2580",
-	// 		wasteType: "Electronic Waste",
-	// 		quantity: 340,
-	// 		rate: 0.45,
-	// 		amount: "$153.00",
-	// 		paymentDate: "2025-07-02",
-	// 		dueDate: "2025-07-04",
-	// 		status: "Paid",
-	// 		paymentMethod: "Bank Transfer",
-	// 		transactionId: "TXN-321654987",
-	// 		processingFee: "$3.06",
-	// 		netAmount: "$149.94",
-	// 	},
-	// 	{
-	// 		id: "PAY-2025-017",
-	// 		orderId: "WO-2025-017",
-	// 		farmer: "Galle Glass Works",
-	// 		farmerAccount: "****-3691",
-	// 		wasteType: "Glass",
-	// 		quantity: 890,
-	// 		rate: 0.15,
-	// 		amount: "$133.50",
-	// 		paymentDate: "2025-07-01",
-	// 		dueDate: "2025-07-03",
-	// 		status: "Pending",
-	// 		paymentMethod: "Wire Transfer",
-	// 		transactionId: "",
-	// 		processingFee: "$2.67",
-	// 		netAmount: "$130.83",
-	// 	},
-	// ]);
-
-	// Filter state variables
 	const cities = [
 		{ value: "colombo", label: "Colombo" },
 		{ value: "kandy", label: "Kandy" },
@@ -401,10 +109,9 @@ const Payments = () => {
 
 	useEffect(() => {
 		setLoading(true);
-		fetch("http://localhost:8088/payments")
-			.then((res) => res.json())
+		api.get("/api/waste/payments")
+			.then((res) => res.data)
 			.then((data) => {
-				console.log("Payments data:", data);
 				setPayments(data);
 				setLoading(false);
 			})
@@ -413,6 +120,16 @@ const Payments = () => {
 				setLoading(false);
 			});
 	}, []);
+
+	// Convert quantity to KG if it's in TON
+	const convertToKg = (quantity, unit) => {
+		if (!unit) return quantity;
+		const unitUpper = unit.toUpperCase();
+		if (unitUpper === 'TON' || unitUpper === 'TONS') {
+			return quantity * 907.185; // 1 US short ton = 907.185 kg
+		}
+		return quantity;
+	};
 
 	const getStatusBadge = (status) => {
 		if (!status) return "bg-gray-100 text-gray-800";
@@ -460,13 +177,14 @@ const Payments = () => {
 			"Date,Farmer Name,Waste Type,Quantity (kg),Rate (Rs/kg),Total Payment,Status,Transaction ID\n";
 		const csvData = filteredPayments
 			.map((payment) => {
+				const quantityInKg = convertToKg(payment.quantity, payment.quantityUnit);
 				const rate = (
 					parseFloat(payment.amount.replace("$", "")) /
-					payment.quantity
+					quantityInKg
 				).toFixed(2);
 				return `${payment.paymentDate},"${payment.farmer}","${
 					payment.wasteType
-				}",${payment.quantity},${rate},${payment.amount},${
+				}",${quantityInKg.toFixed(2)},${rate},${payment.amount},${
 					payment.status
 				},"${payment.transactionId || "N/A"}"`;
 			})
@@ -492,14 +210,11 @@ const Payments = () => {
 		const startTask = async () => {
 			try {
 				// Update status to PROCESSING
-				const res = await fetch(
-					`http://localhost:8088/payments/${paymentId}/status?status=PROCESSING`,
-					{ method: "PUT" }
+				const res = await api.put(
+					`/api/waste/payments/${paymentId}/status?status=PROCESSING`
 				);
 				
-				if (!res.ok) throw new Error("Failed to update payment status");
-				
-				const updatedPayment = await res.json();
+				const updatedPayment = res.data;
 				
 				// Update local state with backend response
 				setPayments((prev) =>
@@ -515,19 +230,18 @@ const Payments = () => {
 
 				// Set timeout to revert to PENDING after 2 minutes if not PAID
 				setTimeout(async () => {
-					// Fetch current payment status to check if it changed to PAID
-					const checkRes = await fetch(`http://localhost:8088/payments/${paymentId}`);
-					const currentPayment = await checkRes.json();
-					
-					if (currentPayment.status?.toUpperCase() !== "PAID") {
-						// Revert to PENDING if still not PAID
-						const revertRes = await fetch(
-							`http://localhost:8088/payments/${paymentId}/status?status=PENDING`,
-							{ method: "PUT" }
-						);
+					try {
+						// Fetch current payment status to check if it changed to PAID
+						const checkRes = await api.get(`/api/waste/payments/${paymentId}`);
+						const currentPayment = checkRes.data;
 						
-						if (revertRes.ok) {
-							const revertedPayment = await revertRes.json();
+						if (currentPayment.status?.toUpperCase() !== "PAID") {
+							// Revert to PENDING if still not PAID
+							const revertRes = await api.put(
+								`/api/waste/payments/${paymentId}/status?status=PENDING`
+							);
+							
+							const revertedPayment = revertRes.data;
 							setPayments((prev) =>
 								prev.map((payment) =>
 									payment.id === paymentId
@@ -540,6 +254,8 @@ const Payments = () => {
 								description: `Payment ${paymentId} has been reverted to pending status.`,
 							});
 						}
+					} catch (error) {
+						console.error("Error checking payment status:", error);
 					}
 				}, 120000); // 2 minutes = 120000ms
 
@@ -691,7 +407,7 @@ const Payments = () => {
 		);
 
 	const totalWeightCollected = filteredPayments.reduce(
-		(total, payment) => total + payment.quantity,
+		(total, payment) => total + convertToKg(payment.quantity, payment.quantityUnit),
 		0
 	);
 
@@ -751,71 +467,19 @@ const Payments = () => {
 			</div>
 
 			{/* Payment Summary */}
-			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-				<div className="relative bg-white rounded-lg shadow-sm border border-green-400 p-4 flex items-center overflow-hidden">
-					<CreditCard className="h-7 w-7 text-green-500 mr-3 z-10" />
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
+					<div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
+					<Check className="h-7 w-7 text-green-500 mr-3 z-10" />
 					<div className="z-10">
 						<p className="text-xs font-medium text-gray-500">
 							Total Paid This Month
 						</p>
-						<p className="text-lg font-bold text-green-700">
+						<p className="text-lg font-bold text-gray-900">
 							<NumberFlow
 								value={totalPaidThisMonth}
 								format={{ style: "currency", currency: "USD" }}
 							/>
-						</p>
-					</div>
-				</div>
-				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-					<Clock className="h-7 w-7 text-blue-500 mr-3 z-10" />
-					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">
-							Number of Payments
-						</p>
-						<p className="text-lg font-bold text-gray-900">
-							<NumberFlow value={filteredPayments.length} />
-						</p>
-					</div>
-				</div>
-				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-					<CheckCircle className="h-7 w-7 text-yellow-500 mr-3 z-10" />
-					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">
-							Top Paid Farmer
-						</p>
-						<p className="text-sm font-medium text-gray-900 truncate">
-							{topFarmerName}
-						</p>
-					</div>
-				</div>
-				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-					<AlertTriangle className="h-7 w-7 text-purple-500 mr-3 z-10" />
-					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">
-							Total Weight Collected
-						</p>
-						<p className="text-lg font-bold text-gray-900">
-							<NumberFlow value={totalWeightCollected} />
-							<span className="text-sm font-normal text-gray-500">
-								{" "}
-								kg
-							</span>
-						</p>
-					</div>
-				</div>
-			</div>
-
-			{/* Status Overview */}
-			<div className="grid grid-cols-3 gap-4">
-				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-					<div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
-					<CheckCircle className="h-7 w-7 text-green-500 mr-3 z-10" />
-					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">
-							Paid Payments
-						</p>
-						<p className="text-lg font-bold text-gray-900">
-							<NumberFlow value={paidCount} />
 						</p>
 					</div>
 				</div>
@@ -828,18 +492,6 @@ const Payments = () => {
 						</p>
 						<p className="text-lg font-bold text-gray-900">
 							<NumberFlow value={pendingCount} />
-						</p>
-					</div>
-				</div>
-				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-					<div className="absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-l-lg" />
-					<AlertTriangle className="h-7 w-7 text-blue-500 mr-3 z-10" />
-					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">
-							Processing Payments
-						</p>
-						<p className="text-lg font-bold text-gray-900">
-							<NumberFlow value={processingCount} />
 						</p>
 					</div>
 				</div>
@@ -1262,17 +914,17 @@ const Payments = () => {
 								</TableCell>
 								<TableCell>
 									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{payment.quantity.toLocaleString()} kg
+										{convertToKg(payment.quantity, payment.quantityUnit).toLocaleString()} {payment.unit.toLowerCase()}
 									</div>
 								</TableCell>
 								<TableCell>
 									<div className="font-medium text-gray-900 dark:text-gray-100">
-										${payment.rate.toFixed(2)}/kg
+										${payment.rate.toFixed(2)}/{payment.unit.toLowerCase()}
 									</div>
 								</TableCell>
 								<TableCell>
 									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{payment.amount}
+										${payment.grossAmount?.toFixed(2) || '0.00'}
 									</div>
 								</TableCell>
 								<TableCell>

@@ -90,9 +90,12 @@ public class RequestService {
                 .build();
         requesterRepository.save(farmer);
 
-        // Determine description: from related listing when provided, else fallback
-        String description = null;
-        if (relatedListingId != null) {
+        // Determine description priority:
+        // 1) request.description, 2) related listing description, 3) default fallback
+        String description = (request.getDescription() != null && !request.getDescription().isBlank())
+                ? request.getDescription().trim()
+                : null;
+        if (description == null && relatedListingId != null) {
             description = wasteListingRepository.findById(relatedListingId)
                     .map(WasteListing::getDescription)
                     .orElse(null);

@@ -34,7 +34,7 @@ echo .
 echo Stopping ALL Farmio backend microservices...
 echo.
 setlocal enabledelayedexpansion
-set ports=8761 8080 8085 8081 8083 8086 8087 8088 8089 8090 8091 8092 8093
+set ports=8761 8080 8085 8081 8083 8086 8087 8088 8089 8090 8091 8092 8093 8094
 for %%p in (!ports!) do (
     set found=0
     for /f "tokens=5" %%i in ('netstat -ano ^| findstr ":%%p "') do (

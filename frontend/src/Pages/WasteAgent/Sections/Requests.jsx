@@ -63,6 +63,7 @@ import {
 	CommandList,
 } from "@/Components/WasteUI/command";
 import { cn } from "@/lib/utils";
+import api from "@/API/client";
 
 const Requests = () => {
 	// const [requests, setRequests] = useState([
@@ -182,12 +183,12 @@ const Requests = () => {
 
 	useEffect(() => {
 		setLoading(true);
-		fetch("http://localhost:8088/requests")
+		api.get("/api/waste/requests")
 			.then((res) => {
-				if (!res.ok) {
-					throw new Error("Failed to fetch requests");
-				}
-				return res.json();
+				// if (!res.ok) {
+				// 	throw new Error("Failed to fetch requests");
+				// }
+				return res.data;
 			})
 			.then((data) => {
 				setRequests(data);
@@ -247,21 +248,13 @@ const Requests = () => {
 
 		// Determine the endpoint based on action
 		const endpoint = action === "accept" 
-			? `http://localhost:8088/requests/${requestId}/accept?agentId=${agentId}`
-			: `http://localhost:8088/requests/${requestId}/reject`;
+			? `/api/waste/requests/${requestId}/accept?agentId=${agentId}`
+			: `/api/waste/requests/${requestId}/reject`;
 
 		// Call backend API to update status
-		fetch(endpoint, {
-			method: "PUT",
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
+		api.put(endpoint)
 			.then((res) => {
-				if (!res.ok) {
-					throw new Error(`Failed to ${actionText} request`);
-				}
-				return res.json();
+				return res.data;
 			})
 			.then((updatedRequest) => {
 				// Update local state with the updated request

@@ -23,6 +23,9 @@ public class Request {
     private String quantity;
     private String preferredPickupTime;
 
+    // Optional description provided by requester
+    private String description;
+
     // Offer
     private BigDecimal offeredPrice;
     private BigDecimal totalOffer;
@@ -56,6 +59,9 @@ public class Request {
 
     public String getPreferredPickupTime() { return preferredPickupTime; }
     public void setPreferredPickupTime(String preferredPickupTime) { this.preferredPickupTime = preferredPickupTime; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     public BigDecimal getOfferedPrice() { return offeredPrice; }
     public void setOfferedPrice(BigDecimal offeredPrice) { this.offeredPrice = offeredPrice; }

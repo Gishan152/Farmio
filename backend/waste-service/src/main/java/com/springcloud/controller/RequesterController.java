@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/requesters")
+@RequestMapping("/api/waste/requesters")
 public class RequesterController {
 
     private final RequesterService requesterService;

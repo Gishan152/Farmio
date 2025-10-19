@@ -58,6 +58,7 @@ import { Toaster, toast } from "sonner";
 import { Input } from "@/Components/WasteUI/input";
 import { CardDescription, CardTitle } from "@/Components/WasteUI/card";
 import { PopoverAnchor } from "@radix-ui/react-popover";
+import api from "@/API/client";
 
 const WasteListings = () => {
 	// These are accepted requests that now show as listings
@@ -611,8 +612,10 @@ const WasteListings = () => {
 
 	useEffect(() => {
 		setLoading(true);
-		fetch("http://localhost:8088/waste-listings")
-			.then((res) => res.json())
+		api.get("/api/waste/listings")
+			.then((res) => {
+				return res.data
+			})
 			.then((data) => {
 				setListingsResp(data);
 				setLoading(false);
@@ -643,12 +646,10 @@ const WasteListings = () => {
 		const listing = listingsResp.find((l) => l.id === listingId);
 
 		const startTask = async () => {
-			const res = await fetch(
-				`http://localhost:8088/waste-listings/${listingId}/status?status=IN_PROGRESS`,
-				{ method: "PUT" }
+			const res = await api.put(
+				`api/waste/listings/${listingId}/status?status=IN_PROGRESS`
 			);
-			if (!res.ok) throw new Error("Failed to update status");
-			const updated = await res.json();
+			const updated = res.data;
 
 			// update local state with backend response
 			setListingsResp((prev) =>
@@ -671,12 +672,10 @@ const WasteListings = () => {
 		const listing = listingsResp.find((l) => l.id === listingId);
 
 		const completeTask = async () => {
-			const res = await fetch(
-				`http://localhost:8088/waste-listings/${listingId}/status?status=COMPLETED`,
-				{ method: "PUT" }
+			const res = await api.put(
+				`api/waste/listings/${listingId}/status?status=COMPLETED`
 			);
-			if (!res.ok) throw new Error("Failed to update status");
-			const updated = await res.json();
+			const updated = res.data;
 
 			setListingsResp((prev) =>
 				prev.map((l) =>

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/waste-agents")
+@RequestMapping("/api/waste/waste-agents")
 public class WasteAgentController {
 
     private final WasteAgentService wasteAgentService;
