@@ -9,57 +9,99 @@ import {
   ArrowDownTrayIcon,
   CheckBadgeIcon
 } from '@heroicons/react/24/outline';
+import api from "../../../API/client"
+
+export async function AssignedLoadsLoader() {
+  try {
+    // Fetch all loads assigned to the current driver
+    const response = await api.get("/transport/load/all");
+
+    const loads = response.data;
+    const API_BASE_URL = import.meta.env.VITE_API_GATEWAY_URL;
+
+    // Transform data into frontend-friendly structure
+    return loads.map((load) => ({
+      id: load.id,
+      crop: load.cropType || "Unknown Crop",
+      quantity: `${load.quantity} ${load.unit || "kg"}`,
+      pickupLocation: load.pickupLocation || "N/A",
+      deliveryLocation: load.deliveryLocation || "N/A",
+      status: load.status || "Pending Pickup",
+      confirmedBy: {
+        driverPickup: load.driverPickupConfirmed || false,
+        driverDelivery: load.driverDeliveryConfirmed || false,
+        buyer: load.buyerConfirmed || false,
+      },
+      pickupTime: load.pickupTime,
+      estimatedDelivery: load.estimatedDeliveryTime,
+      imageUrls: load.imageUrls
+        ? load.imageUrls.map((url) => `${API_BASE_URL}${url}`)
+        : [],
+    }));
+  } catch (error) {
+    console.error("Failed to fetch assigned loads:", error);
+    return [];
+  }
+}
 
 const AssignedLoads = () => {
   const navigate = useNavigate();
-  const [loads, setLoads] = useState([
-    {
-      id: 1,
-      crop: 'Tomatoes',
-      quantity: '50 kg',
-      pickupLocation: 'Galle',
-      deliveryLocation: 'Colombo',
-      status: 'Pending Pickup',
-      confirmedBy: {
-        driverPickup: false,
-        driverDelivery: false,
-        buyer: false,
-      },
-      pickupTime: '2023-05-15 08:30',
-      estimatedDelivery: '2023-05-15 14:00'
-    },
-    {
-      id: 2,
-      crop: 'Bananas',
-      quantity: '30 kg',
-      pickupLocation: 'Matara',
-      deliveryLocation: 'Kandy',
-      status: 'In Transit',
-      confirmedBy: {
-        driverPickup: true,
-        driverDelivery: false,
-        buyer: false,
-      },
-      pickupTime: '2023-05-16 09:15',
-      estimatedDelivery: '2023-05-16 16:30'
-    },
-    {
-      id: 3,
-      crop: 'Carrots',
-      quantity: '20 kg',
-      pickupLocation: 'Nuwara Eliya',
-      deliveryLocation: 'Gampaha',
-      status: 'Delivered',
-      confirmedBy: {
-        driverPickup: true,
-        driverDelivery: true,
-        buyer: true,
-      },
-      pickupTime: '2023-05-14 10:00',
-      estimatedDelivery: '2023-05-14 18:00'
-    },
-  ]);
+  // const [loads, setLoads] = useState([
+  //   {
+  //     id: 1,
+  //     crop: 'Tomatoes',
+  //     quantity: '50 kg',
+  //     pickupLocation: 'Galle',
+  //     deliveryLocation: 'Colombo',
+  //     status: 'Pending Pickup',
+  //     confirmedBy: {
+  //       driverPickup: false,
+  //       driverDelivery: false,
+  //       buyer: false,
+  //     },
+  //     pickupTime: '2023-05-15 08:30',
+  //     estimatedDelivery: '2023-05-15 14:00'
+  //   },
+  //   {
+  //     id: 2,
+  //     crop: 'Bananas',
+  //     quantity: '30 kg',
+  //     pickupLocation: 'Matara',
+  //     deliveryLocation: 'Kandy',
+  //     status: 'In Transit',
+  //     confirmedBy: {
+  //       driverPickup: true,
+  //       driverDelivery: false,
+  //       buyer: false,
+  //     },
+  //     pickupTime: '2023-05-16 09:15',
+  //     estimatedDelivery: '2023-05-16 16:30'
+  //   },
+  //   {
+  //     id: 3,
+  //     crop: 'Carrots',
+  //     quantity: '20 kg',
+  //     pickupLocation: 'Nuwara Eliya',
+  //     deliveryLocation: 'Gampaha',
+  //     status: 'Delivered',
+  //     confirmedBy: {
+  //       driverPickup: true,
+  //       driverDelivery: true,
+  //       buyer: true,
+  //     },
+  //     pickupTime: '2023-05-14 10:00',
+  //     estimatedDelivery: '2023-05-14 18:00'
+  //   },
+  // ]);
+  const [loads, setLoads] = useState([]);
 
+  useEffect(() => {
+    const fetchLoads = async () => {
+      const data = await AssignedLoadsLoader();
+      setLoads(data);
+    };
+    fetchLoads();
+  }, []);
   const handleConfirm = (loadId, type) => {
     setLoads((prevLoads) =>
       prevLoads.map((load) => {

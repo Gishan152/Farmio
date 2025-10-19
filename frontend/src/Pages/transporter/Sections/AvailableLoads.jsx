@@ -1,36 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { TruckIcon, CheckCircleIcon, XCircleIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import api from '../../../API/client';
 
-const mockLoads = [
-  {
-    id: 'LD-1052',
-    from: 'Anuradhapura',
-    to: 'Colombo',
-    weight: '25kg',
-    payment: 'Rs. 3,000',
-    pickupTime: '2023-05-15 08:30',
-    estimatedDelivery: '2023-05-15 14:00',
-    product: 'Vegetables'
-  },
-  {
-    id: 'LD-1061',
-    from: 'Matara',
-    to: 'Kandy',
-    weight: '40kg',
-    payment: 'Rs. 5,200',
-    pickupTime: '2023-05-16 09:15',
-    estimatedDelivery: '2023-05-16 16:30',
-    product: 'Fruits'
-  },
-];
+// const mockLoads = [
+//   {
+//     id: 'LD-1052',
+//     from: 'Anuradhapura',
+//     to: 'Colombo',
+//     weight: '25kg',
+//     payment: 'Rs. 3,000',
+//     pickupTime: '2023-05-15 08:30',
+//     estimatedDelivery: '2023-05-15 14:00',
+//     product: 'Vegetables'
+//   },
+//   {
+//     id: 'LD-1061',
+//     from: 'Matara',
+//     to: 'Kandy',
+//     weight: '40kg',
+//     payment: 'Rs. 5,200',
+//     pickupTime: '2023-05-16 09:15',
+//     estimatedDelivery: '2023-05-16 16:30',
+//     product: 'Fruits'
+//   },
+// ];
+
+export async function AvailableLoadsLoader() {
+  try {
+    // Fetch all loads assigned to the current driver
+    const response = await api.get("/api/transport/getAllLoads");
+
+    const loads = response.data;
+    const API_BASE_URL = import.meta.env.VITE_API_GATEWAY_URL;
+
+    // Transform data into frontend-friendly structure
+    return loads.map((load) => ({
+      id: load.id,
+      from: load.fromLocation,
+      to: load.toLocation,
+      weight: load.weight,
+      payment: load.payment,
+      pickupTime: load.pickupTime,
+      estimatedDelivery: load.estimatedDeliveryTime,
+      product: load.product,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch assigned loads:", error);
+    return [];
+  }
+}
 
 export default function AvailableLoads() {
   const [loads, setLoads] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    // 🔹 Replace this mock with backend call later
-    setLoads(mockLoads);
+    const fetchLoads = async () => {
+      const data = await AvailableLoadsLoader();
+      setLoads(data);
+    };
+    fetchLoads();
   }, []);
 
   const handleAccept = (loadId) => {
