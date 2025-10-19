@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   TruckIcon, 
@@ -20,7 +20,9 @@ export async function AssignedLoadsLoader() {
     const API_BASE_URL = import.meta.env.VITE_API_GATEWAY_URL;
 
     // Transform data into frontend-friendly structure
-    return loads.map((load) => ({
+    return loads
+    .filter((load) => load.status === "accepted" || load.status === "in_transit" || load.status === "delivered")
+    .map((load) => ({
       id: load.id,
       crop: load.cropType || "Unknown Crop",
       quantity: `${load.quantity} ${load.unit || "kg"}`,

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {useUserContext} from '../../../Contexts/UserContext'
 import { 
   TruckIcon,
   PencilIcon,
@@ -9,6 +10,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import transportService from '../../../API/transportService';
+
 
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) return null;
@@ -54,6 +56,10 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
 };
 
 export default function VehicleInfo() {
+  const { user } = useUserContext(); 
+  const providerId = user?.id;
+  console.log("Provider ID in VehicleInfo:", providerId);
+
   const [vehicle, setVehicle] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -66,7 +72,12 @@ export default function VehicleInfo() {
     sidePhoto: '',
   });
   const [errors, setErrors] = useState({});
-  const providerId = 1;
+
+  useEffect(() => {
+    if (providerId) {
+      loadVehicle(providerId);
+    }
+  }, [providerId]);
 
   useEffect(() => {
     loadVehicle();
@@ -119,6 +130,9 @@ export default function VehicleInfo() {
     if (!validateForm()) return;
 
     try {
+      setLoading(true);
+      setError('');
+
       const vehicleData = {
         ...formData,
         providerId: providerId
@@ -126,43 +140,31 @@ export default function VehicleInfo() {
 
       let savedVehicle;
       if (vehicle) {
-        savedVehicle = await transportService.updateVehicle(vehicle.id, vehicleData);
+        // Update existing vehicle
+        savedVehicle = await vehicleService.updateVehicle(vehicleData);
       } else {
-        savedVehicle = await transportService.saveVehicle(vehicleData);
+        // Create new vehicle
+        savedVehicle = await vehicleService.saveVehicle(vehicleData);
       }
 
       setVehicle(savedVehicle);
       setIsEditing(false);
-
     } catch (error) {
       console.error('Error saving vehicle:', error);
+      setError('Failed to save vehicle. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleEdit = () => {
-    setFormData({
-      regNo: vehicle.regNo,
-      type: vehicle.type,
-      kind: vehicle.kind,
-      maxLoad: vehicle.maxLoad,
-      frontPhoto: vehicle.frontPhoto,
-      sidePhoto: vehicle.sidePhoto,
-    });
-    setIsEditing(true);
   };
 
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = async () => {
-    try {
-      await transportService.deleteVehicle(vehicle.id);
-      setVehicle(null);
-      setShowDeleteModal(false);
-    } catch (error) {
-      console.error('Error deleting vehicle:', error);
-    }
+  const handleDeleteConfirm = () => {
+    setVehicle(null);
+    localStorage.removeItem('transportProviderVehicle');
+    setShowDeleteModal(false);
   };
 
   const handleDeleteCancel = () => {

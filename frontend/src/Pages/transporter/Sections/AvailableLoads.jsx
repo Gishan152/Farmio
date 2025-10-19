@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TruckIcon, CheckCircleIcon, XCircleIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import api from '../../../API/client';
+import {useUserContext} from '../../../Contexts/UserContext'
 
 // const mockLoads = [
 //   {
@@ -30,7 +31,7 @@ export async function AvailableLoadsLoader() {
     // Fetch all loads assigned to the current driver
     const response = await api.get("/api/transport/getAllLoads");
 
-    const loads = response.data;
+    const loads = response.data.filter(load => load.status?.toLowerCase() === "pending");
     const API_BASE_URL = import.meta.env.VITE_API_GATEWAY_URL;
 
     // Transform data into frontend-friendly structure
@@ -51,6 +52,7 @@ export async function AvailableLoadsLoader() {
 }
 
 export default function AvailableLoads() {
+  
   const [loads, setLoads] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -62,10 +64,20 @@ export default function AvailableLoads() {
     fetchLoads();
   }, []);
 
-  const handleAccept = (loadId) => {
-    // Later this will call backend API to change status to "accepted"
+  const handleAccept = async(loadId) => {
+    try {
+      const { user } = useUserContext(); 
+      const driverId = user?.id;
+
+    await api.put(`/api/transport/assignDriver/${loadId}/${driverId}`);
+
     setLoads(prevLoads => prevLoads.filter(load => load.id !== loadId));
-  };
+
+  } catch (error) {
+    console.error("Failed to accept load:", error);
+    alert("Failed to accept load. Please try again.");
+  }
+};
 
   const filteredLoads = loads.filter(load =>
     !searchTerm || load.id.toLowerCase().includes(searchTerm.toLowerCase())
