@@ -74,13 +74,24 @@ public class OrderService {
                     .map(item -> item.getPricePerUnit().multiply(item.getQuantity()))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+            // Determine transport mode from product transportation availability
+            boolean anyTransportAvailable = farmerItems.stream().anyMatch(itemReq -> {
+                CropInfo ci = cropMap.get(itemReq.getCropId());
+                try {
+                    return ci != null && ci.isTransportationAvailable();
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            String transportMode = anyTransportAvailable ? "BY_FARMER" : "BY_BUYER";
+
             var order = Order.builder()
                     .farmerId(farmerId)
                     .buyerId(userId)
                     .paymentId("123")
                     .status(OrderStatus.PENDING)
                     .total(total)
-                    .transport("BY_BUYER")
+                    .transport(transportMode)
                     .build();
 
 //            orderRepository.saveAndFlush(order);
