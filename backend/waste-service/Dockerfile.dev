@@ -1,19 +1,14 @@
 FROM eclipse-temurin:24-jdk-noble
 
-WORKDIR /app
+WORKDIR /app/waste-service
 
-COPY pom.xml /app
+# Copy wrapper and .mvn so Maven can bootstrap
+COPY waste-service/mvnw .
+COPY waste-service/.mvn .mvn
+RUN chmod +x mvnw
 
-# RUN ls -la /app         # Check wrapper files are here
+# Copy pom.xml so dependencies can be resolved
+COPY waste-service/pom.xml .
 
-WORKDIR /app/service
-
-# RUN /app/service/mvnw dependency:go-offline -B
-CMD ["bash", "-c", "/app/service/mvnw dependency:go-offline -B"]
-
-# No VOLUME here — using bind mount instead
-
-# EXPOSE 8080 5005
-
-ENTRYPOINT ["bash", "-c", "/app/service/mvnw org.springframework.boot:spring-boot-maven-plugin:run"]
-# CMD ["sh", "-c", "while true; do sleep 1; done"]
+# Default entrypoint: run Spring Boot via wrapper
+ENTRYPOINT ["./mvnw", "spring-boot:run"]

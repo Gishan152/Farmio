@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	Table,
 	TableBody,
@@ -49,313 +49,21 @@ import {
 	CommandList,
 } from "@/Components/WasteUI/command";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/Components/WasteUI/dialog"
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/Components/WasteUI/dialog";
 import { cn } from "@/lib/utils";
 import { Label } from "@/Components/WasteUI/label";
 import { FaDownload } from "react-icons/fa6";
+import api from "@/API/client";
 
 const Payments = () => {
-	const [payments, setPayments] = useState([
-		{
-			id: "PAY-2025-001",
-			orderId: "WO-2025-001",
-			farmer: "Paddy Green Farms",
-			farmerAccount: "****-1234",
-			wasteType: "Compostable",
-			quantity: 2500,
-			rate: 0.15,
-			amount: "$375.00",
-			paymentDate: "2025-01-08",
-			dueDate: "2025-01-10",
-			status: "Paid",
-			paymentMethod: "Bank Transfer",
-			transactionId: "TXN-789123456",
-			processingFee: "$5.25",
-			netAmount: "$369.75",
-		},
-		{
-			id: "PAY-2025-002",
-			orderId: "WO-2025-002",
-			farmer: "Nuwara Eliya Fresh Co.",
-			farmerAccount: "****-5678",
-			wasteType: "Spoiled Produce",
-			quantity: 850,
-			rate: 0.08,
-			amount: "$68.00",
-			paymentDate: "2025-01-06",
-			dueDate: "2025-01-08",
-			status: "Paid",
-			paymentMethod: "Bank Transfer",
-			transactionId: "TXN-789123456",
-			processingFee: "$2.40",
-			netAmount: "$65.60",
-		},
-		{
-			id: "PAY-2025-003",
-			orderId: "WO-2025-003",
-			farmer: "Lanka Coconut Estate",
-			farmerAccount: "****-9012",
-			wasteType: "Plastic",
-			quantity: 1200,
-			rate: 0.12,
-			amount: "$144.00",
-			paymentDate: "2025-01-09",
-			dueDate: "2025-01-11",
-			status: "Pending",
-			paymentMethod: "ACH Transfer",
-			transactionId: "",
-			processingFee: "$3.60",
-			netAmount: "$140.40",
-		},
-		{
-			id: "PAY-2025-004",
-			orderId: "WO-2025-004",
-			farmer: "Kandy Hill Tea Estate",
-			farmerAccount: "****-3456",
-			wasteType: "Compostable",
-			quantity: 3800,
-			rate: 0.10,
-			amount: "$380.00",
-			paymentDate: "2025-01-12",
-			dueDate: "2025-01-14",
-			status: "Pending",
-			paymentMethod: "Bank Transfer",
-			transactionId: "",
-			processingFee: "$7.60",
-			netAmount: "$372.40",
-		},
-		{
-			id: "PAY-2025-005",
-			orderId: "WO-2025-005",
-			farmer: "Galle Sugar Mills",
-			farmerAccount: "****-7890",
-			wasteType: "Agricultural Waste",
-			quantity: 5000,
-			rate: 0.05,
-			amount: "$250.00",
-			paymentDate: "2025-01-06",
-			dueDate: "2025-01-08",
-			status: "Paid",
-			paymentMethod: "Wire Transfer",
-			transactionId: "TXN-456789123",
-			processingFee: "$5.00",
-			netAmount: "$245.00",
-		},
-		{
-			id: "PAY-2025-006",
-			orderId: "WO-2024-098",
-			farmer: "Matara Spice Gardens",
-			farmerAccount: "****-2468",
-			wasteType: "Spoiled Produce",
-			quantity: 1800,
-			rate: 0.12,
-			amount: "$216.00",
-			paymentDate: "2024-12-30",
-			dueDate: "2025-01-02",
-			status: "Rejected",
-			paymentMethod: "Bank Transfer",
-			transactionId: "",
-			processingFee: "$4.32",
-			netAmount: "$211.68",
-		},
-		{
-			id: "PAY-2025-007",
-			orderId: "WO-2025-007",
-			farmer: "Jaffna Vegetable Co-op",
-			farmerAccount: "****-5432",
-			wasteType: "Compostable",
-			quantity: 2200,
-			rate: 0.13,
-			amount: "$286.00",
-			paymentDate: "2025-07-08",
-			dueDate: "2025-07-10",
-			status: "Paid",
-			paymentMethod: "Bank Transfer",
-			transactionId: "TXN-789456123",
-			processingFee: "$4.29",
-			netAmount: "$281.71",
-		},
-		{
-			id: "PAY-2025-008",
-			orderId: "WO-2025-008",
-			farmer: "Negombo Fish Market",
-			farmerAccount: "****-9876",
-			wasteType: "Spoiled Produce",
-			quantity: 950,
-			rate: 0.09,
-			amount: "$85.50",
-			paymentDate: "2025-07-09",
-			dueDate: "2025-07-11",
-			status: "Pending",
-			paymentMethod: "ACH Transfer",
-			transactionId: "",
-			processingFee: "$2.85",
-			netAmount: "$82.65",
-		},
-		{
-			id: "PAY-2025-009",
-			orderId: "WO-2025-009",
-			farmer: "Anuradhapura Rice Mills",
-			farmerAccount: "****-3210",
-			wasteType: "Agricultural Waste",
-			quantity: 4500,
-			rate: 0.06,
-			amount: "$270.00",
-			paymentDate: "2025-07-09",
-			dueDate: "2025-07-11",
-			status: "Paid",
-			paymentMethod: "Wire Transfer",
-			transactionId: "TXN-654321987",
-			processingFee: "$5.40",
-			netAmount: "$264.60",
-		},
-		{
-			id: "PAY-2025-010",
-			orderId: "WO-2025-010",
-			farmer: "Batticaloa Coconut Estate",
-			farmerAccount: "****-6789",
-			wasteType: "Plastic",
-			quantity: 1600,
-			rate: 0.11,
-			amount: "$176.00",
-			paymentDate: "2025-07-08",
-			dueDate: "2025-07-10",
-			status: "Paid",
-			paymentMethod: "Bank Transfer",
-			transactionId: "TXN-987654321",
-			processingFee: "$3.52",
-			netAmount: "$172.48",
-		},
-		{
-			id: "PAY-2025-011",
-			orderId: "WO-2025-011",
-			farmer: "Kurunegala Fruit Growers",
-			farmerAccount: "****-1357",
-			wasteType: "Compostable",
-			quantity: 3200,
-			rate: 0.14,
-			amount: "$448.00",
-			paymentDate: "2025-07-07",
-			dueDate: "2025-07-09",
-			status: "Paid",
-			paymentMethod: "Bank Transfer",
-			transactionId: "TXN-123789456",
-			processingFee: "$6.72",
-			netAmount: "$441.28",
-		},
-		{
-			id: "PAY-2025-012",
-			orderId: "WO-2025-012",
-			farmer: "Trincomalee Seafood Co.",
-			farmerAccount: "****-2468",
-			wasteType: "Spoiled Produce",
-			quantity: 1100,
-			rate: 0.08,
-			amount: "$88.00",
-			paymentDate: "2025-07-06",
-			dueDate: "2025-07-08",
-			status: "Pending",
-			paymentMethod: "Bank Transfer",
-			transactionId: "",
-			processingFee: "$2.64",
-			netAmount: "$85.36",
-		},
-		{
-			id: "PAY-2025-013",
-			orderId: "WO-2025-013",
-			farmer: "Badulla Tea Estates",
-			farmerAccount: "****-8642",
-			wasteType: "Compostable",
-			quantity: 2800,
-			rate: 0.12,
-			amount: "$336.00",
-			paymentDate: "2025-07-05",
-			dueDate: "2025-07-07",
-			status: "Paid",
-			paymentMethod: "Wire Transfer",
-			transactionId: "TXN-456123789",
-			processingFee: "$5.04",
-			netAmount: "$330.96",
-		},
-		{
-			id: "PAY-2025-014",
-			orderId: "WO-2025-014",
-			farmer: "Ratnapura Gem Miners",
-			farmerAccount: "****-9753",
-			wasteType: "Metal",
-			quantity: 650,
-			rate: 0.25,
-			amount: "$162.50",
-			paymentDate: "2025-07-04",
-			dueDate: "2025-07-06",
-			status: "Paid",
-			paymentMethod: "Bank Transfer",
-			transactionId: "TXN-789123654",
-			processingFee: "$3.25",
-			netAmount: "$159.25",
-		},
-		{
-			id: "PAY-2025-015",
-			orderId: "WO-2025-015",
-			farmer: "Kegalle Paper Mills",
-			farmerAccount: "****-1470",
-			wasteType: "Paper",
-			quantity: 2100,
-			rate: 0.07,
-			amount: "$147.00",
-			paymentDate: "2025-07-03",
-			dueDate: "2025-07-05",
-			status: "Rejected",
-			paymentMethod: "ACH Transfer",
-			transactionId: "",
-			processingFee: "$2.94",
-			netAmount: "$144.06",
-		},
-		{
-			id: "PAY-2025-016",
-			orderId: "WO-2025-016",
-			farmer: "Colombo Electronics Hub",
-			farmerAccount: "****-2580",
-			wasteType: "Electronic Waste",
-			quantity: 340,
-			rate: 0.45,
-			amount: "$153.00",
-			paymentDate: "2025-07-02",
-			dueDate: "2025-07-04",
-			status: "Paid",
-			paymentMethod: "Bank Transfer",
-			transactionId: "TXN-321654987",
-			processingFee: "$3.06",
-			netAmount: "$149.94",
-		},
-		{
-			id: "PAY-2025-017",
-			orderId: "WO-2025-017",
-			farmer: "Galle Glass Works",
-			farmerAccount: "****-3691",
-			wasteType: "Glass",
-			quantity: 890,
-			rate: 0.15,
-			amount: "$133.50",
-			paymentDate: "2025-07-01",
-			dueDate: "2025-07-03",
-			status: "Pending",
-			paymentMethod: "Wire Transfer",
-			transactionId: "",
-			processingFee: "$2.67",
-			netAmount: "$130.83",
-		},
-	]);
-
-	// Filter state variables
 	const cities = [
 		{ value: "colombo", label: "Colombo" },
 		{ value: "kandy", label: "Kandy" },
@@ -372,6 +80,8 @@ const Payments = () => {
 		{ value: "kegalle", label: "Kegalle" },
 	];
 
+	const [payments, setPayments] = useState([]);
+	const [loading, setLoading] = useState(true);
 	const [open, setOpen] = useState(false);
 	const [selectedDistrict, setSelectedDistrict] = useState("");
 
@@ -386,35 +96,80 @@ const Payments = () => {
 
 	const wasteTypes = [
 		"Compostable",
-		"Plastic", 
+		"Plastic",
 		"Spoiled Produce",
 		"Agricultural Waste",
 		"Glass",
 		"Metal",
 		"Paper",
-		"Electronic Waste"
+		"Electronic Waste",
 	];
 
-	const farmerNames = [...new Set(payments.map(p => p.farmer))].sort();
+	const farmerNames = [...new Set(payments.map((p) => p.farmer))].sort();
+
+	// Polling interval to pick up backend updates from the payment listener
+	const POLL_MS = 15000; // 15 seconds
+
+	const fetchPayments = async ({ showLoading = false } = {}) => {
+		try {
+			if (showLoading) setLoading(true);
+			const userId = localStorage.getItem("userId"); // adjust if using an auth context
+			const res = await api.get("/api/waste/payments", {
+				headers: userId ? { "X-User-Id": userId } : undefined,
+			});
+			setPayments(res.data || []);
+		} catch (err) {
+			console.error("Error fetching payments:", err);
+		} finally {
+			if (showLoading) setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		// initial fetch with loading state
+		fetchPayments({ showLoading: true });
+		// periodic refresh to reflect backend listener updates (e.g., PAID)
+		const t = setInterval(() => fetchPayments({ showLoading: false }), POLL_MS);
+		return () => clearInterval(t);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	// Convert quantity to KG if it's in TON
+	const convertToKg = (quantity, unit) => {
+		if (!unit) return quantity;
+		const unitUpper = unit.toUpperCase();
+		if (unitUpper === 'TON' || unitUpper === 'TONS') {
+			return quantity * 907.185; // 1 US short ton = 907.185 kg
+		}
+		return quantity;
+	};
 
 	const getStatusBadge = (status) => {
+		if (!status) return "bg-gray-100 text-gray-800";
+
+		// Normalize backend values to match style keys
+		const normalized = status.replace("_", " ").toLowerCase();
+
 		const styles = {
-			Paid: "bg-green-100 text-green-800",
-			Pending: "bg-yellow-100 text-yellow-800",
-			Rejected: "bg-red-100 text-red-800",
+			paid: "bg-green-100 text-green-800",
+			pending: "bg-yellow-100 text-yellow-800",
+			processing: "bg-blue-100 text-blue-800",
+			rejected: "bg-red-100 text-red-800",
+			completed: "bg-purple-100 text-purple-800",
 		};
-		return styles[status] || "bg-gray-100 text-gray-800";
+
+		return styles[normalized] || "bg-gray-100 text-gray-800";
 	};
 
 	const getWasteTypeBadge = (type) => {
 		const styles = {
-			"Compostable": "bg-green-100 text-green-800",
-			"Plastic": "bg-blue-100 text-blue-800",
+			Compostable: "bg-green-100 text-green-800",
+			Plastic: "bg-blue-100 text-blue-800",
 			"Spoiled Produce": "bg-orange-100 text-orange-800",
 			"Agricultural Waste": "bg-emerald-100 text-emerald-800",
-			"Glass": "bg-cyan-100 text-cyan-800",
-			"Metal": "bg-gray-100 text-gray-800",
-			"Paper": "bg-yellow-100 text-yellow-800",
+			Glass: "bg-cyan-100 text-cyan-800",
+			Metal: "bg-gray-100 text-gray-800",
+			Paper: "bg-yellow-100 text-yellow-800",
 			"Electronic Waste": "bg-purple-100 text-purple-800",
 		};
 		return styles[type] || "bg-gray-100 text-gray-800";
@@ -431,59 +186,108 @@ const Payments = () => {
 	};
 
 	const handleDownloadCSV = () => {
-		const csvHeaders = "Date,Farmer Name,Waste Type,Quantity (kg),Rate (Rs/kg),Total Payment,Status,Transaction ID\n";
-		const csvData = filteredPayments.map(payment => {
-			const rate = (parseFloat(payment.amount.replace('$', '')) / payment.quantity).toFixed(2);
-			return `${payment.paymentDate},"${payment.farmer}","${payment.wasteType}",${payment.quantity},${rate},${payment.amount},${payment.status},"${payment.transactionId || 'N/A'}"`;
-		}).join('\n');
-		
+		const csvHeaders =
+			"Date,Farmer Name,Waste Type,Quantity (kg),Rate (Rs/kg),Total Payment,Status,Transaction ID\n";
+		const csvData = filteredPayments
+			.map((payment) => {
+				const quantityInKg = convertToKg(payment.quantity, payment.unit);
+				const rate = (
+					parseFloat(payment.amount.replace("$", "")) /
+					quantityInKg
+				).toFixed(2);
+				return `${payment.paymentDate},"${payment.farmer}","${
+					payment.wasteType
+				}",${quantityInKg.toFixed(2)},${rate},${payment.amount},${
+					payment.status
+				},"${payment.transactionId || "N/A"}"`;
+			})
+			.join("\n");
+
 		const csvContent = csvHeaders + csvData;
-		const blob = new Blob([csvContent], { type: 'text/csv' });
+		const blob = new Blob([csvContent], { type: "text/csv" });
 		const url = window.URL.createObjectURL(blob);
-		const link = document.createElement('a');
+		const link = document.createElement("a");
 		link.href = url;
-		link.download = `payment-history-${new Date().toISOString().split('T')[0]}.csv`;
+		link.download = `payment-history-${
+			new Date().toISOString().split("T")[0]
+		}.csv`;
 		link.click();
 		window.URL.revokeObjectURL(url);
-		
+
 		toast.success("CSV Downloaded!", {
 			description: "Payment history exported successfully",
 		});
 	};
 
-	const handleMakePayment = (paymentId) => {
-		const startTask = () => {
-			return new Promise((resolve, reject) => {
-				setTimeout(() => {
-					setPayments(
-						payments.map((payment) =>
-							payment.id === paymentId
-								? {
-										...payment,
-										status: "Completed",
-										transactionId: `TXN-${Date.now()}`,
-										paymentDate: new Date()
-											.toISOString()
-											.split("T")[0],
-								  }
-								: payment
-						)
-					);
-					resolve({ transactionId: `TXN-${Date.now()}` }); // Return data for success callback
-				}, 2000);
+	const handleMakePayment = async (paymentId) => {
+		try {
+			// Call backend to initiate payment
+			const res = await api.post(`/api/waste/payments/${paymentId}/pay`);
+			console.log("Payment initiation response:", res.data);
+
+			// If all required PayHere params are present, create and submit a form
+			if (res.data && res.data.hash) {
+				const {
+					merchantId,
+					orderId,
+					amount,
+					currency,
+					hash,
+					firstName,
+					lastName,
+					email,
+					phone,
+					address,
+					city,
+					country,
+				} = res.data;
+
+				// Create a form dynamically
+				const form = document.createElement("form");
+				form.method = "POST";
+				form.action = "https://sandbox.payhere.lk/pay/checkout";
+
+				const fields = {
+					merchant_id: merchantId,
+					return_url: `${window.location.origin}/waste-agent/payments`,
+					cancel_url: `${window.location.origin}/waste-agent/payments`,
+					notify_url: "http://localhost:8080/api/payment/payhere/notify",
+					order_id: orderId,
+					items: res.data.description || "Waste payment",
+					currency: currency,
+					amount: amount,
+					first_name: firstName,
+					last_name: lastName,
+					email: email,
+					phone: phone,
+					address: address,
+					city: city,
+					country: country,
+					hash: hash,
+				};
+
+				for (const [key, value] of Object.entries(fields)) {
+					const input = document.createElement("input");
+					input.type = "hidden";
+					input.name = key;
+					input.value = value;
+					form.appendChild(input);
+				}
+
+				document.body.appendChild(form);
+				form.submit();
+			} else {
+				console.error("Payment initiation failed: missing hash or data");
+				toast.error("Payment initialization failed", {
+					description: "Please try again or contact support.",
+				});
+			}
+		} catch (err) {
+			console.error("Payment failed:", err);
+			toast.error("Payment failed", {
+				description: "Please try again.",
 			});
-		};
-
-		toast.promise(startTask(), {
-			loading: "Payment is processing...",
-			success: (data) => ({
-				message: "Payment completed successfully!",
-				description: `Payment ${paymentId} has been processed. Transaction ID: ${data.transactionId}`,
-			}),
-			error: "Payment failed. Please try again.",
-		});
-
-		// Remove the duplicate toast.success() call since toast.promise handles it
+		}
 	};
 
 	const handleSchedulePayment = (paymentId) => {
@@ -516,99 +320,136 @@ const Payments = () => {
 	};
 
 	// Filter and sort payments based on current filter state
-	const filteredPayments = payments.filter((payment) => {
-		// Get selected district label
-		const selectedDistrictLabel = selectedDistrict
-			? cities.find((city) => city.value === selectedDistrict)?.label
-			: "";
+	const filteredPayments = payments
+		.filter((payment) => {
+			// Get selected district label
+			const selectedDistrictLabel = selectedDistrict
+				? cities.find((city) => city.value === selectedDistrict)?.label
+				: "";
 
-		// Date range filter
-		const paymentDate = new Date(payment.paymentDate);
-		const now = new Date();
-		let dateMatch = true;
-		
-		if (filters.dateRange === "thisMonth") {
-			dateMatch = paymentDate.getMonth() === now.getMonth() && 
-						paymentDate.getFullYear() === now.getFullYear();
-		} else if (filters.dateRange === "lastMonth") {
-			const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1);
-			dateMatch = paymentDate.getMonth() === lastMonth.getMonth() && 
-						paymentDate.getFullYear() === lastMonth.getFullYear();
-		} else if (filters.dateRange === "last7Days") {
-			const weekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-			dateMatch = paymentDate >= weekAgo;
-		}
+			// Date range filter
+			const paymentDate = new Date(payment.paymentDate);
+			const now = new Date();
+			let dateMatch = true;
 
-		return (
-			(filters.status === "All" || payment.status === filters.status) &&
-			(filters.wasteType === "All" || payment.wasteType === filters.wasteType) &&
-			(filters.searchTerm === "" ||
-				payment.farmer
-					.toLowerCase()
-					.includes(filters.searchTerm.toLowerCase()) ||
-				payment.wasteType
-					.toLowerCase()
-					.includes(filters.searchTerm.toLowerCase()) ||
-				payment.id
-					.toLowerCase()
-					.includes(filters.searchTerm.toLowerCase()) ||
-				payment.orderId
-					.toLowerCase()
-					.includes(filters.searchTerm.toLowerCase())) &&
-			(selectedDistrictLabel === "" ||
-				payment.farmer
-					.toLowerCase()
-					.includes(selectedDistrictLabel.toLowerCase())) &&
-			dateMatch
-		);
-	}).sort((a, b) => {
-		// Sort logic
-		if (filters.sortBy === "date") {
-			const dateA = new Date(a.paymentDate);
-			const dateB = new Date(b.paymentDate);
-			return filters.sortOrder === "desc" ? dateB - dateA : dateA - dateB;
-		} else if (filters.sortBy === "amount") {
-			const amountA = parseFloat(a.amount.replace("$", ""));
-			const amountB = parseFloat(b.amount.replace("$", ""));
-			return filters.sortOrder === "desc" ? amountB - amountA : amountA - amountB;
-		} else if (filters.sortBy === "farmer") {
-			return filters.sortOrder === "desc" 
-				? b.farmer.localeCompare(a.farmer)
-				: a.farmer.localeCompare(b.farmer);
-		}
-		return 0;
-	});
+			if (filters.dateRange === "thisMonth") {
+				dateMatch =
+					paymentDate.getMonth() === now.getMonth() &&
+					paymentDate.getFullYear() === now.getFullYear();
+			} else if (filters.dateRange === "lastMonth") {
+				const lastMonth = new Date(
+					now.getFullYear(),
+					now.getMonth() - 1
+				);
+				dateMatch =
+					paymentDate.getMonth() === lastMonth.getMonth() &&
+					paymentDate.getFullYear() === lastMonth.getFullYear();
+			} else if (filters.dateRange === "last7Days") {
+				const weekAgo = new Date(
+					now.getTime() - 7 * 24 * 60 * 60 * 1000
+				);
+				dateMatch = paymentDate >= weekAgo;
+			}
+
+			// Normalize status for comparison
+			const normalizedStatus = payment.status?.toUpperCase();
+			const filterStatus = filters.status?.toUpperCase();
+
+			return (
+				(filters.status === "All" ||
+					normalizedStatus === filterStatus) &&
+				(filters.wasteType === "All" ||
+					payment.wasteType === filters.wasteType) &&
+				(filters.searchTerm === "" ||
+					payment.farmer
+						?.toLowerCase()
+						.includes(filters.searchTerm.toLowerCase()) ||
+					payment.wasteType
+						?.toLowerCase()
+						.includes(filters.searchTerm.toLowerCase()) ||
+					payment.id
+						?.toLowerCase()
+						.includes(filters.searchTerm.toLowerCase()) ||
+					payment.orderId
+						?.toLowerCase()
+						.includes(filters.searchTerm.toLowerCase())) &&
+				(selectedDistrictLabel === "" ||
+					payment.farmer
+						?.toLowerCase()
+						.includes(selectedDistrictLabel.toLowerCase())) &&
+				dateMatch
+			);
+		})
+		.sort((a, b) => {
+			// Sort logic
+			if (filters.sortBy === "date") {
+				const dateA = new Date(a.paymentDate);
+				const dateB = new Date(b.paymentDate);
+				return filters.sortOrder === "desc"
+					? dateB - dateA
+					: dateA - dateB;
+			} else if (filters.sortBy === "amount") {
+				const amountA = parseFloat(a.amount.replace("$", ""));
+				const amountB = parseFloat(b.amount.replace("$", ""));
+				return filters.sortOrder === "desc"
+					? amountB - amountA
+					: amountA - amountB;
+			} else if (filters.sortBy === "farmer") {
+				return filters.sortOrder === "desc"
+					? b.farmer.localeCompare(a.farmer)
+					: a.farmer.localeCompare(b.farmer);
+			}
+			return 0;
+		});
 
 	// Summary calculations
 	const totalPaidThisMonth = filteredPayments
 		.filter((p) => {
 			const paymentDate = new Date(p.paymentDate);
 			const now = new Date();
-			return p.status === "Paid" && 
-				   paymentDate.getMonth() === now.getMonth() && 
-				   paymentDate.getFullYear() === now.getFullYear();
+			const normalizedStatus = p.status?.toUpperCase();
+			return (
+				normalizedStatus === "PAID" &&
+				paymentDate.getMonth() === now.getMonth() &&
+				paymentDate.getFullYear() === now.getFullYear()
+			);
 		})
-		.reduce((total, payment) => total + parseFloat(payment.amount.replace("$", "")), 0);
+		.reduce(
+			(total, payment) =>
+				total + parseFloat(payment.amount?.replace("$", "") || 0),
+			0
+		);
 
-	const totalWeightCollected = filteredPayments
-		.reduce((total, payment) => total + payment.quantity, 0);
+	const totalWeightCollected = filteredPayments.reduce(
+		(total, payment) => total + convertToKg(payment.quantity, payment.quantityUnit),
+		0
+	);
 
-	const topPaidFarmer = payments
-		.reduce((acc, payment) => {
-			if (payment.status === "Paid") {
-				const amount = parseFloat(payment.amount.replace("$", ""));
-				acc[payment.farmer] = (acc[payment.farmer] || 0) + amount;
-			}
-			return acc;
-		}, {});
-	
-	const topFarmerName = Object.keys(topPaidFarmer).length > 0 
-		? Object.keys(topPaidFarmer).reduce((a, b) => topPaidFarmer[a] > topPaidFarmer[b] ? a : b)
-		: "No payments yet";
+	const topPaidFarmer = payments.reduce((acc, payment) => {
+		const normalizedStatus = payment.status?.toUpperCase();
+		if (normalizedStatus === "PAID") {
+			const amount = parseFloat(payment.amount?.replace("$", "") || 0);
+			acc[payment.farmer] = (acc[payment.farmer] || 0) + amount;
+		}
+		return acc;
+	}, {});
 
-	const paidCount = filteredPayments.filter((p) => p.status === "Paid").length;
-	const pendingCount = filteredPayments.filter((p) => p.status === "Pending").length;
-	const rejectedCount = filteredPayments.filter((p) => p.status === "Rejected").length;
+	const topFarmerName =
+		Object.keys(topPaidFarmer).length > 0
+			? Object.keys(topPaidFarmer).reduce((a, b) =>
+					topPaidFarmer[a] > topPaidFarmer[b] ? a : b
+			  )
+			: "No payments yet";
+
+	const paidCount = filteredPayments.filter(
+		(p) => p.status === "Paid" || p.status === "PAID"
+	).length;
+	const pendingCount = filteredPayments.filter(
+		(p) => p.status === "Pending" || p.status === "PENDING"
+	).length;
+	const processingCount = filteredPayments.filter(
+		(p) => p.status === "Processing" || p.status === "PROCESSING"
+	).length;
 
 	return (
 		<div className="space-y-6">
@@ -635,61 +476,24 @@ const Payments = () => {
 					</p>
 				</div>
 				<div className="flex space-x-2">
-					
 					{/* <Button>Setup Auto-Pay</Button> */}
 				</div>
 			</div>
 
 			{/* Payment Summary */}
-			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-				<div className="relative bg-white rounded-lg shadow-sm border border-green-400 p-4 flex items-center overflow-hidden">
-					<CreditCard className="h-7 w-7 text-green-500 mr-3 z-10" />
-					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Total Paid This Month</p>
-						<p className="text-lg font-bold text-green-700">
-							<NumberFlow value={totalPaidThisMonth} format={{ style: "currency", currency: "USD" }} />
-						</p>
-					</div>
-				</div>
-				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-					<Clock className="h-7 w-7 text-blue-500 mr-3 z-10" />
-					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Number of Payments</p>
-						<p className="text-lg font-bold text-gray-900">
-							<NumberFlow value={filteredPayments.length} />
-						</p>
-					</div>
-				</div>
-				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-					<CheckCircle className="h-7 w-7 text-yellow-500 mr-3 z-10" />
-					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Top Paid Farmer</p>
-						<p className="text-sm font-medium text-gray-900 truncate">
-							{topFarmerName}
-						</p>
-					</div>
-				</div>
-				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-					<AlertTriangle className="h-7 w-7 text-purple-500 mr-3 z-10" />
-					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Total Weight Collected</p>
-						<p className="text-lg font-bold text-gray-900">
-							<NumberFlow value={totalWeightCollected} />
-							<span className="text-sm font-normal text-gray-500"> kg</span>
-						</p>
-					</div>
-				</div>
-			</div>
-
-			{/* Status Overview */}
-			<div className="grid grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
 					<div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
-					<CheckCircle className="h-7 w-7 text-green-500 mr-3 z-10" />
+					<Check className="h-7 w-7 text-green-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Paid Payments</p>
+						<p className="text-xs font-medium text-gray-500">
+							Total Paid This Month
+						</p>
 						<p className="text-lg font-bold text-gray-900">
-							<NumberFlow value={paidCount} />
+							<NumberFlow
+								value={totalPaidThisMonth}
+								format={{ style: "currency", currency: "USD" }}
+							/>
 						</p>
 					</div>
 				</div>
@@ -697,40 +501,15 @@ const Payments = () => {
 					<div className="absolute left-0 top-0 h-full w-1 bg-yellow-500 rounded-l-lg" />
 					<Clock className="h-7 w-7 text-yellow-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Pending Payments</p>
+						<p className="text-xs font-medium text-gray-500">
+							Pending Payments
+						</p>
 						<p className="text-lg font-bold text-gray-900">
 							<NumberFlow value={pendingCount} />
 						</p>
 					</div>
 				</div>
-				<div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-					<div className="absolute left-0 top-0 h-full w-1 bg-red-500 rounded-l-lg" />
-					<AlertTriangle className="h-7 w-7 text-red-500 mr-3 z-10" />
-					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Rejected Payments</p>
-						<p className="text-lg font-bold text-gray-900">
-							<NumberFlow value={rejectedCount} />
-						</p>
-					</div>
-				</div>
 			</div>
-
-			{/* Rejected Payments Alert */}
-			{rejectedCount > 0 && (
-				<div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-					<div className="flex items-center">
-						<div className="text-red-600 mr-3">⚠️</div>
-						<div>
-							<h3 className="text-red-800 dark:text-red-200 font-medium">
-								{rejectedCount} Rejected Payment{rejectedCount > 1 ? "s" : ""}
-							</h3>
-							<p className="text-red-600 dark:text-red-300 text-sm">
-								These payments require review and possible resubmission.
-							</p>
-						</div>
-					</div>
-				</div>
-			)}
 
 			{/* Payments Table */}
 			<Card className="bg-white dark:bg-gray-800 border rounded-[1.5rem] border-gray-200 dark:border-gray-700 gap-0 py-0 mb-4">
@@ -742,7 +521,10 @@ const Payments = () => {
 						Review and manage payments to farmers for waste
 						collection services
 					</CardDescription>
-					<div id="payment-search" className="flex mt-5 gap-2 flex-wrap">
+					<div
+						id="payment-search"
+						className="flex mt-5 gap-2 flex-wrap"
+					>
 						<div className="flex-1 min-w-[300px]">
 							<Input
 								type="text"
@@ -756,7 +538,7 @@ const Payments = () => {
 								}
 							/>
 						</div>
-						
+
 						{/* Date Range Filter */}
 						<div>
 							<Select
@@ -769,10 +551,18 @@ const Payments = () => {
 									<SelectValue placeholder="Date Range" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="All">All Time</SelectItem>
-									<SelectItem value="last7Days">Last 7 Days</SelectItem>
-									<SelectItem value="thisMonth">This Month</SelectItem>
-									<SelectItem value="lastMonth">Last Month</SelectItem>
+									<SelectItem value="All">
+										All Time
+									</SelectItem>
+									<SelectItem value="last7Days">
+										Last 7 Days
+									</SelectItem>
+									<SelectItem value="thisMonth">
+										This Month
+									</SelectItem>
+									<SelectItem value="lastMonth">
+										Last Month
+									</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
@@ -789,7 +579,9 @@ const Payments = () => {
 									<SelectValue placeholder="Waste Type" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="All">All Types</SelectItem>
+									<SelectItem value="All">
+										All Types
+									</SelectItem>
 									{wasteTypes.map((type) => (
 										<SelectItem key={type} value={type}>
 											{type}
@@ -811,10 +603,16 @@ const Payments = () => {
 									<SelectValue placeholder="Status" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="All">All Status</SelectItem>
-									<SelectItem value="Paid">Paid</SelectItem>
-									<SelectItem value="Pending">Pending</SelectItem>
-									<SelectItem value="Rejected">Rejected</SelectItem>
+									<SelectItem value="All">
+										All Status
+									</SelectItem>
+									<SelectItem value="PAID">Paid</SelectItem>
+									<SelectItem value="PENDING">
+										Pending
+									</SelectItem>
+									<SelectItem value="PROCESSING">
+										Processing
+									</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
@@ -824,20 +622,37 @@ const Payments = () => {
 							<Select
 								value={`${filters.sortBy}-${filters.sortOrder}`}
 								onValueChange={(value) => {
-									const [sortBy, sortOrder] = value.split('-');
-									setFilters({ ...filters, sortBy, sortOrder });
+									const [sortBy, sortOrder] =
+										value.split("-");
+									setFilters({
+										...filters,
+										sortBy,
+										sortOrder,
+									});
 								}}
 							>
 								<SelectTrigger className="w-fit cursor-pointer">
 									<SelectValue placeholder="Sort By" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="date-desc">Date (Newest)</SelectItem>
-									<SelectItem value="date-asc">Date (Oldest)</SelectItem>
-									<SelectItem value="amount-desc">Amount (High to Low)</SelectItem>
-									<SelectItem value="amount-asc">Amount (Low to High)</SelectItem>
-									<SelectItem value="farmer-asc">Farmer (A-Z)</SelectItem>
-									<SelectItem value="farmer-desc">Farmer (Z-A)</SelectItem>
+									<SelectItem value="date-desc">
+										Date (Newest)
+									</SelectItem>
+									<SelectItem value="date-asc">
+										Date (Oldest)
+									</SelectItem>
+									<SelectItem value="amount-desc">
+										Amount (High to Low)
+									</SelectItem>
+									<SelectItem value="amount-asc">
+										Amount (Low to High)
+									</SelectItem>
+									<SelectItem value="farmer-asc">
+										Farmer (A-Z)
+									</SelectItem>
+									<SelectItem value="farmer-desc">
+										Farmer (Z-A)
+									</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
@@ -849,7 +664,7 @@ const Payments = () => {
 						</Button>
 					</div>
 				</div>
-				<Table>
+				{/* <Table>
 					<TableHeader>
 						<TableRow>
 							<TableHead>Date</TableHead>
@@ -863,48 +678,95 @@ const Payments = () => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{filteredPayments.map((payment) => (
-							<TableRow key={payment.id}>
-								<TableCell>
-									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{new Date(payment.paymentDate).toLocaleDateString()}
-									</div>
-									<div className="text-xs text-gray-500 dark:text-gray-400">
-										{payment.id}
+						{loading ? (
+							// Loading skeleton
+							Array.from({ length: 5 }).map((_, index) => (
+								<TableRow key={`skeleton-${index}`}>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="h-6 w-28 bg-gray-200 rounded-full animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-6 w-20 bg-gray-200 rounded-full animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="flex justify-end gap-2">
+											<div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+								</TableRow>
+							))
+						) : filteredPayments.length === 0 ? (
+							<TableRow>
+								<TableCell colSpan={8} className="text-center py-8">
+									<div className="text-gray-500">
+										No payments found
 									</div>
 								</TableCell>
-								<TableCell>
-									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{payment.farmer}
-									</div>
-									<div className="text-sm text-gray-500 dark:text-gray-400">
-										{payment.farmerAccount}
-									</div>
-								</TableCell>
-								<TableCell>
-									<span
-										className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getWasteTypeBadge(
-											payment.wasteType
-										)}`}
-									>
-										{payment.wasteType}
-									</span>
-								</TableCell>
-								<TableCell>
-									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{payment.quantity.toLocaleString()} kg
-									</div>
-								</TableCell>
-								<TableCell>
-									<div className="font-medium text-gray-900 dark:text-gray-100">
-										${payment.rate.toFixed(2)}/kg
-									</div>
-								</TableCell>
-								<TableCell>
-									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{payment.amount}
-									</div>
-									<div className="text-xs text-gray-500 dark:text-gray-400">
+							</TableRow>
+						) : (
+							filteredPayments.map((payment) => (
+								<TableRow key={payment.id}>
+									<TableCell>
+										<div className="font-medium text-gray-900 dark:text-gray-100">
+											{new Date(payment.paymentDate).toLocaleDateString()}
+										</div>
+										<div className="text-xs text-gray-500 dark:text-gray-400">
+											{payment.id}
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="font-medium text-gray-900 dark:text-gray-100">
+											{payment.farmer}
+										</div>
+										<div className="text-sm text-gray-500 dark:text-gray-400">
+											{payment.farmerAccount}
+										</div>
+									</TableCell>
+									<TableCell>
+										<span
+											className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getWasteTypeBadge(
+												payment.wasteType
+											)}`}
+										>
+											{payment.wasteType}
+										</span>
+									</TableCell>
+									<TableCell>
+										<div className="font-medium text-gray-900 dark:text-gray-100">
+											{payment.quantity.toLocaleString()} kg
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="font-medium text-gray-900 dark:text-gray-100">
+											${payment.rate.toFixed(2)}/kg
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="font-medium text-gray-900 dark:text-gray-100">
+											{payment.amount}
+										</div>
+										<div className="text-xs text-gray-500 dark:text-gray-400">
 										Fee: {payment.processingFee}
 									</div>
 									<div className="text-sm font-semibold text-green-600">
@@ -970,6 +832,163 @@ const Payments = () => {
 								</TableCell>
 							</TableRow>
 						))}
+					</TableBody>
+				</Table> */}
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead>Date</TableHead>
+							<TableHead>Farmer Name</TableHead>
+							<TableHead>Waste Type</TableHead>
+							<TableHead>Quantity</TableHead>
+							<TableHead>Rate</TableHead>
+							<TableHead>Total Payment</TableHead>
+							<TableHead>Status</TableHead>
+							<TableHead className="text-right">
+								Actions
+							</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{loading ? (
+							// Loading skeleton
+							Array.from({ length: 5 }).map((_, index) => (
+								<TableRow key={`skeleton-${index}`}>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="h-6 w-28 bg-gray-200 rounded-full animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="h-6 w-20 bg-gray-200 rounded-full animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="flex justify-end gap-2">
+											<div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+								</TableRow>
+							))
+						) : filteredPayments.length === 0 ? (
+							<TableRow>
+								<TableCell colSpan={8} className="text-center py-8">
+									<div className="text-gray-500">
+										No payments found
+									</div>
+								</TableCell>
+							</TableRow>
+						) : (
+							filteredPayments.map((payment) => (
+							<TableRow key={payment.id}>
+								<TableCell>
+									<div className="font-medium text-gray-900 dark:text-gray-100">
+										{new Date(
+											payment.paymentDate
+										).toLocaleDateString()}
+									</div>
+									<div className="text-xs text-gray-500 dark:text-gray-400">
+										{payment.id}
+									</div>
+								</TableCell>
+								<TableCell>
+									<div className="font-medium text-gray-900 dark:text-gray-100">
+										{payment.farmer}
+									</div>
+									<div className="text-sm text-gray-500 dark:text-gray-400">
+										{payment.farmerAccount}
+									</div>
+								</TableCell>
+								<TableCell>
+									<span
+										className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getWasteTypeBadge(
+											payment.wasteType
+										)}`}
+									>
+										{payment.wasteType}
+									</span>
+								</TableCell>
+								<TableCell>
+									<div className="font-medium text-gray-900 dark:text-gray-100">
+										{convertToKg(payment.quantity, payment.unit).toLocaleString()} {payment.unit?.toLowerCase?.() ?? ""}
+									</div>
+								</TableCell>
+								<TableCell>
+									<div className="font-medium text-gray-900 dark:text-gray-100">
+										${payment.rate.toFixed(2)}/{payment.unit.toLowerCase()}
+									</div>
+								</TableCell>
+								<TableCell>
+									<div className="font-medium text-gray-900 dark:text-gray-100">
+										${payment.grossAmount?.toFixed(2) || '0.00'}
+									</div>
+								</TableCell>
+								<TableCell>
+									<span
+										className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(
+											payment.status
+										)}`}
+									>
+										{payment.status ? payment.status.split("_").join(" ") : "Unknown"}
+									</span>
+								</TableCell>
+								<TableCell className="text-right">
+									<div className="flex justify-end space-x-2">
+										{(payment.status?.toUpperCase() === "PAID") && (
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={() =>
+													handleViewReceipt(payment)
+												}
+											>
+												Receipt
+											</Button>
+										)}
+										{(payment.status?.toUpperCase() === "PENDING") && (
+											<Button
+												size="sm"
+												onClick={() =>
+													handleMakePayment(
+														payment.id
+													)
+												}
+											>
+												Process
+											</Button>
+										)}
+										{(payment.status?.toUpperCase() === "PROCESSING") && (
+											<Button
+												variant="outline"
+												size="sm"
+												disabled
+											>
+												Processing...
+											</Button>
+										)}
+									</div>
+								</TableCell>
+							</TableRow>
+						))
+						)}
 					</TableBody>
 				</Table>
 			</Card>
