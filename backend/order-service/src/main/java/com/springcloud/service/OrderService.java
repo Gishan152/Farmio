@@ -75,7 +75,7 @@ public class OrderService {
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             var order = Order.builder()
-                    .farmerId(1L)
+                    .farmerId(farmerId)
                     .buyerId(userId)
                     .paymentId("123")
                     .status(OrderStatus.PENDING)
@@ -121,19 +121,40 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
+    // Lists for farmer dashboard
+    public List<Order> getFarmerAwaitingShipment(Long farmerId) {
+        return orderRepository.findByFarmerIdAndStatusIn(
+                farmerId,
+                java.util.EnumSet.of(OrderStatus.PENDING, OrderStatus.PROCESSING, OrderStatus.AWAITING_PICKUP)
+        );
+    }
+
+    public List<Order> getFarmerOngoingShipment(Long farmerId) {
+        return orderRepository.findByFarmerIdAndStatus(farmerId, OrderStatus.IN_TRANSPORT);
+    }
+
+    public List<Order> getFarmerPaidAndShipped(Long farmerId) {
+        return orderRepository.findByFarmerIdAndStatus(farmerId, OrderStatus.DELIVERED);
+    }
+
     public Order markReadyToPickup(Long userId, Long orderId) {
         return orderRepository.findById(orderId)
                 .map(order -> {
                     if(!order.getFarmerId().equals(userId)){
                         throw new RuntimeException("Unauthorized");
                     }
-                    if(order.getStatus().equals(OrderStatus.PROCESSING)){
-                        throw new RuntimeException("Buyer have not made the payment yet");
+                    if(!order.getStatus().equals(OrderStatus.PROCESSING)){
+                        throw new RuntimeException("Order must be in PROCESSING to mark AWAITING_PICKUP");
                     }
                     order.setStatus(OrderStatus.AWAITING_PICKUP);
                     return orderRepository.save(order);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+    }
+
+    // New: explicit method names used by controller
+    public Order markAwaitingPickup(Long userId, Long orderId) {
+        return markReadyToPickup(userId, orderId);
     }
 
     public Order markPaymentCompleted(Long orderId) {
@@ -155,26 +176,39 @@ public class OrderService {
                     if(!order.getFarmerId().equals(userId)){
                         throw new RuntimeException("Unauthorized");
                     }
-                    if(!order.getStatus().equals(OrderStatus.PENDING)){
-                        throw new RuntimeException("Payment is already completed");
+                    if(!order.getStatus().equals(OrderStatus.AWAITING_PICKUP)){
+                        throw new RuntimeException("Order must be in AWAITING_PICKUP to mark IN_TRANSPORT");
                     }
-                    order.setStatus(OrderStatus.PROCESSING);
+                    // Check transportation availability from any of order's items' crops
+                    boolean transportAvailable = order.getItems().stream().anyMatch(oi -> {
+                        try {
+                            var crop = cropListingServiceClient.getProductById(oi.getCropId());
+                            return Boolean.TRUE.equals(crop.isTransportationAvailable());
+                        } catch (Exception e) { return false; }
+                    });
+                    if (!transportAvailable) {
+                        throw new IllegalStateException("Transportation is not available for this order's product(s)");
+                    }
+                    order.setStatus(OrderStatus.IN_TRANSPORT);
                     return orderRepository.save(order);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
     }
 
+    public Order markInTransportByFarmer(Long userId, Long orderId) {
+        return markInTransport(userId, orderId);
+    }
+
     public Order markDelivered(Long userId, Long orderId) {
         return orderRepository.findById(orderId)
                 .map(order -> {
-                    if(!order.getBuyerId().equals(userId)){
+                    // Allow farmer to mark delivered when transport is used
+                    if(!order.getFarmerId().equals(userId) && !order.getBuyerId().equals(userId)){
                         throw new RuntimeException("Unauthorized");
                     }
                     OrderStatus status = order.getStatus();
-                    if(!EnumSet.of(OrderStatus.AWAITING_PICKUP, OrderStatus.IN_TRANSPORT).contains(status)){
-                        throw new IllegalStateException(
-                                "Order cannot be cancelled in the current state: " + status
-                        );
+                    if(!EnumSet.of(OrderStatus.IN_TRANSPORT).contains(status)){
+                        throw new IllegalStateException("Order must be IN_TRANSPORT to mark DELIVERED");
                     }
 
                     // TODO : Check the code below for releasing escrow to farmer
@@ -191,6 +225,10 @@ public class OrderService {
                     return orderRepository.save(order);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+    }
+
+    public Order markDeliveredByFarmer(Long userId, Long orderId) {
+        return markDelivered(userId, orderId);
     }
 
     public Order refund(Long userId, Long orderId) {

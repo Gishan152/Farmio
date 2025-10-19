@@ -1,27 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { TruckIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
-import corn from "../../../Assets/Farmer/Crops/corn.jpeg";
+import api from "../../../API/client";
 
 // Paid and Shipped card
 export function PaidAndShipped({ order }) {
   const {
     id,
-    buyerName,
-    buyerAddress,
-    buyerLocation,
-    productName,
-    quantity,
-    totalPrice,
-    imageUrl,
-    vehicleReg,
-    driverName,
-    driverPhone,
-    driverEmail,
-    loadNumber,
+    orderId,
+    buyerId,
+    status,
+    total,
+    items = [],
   } = order;
 
-  const transportData = { vehicleReg, driverName, driverPhone, driverEmail, loadNumber, loadPicked: true, loadDelivered: true, buyerConfirmation: true };
+  const transportData = { vehicleReg: '-', driverName: '-', driverPhone: '-', driverEmail: '-', loadNumber: '-', loadPicked: true, loadDelivered: true, buyerConfirmation: true };
   const [showDetails, setShowDetails] = useState(false);
+  const totalNumber = typeof total === 'number' ? total : Number(total || 0);
+  const firstItem = items?.[0];
+  const itemSummary = firstItem ? `${firstItem.quantity} ${firstItem.unitMeasurement} of ${firstItem.__product?.type || ('#'+firstItem.cropId)}` : '—';
 
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
@@ -34,29 +30,41 @@ export function PaidAndShipped({ order }) {
         {/* Order Details */}
         <div className="sm:col-span-2 grid grid-cols-2 gap-4">
           {[
-            { label: 'Order ID', value: id },
-            { label: 'Buyer', value: buyerName },
-            { label: 'Address', value: buyerAddress },
-            { label: 'Location', value: buyerLocation },
-            { label: 'Product', value: productName },
-            { label: 'Quantity', value: quantity },
-            { label: 'Order Total', value: `$${totalPrice.toFixed(2)}` },
-            { label: 'Earnings', value: `$${totalPrice.toFixed(2)}` },
+            { label: 'Order ID', value: id || orderId },
+            { label: 'Buyer ID', value: buyerId },
+            { label: 'Status', value: status },
+            { label: 'Items', value: itemSummary },
+            { label: 'Order Total', value: `$${totalNumber.toFixed(2)}` },
+            { label: 'Earnings', value: `$${totalNumber.toFixed(2)}` },
           ].map(field => (
             <div key={field.label} className="flex flex-col">
               <span className="text-sm text-gray-500">{field.label}</span>
               <span className="text-md font-medium text-gray-800">{field.value}</span>
             </div>
           ))}
+          <div className="col-span-2">
+            <div className="mt-4 border-t pt-3">
+              <p className="text-sm font-medium text-gray-700 mb-2">Order Items</p>
+              <div className="space-y-1">
+                {(items || []).map((it, idx) => (
+                  <div key={idx} className="text-sm text-gray-700 flex gap-3">
+                    <span className="min-w-24">Crop #{it.cropId}</span>
+                    <span>
+                      {Number(it.quantity || 0)} {it.unitMeasurement || ''}
+                    </span>
+                  </div>
+                ))}
+                {(!items || items.length === 0) && (
+                  <div className="text-sm text-gray-500">No items</div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Transport Info & Image */}
         <div className="flex flex-col items-center space-y-4">
-          {imageUrl && (
-            <div className="w-full h-40 bg-gray-100 rounded-lg overflow-hidden">
-              <img src={imageUrl} alt={productName} className="object-cover w-full h-full" />
-            </div>
-          )}
+          {/* Image omitted - backend does not provide */}
           {!showDetails ? (
             <button
               onClick={() => setShowDetails(true)}
@@ -100,29 +108,36 @@ export function PaidAndShipped({ order }) {
 export default function PaidAndShippedList() {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [productMap, setProductMap] = useState({});
 
   useEffect(() => {
-    setTimeout(() => {
-      setOrders([
-        {
-          id: '323456', buyerName: 'Charlie Black', buyerAddress: '654 Elm St', buyerLocation: 'Central City, TX',
-          productName: 'Gaming Laptop', quantity: 1, totalPrice: 1299.99, imageUrl: corn,
-          vehicleReg: 'CAR1234', driverName: 'Nimal', driverPhone: '0712345678', driverEmail: 'nimal@example.com', loadNumber: 'LN-5678'
-        },
-        {
-          id: '323457', buyerName: 'Dana White', buyerAddress: '987 Maple Rd', buyerLocation: 'Coast City, FL',
-          productName: '4K Monitor', quantity: 2, totalPrice: 799.98, imageUrl: corn,
-          vehicleReg: 'CAR5678', driverName: 'Sunil', driverPhone: '0723456789', driverEmail: 'sunil@example.com', loadNumber: 'LN-1234'
-        },
-      ]);
-      setIsLoading(false);
-    }, 1500);
+    let mounted = true;
+    setIsLoading(true);
+    api
+      .get('/api/order/farmer/paid-and-shipped')
+      .then(res => { if (mounted) setOrders(Array.isArray(res.data) ? res.data : []); })
+      .catch(err => { setError(err?.response?.data || 'Failed to load orders'); })
+      .finally(() => { if (mounted) setIsLoading(false); });
+    return () => { mounted = false; };
   }, []);
+
+  useEffect(() => {
+    const ids = Array.from(new Set(orders.flatMap(o => (o.items || []).map(it => it.cropId)).filter(Boolean)));
+    if (ids.length === 0) { setProductMap({}); return; }
+    api.post('/api/products/by-ids', ids)
+      .then(res => {
+        const list = Array.isArray(res.data) ? res.data : [];
+        const map = list.reduce((acc, p) => { acc[p.id] = p; return acc; }, {});
+        setProductMap(map);
+      })
+      .catch(() => {})
+  }, [orders]);
 
   const summary = useMemo(() => ({
     count: orders.length,
-    totalQty: orders.reduce((sum, o) => sum + o.quantity, 0),
-    totalValue: orders.reduce((sum, o) => sum + o.totalPrice, 0)
+    totalQty: orders.reduce((sum, o) => sum + (o.items?.reduce((s,i)=> s + Number(i.quantity || 0), 0) || 0), 0),
+    totalValue: orders.reduce((sum, o) => sum + Number(o.total || 0), 0)
   }), [orders]);
 
   return (
@@ -155,7 +170,18 @@ export default function PaidAndShippedList() {
           </svg>
         </div>
       ) : (
-        orders.map(order => <PaidAndShipped key={order.id} order={order} />)
+        <>
+          {error && (<div className="p-3 bg-red-50 text-red-700 rounded">{String(error)}</div>)}
+          {orders.map(order => (
+            <PaidAndShipped
+              key={order.id || order.orderId}
+              order={{
+                ...order,
+                items: (order.items || []).map(it => ({ ...it, __product: productMap[it.cropId] }))
+              }}
+            />
+          ))}
+        </>
       )}
     </section>
   );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import corn from "../../../Assets/Farmer/Crops/corn.jpeg";
+import api from "../../../API/client";
 
 // Reusable Transport Details Popup
 function AddTransportDetailsPopup({ onClose, onSave }) {
@@ -30,7 +30,7 @@ function AddTransportDetailsPopup({ onClose, onSave }) {
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
         >
-         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" class="h-6 w-6"><path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path></svg>
+         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon" className="h-6 w-6"><path fillRule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clipRule="evenodd"></path></svg>
         </button>
         <h2 className="text-2xl font-semibold mb-6 text-gray-800">Add Transport Details</h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-y-6 gap-x-8">
@@ -76,23 +76,49 @@ function AddTransportDetailsPopup({ onClose, onSave }) {
 }
 
 // Single awaiting shipment card
-export function AwaitingShipment({ order, onTransportSave }) {
+export function AwaitingShipment({ order, onMarkAwaitingPickup, onMarkInTransport }) {
   const {
     id,
-    buyerName,
-    buyerAddress,
-    buyerLocation,
-    productName,
-    quantity,
-    totalPrice,
-    imageUrl,
+    orderId,
+    buyerId,
+    status,
+    total,
+    items = [],
   } = order;
+
+  console.log("Order items : ", items);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const normStatus = (status || '').toString().trim().toUpperCase();
+  const anyTransportAvailable = (items || []).some(it => it.__product?.transportationAvailable);
+  console.log("anyTransportAvailable : ", anyTransportAvailable)
 
   const handleSave = details => {
-    onTransportSave(order.id, details);
+    // Optional: Persist transport details if backend supports it; for now, directly mark in-transport
+    if (order?.status === 'AWAITING_PICKUP') {
+      onMarkInTransport(id || orderId);
+    }
     setIsModalOpen(false);
   };
+
+  const primaryAction = () => {
+    const oid = id || orderId;
+    if (!oid) return;
+    if (normStatus === 'PROCESSING') return onMarkAwaitingPickup(oid);
+    if (normStatus === 'AWAITING_PICKUP' && anyTransportAvailable) return setIsModalOpen(true);
+  };
+
+  const primaryLabel = (
+    normStatus === 'PROCESSING'
+      ? 'Mark Ready for Pickup'
+      : normStatus === 'AWAITING_PICKUP'
+        ? (anyTransportAvailable ? 'Add Transport Details' : 'Transport Not Available')
+        : 'No Actions Available'
+  );
+
+  const firstItem = items?.[0];
+  const itemSummary = firstItem ? `${firstItem.quantity} ${firstItem.unitMeasurement} of ${firstItem.__product?.type || ('#'+firstItem.cropId)}` : '—';
+  const totalNumber = typeof total === 'number' ? total : Number(total || 0);
 
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
@@ -100,34 +126,47 @@ export function AwaitingShipment({ order, onTransportSave }) {
         {/* Order Details */}
         <div className="sm:col-span-2 grid grid-cols-2 gap-4">
           {[
-            { label: 'Order ID', value: id },
-            { label: 'Buyer', value: buyerName },
-            { label: 'Address', value: buyerAddress },
-            { label: 'Location', value: buyerLocation },
-            { label: 'Product', value: productName },
-            { label: 'Quantity', value: quantity },
-            { label: 'Order Total', value: `$${totalPrice.toFixed(2)}` },
-            { label: 'Payout', value: `$${totalPrice.toFixed(2)}` },
+            { label: 'Order ID', value: id || orderId },
+            { label: 'Buyer ID', value: buyerId },
+            { label: 'Status', value: status },
+            { label: 'Items', value: itemSummary },
+            { label: 'Order Total', value: `$${totalNumber.toFixed(2)}` },
+            { label: 'Payout', value: `$${totalNumber.toFixed(2)}` },
           ].map(field => (
             <div key={field.label} className="flex flex-col">
               <span className="text-sm text-gray-500">{field.label}</span>
               <span className="text-md font-medium text-gray-800">{field.value}</span>
             </div>
           ))}
+          {/* Detailed items list */}
+          <div className="col-span-2">
+            <div className="mt-4 border-t pt-3">
+              <p className="text-sm font-medium text-gray-700 mb-2">Order Items</p>
+              <div className="space-y-1">
+                {(items || []).map((it, idx) => (
+                  <div key={idx} className="text-sm text-gray-700 flex gap-3">
+                    <span className="min-w-24">{it.__product?.type || `Crop #${it.cropId}`}</span>
+                    <span>
+                      {Number(it.quantity || 0)} {it.unitMeasurement || ''}
+                    </span>
+                  </div>
+                ))}
+                {(!items || items.length === 0) && (
+                  <div className="text-sm text-gray-500">No items</div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Image & Action */}
         <div className="flex flex-col items-center space-y-4">
-          {imageUrl && (
-            <div className="w-full h-40 bg-gray-100 rounded-lg overflow-hidden">
-              <img src={imageUrl} alt={productName} className="object-cover w-full h-full" />
-            </div>
-          )}
           <button
-            onClick={() => setIsModalOpen(true)}
-            className="mt-auto w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+            onClick={primaryAction}
+            disabled={!(normStatus === 'PROCESSING' || (normStatus === 'AWAITING_PICKUP' && anyTransportAvailable))}
+            className={`mt-auto w-full py-2 rounded-lg text-white ${(normStatus === 'PROCESSING' || (normStatus === 'AWAITING_PICKUP' && anyTransportAvailable)) ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'}`}
           >
-            Add Transport Details
+            {primaryLabel}
           </button>
         </div>
       </div>
@@ -143,30 +182,85 @@ export function AwaitingShipment({ order, onTransportSave }) {
 export default function AwaitingShipmentsList() {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [productMap, setProductMap] = useState({});
+  const [productsLoading, setProductsLoading] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => {
-      setOrders([
-        {
-          id: '123456', buyerName: 'John Doe', buyerAddress: '123 Main St', buyerLocation: 'Springfield, IL',
-          productName: 'Wireless Headphones', quantity: 2, totalPrice: 199.98, imageUrl: corn
-        },
-        {
-          id: '123457', buyerName: 'Jane Smith', buyerAddress: '456 Elm St', buyerLocation: 'Metropolis, NY',
-          productName: 'Bluetooth Speaker', quantity: 1, totalPrice: 79.99, imageUrl: corn
-        },
-      ]);
-      setIsLoading(false);
-    }, 1500);
+    let mounted = true;
+    setIsLoading(true);
+    api
+      .get('/api/order/farmer/awaiting-shipment')
+      .then(res => {
+        if (!mounted) return;
+        setOrders(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(err => {
+        console.error('Failed to load awaiting-shipment orders', err);
+        setError(err?.response?.data || 'Failed to load orders');
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setIsLoading(false);
+      });
+    return () => { mounted = false; };
   }, []);
+
+  // Fetch product details for all cropIds present in current orders
+  useEffect(() => {
+    const ids = Array.from(
+      new Set(
+        orders.flatMap(o => (o.items || []).map(it => it.cropId)).filter(Boolean)
+      )
+    );
+    if (ids.length === 0) { setProductMap({}); return; }
+    setProductsLoading(true);
+    api.post('/api/products/by-ids', ids)
+      .then(res => {
+        const list = Array.isArray(res.data) ? res.data : [];
+        const map = list.reduce((acc, p) => { acc[p.id] = p; return acc; }, {});
+        console.log("product map : ", map)
+        setProductMap(map);
+      })
+      .catch(err => {
+        console.error('Failed to fetch product details', err);
+      })
+      .finally(() => setProductsLoading(false));
+  }, [orders]);
 
   const summary = useMemo(() => {
     const late = 0;
     const count = orders.length;
-    const totalQty = orders.reduce((sum, o) => sum + o.quantity, 0);
-    const totalValue = orders.reduce((sum, o) => sum + o.totalPrice, 0);
-    return { late,count, totalQty, totalValue };
+    const totalQty = orders.reduce((sum, o) => sum + (o.items?.reduce((s,i)=> s + Number(i.quantity || 0), 0) || 0), 0);
+    const totalValue = orders.reduce((sum, o) => sum + Number(o.total || 0), 0);
+    return { late, count, totalQty, totalValue };
   }, [orders]);
+
+  const refresh = () => {
+    setIsLoading(true);
+    api.get('/api/order/farmer/awaiting-shipment')
+      .then(res => setOrders(Array.isArray(res.data) ? res.data : []))
+      .catch(err => setError(err?.response?.data || 'Failed to refresh orders'))
+      .finally(() => setIsLoading(false));
+  };
+
+  const handleMarkAwaitingPickup = async (orderId) => {
+    try {
+      await api.post(`/api/order/farmer/mark-awaiting-pickup/${orderId}`);
+      refresh();
+    } catch (e) {
+      alert(e?.response?.data || 'Failed to mark ready for pickup');
+    }
+  };
+
+  const handleMarkInTransport = async (orderId) => {
+    try {
+      await api.post(`/api/order/farmer/mark-in-transport/${orderId}`);
+      refresh();
+    } catch (e) {
+      alert(e?.response?.data || 'Failed to mark in transport');
+    }
+  };
 
   return (
     <section className="p-6 space-y-6">
@@ -206,9 +300,26 @@ export default function AwaitingShipmentsList() {
           </svg>
         </div>
       ) : (
-        orders.map(order => (
-          <AwaitingShipment key={order.id} order={order} onTransportSave={() => {}} />
-        ))
+        <>
+          {error && (
+            <div className="p-3 bg-red-50 text-red-700 rounded">{String(error)}</div>
+          )}
+          {orders.map(order => (
+            <AwaitingShipment
+              key={order.id || order.orderId}
+              order={{
+                ...order,
+                // Augment the item summary using product names where available
+                items: (order.items || []).map(it => ({
+                  ...it,
+                  __product: productMap[it.cropId]
+                }))
+              }}
+              onMarkAwaitingPickup={handleMarkAwaitingPickup}
+              onMarkInTransport={handleMarkInTransport}
+            />
+          ))}
+        </>
       )}
     </section>
   );
