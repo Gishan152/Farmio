@@ -65,4 +65,17 @@ public class LoadServiceImpl implements LoadService {
         loadRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional
+    public LoadDetailsDto acceptLoad(Long id, Long driverId) {
+        LoadDetails load = loadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Load not found with ID: " + id));
+
+        load.setStatus("Accepted");
+        load.setDriverId(driverId);
+        LoadDetails saved = loadRepository.save(load);
+        return modelMapper.map(saved, LoadDetailsDto.class);
+    }
+
+
 }

@@ -48,5 +48,12 @@ public class LoadController {
         loadService.deleteLoad(id);
         return ResponseEntity.ok("Load deleted successfully with ID: " + id);
     }
+
+    @PutMapping("/acceptLoad/{id}/{driverId}")
+    public ResponseEntity<LoadDetailsDto> acceptLoad(@PathVariable Long id,
+                                                     @PathVariable Long driverId) {
+        LoadDetailsDto updated = loadService.acceptLoad(id, driverId);
+        return ResponseEntity.ok(updated);
+    }
 }
 

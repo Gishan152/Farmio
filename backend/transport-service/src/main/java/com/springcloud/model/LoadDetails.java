@@ -28,7 +28,8 @@ public class LoadDetails {
     private String product;
     private LocalDateTime pickupTime;
     private LocalDateTime estimatedDelivery;
-    private String status;
+    @Column(nullable = false)
+    private String status = "Pending";
     private Long driverId;
     private Double driverRating;
 
