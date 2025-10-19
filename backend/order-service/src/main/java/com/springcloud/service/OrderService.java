@@ -145,7 +145,10 @@ public class OrderService {
     }
 
     public List<Order> getFarmerPaidAndShipped(Long farmerId) {
-        return orderRepository.findByFarmerIdAndStatus(farmerId, OrderStatus.DELIVERED);
+        return orderRepository.findByFarmerIdAndStatusIn(
+                farmerId,
+                java.util.EnumSet.of(OrderStatus.DELIVERED, OrderStatus.COMPLETED)
+        );
     }
 
     public Order markReadyToPickup(Long userId, Long orderId) {
@@ -240,6 +243,47 @@ public class OrderService {
 
     public Order markDeliveredByFarmer(Long userId, Long orderId) {
         return markDelivered(userId, orderId);
+    }
+
+    /**
+     * Buyer marks order as COMPLETED when delivery is confirmed according to transport rules.
+     * Allowed when:
+     * - transport == BY_BUYER and status == AWAITING_PICKUP (buyer self-pickup complete)
+     * - transport == BY_FARMER and status == IN_TRANSPORT (carrier handed over to buyer)
+     * - transport in {BY_BUYER_SYSTEM, BY_FARMER_SYSTEM} and status == IN_TRANSPORT
+     */
+    public Order markCompleted(Long userId, Long orderId) {
+        return orderRepository.findById(orderId)
+                .map(order -> {
+                    // Only buyer can complete their order
+                    if (!order.getBuyerId().equals(userId)) {
+                        throw new RuntimeException("Unauthorized");
+                    }
+
+                    String transport = order.getTransport();
+                    OrderStatus status = order.getStatus();
+
+                    boolean canComplete =
+                            ("BY_BUYER".equals(transport) && status == OrderStatus.AWAITING_PICKUP) ||
+                            ("BY_FARMER".equals(transport) && status == OrderStatus.IN_TRANSPORT) ||
+                            (("BY_BUYER_SYSTEM".equals(transport) || "BY_FARMER_SYSTEM".equals(transport)) && status == OrderStatus.IN_TRANSPORT);
+
+                    if (!canComplete) {
+                        throw new IllegalStateException("Order cannot be completed in the current transport/status combination");
+                    }
+
+                    // Optional: ensure escrow release is triggered before completion if still in transport
+                    try {
+                        var releaseRequest = new EscrowReleaseRequest(order.getId().toString());
+                        paymentServiceClient.releaseEscrow(releaseRequest);
+                    } catch (Exception e) {
+                        System.err.println("Failed to release escrow on completion: " + e.getMessage());
+                    }
+
+                    order.setStatus(OrderStatus.COMPLETED);
+                    return orderRepository.save(order);
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
     }
 
     public Order refund(Long userId, Long orderId) {

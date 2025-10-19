@@ -188,6 +188,17 @@ export default function OrderDetails() {
         closeModal();
     }
 
+    const handleMarkCompleted = async () => {
+        try {
+            await api.post(`/api/order/complete/${orderId}`);
+            updateOrder(orderId, { status: "COMPLETED" });
+        } catch (err) {
+            console.error("Error completing order: ", err);
+        } finally {
+            closeModal();
+        }
+    }
+
     const modelValues = {
         MAKE_PAYMENT: {
             title: "Make Payment",
@@ -224,9 +235,14 @@ export default function OrderDetails() {
             description: "Request release of funds held in escrow after confirmation.",
             submitText: "Request Funds",
             onSubmit: handleRefundRequest
+        },
+        COMPLETE_ORDER: {
+            title: "Mark Order as Completed",
+            description: "Confirm you've received the goods. This will release payment to the farmer.",
+            submitText: "Mark as Completed",
+            onSubmit: handleMarkCompleted
         }
     };
-
 
     return (
         <div className="bg-gray-50 min-h-screen">
@@ -299,6 +315,13 @@ export default function OrderDetails() {
                                     {(order.status === "IN_TRANSPORT" || order.status === "DELIVERED") && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={handleViewTransport}>View Transport</button>}
                                     {(order.status === "PENDING" || order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
                                         <button className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold shadow" onClick={() => openModel("CANCEL_ORDER")}>Cancel Order</button>
+                                    )}
+                                    {/* Buyer can mark as COMPLETED under specific transport/state combinations */}
+                                    {(
+                                        (order.transport === "BY_BUYER" && order.status === "AWAITING_PICKUP") ||
+                                        ((order.transport === "BY_FARMER" || order.transport === "BY_BUYER_SYSTEM" || order.transport === "BY_FARMER_SYSTEM") && order.status === "IN_TRANSPORT")
+                                    ) && (
+                                        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow" onClick={() => openModel("COMPLETE_ORDER")}>Mark as Completed</button>
                                     )}
                                     {order.status === "IN_TRANSPORT" && (
                                         <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow" onClick={() => openModel("CONFIRM_DELIVERY")}>Confirm Delivery</button>

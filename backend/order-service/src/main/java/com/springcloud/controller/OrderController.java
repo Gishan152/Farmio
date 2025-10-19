@@ -119,6 +119,20 @@ public class OrderController {
         return ResponseEntity.ok(order);
     }
 
+    /**
+     * Buyer marks an order as COMPLETED depending on transport/status rules
+     */
+    @PostMapping("/complete/{orderId}")
+    public ResponseEntity<Order> completeOrder(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Name") String username,
+            @RequestHeader("X-Roles") String rolesCsv,
+            @PathVariable("orderId") @NotNull Long orderId
+    ) {
+        var order = orderService.markCompleted(Long.valueOf(userId), orderId);
+        return ResponseEntity.ok(order);
+    }
+
     @PostMapping("/get")
     public ResponseEntity<List<Order>> getOrders(
             @RequestHeader("X-User-Id") String userId,
