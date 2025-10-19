@@ -487,45 +487,45 @@ services:
   #       reservations:
   #         memory: 256M
 
-  notification-service:
-    build:
-      context: ./
-      dockerfile: ./notification-service/Dockerfile.dev
-    container_name: notification-service
-    depends_on:
-      - eureka-server
-      - rabbitmq
-      - postgres
-    environment:
-      - SERVER_PORT=8094
-      - SPRING_APPLICATION_NAME=notification-service
-      - SPRING_PROFILES_ACTIVE=docker
-      - EUREKA_URL=http://eureka-server:8761/eureka
-      - RABBITMQ_HOST=rabbitmq
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=farmio_notifications
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=farmio@1234
-    ports:
-      - "8094:8094"
-    networks:
-      - spring-net
-    volumes:
-      - ./notification-service:/app/service
-      # - ${MAVEN_CACHE_PATH}:/root/.m2:cached
-    profiles: ["essential", "full"]
-    develop:
-      watch:
-        - action: rebuild
-          path: ./notification-service/target/*-SNAPSHOT.jar
-    deploy:
-      resources:
-        limits:
-          memory: 768M
-          cpus: '0.5'
-        reservations:
-          memory: 384M
+  # notification-service:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./notification-service/Dockerfile.dev
+  #   container_name: notification-service
+  #   depends_on:
+  #     - eureka-server
+  #     - rabbitmq
+  #     - postgres
+  #   environment:
+  #     - SERVER_PORT=8094
+  #     - SPRING_APPLICATION_NAME=notification-service
+  #     - SPRING_PROFILES_ACTIVE=docker
+  #     - EUREKA_URL=http://eureka-server:8761/eureka
+  #     - RABBITMQ_HOST=rabbitmq
+  #     - DB_HOST=postgres
+  #     - DB_PORT=5432
+  #     - DB_NAME=farmio_notifications
+  #     - DB_USERNAME=postgres
+  #     - DB_PASSWORD=farmio@1234
+  #   ports:
+  #     - "8094:8094"
+  #   networks:
+  #     - spring-net
+  #   volumes:
+  #     - ./notification-service:/app/service
+  #     # - ${MAVEN_CACHE_PATH}:/root/.m2:cached
+  #   profiles: ["essential", "full"]
+  #   develop:
+  #     watch:
+  #       - action: rebuild
+  #         path: ./notification-service/target/*-SNAPSHOT.jar
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 768M
+  #         cpus: '0.5'
+  #       reservations:
+  #         memory: 384M
 
 volumes:
   pgdata:

@@ -4,6 +4,7 @@ import Card from '../../../components/ui/Card';
 import Table from '../../../components/ui/Table';
 import StatCard from '../../../components/ui/StatCard';
 import productService from '../../../API/productService';
+import { fetchAllProducts } from '../../../Utils/cropUtils';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -83,152 +84,10 @@ const ViewIcon = () => (
   </svg>
 );
 
-// Sample product data
-const products = [
-  {
-    id: 'P1001',
-    name: 'Organic Tomatoes',
-    category: 'Vegetables',
-    farmer: 'Kumara Perera',
-    location: 'Nuwara Eliya',
-    price: '350/kg',
-    stock: 120,
-    unit: 'kg',
-    stockStatus: 'In Stock',
-    certifications: 'Organic',
-    harvested: '2023-06-10',
-    image: 'https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Fresh organic tomatoes grown using sustainable farming practices in the cool climate of Nuwara Eliya. Perfect for curries, salads, or cooking.',
-    lifespan: '7-10 days',
-    storageConditions: 'Store at room temperature away from direct sunlight. Refrigerate after ripening.'
-  },
-  {
-    id: 'P1002',
-    name: 'Beans',
-    category: 'Vegetables',
-    farmer: 'Malini Gunasekara',
-    location: 'Kandy',
-    price: '280/kg',
-    stock: 80,
-    unit: 'kg',
-    stockStatus: 'In Stock',
-    certifications: 'Organic',
-    harvested: '2023-06-17',
-    image: 'https://images.unsplash.com/photo-1567375698348-5d9d5ae99de0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Fresh green beans grown in the fertile soils of Kandy. Crisp and tender, perfect for stir-fries, curries, and salads.',
-    lifespan: '1-2 weeks',
-    storageConditions: 'Refrigerate in a perforated plastic bag. For best quality, use within a week of purchase.'
-  },
-  {
-    id: 'P1003',
-    name: 'Local Beef',
-    category: 'Meat',
-    farmer: 'Asanka Fernando',
-    location: 'Ratnapura',
-    price: '1500/kg',
-    stock: 45,
-    unit: 'kg',
-    stockStatus: 'Low Stock',
-    certifications: 'Pasture-Raised',
-    harvested: '2023-06-14',
-    image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Premium cuts of grass-fed beef from cattle raised on open pastures. No hormones or antibiotics. Our beef is aged for tenderness and rich flavor.',
-    lifespan: 'Use within 3-5 days or freeze for up to 6 months',
-    storageConditions: 'Keep refrigerated at 40°F or below. Freeze for longer storage.'
-  },
-  {
-    id: 'P1004',
-    name: 'Kithul Honey',
-    category: 'Specialty',
-    farmer: 'Priyantha Weerasinghe',
-    location: 'Matara',
-    price: '1800/bottle',
-    stock: 30,
-    unit: 'bottle',
-    stockStatus: 'Low Stock',
-    certifications: 'Raw, Unfiltered',
-    harvested: '2023-05-20',
-    image: 'https://images.unsplash.com/photo-1587049352851-8d4e89133924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Pure, raw kithul treacle collected from the kithul palm trees in the southern region. This traditional Sri Lankan sweetener has a distinct smoky flavor.',
-    lifespan: '2+ years',
-    storageConditions: 'Store at room temperature. Crystallization is natural and can be reversed by gentle warming.'
-  },
-  {
-    id: 'P1005',
-    name: 'Organic Gotukola',
-    category: 'Vegetables',
-    farmer: 'Dinesh Rajapaksa',
-    location: 'Bandarawela',
-    price: '150/bundle',
-    stock: 0,
-    unit: 'bundle',
-    stockStatus: 'Out of Stock',
-    certifications: 'Organic',
-    harvested: '2023-05-25',
-    image: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Fresh organic gotukola (Centella asiatica), a traditional Sri Lankan leafy green herb. Perfect for sambols, mallums, or as a nutritious addition to your diet.',
-    lifespan: '5-7 days',
-    storageConditions: 'Refrigerate immediately. Keep in crisper drawer.'
-  },
-  {
-    id: 'P1006',
-    name: 'Fresh Milk',
-    category: 'Dairy & Eggs',
-    farmer: 'Emma Davis',
-    price: '$4.49/gallon',
-    stock: 65,
-    unit: 'gallon',
-    stockStatus: 'In Stock',
-    certifications: 'Hormone-Free',
-    rating: 4.7,
-    lastUpdated: '2023-06-19',
-    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Fresh whole milk from our hormone-free dairy cows. Pasteurized but not homogenized for a rich, creamy texture.',
-    harvested: '2023-06-18',
-    lifespan: '7-10 days',
-    storageConditions: 'Keep refrigerated at 40°F or below. Store in the back of the refrigerator, not the door.'
-  },
-  {
-    id: 'P1007',
-    name: 'Heirloom Carrots',
-    category: 'Vegetables',
-    farmer: 'John Smith',
-    price: '$3.49/bunch',
-    stock: 90,
-    unit: 'bunch',
-    stockStatus: 'In Stock',
-    certifications: 'Organic',
-    rating: 4.2,
-    lastUpdated: '2023-06-17',
-    image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Colorful mix of heirloom carrot varieties including purple, yellow, white, and orange. Sweet flavor and crisp texture.',
-    harvested: '2023-06-15',
-    lifespan: '2-3 weeks',
-    storageConditions: 'Refrigerate in a plastic bag in the crisper drawer. Remove tops if attached to extend freshness.'
-  },
-  {
-    id: 'P1008',
-    name: 'Organic Apples',
-    category: 'Fruits',
-    farmer: 'Sarah Williams',
-    price: '$1.99/lb',
-    stock: 15,
-    unit: 'lb',
-    stockStatus: 'Low Stock',
-    certifications: 'Organic',
-    rating: 4.4,
-    lastUpdated: '2023-06-12',
-    image: 'https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Crisp and juicy organic apples grown in our pesticide-free orchards. Perfect balance of sweet and tart flavors.',
-    harvested: '2023-06-08',
-    lifespan: '1-2 months',
-    storageConditions: 'Store in the refrigerator crisper drawer. Keep away from strong-smelling foods as apples absorb odors.'
-  }
-];
-
 const ProductsManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [allProducts, setAllProducts] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -240,46 +99,54 @@ const ProductsManagement = () => {
   const [editFormData, setEditFormData] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Fetch products from API
+  // Fetch products from API using products table
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        const apiProducts = await productService.getAllProducts();
-        console.log('API products:', apiProducts);
+        const products = await fetchAllProducts();
+        console.log('Fetched products from products table:', products);
         
-        // Map API data to match the expected product structure
-        const mappedProducts = apiProducts.map((product, index) => ({
-          id: product.id || `P${index + 1000}`,
-          name: product.productName || 'Unnamed Product',
+        // Map product data to match the expected product structure based on API response (camelCase)
+        const mappedProducts = products.map((product) => ({
+          id: product.id || 'N/A',
+          name: product.productName || 'Unknown Product',
           category: product.measurement || 'Uncategorized',
-          farmer: `Farmer ${product.userId || ''}`,
+          farmer: 'Product Owner', // Not available in products table
+          farmerId: product.userId || '', // Available as userId
           location: product.location || 'Unknown location',
-          price: product.pricePerUnit ? `${product.pricePerUnit}/unit` : 'Price not set',
+          price: product.pricePerUnit ? `LKR ${product.pricePerUnit}/${product.measurement || 'unit'}` : 'Price not set',
           stock: product.availableStock || 0,
           unit: product.measurement || 'unit',
           stockStatus: product.availableStock > 20 ? 'In Stock' : 
                         product.availableStock > 0 ? 'Low Stock' : 'Out of Stock',
           certifications: product.badges && product.badges.length > 0 ? product.badges.join(', ') : 'Standard',
-          harvested: product.createdAt ? new Date(product.createdAt).toISOString().split('T')[0] : '2023-06-10',
-          // Get first image from imageUrls array, or fallback to default image
-          image: product.imageUrls && product.imageUrls.length > 0 && product.imageUrls[0] ? 
-                 product.imageUrls[0] : 
+          harvested: product.createdAt ? new Date(product.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          // Use imageUrls from API or fallback to default
+          image: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : 
                  'https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-          // Store all image URLs for product details view
+          // Store all images if available
           allImages: product.imageUrls || [],
-          description: `${product.productName} - ${product.measurement}`,
+          description: `${product.productName || 'Product'} from ${product.location || 'farm'}`,
           lifespan: '7-10 days',
-          storageConditions: 'Store in a cool, dry place'
+          storageConditions: 'Store in a cool, dry place',
+          verified: false, // Not available in products table
+          rating: 0, // Not available in products table
+          transportationAvailable: product.transportAvailability === 'Yes',
+          returnsAccepted: product.returnAccepted === 'Yes',
+          createdAt: product.createdAt,
+          pricePerUnit: product.pricePerUnit,
+          availableStock: product.availableStock
         }));
         
+        setAllProducts(mappedProducts);
         setFilteredData(mappedProducts);
         setIsLoading(false);
       } catch (error) {
         console.error('Failed to fetch products:', error);
         setIsLoading(false);
-        // Use sample data as fallback if API fails
-        setFilteredData(products);
+        setAllProducts([]);
+        setFilteredData([]);
       }
     };
     
@@ -288,8 +155,12 @@ const ProductsManagement = () => {
 
   // Handle search
   useEffect(() => {
-    if (filteredData && filteredData.length > 0) {
-      const results = filteredData.filter(product => {
+    if (searchTerm.trim() === '') {
+      // If search is empty, apply filters only
+      applyFilters(allProducts);
+    } else {
+      // Apply search on all products
+      const results = allProducts.filter(product => {
         return Object.keys(product).some(key => {
           if (product[key]) {
             return product[key].toString().toLowerCase().includes(searchTerm.toLowerCase());
@@ -297,13 +168,51 @@ const ProductsManagement = () => {
           return false;
         });
       });
+      // Apply filters on search results
+      applyFilters(results);
+    }
+  }, [searchTerm, allProducts]);
 
-      if (searchTerm) {
-        setFilteredData(results);
-      }
+  // Helper function to apply filters
+  const applyFilters = (productsToFilter) => {
+    if (!productsToFilter || Object.keys(selectedFilters).length === 0) {
+      setFilteredData(productsToFilter);
+      return;
     }
 
-  }, [searchTerm]);
+    const results = productsToFilter.filter(product => {
+      return Object.entries(selectedFilters).every(([key, value]) => {
+        if (!value || value === 'all') return true;
+
+        // Special handling for date ranges
+        if (key === 'harvested') {
+          const productDate = new Date(product.harvested);
+          const today = new Date();
+
+          switch (value) {
+            case '7days':
+              const sevenDaysAgo = new Date();
+              sevenDaysAgo.setDate(today.getDate() - 7);
+              return productDate >= sevenDaysAgo;
+            case '14days':
+              const fourteenDaysAgo = new Date();
+              fourteenDaysAgo.setDate(today.getDate() - 14);
+              return productDate >= fourteenDaysAgo;
+            case '30days':
+              const thirtyDaysAgo = new Date();
+              thirtyDaysAgo.setDate(today.getDate() - 30);
+              return productDate >= thirtyDaysAgo;
+            default:
+              return true;
+          }
+        }
+
+        return product[key] && product[key].toString().includes(value);
+      });
+    });
+
+    setFilteredData(results);
+  };
 
   // Filter options
   const filters = [
@@ -380,46 +289,22 @@ const ProductsManagement = () => {
     }));
   };
 
-  // Apply filters
+  // Apply filters when they change
   useEffect(() => {
-    if (!products || Object.keys(selectedFilters).length === 0) {
-      setFilteredData(products);
-      return;
-    }
-
-    const results = products.filter(product => {
-      return Object.entries(selectedFilters).every(([key, value]) => {
-        if (!value || value === 'all') return true;
-
-        // Special handling for date ranges
-        if (key === 'harvested') {
-          const productDate = new Date(product.harvested);
-          const today = new Date();
-
-          switch (value) {
-            case '7days':
-              const sevenDaysAgo = new Date();
-              sevenDaysAgo.setDate(today.getDate() - 7);
-              return productDate >= sevenDaysAgo;
-            case '14days':
-              const fourteenDaysAgo = new Date();
-              fourteenDaysAgo.setDate(today.getDate() - 14);
-              return productDate >= fourteenDaysAgo;
-            case '30days':
-              const thirtyDaysAgo = new Date();
-              thirtyDaysAgo.setDate(today.getDate() - 30);
-              return productDate >= thirtyDaysAgo;
-            default:
-              return true;
+    if (searchTerm.trim() === '') {
+      applyFilters(allProducts);
+    } else {
+      const searchResults = allProducts.filter(product => {
+        return Object.keys(product).some(key => {
+          if (product[key]) {
+            return product[key].toString().toLowerCase().includes(searchTerm.toLowerCase());
           }
-        }
-
-        return product[key].includes(value);
+          return false;
+        });
       });
-    });
-
-    setFilteredData(results);
-  }, [selectedFilters, products]);
+      applyFilters(searchResults);
+    }
+  }, [selectedFilters]);
 
   // Handle view product details
   const handleViewProduct = (product) => {
@@ -798,7 +683,7 @@ const ProductsManagement = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <StatCard
           title="Total Products"
-          value={products.length.toString()}
+          value={allProducts.length.toString()}
           subtitle="Across all categories"
           icon={<ProductsIcon />}
           color="blue"
@@ -806,7 +691,7 @@ const ProductsManagement = () => {
         />
         <StatCard
           title="Low Stock Items"
-          value={products.filter(p => p.stockStatus === 'Low Stock').length.toString()}
+          value={allProducts.filter(p => p.stockStatus === 'Low Stock').length.toString()}
           subtitle="Need attention"
           icon={<WarningIcon />}
           color="yellow"
@@ -814,7 +699,7 @@ const ProductsManagement = () => {
         />
         <StatCard
           title="Out of Stock Items"
-          value={products.filter(p => p.stockStatus === 'Out of Stock').length.toString()}
+          value={allProducts.filter(p => p.stockStatus === 'Out of Stock').length.toString()}
           subtitle="Require reordering"
           icon={<WarningIcon />}
           color="red"
