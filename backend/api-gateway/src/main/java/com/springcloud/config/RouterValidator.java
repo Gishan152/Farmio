@@ -42,6 +42,11 @@ public class RouterValidator {
         "/api/analytics/admin/waste/listings/by-status",
         "/api/analytics/admin/waste/listings/type-count",
         "/api/analytics/admin/waste/listings/by-type",
+        "/api/analytics/admin/routes",
+        "/api/analytics/admin/routes/count",
+        "/api/analytics/admin/routes/by-location",
+        "/api/analytics/admin/routes/total-distance",
+        "/api/analytics/admin/routes/average-distance",
         "/api/moderator/change-temp-password",
         "/actuator/health",
         

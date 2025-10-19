@@ -19,11 +19,13 @@ import com.springcloud.dto.OrderDTO;
 import com.springcloud.dto.ProductDTO;
 import com.springcloud.dto.WasteListingDTO;
 import com.springcloud.dto.WasteAgentDTO;
+import com.springcloud.dto.RouteDTO;
 import com.springcloud.service.UserAnalyticsService;
 import com.springcloud.service.OrderAnalyticsService;
 import com.springcloud.service.ProductAnalyticsService;
 import com.springcloud.service.ModeratorAnalyticsService;
 import com.springcloud.service.WasteAnalyticsService;
+import com.springcloud.service.TransportAnalyticsService;
 import com.springcloud.dto.ModeratorDTO;
 
 @RestController
@@ -43,6 +45,9 @@ public class AnalyticServiceController {
     
     @Autowired
     private WasteAnalyticsService wasteAnalyticsService;
+    
+    @Autowired
+    private TransportAnalyticsService transportAnalyticsService;
 
     @GetMapping("/hello")
     public String hello() {
@@ -245,5 +250,37 @@ public class AnalyticServiceController {
     public ResponseEntity<List<WasteListingDTO>> getWasteListingsByType(@RequestParam String type) {
         List<WasteListingDTO> listings = wasteAnalyticsService.getWasteListingsByType(type);
         return ResponseEntity.ok(listings);
+    }
+    
+    // Transport/Routes Endpoints
+    
+    @GetMapping("/admin/routes")
+    public ResponseEntity<List<RouteDTO>> getAllRoutesForAdmin() {
+        List<RouteDTO> routes = transportAnalyticsService.fetchAllRoutes();
+        return ResponseEntity.ok(routes);
+    }
+    
+    @GetMapping("/admin/routes/count")
+    public ResponseEntity<Long> getTotalRouteCount() {
+        long count = transportAnalyticsService.getTotalRouteCount();
+        return ResponseEntity.ok(count);
+    }
+    
+    @GetMapping("/admin/routes/by-location")
+    public ResponseEntity<List<RouteDTO>> getRoutesByLocation(@RequestParam String location) {
+        List<RouteDTO> routes = transportAnalyticsService.getRoutesByLocation(location);
+        return ResponseEntity.ok(routes);
+    }
+    
+    @GetMapping("/admin/routes/total-distance")
+    public ResponseEntity<Double> getTotalDistance() {
+        double distance = transportAnalyticsService.getTotalDistance();
+        return ResponseEntity.ok(distance);
+    }
+    
+    @GetMapping("/admin/routes/average-distance")
+    public ResponseEntity<Double> getAverageDistance() {
+        double avgDistance = transportAnalyticsService.getAverageDistance();
+        return ResponseEntity.ok(avgDistance);
     }
 }
