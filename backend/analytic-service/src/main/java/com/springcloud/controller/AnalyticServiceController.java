@@ -120,6 +120,12 @@ public class AnalyticServiceController {
         return ResponseEntity.ok(orders);
     }
 
+    @GetMapping("/admin/orders/recent")
+    public ResponseEntity<List<OrderDTO>> getRecentOrders(@RequestParam(defaultValue = "7") int limit) {
+        List<OrderDTO> orders = orderAnalyticsService.getRecentOrders(limit);
+        return ResponseEntity.ok(orders);
+    }
+
     // User endpoints
     @GetMapping("/admin/users")
     public ResponseEntity<List<UserDTO>> getAllUsersForAdmin() {

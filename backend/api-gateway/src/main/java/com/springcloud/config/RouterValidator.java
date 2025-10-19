@@ -20,16 +20,28 @@ public class RouterValidator {
         "/api/analytics/admin/orders/count",
         "/api/analytics/admin/orders/status-count",
         "/api/analytics/admin/orders/by-status",
+        "/api/analytics/admin/orders/recent",
         "/api/analytics/admin/products",
+        "/api/analytics/admin/products/can-delete",
         "/api/analytics/admin/moderators", 
         "/api/analytics/prices",
         "/api/analytics/prices/category",
         "/api/analytics/moderator/prices",
         "/api/order/get-crops",
         "/api/user/all-dto",
+        
         "/api/admin/moderators/all-dto",
         "/api/moderator/login",
-        "/api/moderator/change-temp-password"
+        "/api/analytics/admin/waste/listings",
+        "/api/analytics/admin/waste/agents",
+        "/api/analytics/admin/waste/listings/count",
+        "/api/analytics/admin/waste/agents/count",
+        "/api/analytics/admin/waste/listings/status-count",
+        "/api/analytics/admin/waste/listings/by-status",
+        "/api/analytics/admin/waste/listings/type-count",
+        "/api/analytics/admin/waste/listings/by-type",
+        "/api/moderator/change-temp-password",
+        "/actuator/health"
     );
 
     public boolean isSecured(ServerHttpRequest request) {

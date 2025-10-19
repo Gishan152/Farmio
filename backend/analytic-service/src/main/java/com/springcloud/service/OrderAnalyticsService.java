@@ -95,6 +95,28 @@ public class OrderAnalyticsService {
     }
 
     /**
+     * Get recent orders sorted by order date (most recent first)
+     */
+    public List<OrderDTO> getRecentOrders(int limit) {
+        try {
+            List<OrderDTO> orders = fetchAllOrders();
+            return orders.stream()
+                .sorted((a, b) -> {
+                    // Sort by order date in descending order (most recent first)
+                    if (a.getOrderDate() == null && b.getOrderDate() == null) return 0;
+                    if (a.getOrderDate() == null) return 1;
+                    if (b.getOrderDate() == null) return -1;
+                    return b.getOrderDate().compareTo(a.getOrderDate());
+                })
+                .limit(limit)
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Error getting recent orders: " + e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
      * Map raw order data to OrderDTO
      */
     private OrderDTO mapToOrderDTO(Map<String, Object> orderData) {
@@ -120,6 +142,9 @@ public class OrderAnalyticsService {
         
         dto.setStatus((String) orderData.get("status"));
         dto.setTransport((String) orderData.get("transport"));
+        
+        // Handle order date if present
+       
         
         // Handle items if present
         if (orderData.get("items") instanceof List) {

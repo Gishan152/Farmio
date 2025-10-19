@@ -4,6 +4,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card from '../../components/ui/Card';
 import Table from '../../components/ui/Table';
 import StatCard from '../../components/ui/StatCard';
+import { getOrderCount, getRecentOrders, formatOrderStatus } from '../../Utils/orderUtils';
 
 // Icons
 const ProductsIcon = () => (
