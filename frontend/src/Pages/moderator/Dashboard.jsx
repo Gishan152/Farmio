@@ -4,7 +4,16 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card from '../../components/ui/Card';
 import Table from '../../components/ui/Table';
 import StatCard from '../../components/ui/StatCard';
-import { getOrderCount, getRecentOrders, formatOrderStatus } from '../../Utils/orderUtils';
+import { 
+  fetchModeratorStats, 
+  fetchRecentOrders, 
+  fetchPendingOrders, 
+  fetchProductsForReview,
+  fetchRecentInventoryUpdates,
+  formatOrderStatus,
+  formatCurrency,
+  formatDate
+} from '../../Utils/moderatorUtils';
 
 // Icons
 const ProductsIcon = () => (
@@ -31,44 +40,71 @@ const CheckIcon = () => (
   </svg>
 );
 
-// Dummy data
-const pendingOrders = [
-  { id: '0124', customer: 'Kumara Dissanayake', product: 'Fresh Farm Milk', amount: 'LKR 7,100', status: 'Processing', date: '2025-06-19' },
-  { id: '0126', customer: 'Fathima Nizam', product: 'Organic Eggs', amount: 'LKR 3,650', status: 'Processing', date: '2025-06-21' },
-  { id: '0128', customer: 'Senaka Jayawardene', product: 'Grass-Fed Beef', amount: 'LKR 17,999', status: 'Processing', date: '2025-06-21' },
-  { id: '0129', customer: 'Priyanthi Fernando', product: 'Seasonal Fruits', amount: 'LKR 6,500', status: 'Processing', date: '2025-06-21' },
-];
-
-const recentInventoryUpdates = [
-  { product: 'Organic Tomatoes', action: 'Stock Update', quantity: '+50 kg', user: 'Chaminda Perera', timestamp: '2025-06-21 09:45 AM' },
-  { product: 'Fresh Farm Milk', action: 'Quality Check', quantity: '200 L', user: 'Malith Gunathilaka', timestamp: '2025-06-21 08:30 AM' },
-  { product: 'Organic Eggs', action: 'Stock Update', quantity: '+120 units', user: 'Wasantha Silva', timestamp: '2025-06-20 04:15 PM' },
-  { product: 'Mixed Vegetables', action: 'Price Update', quantity: '300 kg', user: 'Kamala Vithanage', timestamp: '2025-06-20 02:00 PM' },
-];
 
 const ModeratorDashboard = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({
+    pendingOrders: 0,
+    productsForReview: 0,
+    tasksCompleted: 0
+  });
+  const [pendingOrders, setPendingOrders] = useState([]);
+  const [recentInventoryUpdates, setRecentInventoryUpdates] = useState([]);
+  const [error, setError] = useState(null);
 
-  // Simulate loading
+  // Load dashboard data
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 1000);
-    return () => clearTimeout(timer);
+    const loadDashboardData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        // Load all data in parallel
+        const [statsData, pendingOrdersData, inventoryUpdatesData] = await Promise.all([
+          fetchModeratorStats(),
+          fetchPendingOrders(),
+          fetchRecentInventoryUpdates()
+        ]);
+        
+        setStats(statsData);
+        setPendingOrders(pendingOrdersData);
+        setRecentInventoryUpdates(inventoryUpdatesData);
+        
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        setError('Failed to load dashboard data. Please try again.');
+        
+        // Set fallback data
+        setStats({
+          pendingOrders: 0,
+          productsForReview: 0,
+          tasksCompleted: 0
+        });
+        setPendingOrders([]);
+        setRecentInventoryUpdates([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDashboardData();
   }, []);
 
   // Order status badge
   const OrderStatusBadge = ({ status }) => {
     const statusStyles = {
-      'Delivered': 'bg-pastel-green text-green-800',
-      'Processing': 'bg-pastel-blue text-blue-800',
-      'Shipped': 'bg-pastel-yellow text-yellow-800',
-      'Cancelled': 'bg-pastel-red text-red-800',
+      'DELIVERED': 'bg-green-100 text-green-800',
+      'PROCESSING': 'bg-blue-100 text-blue-800',
+      'IN_TRANSPORT': 'bg-purple-100 text-purple-800',
+      'PENDING': 'bg-yellow-100 text-yellow-800',
+      'CANCELLED': 'bg-red-100 text-red-800',
+      'AWAITING_PICKUP': 'bg-indigo-100 text-indigo-800',
     };
     
     return (
-      <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status] || 'bg-gray-200 text-gray-800'}`}>
-        {status}
+      <span className={`px-2 py-1 text-xs rounded-full font-medium ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
+        {formatOrderStatus(status)}
       </span>
     );
   };
@@ -79,11 +115,23 @@ const ModeratorDashboard = () => {
       userRole="moderator"
       breadcrumbs="Home / Dashboard"
     >
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <AlertIcon />
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error Loading Dashboard</h3>
+              <p className="text-sm text-red-700 mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <StatCard 
           title="Pending Orders"
-          value="8"
+          value={stats.pendingOrders.toString()}
           subtitle="Require attention"
           icon={<AlertIcon />}
           color="yellow"
@@ -91,7 +139,7 @@ const ModeratorDashboard = () => {
         />
         <StatCard 
           title="Products to Review"
-          value="12"
+          value={stats.productsForReview.toString()}
           subtitle="New updates"
           icon={<ProductsIcon />}
           color="blue"
@@ -99,7 +147,7 @@ const ModeratorDashboard = () => {
         />
         <StatCard 
           title="Tasks Completed"
-          value="24"
+          value={stats.tasksCompleted.toString()}
           subtitle="Today"
           icon={<CheckIcon />}
           color="green"
@@ -119,22 +167,36 @@ const ModeratorDashboard = () => {
           <Table
             isLoading={isLoading}
             columns={[
-              { header: 'Order ID', accessor: 'id' },
-              { header: 'Customer', accessor: 'customer' },
+              { header: 'Order ID', accessor: 'orderId' },
+              { 
+                header: 'Customer', 
+                accessor: 'buyerId',
+                cell: (row) => (
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">Customer #{row.buyerId}</div>
+                    <div className="text-xs text-gray-500">ID: {row.buyerId}</div>
+                  </div>
+                )
+              },
               { 
                 header: 'Amount', 
-                accessor: 'amount',
-                cell: (row) => <span className="font-medium">{row.amount}</span>
+                accessor: 'total',
+                cell: (row) => <span className="font-medium">{formatCurrency(row.total)}</span>
               },
               { 
                 header: 'Status', 
                 accessor: 'status',
                 cell: (row) => <OrderStatusBadge status={row.status} />
               },
-              { header: 'Date', accessor: 'date' },
+              { 
+                header: 'Date', 
+                accessor: 'createdAt',
+                cell: (row) => formatDate(row.createdAt)
+              },
             ]}
             data={pendingOrders}
-            onRowClick={(row) => console.log('Clicked row:', row)}
+            onRowClick={(row) => navigate(`/moderator/orders/${row.orderId}`)}
+            emptyMessage="No pending orders found."
           />
         </Card>
         
@@ -148,13 +210,42 @@ const ModeratorDashboard = () => {
           <Table
             isLoading={isLoading}
             columns={[
-              { header: 'Product', accessor: 'product' },
-            //   { header: 'Action', accessor: 'action' },
-              { header: 'Quantity', accessor: 'quantity' },
-              { header: 'User', accessor: 'user' },
-            //   { header: 'Time', accessor: 'timestamp' },
+              { 
+                header: 'Product', 
+                accessor: 'productName',
+                cell: (row) => (
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900">{row.productName || 'Unknown Product'}</div>
+                    <div className="text-xs text-gray-500">{row.location || 'Unknown Location'}</div>
+                  </div>
+                )
+              },
+              { 
+                header: 'Action', 
+                accessor: 'action',
+                cell: (row) => (
+                  <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                    {row.action || 'Update'}
+                  </span>
+                )
+              },
+              { 
+                header: 'Stock', 
+                accessor: 'availableStock',
+                cell: (row) => (
+                  <span className="font-medium">
+                    {row.availableStock || 0} {row.measurement || 'units'}
+                  </span>
+                )
+              },
+              { 
+                header: 'Updated', 
+                accessor: 'updatedAt',
+                cell: (row) => formatDate(row.updatedAt || row.createdAt)
+              },
             ]}
             data={recentInventoryUpdates}
+            emptyMessage="No recent inventory updates found."
           />
         </Card>
       </div>

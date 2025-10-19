@@ -21,6 +21,7 @@ public class RouterValidator {
         "/api/analytics/admin/orders/status-count",
         "/api/analytics/admin/orders/by-status",
         "/api/analytics/admin/orders/recent",
+        "/api/order/admin/all",
         "/api/analytics/admin/products",
         "/api/analytics/admin/products/can-delete",
         "/api/analytics/admin/moderators", 
@@ -28,6 +29,7 @@ public class RouterValidator {
         "/api/analytics/prices/category",
         "/api/analytics/moderator/prices",
         "/api/order/get-crops",
+        "/api/order/get",
         "/api/user/all-dto",
         
         "/api/admin/moderators/all-dto",
@@ -41,7 +43,16 @@ public class RouterValidator {
         "/api/analytics/admin/waste/listings/type-count",
         "/api/analytics/admin/waste/listings/by-type",
         "/api/moderator/change-temp-password",
-        "/actuator/health"
+        "/actuator/health",
+        
+        // Moderator endpoints - allow without authentication
+        "/api/analytics/moderator/stats",
+        "/api/analytics/moderator/recent-orders",
+        "/api/analytics/moderator/pending-orders",
+        "/api/analytics/moderator/products-for-review",
+        "/api/analytics/moderator/recent-inventory-updates",
+        "/api/analytics/moderator/orders",
+        "/api/analytics/moderator/products"
     );
 
     public boolean isSecured(ServerHttpRequest request) {

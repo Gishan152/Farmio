@@ -3,6 +3,14 @@ import DashboardLayout from '../../../components/layout/DashboardLayout';
 import Card from '../../../components/ui/Card';
 import Table from '../../../components/ui/Table';
 import StatCard from '../../../components/ui/StatCard';
+import { 
+  fetchAllProductsForModerator, 
+  approveProduct, 
+  rejectProduct,
+  formatCurrency,
+  formatDate
+} from '../../../Utils/moderatorUtils';
+import { fetchAllProducts } from '../../../Utils/cropUtils';
 
 // Icons
 const ProductsIcon = () => (
@@ -128,31 +136,87 @@ const products = [
 ];
 
 const ProductsPage = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [error, setError] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Simulate loading
+  // Load products data
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 1000);
-    return () => clearTimeout(timer);
+    const loadProducts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        // Use the same fetchAllProducts function from cropUtils
+        const products = await fetchAllProducts();
+        
+        // Map products to moderator format
+        const mappedProducts = products.map((product) => ({
+          id: product.id || 'N/A',
+          name: product.productName || 'Unknown Product',
+          category: product.measurement || 'Uncategorized',
+          farmer: 'Product Owner',
+          farmerId: product.userId || '',
+          location: product.location || 'Unknown location',
+          price: product.pricePerUnit ? `LKR ${product.pricePerUnit}/${product.measurement || 'unit'}` : 'Price not set',
+          stock: product.availableStock || 0,
+          unit: product.measurement || 'unit',
+          status: product.availableStock > 20 ? 'Available' :
+                  product.availableStock > 0 ? 'Low Stock' : 'Out of Stock',
+          certifications: 'Standard',
+          harvested: product.createdAt ? new Date(product.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          image: 'https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+          allImages: [],
+          description: `${product.productName || 'Product'} from ${product.location || 'farm'}`,
+          lifespan: '7-10 days',
+          storageConditions: 'Store in a cool, dry place',
+          verified: false,
+          rating: 0,
+          transportationAvailable: product.transportAvailability === 'Yes',
+          returnsAccepted: product.returnAccepted === 'Yes',
+          createdAt: product.createdAt,
+          pricePerUnit: product.pricePerUnit,
+          availableStock: product.availableStock,
+          transportAvailability: product.transportAvailability,
+          returnAccepted: product.returnAccepted
+        }));
+        
+        setAllProducts(mappedProducts);
+        setFilteredProducts(mappedProducts);
+        
+      } catch (error) {
+        console.error('Error loading products:', error);
+        setError('Failed to load products. Please try again.');
+        setAllProducts([]);
+        setFilteredProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProducts();
   }, []);
 
   // Categories derived from products
-  const categories = ['All', ...new Set(products.map(product => product.category))];
+  const categories = ['All', ...new Set(allProducts.map(product => product.category))];
 
   // Filter products based on search query and category
   useEffect(() => {
-    let result = products;
+    let result = allProducts;
     
     if (searchQuery) {
       const lowerCaseQuery = searchQuery.toLowerCase();
       result = result.filter(product => 
         product.name.toLowerCase().includes(lowerCaseQuery) || 
         product.id.toLowerCase().includes(lowerCaseQuery) ||
-        product.farmer.toLowerCase().includes(lowerCaseQuery)
+        product.farmer.toLowerCase().includes(lowerCaseQuery) ||
+        product.location.toLowerCase().includes(lowerCaseQuery)
       );
     }
     
@@ -161,27 +225,23 @@ const ProductsPage = () => {
     }
     
     setFilteredProducts(result);
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, allProducts]);
 
   // Product status badge
   const ProductStatusBadge = ({ status }) => {
     const statusStyles = {
-      'Available': 'bg-pastel-green text-green-800',
-      'Low Stock': 'bg-pastel-yellow text-yellow-800',
-      'Out of Stock': 'bg-pastel-red text-red-800',
-      'Under Review': 'bg-pastel-blue text-blue-800',
+      'Available': 'bg-green-100 text-green-800',
+      'Low Stock': 'bg-yellow-100 text-yellow-800',
+      'Out of Stock': 'bg-red-100 text-red-800',
+      'Under Review': 'bg-blue-100 text-blue-800',
     };
     
     return (
-      <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status] || 'bg-gray-200 text-gray-800'}`}>
+      <span className={`px-2 py-1 text-xs rounded-full font-medium ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
         {status}
       </span>
     );
   };
-
-const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-const [selectedProduct, setSelectedProduct] = useState(null);
 
 // Handle opening view modal
 const handleViewProduct = (product) => {
@@ -193,6 +253,36 @@ const handleViewProduct = (product) => {
 const handleEditProduct = (product) => {
     setSelectedProduct(product);
     setIsEditModalOpen(true);
+};
+
+// Handle approve product
+const handleApproveProduct = async (productId) => {
+    try {
+        await approveProduct(productId);
+        // Refresh products list
+        const updatedProducts = allProducts.map(p => 
+            p.id === productId ? { ...p, status: 'Available' } : p
+        );
+        setAllProducts(updatedProducts);
+        setFilteredProducts(updatedProducts);
+    } catch (error) {
+        console.error('Error approving product:', error);
+    }
+};
+
+// Handle reject product
+const handleRejectProduct = async (productId) => {
+    try {
+        await rejectProduct(productId, 'Rejected by moderator');
+        // Refresh products list
+        const updatedProducts = allProducts.map(p => 
+            p.id === productId ? { ...p, status: 'Out of Stock' } : p
+        );
+        setAllProducts(updatedProducts);
+        setFilteredProducts(updatedProducts);
+    } catch (error) {
+        console.error('Error rejecting product:', error);
+    }
 };
 
 // View Modal Component
@@ -428,11 +518,23 @@ const EditProductModal = () => {
       userRole="moderator"
       breadcrumbs="Products / All Products"
     >
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <AlertIcon />
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error Loading Products</h3>
+              <p className="text-sm text-red-700 mt-1">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard 
           title="Total Products"
-          value={products.length.toString()}
+          value={allProducts.length.toString()}
           subtitle="Available products"
           icon={<ProductsIcon />}
           color="green"
@@ -440,7 +542,7 @@ const EditProductModal = () => {
         />
         <StatCard 
           title="Products to Review"
-          value="8"
+          value={allProducts.filter(p => p.status === 'Under Review').length.toString()}
           subtitle="Need attention"
           icon={<AlertIcon />}
           color="yellow"
@@ -448,16 +550,16 @@ const EditProductModal = () => {
         />
         <StatCard 
           title="Low Stock Items"
-          value="3"
+          value={allProducts.filter(p => p.status === 'Low Stock').length.toString()}
           subtitle="Need restock"
           icon={<AlertIcon />}
           color="red"
           isLoading={isLoading}
         />
         <StatCard 
-          title="New This Week"
-          value="12"
-          subtitle="Product additions"
+          title="Available Products"
+          value={allProducts.filter(p => p.status === 'Available').length.toString()}
+          subtitle="Ready for sale"
           icon={<ProductsIcon />}
           color="blue"
           isLoading={isLoading}
@@ -518,9 +620,37 @@ const EditProductModal = () => {
             { header: 'Product ID', accessor: 'id' },
             { header: 'Product Name', accessor: 'name' },
             { header: 'Category', accessor: 'category' },
-            { header: 'Farmer', accessor: 'farmer' },
-            { header: 'Price', accessor: 'price' },
-            { header: 'Stock', accessor: 'stock' },
+            { 
+              header: 'Farmer', 
+              accessor: 'farmer',
+              cell: (row) => (
+                <div className="text-sm">
+                  <div className="font-medium text-gray-900">{row.farmer}</div>
+                  <div className="text-xs text-gray-500">ID: {row.farmerId}</div>
+                </div>
+              )
+            },
+            { 
+              header: 'Location', 
+              accessor: 'location',
+              cell: (row) => (
+                <span className="text-sm text-gray-600">{row.location}</span>
+              )
+            },
+            { 
+              header: 'Price', 
+              accessor: 'price',
+              cell: (row) => (
+                <span className="font-medium text-gray-900">{row.price}</span>
+              )
+            },
+            { 
+              header: 'Stock', 
+              accessor: 'stock',
+              cell: (row) => (
+                <span className="font-medium">{row.stock} {row.unit}</span>
+              )
+            },
             { 
               header: 'Status', 
               accessor: 'status',
@@ -532,22 +662,13 @@ const EditProductModal = () => {
               cell: (row) => (
                 <div className="flex space-x-2">
                   <button 
-                    className="p-1 text-blue-600 hover:text-blue-800"
+                    className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleViewProduct(row);
                     }}
                   >
-                    View
-                  </button>
-                  <button 
-                    className="p-1 text-yellow-600 hover:text-yellow-800"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditProduct(row);
-                    }}
-                  >
-                    Edit
+                    View Details
                   </button>
                 </div>
               )
@@ -559,7 +680,7 @@ const EditProductModal = () => {
         {/* Pagination */}
         <div className="p-4 flex justify-between items-center">
           <div className="text-sm text-dashboard-text-light">
-            Showing {filteredProducts.length} of {products.length} products
+            Showing {filteredProducts.length} of {allProducts.length} products
           </div>
           <div className="flex space-x-1">
             <button className="px-3 py-1 rounded bg-gray-100 text-dashboard-text-secondary hover:bg-gray-200">

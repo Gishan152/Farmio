@@ -4,13 +4,13 @@ import Card from '../../../components/ui/Card';
 import Table from '../../../components/ui/Table';
 import StatCard from '../../../components/ui/StatCard';
 import { 
-  fetchAllOrders, 
-  getOrderCount, 
-  getOrderCountByStatus, 
-  getOrdersByStatus,
-  formatOrderStatus, 
-  getStatusColor 
-} from '../../../Utils/orderUtils';
+  fetchAllOrdersForModerator, 
+  updateOrderStatus,
+  formatOrderStatus,
+  formatCurrency,
+  formatDate,
+  getStatusColor
+} from '../../../Utils/moderatorUtils';
 import {
   fetchAllCrops,
   createCropLookupMap,
@@ -185,19 +185,19 @@ const OrdersManagement = () => {
         
         // Load orders, crops, and users in parallel
         const [ordersData, cropsData, usersData] = await Promise.all([
-          fetchAllOrders(),
+          fetchAllOrdersForModerator(),
           fetchAllCrops(),
           fetchAllUsers()
         ]);
         
-        setOrders(ordersData);
-        setFilteredData(ordersData);
-        setCrops(cropsData);
-        setUsers(usersData);
+        setOrders(ordersData || []);
+        setFilteredData(ordersData || []);
+        setCrops(cropsData || []);
+        setUsers(usersData || []);
         
         // Create lookup maps for quick access
-        const cropLookupMap = createCropLookupMap(cropsData);
-        const userLookupMap = createUserLookupMap(usersData);
+        const cropLookupMap = createCropLookupMap(cropsData || []);
+        const userLookupMap = createUserLookupMap(usersData || []);
         setCropLookupMap(cropLookupMap);
         setUserLookupMap(userLookupMap);
         
@@ -350,18 +350,18 @@ const OrdersManagement = () => {
   // Order status badge
   const OrderStatusBadge = ({ status }) => {
     const statusStyles = {
-      'DELIVERED': 'bg-pastel-green text-green-800',
-      'PROCESSING': 'bg-pastel-blue text-blue-800',
+      'DELIVERED': 'bg-green-100 text-green-800',
+      'PROCESSING': 'bg-blue-100 text-blue-800',
       'IN_TRANSPORT': 'bg-purple-100 text-purple-800',
       'AWAITING_PICKUP': 'bg-indigo-100 text-indigo-800',
-      'PENDING': 'bg-pastel-yellow text-yellow-800',
-      'CANCELLED': 'bg-pastel-red text-red-800',
+      'PENDING': 'bg-yellow-100 text-yellow-800',
+      'CANCELLED': 'bg-red-100 text-red-800',
     };
     
     const displayStatus = formatOrderStatus(status);
     
     return (
-      <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status] || 'bg-gray-200 text-gray-800'}`}>
+      <span className={`px-2 py-1 text-xs rounded-full font-medium ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
         {displayStatus}
       </span>
     );
@@ -370,14 +370,14 @@ const OrdersManagement = () => {
   // Payment status badge component
   const PaymentStatusBadge = ({ status }) => {
     const statusStyles = {
-      'Paid': 'bg-pastel-green text-green-800',
-      'Pending': 'bg-pastel-yellow text-yellow-800',
-      'Failed': 'bg-pastel-red text-red-800',
-      'Refunded': 'bg-pastel-gray text-gray-800',
+      'Paid': 'bg-green-100 text-green-800',
+      'Pending': 'bg-yellow-100 text-yellow-800',
+      'Failed': 'bg-red-100 text-red-800',
+      'Refunded': 'bg-gray-100 text-gray-800',
     };
     
     return (
-      <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status] || 'bg-gray-200 text-gray-800'}`}>
+      <span className={`px-2 py-1 text-xs rounded-full font-medium ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
         {status}
       </span>
     );
@@ -775,7 +775,7 @@ const OrdersManagement = () => {
             { 
               accessor: 'total', 
               header: 'Total',
-              cell: (row) => <span className="font-medium">LKR {row.total ? row.total.toFixed(2) : '0.00'}</span>
+              cell: (row) => <span className="font-medium">{formatCurrency(row.total)}</span>
             },
             { 
               accessor: 'items', 
@@ -810,7 +810,11 @@ const OrdersManagement = () => {
           ]}
           data={filteredData}
           onRowClick={(row) => console.log('View order details:', row)}
-          emptyMessage="No orders found matching your criteria."
+          emptyMessage={
+            orders.length === 0 
+              ? "No orders found in the database. Orders will appear here once customers start placing orders."
+              : "No orders found matching your criteria."
+          }
           expandedRowRender={(row) => <OrderDetails order={row} />}
           expandedRowId={expandedOrderId}
         />
