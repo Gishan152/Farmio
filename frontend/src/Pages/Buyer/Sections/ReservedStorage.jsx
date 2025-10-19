@@ -10,12 +10,13 @@ import axios from "axios";
 
 export default function ReservedStorage() {
     const [reservations, setReservations] = useState({
-        paymentPending: [],
-        approved: [],
-        active: [],
-        completed: []
+        pendingApproval: [], // Phase 1: Awaiting warehouse owner approval
+        pendingPayment: [],  // Phase 1: Approved by warehouse owner, awaiting payment
+        paid: [],            // Phase 2: Payment completed, funds in escrow
+        active: [],          // Storage is currently in use
+        completed: []        // Booking has ended
     });
-    const [activeTab, setActiveTab] = useState("paymentPending");
+    const [activeTab, setActiveTab] = useState("pendingApproval");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -56,19 +57,27 @@ export default function ReservedStorage() {
                 const allBookings = bookingsResponse.data || [];
                 console.log('All bookings found:', allBookings.length);
 
-                // Categorize bookings by status
+                // Categorize bookings by status according to the phases
                 const categorizedReservations = {
-                    paymentPending: allBookings.filter(booking => 
-                        booking.status === 'PENDING' || booking.status === 'PENDING_APPROVAL' || booking.status === 'APPROVED_AWAITING_PAYMENT'
+                    pendingApproval: allBookings.filter(booking => 
+                        booking.status === 'SENT' || booking.status === 'SUBMITTED' || booking.status === 'REQUEST_SENT' || 
+                        booking.status === 'PENDING_REVIEW' || booking.status === 'AWAITING_APPROVAL'
                     ),
-                    approved: allBookings.filter(booking => 
-                        booking.status === 'PAID' || booking.status === 'APPROVED' || booking.status === 'CONFIRMED'
+                    pendingPayment: allBookings.filter(booking => 
+                        booking.status === 'APPROVED_AWAITING_PAYMENT' || booking.status === 'PAYMENT_REQUIRED' || 
+                        booking.status === 'PENDING_PAYMENT'
+                    ),
+                    paid: allBookings.filter(booking => 
+                        booking.status === 'PAID' || booking.status === 'PAYMENT_COMPLETED' || 
+                        booking.status === 'APPROVED' || booking.status === 'CONFIRMED' || booking.status === 'PAYMENT_IN_ESCROW'
                     ),
                     active: allBookings.filter(booking => 
-                        booking.status === 'ACTIVE' || booking.status === 'IN_PROGRESS' || booking.status === 'ONGOING'
+                        booking.status === 'ACTIVE' || booking.status === 'IN_PROGRESS' || booking.status === 'ONGOING' ||
+                        booking.status === 'STORAGE_IN_USE'
                     ),
                     completed: allBookings.filter(booking => 
-                        booking.status === 'COMPLETED' || booking.status === 'FINISHED' || booking.status === 'DONE'
+                        booking.status === 'COMPLETED' || booking.status === 'FINISHED' || booking.status === 'DONE' ||
+                        booking.status === 'RELEASED'
                     )
                 };
 
@@ -84,8 +93,9 @@ export default function ReservedStorage() {
                 setError(`Failed to load reservations: ${err.response?.data?.message || err.message}. Please try again later.`);
                 // Set empty data on error
                 setReservations({
-                    paymentPending: [],
-                    approved: [],
+                    pendingApproval: [],
+                    pendingPayment: [],
+                    paid: [],
                     active: [],
                     completed: []
                 });
@@ -99,16 +109,32 @@ export default function ReservedStorage() {
 
     const getStatusColor = (status) => {
         switch (status?.toUpperCase()) {
-            case 'PENDING':
-            case 'PENDING_APPROVAL':
-            case 'APPROVED_AWAITING_PAYMENT': 
+            // Phase 1: Pending Approval
+            case 'SENT':
+            case 'SUBMITTED':
+            case 'REQUEST_SENT':
+            case 'PENDING_REVIEW':
+            case 'AWAITING_APPROVAL':
+                return 'bg-purple-100 text-purple-800 border-purple-200';
+            
+            // Phase 1: Payment Required
+            case 'APPROVED_AWAITING_PAYMENT':
+            case 'PAYMENT_REQUIRED':
+            case 'PENDING_PAYMENT': 
                 return 'bg-orange-100 text-orange-800 border-orange-200';
+            
+            // Phase 2: Payment Complete
             case 'APPROVED':
             case 'PAID':
-            case 'CONFIRMED': 
+            case 'PAYMENT_COMPLETED':
+            case 'CONFIRMED':
+            case 'PAYMENT_IN_ESCROW': 
                 return 'bg-green-100 text-green-800 border-green-200';
+            
+            // Storage in use
             case 'ACTIVE':
             case 'IN_PROGRESS':
+            case 'STORAGE_IN_USE':
             case 'ONGOING': 
                 return 'bg-blue-100 text-blue-800 border-blue-200';
             case 'COMPLETED':
@@ -151,6 +177,69 @@ export default function ReservedStorage() {
         </button>
     );
 
+    const SentRequestCard = ({ request }) => (
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="flex justify-between items-start mb-4">
+                <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                        {request.warehouseName || `Warehouse ID: ${request.warehouseId || 'Unknown'}`}
+                    </h3>
+                    <div className="flex items-center text-gray-600 mt-1">
+                        <MapPinIcon className="h-4 w-4 mr-1" />
+                        <span className="text-sm">{request.city || request.warehouseLocation || 'Location TBD'}</span>
+                    </div>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(request.status)}`}>
+                    Awaiting Approval
+                </span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <p className="text-sm text-gray-500">Sent Date</p>
+                    <p className="font-medium">{formatDate(request.requestDate || request.createdAt)}</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Product Type</p>
+                    <p className="font-medium capitalize">{request.productType || 'Not specified'}</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Quantity</p>
+                    <p className="font-medium">{request.quantity || request.quantityKg}kg</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Duration</p>
+                    <p className="font-medium">{request.duration || request.durationDays} days</p>
+                </div>
+            </div>
+            
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center">
+                    <ClockIcon className="h-5 w-5 text-purple-600 mr-2" />
+                    <div>
+                        <p className="text-sm font-medium text-purple-800">Awaiting Warehouse Response</p>
+                        <p className="text-xs text-purple-600">Your request has been sent to the warehouse owner for review</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div className="flex gap-2">
+                <button 
+                    onClick={() => console.log('Edit request:', request)}
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                >
+                    Edit Request
+                </button>
+                <button 
+                    onClick={() => console.log('Cancel request:', request)}
+                    className="flex-1 px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
+                >
+                    Cancel Request
+                </button>
+            </div>
+        </div>
+    );
+
     const PaymentPendingCard = ({ request }) => (
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
             <div className="flex justify-between items-start mb-4">
@@ -164,7 +253,7 @@ export default function ReservedStorage() {
                     </div>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(request.status)}`}>
-                    Payment Pending
+                    Payment Required
                 </span>
             </div>
             
@@ -216,16 +305,17 @@ export default function ReservedStorage() {
                     </div>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
-                    Approved
+                    Payment Complete
                 </span>
             </div>
             
             <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
                 <div className="flex items-center">
                     <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2" />
-                    <span className="font-medium text-green-800">
-                        Slot Reserved: {booking.slotNumber || booking.slot?.slotNumber || 'TBD'}
-                    </span>
+                    <div>
+                        <p className="text-sm font-medium text-green-800">Payment Complete - Funds in Escrow</p>
+                        <p className="text-xs text-green-600">Slot Reserved: {booking.slotNumber || booking.slot?.slotNumber || 'TBD'}</p>
+                    </div>
                 </div>
             </div>
             
@@ -418,19 +508,25 @@ export default function ReservedStorage() {
                 {/* Tab Navigation */}
                 <div className="flex gap-2 mb-6 overflow-x-auto">
                     <TabButton 
-                        label="Payment Pending" 
-                        isActive={activeTab === "paymentPending"} 
-                        onClick={() => setActiveTab("paymentPending")}
-                        count={reservations.paymentPending?.length || 0}
+                        label="Pending Approval" 
+                        isActive={activeTab === "pendingApproval"} 
+                        onClick={() => setActiveTab("pendingApproval")}
+                        count={reservations.pendingApproval?.length || 0}
                     />
                     <TabButton 
-                        label="Approved Requests" 
-                        isActive={activeTab === "approved"} 
-                        onClick={() => setActiveTab("approved")}
-                        count={reservations.approved?.length || 0}
+                        label="Payment Required" 
+                        isActive={activeTab === "pendingPayment"} 
+                        onClick={() => setActiveTab("pendingPayment")}
+                        count={reservations.pendingPayment?.length || 0}
                     />
                     <TabButton 
-                        label="Active Bookings" 
+                        label="Paid Bookings" 
+                        isActive={activeTab === "paid"} 
+                        onClick={() => setActiveTab("paid")}
+                        count={reservations.paid?.length || 0}
+                    />
+                    <TabButton 
+                        label="Active Storage" 
                         isActive={activeTab === "active"} 
                         onClick={() => setActiveTab("active")}
                         count={reservations.active?.length || 0}
@@ -445,17 +541,39 @@ export default function ReservedStorage() {
 
                 {/* Content */}
                 <div className="space-y-6">
-                    {activeTab === "paymentPending" && (
+                    {activeTab === "pendingApproval" && (
                         <div>
-                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Payment Pending</h2>
-                            {reservations.paymentPending?.length === 0 ? (
+                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Pending Approval</h2>
+                            <p className="text-sm text-gray-600 mb-4">Requests sent to warehouse owners awaiting their approval</p>
+                            {reservations.pendingApproval?.length === 0 ? (
                                 <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-                                    <CreditCardIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                    <p className="text-gray-500">No pending payments found</p>
+                                    <ClockIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-500">No pending requests found</p>
+                                    <p className="text-sm text-gray-400 mt-2">Your booking requests to warehouses will appear here</p>
                                 </div>
                             ) : (
                                 <div className="grid gap-6">
-                                    {reservations.paymentPending?.map(request => (
+                                    {reservations.pendingApproval?.map(request => (
+                                        <SentRequestCard key={request.id} request={request} />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === "pendingPayment" && (
+                        <div>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Payment Required</h2>
+                            <p className="text-sm text-gray-600 mb-4">Requests approved by warehouse owners - payment needed to confirm booking</p>
+                            {reservations.pendingPayment?.length === 0 ? (
+                                <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+                                    <CreditCardIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-500">No payments pending</p>
+                                    <p className="text-sm text-gray-400 mt-2">Approved requests requiring payment will appear here</p>
+                                </div>
+                            ) : (
+                                <div className="grid gap-6">
+                                    {reservations.pendingPayment?.map(request => (
                                         <PaymentPendingCard key={request.id} request={request} />
                                     ))}
                                 </div>
@@ -463,17 +581,19 @@ export default function ReservedStorage() {
                         </div>
                     )}
 
-                    {activeTab === "approved" && (
+                    {activeTab === "paid" && (
                         <div>
-                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Approved Requests</h2>
-                            {reservations.approved?.length === 0 ? (
+                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Paid Bookings</h2>
+                            <p className="text-sm text-gray-600 mb-4">Payment completed and funds held in escrow</p>
+                            {reservations.paid?.length === 0 ? (
                                 <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
                                     <CheckCircleIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                    <p className="text-gray-500">No approved requests found</p>
+                                    <p className="text-gray-500">No paid bookings found</p>
+                                    <p className="text-sm text-gray-400 mt-2">Your paid bookings will appear here</p>
                                 </div>
                             ) : (
                                 <div className="grid gap-6">
-                                    {reservations.approved?.map(booking => (
+                                    {reservations.paid?.map(booking => (
                                         <ApprovedCard key={booking.id} booking={booking} />
                                     ))}
                                 </div>
@@ -483,11 +603,13 @@ export default function ReservedStorage() {
 
                     {activeTab === "active" && (
                         <div>
-                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Active Bookings</h2>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Active Storage</h2>
+                            <p className="text-sm text-gray-600 mb-4">Your products are currently in storage at these warehouses</p>
                             {reservations.active?.length === 0 ? (
                                 <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
                                     <ClockIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                    <p className="text-gray-500">No active bookings found</p>
+                                    <p className="text-gray-500">No active storage bookings found</p>
+                                    <p className="text-sm text-gray-400 mt-2">Your active storage will appear here</p>
                                 </div>
                             ) : (
                                 <div className="grid gap-6">
@@ -502,10 +624,12 @@ export default function ReservedStorage() {
                     {activeTab === "completed" && (
                         <div>
                             <h2 className="text-xl font-semibold text-gray-900 mb-4">Completed Bookings</h2>
+                            <p className="text-sm text-gray-600 mb-4">Storage bookings that have been completed</p>
                             {reservations.completed?.length === 0 ? (
                                 <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
                                     <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                                     <p className="text-gray-500">No completed bookings found</p>
+                                    <p className="text-sm text-gray-400 mt-2">Your completed bookings will appear here</p>
                                 </div>
                             ) : (
                                 <div className="grid gap-6">

@@ -492,6 +492,8 @@ export default function PaymentManagement() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Reason</label>
                                 <textarea
+                                    id="refund-reason"
+                                    name="refund-reason"
                                     value={refundData.reason}
                                     onChange={(e) => setRefundData(prev => ({ ...prev, reason: e.target.value }))}
                                     placeholder="Reason for refund"
