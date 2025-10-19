@@ -17,6 +17,7 @@ services=(
     "analytic-service"
     "chat-service"
     "payment-service"
+    "notification-service"
 )
 
 # Build parent pom first if it exists

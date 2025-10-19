@@ -3,7 +3,7 @@ REM Farmio Build All Services Script
 REM ===============================
 
 REM List of services to build
-set services=eureka-server api-gateway auth-service order-service crop-listing-service waste-service transport-service warehouse-service analytic-service chat-service payment-service
+set services=eureka-server api-gateway auth-service order-service crop-listing-service waste-service transport-service warehouse-service analytic-service chat-service payment-service notification-service
 
 REM Banner
 cls

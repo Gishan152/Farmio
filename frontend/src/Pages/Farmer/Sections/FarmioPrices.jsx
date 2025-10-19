@@ -1,18 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
 
+import api from "../../../API/client";
+import { format } from 'date-fns';
+
 const samplePrices = [
-  { product: 'Rice', unit: 'kg', price: 1.20, updated: '2025-07-01' },
-  { product: 'Corn', unit: 'kg', price: 0.90, updated: '2025-07-03' },
-  { product: 'Tomatoes', unit: 'kg', price: 1.50, updated: '2025-07-02' },
-  { product: 'Potatoes', unit: 'kg', price: 0.80, updated: '2025-07-04' },
-  { product: 'Wheat', unit: 'kg', price: 1.10, updated: '2025-07-05' },
+ 
 ];
 
 export default function FarmioPrices() {
   const [prices, setPrices] = useState([]);
   const [search, setSearch] = useState('');
 
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const response = await api.get('/api/analytics/moderator/prices');
+        const backendPrices = response.data;
+        console.log(backendPrices[0].productName);
+        // Transform backend data to match the expected format
+        const transformedPrices = backendPrices.map(item => ({
+          product: item.productName,
+          unit: item.unit,
+          price: parseFloat(item.recommendedPrice), // Convert BigDecimal (likely string) to number
+          updated: format(new Date(item.updatedAt), 'MMMM d, yyyy')// Assuming ISO string format from LocalDateTime
+        }));
+        
+        setPrices(transformedPrices);
+      } catch (err) {
+        console.error("Failed to fetch prices:", err);
+        setPrices([]); // Fallback to empty array on error
+      }
+    };
+
+    fetchPrices();
+  }, []);
   useEffect(() => {
     // simulate fetch from moderator input
     setPrices(samplePrices);

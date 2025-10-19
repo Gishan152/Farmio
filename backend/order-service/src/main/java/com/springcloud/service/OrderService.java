@@ -20,6 +20,7 @@ import com.springcloud.common.enums.OrderStatus;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+    private final com.springcloud.feign.PaymentServiceClient paymentServiceClient;
 
     private final OrderRepository orderRepository;
 
@@ -166,7 +167,16 @@ public class OrderService {
                         );
                     }
 
-                    // TODO : Relese the pending payment to the farmer
+                    // TODO : Check the code below for releasing escrow to farmer
+                    var releaseRequest = new EscrowReleaseRequest(
+                        order.getId().toString()
+                    );
+                    try {
+                        paymentServiceClient.releaseEscrow(releaseRequest);
+                    } catch (Exception e) {
+                        System.err.println("Failed to release escrow: " + e.getMessage());
+                    }
+
                     order.setStatus(OrderStatus.DELIVERED);
                     return orderRepository.save(order);
                 })
@@ -215,6 +225,16 @@ public class OrderService {
                             .multiply(refundRatio)
                             .setScale(2, RoundingMode.HALF_UP);
 //                    order.setRefundAmount(refundAmount);
+
+                    // Feign call to refund escrow
+                    var refundRequest = new EscrowRefundRequest(
+                        order.getId().toString()
+                    );
+                    try {
+                        paymentServiceClient.refundEscrow(refundRequest);
+                    } catch (Exception e) {
+                        System.err.println("Failed to refund escrow: " + e.getMessage());
+                    }
 
                     order.setStatus(OrderStatus.CANCELLED);
                     // TODO : restore the stock of order items

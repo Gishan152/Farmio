@@ -1,0 +1,112 @@
+# Server Configuration
+server:
+  port: 8094
+
+# Spring Configuration
+spring:
+  application:
+    name: notification-service
+  
+  cloud:
+    config:
+      import-check:
+        enabled: false
+
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://ep-dry-snow-a1szex24-pooler.ap-southeast-1.aws.neon.tech/notificationdb?sslmode=require&channelBinding=require
+    username: neondb_owner
+    password: npg_l2wurAbES8Cq
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  # RabbitMQ Configuration
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: 5672
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: /
+    connection-timeout: 60000
+  
+  # Email Configuration
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+          ssl:
+            trust: "*"
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+# Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    show-components: always
+    show-details: always
+    db:
+      enabled: true
+  security:
+    enabled: false
+
+# Application Configuration
+app:
+  mail:
+    from: ${MAIL_FROM:noreply@farmio.com}
+  
+  websocket:
+    allowed-origins: ${WEBSOCKET_ORIGINS:http://localhost:3000,http://localhost:5173,http://localhost:8080}
+    
+  notification:
+    # Email template configurations
+    email-templates:
+      order-confirmation: order-confirmation-email
+      payment-received: payment-received-email
+      transport-update: transport-update-email
+      general-notification: notification-email
+    
+    # Retry configurations
+    retry:
+      max-attempts: 3
+      delay: 5000  # 5 seconds
+    
+    # Rate limiting
+    rate-limit:
+      per-user: 100  # 100 notifications per hour per user
+      global: 10000  # 10,000 notifications per hour globally
+
+# Logging Configuration
+logging:
+  level:
+    com.springcloud: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.mail: DEBUG
+    org.springframework.amqp: DEBUG
