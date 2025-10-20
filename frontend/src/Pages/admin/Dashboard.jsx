@@ -4,6 +4,9 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import Card from '../../components/ui/Card';
 import Table from '../../components/ui/Table';
 import StatCard from '../../components/ui/StatCard';
+import { fetchUsersByRole, transformApiUsers, approveUser } from '../../Utils/roleUtils';
+import { getUserCount } from '../../Utils/userUtils';
+import { getOrderCount, getRecentOrders, formatOrderStatus } from '../../Utils/orderUtils';
 
 // Icons
 const UsersIcon = () => (
@@ -58,36 +61,114 @@ const EditIcon = () => (
   </svg>
 );
 
-// Dummy Data
-const recentOrders = [
-  { id: '0123', customer: 'Manju Perera', product: 'Organic Tomatoes', amount: 'LKR 4,998', status: 'Delivered', date: '2025-06-18' },
-  { id: '0124', customer: 'Iresha Gunasekara', product: 'Fresh Farm Milk', amount: 'LKR 7,100', status: 'Processing', date: '2025-06-19' },
-  { id: '0125', customer: 'Sunil Karunaratne', product: 'Mixed Vegetables', amount: 'LKR 9,550', status: 'Shipped', date: '2025-06-20' },
-  { id: '0126', customer: 'Shamila Jayasinghe', product: 'Organic Eggs', amount: 'LKR 3,650', status: 'Processing', date: '2025-06-21' },
+// Fallback order data in case API call fails
+const fallbackRecentOrders = [
+  { orderId: '0123', customer: 'Manju Perera', product: 'Organic Tomatoes', amount: 'LKR 4,998', status: 'DELIVERED', date: '2025-06-18' },
+  { orderId: '0124', customer: 'Iresha Gunasekara', product: 'Fresh Farm Milk', amount: 'LKR 7,100', status: 'PROCESSING', date: '2025-06-19' },
+  { orderId: '0125', customer: 'Sunil Karunaratne', product: 'Mixed Vegetables', amount: 'LKR 9,550', status: 'IN_TRANSPORT', date: '2025-06-20' },
+  { orderId: '0126', customer: 'Shamila Jayasinghe', product: 'Organic Eggs', amount: 'LKR 3,650', status: 'PROCESSING', date: '2025-06-21' },
 ];
 
-const pendingUsers = [
-  { id: 'USR001', name: 'Kasun Wijeratne', email: 'kasun.w@gmail.com', role: 'Transport Manager', location: 'Colombo', experience: '5 years', appliedDate: '2025-07-15', status: 'Pending' },
-  { id: 'USR002', name: 'Nimal Fernando', email: 'nimal.f@yahoo.com', role: 'Warehouse Manager', location: 'Kandy', experience: '8 years', appliedDate: '2025-07-16', status: 'Pending' },
-  { id: 'USR003', name: 'Saman Perera', email: 'saman.p@gmail.com', role: 'Waste Manager', location: 'Galle', experience: '3 years', appliedDate: '2025-07-17', status: 'Pending' },
-  { id: 'USR004', name: 'Chamara Silva', email: 'chamara.s@outlook.com', role: 'Transport Manager', location: 'Matara', experience: '6 years', appliedDate: '2025-07-18', status: 'Pending' },
+// Fallback data in case API call fails
+const fallbackPendingUsers = [
+  { id: 'USR001', name: 'Kasun Wijeratne', email: 'kasun.w@gmail.com', roles: 'ROLE_TRANSPORT', location: 'Colombo', experience: '5 years', appliedDate: '2025-07-15', status: 'PENDING' },
+  { id: 'USR002', name: 'Nimal Fernando', email: 'nimal.f@yahoo.com', roles: 'ROLE_WAREHOUSE', location: 'Kandy', experience: '8 years', appliedDate: '2025-07-16', status: 'PENDING' },
+  { id: 'USR003', name: 'Saman Perera', email: 'saman.p@gmail.com', roles: 'ROLE_WASTE', location: 'Galle', experience: '3 years', appliedDate: '2025-07-17', status: 'PENDING' },
 ];
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
-  const [users, setUsers] = useState(pendingUsers);
+  const [users, setUsers] = useState([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const [confirmMessage, setConfirmMessage] = useState('');
   const [confirmType, setConfirmType] = useState('');
+  const [error, setError] = useState(null);
+  const [totalUsers, setTotalUsers] = useState('--');
+  const [totalOrders, setTotalOrders] = useState('--');
+  const [newUsersThisMonth, setNewUsersThisMonth] = useState('--');
+  const [pendingDeliveries, setPendingDeliveries] = useState('--');
+  const [recentOrders, setRecentOrders] = useState([]);
 
+  // Fetch dashboard data on component mount
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 1000);
-    return () => clearTimeout(timer);
+    const fetchDashboardData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch all required data individually for better error tracking
+        setIsLoading(true);
+        
+        console.log("Fetching user data...");
+        const allUsers = await fetchUsersByRole();
+        console.log("User data received:", allUsers?.length || 0, "users");
+        
+        console.log("Fetching user count...");
+        const userCount = await getUserCount();
+        console.log("User count received:", userCount);
+        
+        console.log("Fetching order count...");
+        const orderCount = await getOrderCount();
+        console.log("Order count received:", orderCount);
+        
+        console.log("Fetching recent orders...");
+        const latestOrders = await getRecentOrders(7);
+        console.log("Recent orders received:", latestOrders?.length || 0, "orders", latestOrders);
+        
+        // Process users data
+        const pendingUsers = allUsers.filter(user => 
+          user.status === 'PENDING'
+        );
+        const transformedUsers = transformApiUsers(pendingUsers);
+        setUsers(transformedUsers);
+        
+        // Set dashboard statistics
+        setTotalUsers(userCount.toString());
+        setTotalOrders(orderCount.toString());
+        
+        // Estimate new users this month (20% of total is an assumption)
+        // In a real app, this would come from the API
+        setNewUsersThisMonth(Math.round(userCount * 0.2).toString());
+        
+        // Estimate pending deliveries (10% of total orders is an assumption)
+        // In a real app, this would come from the API
+        setPendingDeliveries(Math.round(orderCount * 0.1).toString());
+        
+        // Format orders data for display
+        if (latestOrders && Array.isArray(latestOrders) && latestOrders.length > 0) {
+          console.log("Processing recent orders...");
+          // Transform the order data to match the expected format in the table
+          const formattedOrders = latestOrders.map(order => ({
+            id: order.orderId?.toString() || order.id?.toString() || "N/A",
+            orderId: order.orderId?.toString() || order.id?.toString() || "N/A",
+            customer: order.buyerName || (order.buyerId ? `Buyer #${order.buyerId}` : "Unknown"),
+            product: order.productNames || order.product || 'Multiple items',
+            amount: `LKR ${order.total?.toFixed(2) || order.amount?.replace('LKR ', '') || '0.00'}`,
+            status: order.status,
+            date: order.orderDate ? new Date(order.orderDate).toISOString().split('T')[0] : order.date || "N/A"
+          }));
+          
+          console.log("Formatted orders:", formattedOrders);
+          setRecentOrders(formattedOrders);
+        } else {
+          console.log("No orders received or empty array, using fallback data");
+          setRecentOrders(fallbackRecentOrders);
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        setError(`Failed to load dashboard data: ${error.message}`);
+        
+        // Use fallback data on error
+        setUsers(fallbackPendingUsers);
+        setRecentOrders(fallbackRecentOrders);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
   }, []);
 
   const handleViewUser = (user) => {
@@ -95,19 +176,37 @@ const AdminDashboard = () => {
     setShowUserModal(true);
   };
 
+  // Helper function to show messages
+  const showMessage = (message, isSuccess = true) => {
+    // You can implement a toast message here if you have a toast component
+    console.log(isSuccess ? '✅' : '❌', message);
+  };
+
   const handleApproveUser = (userId) => {
     const user = users.find(u => u.id === userId);
     setConfirmMessage(`Are you sure you want to approve ${user?.name}?`);
     setConfirmType('approve');
-    setConfirmAction(() => () => {
-      setUsers(prevUsers =>
-        prevUsers
-          .map(u => (u.id === userId ? { ...u, status: 'Approved' } : u))
-          .filter(u => u.status === 'Pending')
-      );
-      setShowUserModal(false);
-      setShowConfirmModal(false);
-      console.log('User approved:', userId);
+    setConfirmAction(() => async () => {
+      try {
+        // Call the API to approve the user
+        await approveUser(userId);
+        
+        // Update the local state to reflect the change
+        setUsers(prevUsers =>
+          prevUsers
+            .map(u => (u.id === userId ? { ...u, status: 'APPROVED' } : u))
+            .filter(u => u.status === 'PENDING')
+        );
+        setShowUserModal(false);
+        setShowConfirmModal(false);
+        
+        // Show success message
+        showMessage(`User ${user?.name} has been approved successfully!`);
+        console.log('User approved:', userId);
+      } catch (error) {
+        console.error('Failed to approve user:', error);
+        showMessage('Failed to approve user. Please try again.', false);
+      }
     });
     setShowConfirmModal(true);
   };
@@ -116,15 +215,27 @@ const AdminDashboard = () => {
     const user = users.find(u => u.id === userId);
     setConfirmMessage(`Are you sure you want to reject ${user?.name}?`);
     setConfirmType('reject');
-    setConfirmAction(() => () => {
-      setUsers(prevUsers =>
-        prevUsers
-          .map(u => (u.id === userId ? { ...u, status: 'Rejected' } : u))
-          .filter(u => u.status === 'Pending')
-      );
-      setShowUserModal(false);
-      setShowConfirmModal(false);
-      console.log('User rejected:', userId);
+    setConfirmAction(() => async () => {
+      try {
+        // Currently there's no API to reject users, but when it's implemented:
+        // await rejectUser(userId);
+        
+        // For now, just update the UI
+        setUsers(prevUsers =>
+          prevUsers
+            .map(u => (u.id === userId ? { ...u, status: 'REJECTED' } : u))
+            .filter(u => u.status === 'PENDING')
+        );
+        setShowUserModal(false);
+        setShowConfirmModal(false);
+        
+        // Show success message
+        showMessage(`User ${user?.name} has been rejected.`);
+        console.log('User rejected:', userId);
+      } catch (error) {
+        console.error('Failed to reject user:', error);
+        showMessage('Failed to reject user. Please try again.', false);
+      }
     });
     setShowConfirmModal(true);
   };
@@ -146,27 +257,53 @@ const AdminDashboard = () => {
 
   const OrderStatusBadge = ({ status }) => {
     const statusStyles = {
-      Delivered: 'bg-pastel-green text-green-800',
-      Processing: 'bg-pastel-blue text-blue-800',
-      Shipped: 'bg-pastel-yellow text-yellow-800',
-      Cancelled: 'bg-pastel-red text-red-800',
+      'DELIVERED': 'bg-pastel-green text-green-800',
+      'PROCESSING': 'bg-pastel-blue text-blue-800',
+      'IN_TRANSPORT': 'bg-pastel-yellow text-yellow-800',
+      'AWAITING_PICKUP': 'bg-purple-100 text-purple-800',
+      'PENDING': 'bg-pastel-blue text-blue-800',
+      'CANCELLED': 'bg-pastel-red text-red-800',
     };
+    
+    // Use formatOrderStatus to get proper display name
+    const displayStatus = formatOrderStatus(status);
+    
     return (
       <span className={`px-2 py-1 text-xs rounded-full ${statusStyles[status] || 'bg-gray-200 text-gray-800'}`}>
-        {status}
+        {displayStatus}
       </span>
     );
   };
 
   const UserRoleBadge = ({ role }) => {
+    // Map API role format to display format
+    const roleMapping = {
+      'ROLE_FARMER': 'Farmer',
+      'ROLE_BUYER': 'Buyer',
+      'ROLE_WASTE': 'Waste Manager',
+      'ROLE_WAREHOUSE': 'Warehouse Manager',
+      'ROLE_TRANSPORT': 'Transport Manager',
+      'ROLE_ADMIN': 'Administrator',
+      'ROLE_MODERATOR': 'Moderator'
+    };
+    
+    // Define style for each role type
     const roleStyles = {
       'Transport Manager': 'bg-blue-100 text-blue-800',
       'Warehouse Manager': 'bg-green-100 text-green-800',
       'Waste Manager': 'bg-orange-100 text-orange-800',
+      'Farmer': 'bg-emerald-100 text-emerald-800',
+      'Buyer': 'bg-purple-100 text-purple-800',
+      'Administrator': 'bg-red-100 text-red-800',
+      'Moderator': 'bg-yellow-100 text-yellow-800'
     };
+    
+    // Get display name for the role
+    const displayRole = roleMapping[role] || role;
+    
     return (
-      <span className={`px-2 py-1 text-xs rounded-full ${roleStyles[role] || 'bg-gray-200 text-gray-800'}`}>
-        {role}
+      <span className={`px-2 py-1 text-xs rounded-full ${roleStyles[displayRole] || 'bg-gray-200 text-gray-800'}`}>
+        {displayRole}
       </span>
     );
   };
@@ -190,9 +327,9 @@ const AdminDashboard = () => {
     <DashboardLayout title="Dashboard" userRole="admin" breadcrumbs="Home / Dashboard">
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Total Users" value="2,845" subtitle="125 new this month" icon={<UsersIcon />} color="blue" trend="up" trendValue="12%" isLoading={isLoading} />
+        <StatCard title="Total Users" value={totalUsers} subtitle={`${newUsersThisMonth} new this month`} icon={<UsersIcon />} color="blue" trend="up" trendValue="12%" isLoading={isLoading} />
         <StatCard title="Pending Approvals" value={users.length.toString()} subtitle="Users awaiting approval" icon={<UserCheckIcon />} color="orange" trend="up" trendValue="3" isLoading={isLoading} />
-        <StatCard title="Orders" value="452" subtitle="45 pending deliveries" icon={<OrdersIcon />} color="yellow" trend="up" trendValue="5%" isLoading={isLoading} />
+        <StatCard title="Total Orders" value={totalOrders} subtitle={`${pendingDeliveries} pending deliveries`} icon={<OrdersIcon />} color="yellow" trend="up" trendValue="5%" isLoading={isLoading} />
         <StatCard title="Revenue" value="LKR 5,691,800" subtitle="This month" icon={<RevenueIcon />} color="purple" trend="up" trendValue="18%" isLoading={isLoading} />
       </div>
 
@@ -211,7 +348,8 @@ const AdminDashboard = () => {
               { header: 'Date', accessor: 'date' },
             ]}
             data={recentOrders}
-            onRowClick={(row) => console.log('Order clicked:', row)}
+            onRowClick={(row) => navigate(`/admin/orders/${row.id}`)}
+            emptyMessage="No recent orders found"
           />
         </Card>
 
@@ -221,6 +359,17 @@ const AdminDashboard = () => {
             isLoading={isLoading}
             columns={[
               { header: 'Name', accessor: 'name' },
+              { 
+                header: 'Role', 
+                accessor: 'roles', 
+                cell: (row) => (
+                  <div className="flex flex-wrap gap-1">
+                    {row.roles && row.roles.split(', ').map((role, index) => (
+                      <UserRoleBadge key={index} role={role} />
+                    ))}
+                  </div>
+                )
+              },
               { header: 'Actions', accessor: 'actions', cell: (row) => <UserActionButtons user={row} /> },
             ]}
             data={users}
@@ -251,9 +400,14 @@ const AdminDashboard = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Role</label>
-                  <p className="text-sm text-gray-900">
-                    <UserRoleBadge role={selectedUser.role} />
-                  </p>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {selectedUser.roles && selectedUser.roles.split(', ').map((role, index) => (
+                      <UserRoleBadge key={index} role={role} />
+                    ))}
+                    {(!selectedUser.roles || selectedUser.roles === 'N/A') && (
+                      <span className="text-sm text-gray-500">No roles assigned</span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Location</label>

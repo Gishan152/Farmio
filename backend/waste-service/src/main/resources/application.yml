@@ -4,43 +4,60 @@ server:
 
 # Database
 spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   application:
     name: waste-service
   cloud:
+#    gateway:
+#      routes:
+#        - id: waste-service
+#          uri: lb://waste-service
+#          predicates:
+#            - Path=/api/waste/**
     config:
-      import-check:
-        enabled: false
+      enabled: false
   rabbitmq:
-    host: rabbitmq
-    port: 5672
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
 
   datasource:
     url: jdbc:postgresql://ep-dry-snow-a1szex24-pooler.ap-southeast-1.aws.neon.tech/wastedb?sslmode=require&channelBinding=require
     username: neondb_owner
     password: npg_l2wurAbES8Cq
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      keepalive-time: 60000
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-    health:
-      show-components: always
-      show-details: always
-      db:
-        enabled: true
-  security:
-    enabled: false
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: "*"
+#    health:
+#      show-components: always
+#      show-details: always
+#      db:
+#        enabled: true
+#  security:
+#    enabled: false
 
 eureka:
   client:
+    register-with-eureka: true
+    fetch-registry: true
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+

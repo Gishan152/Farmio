@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {useUserContext} from '../../../Contexts/UserContext'
 import { 
   TruckIcon,
   PencilIcon,
@@ -8,6 +9,8 @@ import {
   CameraIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
+import transportService from '../../../API/transportService';
+
 
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) return null;
@@ -53,6 +56,10 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
 };
 
 export default function VehicleInfo() {
+  const { user } = useUserContext(); 
+  const providerId = user?.id;
+  console.log("Provider ID in VehicleInfo:", providerId);
+
   const [vehicle, setVehicle] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -66,13 +73,30 @@ export default function VehicleInfo() {
   });
   const [errors, setErrors] = useState({});
 
-  // Load saved vehicle from localStorage
   useEffect(() => {
-    const savedVehicle = localStorage.getItem('transportProviderVehicle');
-    if (savedVehicle) {
-      setVehicle(JSON.parse(savedVehicle));
+    if (providerId) {
+      loadVehicle(providerId);
     }
-  }, []);
+  }, [providerId]);
+
+  useEffect(() => {
+    loadVehicle();
+  }, [providerId]);
+
+  const loadVehicle = async () => {
+    try {
+      setLoading(true);
+      const vehicleData = await transportService.getVehicleByProvider(providerId);
+      if (vehicleData) {
+        setVehicle(vehicleData);
+      }
+    } catch (error) {
+      console.error('Error loading vehicle:', error);
+      // It's okay if no vehicle exists yet
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -101,29 +125,36 @@ export default function VehicleInfo() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const newVehicle = {
-      ...formData,
-      updatedAt: new Date().toISOString()
-    };
-    setVehicle(newVehicle);
-    localStorage.setItem('transportProviderVehicle', JSON.stringify(newVehicle));
-    setIsEditing(false);
-  };
+    try {
+      setLoading(true);
+      setError('');
 
-  const handleEdit = () => {
-    setFormData({
-      regNo: vehicle.regNo,
-      type: vehicle.type,
-      kind: vehicle.kind,
-      maxLoad: vehicle.maxLoad,
-      frontPhoto: vehicle.frontPhoto,
-      sidePhoto: vehicle.sidePhoto,
-    });
-    setIsEditing(true);
+      const vehicleData = {
+        ...formData,
+        providerId: providerId
+      };
+
+      let savedVehicle;
+      if (vehicle) {
+        // Update existing vehicle
+        savedVehicle = await vehicleService.updateVehicle(vehicleData);
+      } else {
+        // Create new vehicle
+        savedVehicle = await vehicleService.saveVehicle(vehicleData);
+      }
+
+      setVehicle(savedVehicle);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving vehicle:', error);
+      setError('Failed to save vehicle. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteClick = () => {

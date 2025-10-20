@@ -9,6 +9,10 @@ import {
   XCircleIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
+import { update } from 'lodash';
+import api from '../../../API/client';
+import {useUserContext} from '../../../Contexts/UserContext'
+import transportService from '../../../API/transportService';
 
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, itemType }) => {
   if (!isOpen) return null;
@@ -75,19 +79,42 @@ export default function RoutePlanner() {
     availableFrom: '',
     availableTo: '',
   });
+  const { user } = useUserContext(); 
+  const driverId = user?.id;
 
   useEffect(() => {
-    const savedRoute = localStorage.getItem('transportProviderRoute');
-    const savedAvailability = localStorage.getItem('transportProviderAvailability');
-    
-    if (savedRoute) {
-      setRoute(JSON.parse(savedRoute));
-      setMode('route');
-    } else if (savedAvailability) {
-      setAvailabilityData(JSON.parse(savedAvailability));
-      setMode('availability');
-    }
+    const fetchData = async () => {
+      // Only fetch data when we have a driverId
+      if (!driverId) {
+        return;
+      }
+
+      try {
+        const [routes, availabilities] = await Promise.all([
+          transportService.getAllRoutesByProvider(driverId),
+          transportService.getAllAvailabilitiesByProvider(driverId)
+        ]);
+
+        console.log("API Routes Response:", routes);
+        console.log("API Availabilities Response:", availabilities);
+
+        if (routes?.length > 0) {
+          setRoute(routes[0]);
+          setMode("route");
+        } else if (availabilities?.length > 0) {
+          setAvailabilityData(availabilities[0]);
+          setMode("availability");
+        } else {
+          setIsEditing(true); // no data yet → start in edit mode
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
   }, []);
+
 
   const validateRouteForm = () => {
     const newErrors = {};
@@ -131,37 +158,58 @@ export default function RoutePlanner() {
     setFormData({ ...formData, days: updatedDays });
   };
 
-  const handleSaveRoute = (e) => {
+  const handleSaveRoute = async (e) => {
     e.preventDefault();
     if (!validateRouteForm()) return;
 
     const newRoute = {
       ...formData,
-      id: Date.now(),
-      updatedAt: new Date().toISOString()
+      providerId: driverId,
+      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
     };
-    setRoute(newRoute);
-    localStorage.setItem('transportProviderRoute', JSON.stringify(newRoute));
-    localStorage.removeItem('transportProviderAvailability');
+    try{
+      if(route){
+        await transportService.updateRoute(route.id, newRoute);
+      }else{
+        await transportService.createRoute(newRoute);
+      }
+       const routes = await transportService.getAllRoutesByProvider(driverId);
+      setRoute(routes.data[0]);
+      setIsEditing(false);
+      setMode("route");
+    }catch(error){
+      console.error("Error saving route:", error);
+    }
+    
+  };
+
+  const handleSaveAvailability = async (e) => {
+  e.preventDefault();
+  if (!validateAvailabilityForm()) return;
+
+  const data = {
+    ...availabilityData,
+    providerId: driverId,
+    updatedAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+  };
+
+  try {
+    if (availabilityData.id) {
+      await transportService.updateAvailability(availabilityData.id, data);
+    } else {
+      await transportService.createAvailability(data);
+    }
+
+    const availabilities = await transportService.getAllAvailabilitiesByProvider(driverId);
+    setAvailabilityData(availabilities?.data?.[0]);
     setIsEditing(false);
-    setMode('route');
-  };
-
-  const handleSaveAvailability = (e) => {
-    e.preventDefault();
-    if (!validateAvailabilityForm()) return;
-
-    const newAvailability = {
-      ...availabilityData,
-      id: Date.now(),
-      updatedAt: new Date().toISOString()
-    };
-    setAvailabilityData(newAvailability);
-    localStorage.setItem('transportProviderAvailability', JSON.stringify(newAvailability));
-    localStorage.removeItem('transportProviderRoute');
-    setRoute(null);
-    setMode('availability');
-  };
+    setMode("availability");
+  } catch (error) {
+    console.error("Error saving availability:", error);
+  }
+};
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -172,27 +220,31 @@ export default function RoutePlanner() {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
-    if (itemToDelete === 'route') {
+  const handleDeleteConfirm = async () => {
+  try {
+    if (itemToDelete === "route" && route) {
+      await transportService.deleteRoute(route.id);
       setRoute(null);
-      localStorage.removeItem('transportProviderRoute');
-    } else {
+    } else if (itemToDelete === "availability" && availabilityData?.id) {
+      await transportService.deleteAvailability(availabilityData.id);
       setAvailabilityData({
         available: true,
         allowDetours: false,
-        currentLocation: '',
-        availableFrom: '',
-        availableTo: '',
+        currentLocation: "",
+        availableFrom: "",
+        availableTo: "",
       });
-      localStorage.removeItem('transportProviderAvailability');
     }
+  } catch (error) {
+    console.error("Error deleting item:", error);
+  } finally {
     setShowDeleteModal(false);
-  };
-
-  const handleDeleteCancel = () => {
-    setShowDeleteModal(false);
-  };
-
+  }
+};
+const handleDeleteCancel = () => {
+  setShowDeleteModal(false);
+  setItemToDelete(null);
+};
   const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   return (
@@ -260,7 +312,7 @@ export default function RoutePlanner() {
                       {route ? 'Your Current Route' : 'Your Availability Settings'}
                     </h2>
                     <p className="text-sm text-green-600">
-                      Last updated: {new Date(route?.updatedAt || availabilityData.updatedAt).toLocaleDateString()}
+                      Last updated: {new Date(route?.updatedAt || availabilityData?.updatedAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>

@@ -3,6 +3,12 @@ import DashboardLayout from '../../../components/layout/DashboardLayout';
 import Card from '../../../components/ui/Card';
 import Table from '../../../components/ui/Table';
 import StatCard from '../../../components/ui/StatCard';
+import { 
+  fetchAllWasteListings, 
+  fetchAllWasteAgents,
+  getWasteListingCountByStatus,
+  getWasteListingCountByType 
+} from '../../../Utils/wasteUtils';
 
 // Icons
 const RecycleIcon = () => (
@@ -154,21 +160,72 @@ const collectionPoints = [
 ];
 
 const CollectionPoints = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [expandedPointId, setExpandedPointId] = useState(null);
+  const [wasteListings, setWasteListings] = useState([]);
+  const [wasteAgents, setWasteAgents] = useState([]);
+  const [wasteStats, setWasteStats] = useState({
+    totalListings: 0,
+    totalAgents: 0,
+    statusCounts: {},
+    typeCounts: {}
+  });
 
-  // Simulate loading
+  // Fetch waste data
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setFilteredData(collectionPoints);
-    }, 1000);
-    return () => clearTimeout(timer);
+    const fetchWasteData = async () => {
+      setIsLoading(true);
+      try {
+        console.log('Fetching waste data for collection points dashboard...');
+        
+        // Use Promise.allSettled to continue even if some requests fail
+        const [listings, agents, statusCounts, typeCounts] = await Promise.allSettled([
+          fetchAllWasteListings(), // Direct import from wasteUtils
+          fetchAllWasteAgents(), // Direct import from wasteUtils
+          getWasteListingCountByStatus(), // Direct import from wasteUtils
+          getWasteListingCountByType() // Direct import from wasteUtils
+        ]);
+        
+        // Process results, using empty arrays/objects for rejected promises
+        const listingsData = listings.status === 'fulfilled' ? listings.value : [];
+        const agentsData = agents.status === 'fulfilled' ? agents.value : [];
+        const statusCountsData = statusCounts.status === 'fulfilled' ? statusCounts.value : {};
+        const typeCountsData = typeCounts.status === 'fulfilled' ? typeCounts.value : {};
+        
+        console.log(`Successfully processed: ${listingsData.length} listings, ${agentsData.length} agents`);
+        
+        setWasteListings(listingsData);
+        setWasteAgents(agentsData);
+        
+        setWasteStats({
+          totalListings: listingsData.length,
+          totalAgents: agentsData.length,
+          statusCounts: statusCountsData,
+          typeCounts: typeCountsData
+        });
+        
+        // Always use sample data for UI testing for now
+        setFilteredData(collectionPoints);
+      } catch (error) {
+        console.error("Error fetching waste data:", error);
+        // Use sample data as fallback
+        setFilteredData(collectionPoints);
+        setWasteStats({
+          totalListings: 0,
+          totalAgents: 0,
+          statusCounts: {},
+          typeCounts: {}
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchWasteData();
   }, []);
 
   // Handle search
@@ -462,32 +519,32 @@ const CollectionPoints = () => {
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <StatCard
-          title="Collection Points"
-          value={collectionPoints.length.toString()}
-          subtitle="Total locations"
+          title="Waste Listings"
+          value={wasteStats.totalListings.toString()}
+          subtitle="Total waste listings"
           icon={<RecycleIcon />}
           color="green"
           isLoading={isLoading}
         />
         <StatCard
-          title="Total Capacity"
-          value="51 tons"
-          subtitle="Daily maximum"
+          title="Waste Agents"
+          value={wasteStats.totalAgents.toString()}
+          subtitle="Available agents"
           icon={<RecycleIcon />}
           color="blue"
           isLoading={isLoading}
         />
         <StatCard
-          title="Average Load"
-          value="62%"
-          subtitle="Current utilization"
+          title="Completed Listings"
+          value={(wasteStats.statusCounts['COMPLETED'] || 0).toString()}
+          subtitle="Successfully processed"
           icon={<RecycleIcon />}
           color="yellow"
           isLoading={isLoading}
         />
         <StatCard
-          title="Points at Capacity"
-          value="1"
+          title="Pending Listings"
+          value={(wasteStats.statusCounts['PENDING'] || 0).toString()}
           subtitle="Needs attention"
           icon={<RecycleIcon />}
           color="red"

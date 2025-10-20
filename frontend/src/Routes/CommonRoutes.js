@@ -14,6 +14,7 @@ import AboutUs from '../Pages/AboutUs';
 import FAQ from '../Pages/FAQ';
 import HowItWorks from '../Pages/HowItWorks';
 import TermsAndConditions from '../Pages/TermsAndConditions';
+import TestConnection from '../Pages/TestConnection';
 
 
 
@@ -21,6 +22,10 @@ const commonRoutes = [
     {
         index: true,
         Component: LandingPage
+    },
+    {
+        path: "/test-connection",
+        Component: TestConnection
     },
      {
         path: "/about",

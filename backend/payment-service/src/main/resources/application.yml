@@ -11,7 +11,7 @@ spring:
       import-check:
         enabled: false
   rabbitmq:
-    host: rabbitmq
+    host: ${RABBITMQ_HOST:localhost}
     port: 5672
 
   datasource:
@@ -43,4 +43,11 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+
+# PayHere Configuration
+payhere:
+  merchant-id: ${PAYHERE_MERCHANT_ID:1230134}
+  merchant-secret: ${PAYHERE_MERCHANT_SECRET:MzQ1MTI4NDkzMTQwMDU4NzczNDkyMDI5MzQyODIxMDg0NjI0Nzg=}
+  notify-url: ${PAYHERE_NOTIFY_URL:http://localhost:8093/api/payment/payhere/notify}
+  sandbox: ${PAYHERE_SANDBOX:true}

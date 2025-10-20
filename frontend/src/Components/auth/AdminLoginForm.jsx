@@ -26,18 +26,54 @@ const AdminLoginForm = () => {
 
     try {
       // Here you would integrate with your backend API
-      // For now, we'll just simulate a successful login
       console.log('Login attempt with:', formData);
       
-      // Redirect based on role after successful login
-      setTimeout(() => {
-        if (formData.role === 'admin') {
-          navigate('/admin/dashboard');
-        } else {
-          navigate('/moderator/dashboard');
+      // For development, we'll still use a mock response
+      // In production, this should be replaced with an actual API call
+      let response;
+      
+      try {
+        // Attempt to call the real API
+        const apiResponse = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        });
+        
+        if (!apiResponse.ok) {
+          const errorData = await apiResponse.json();
+          throw new Error(errorData.message || 'Login failed');
         }
-        setIsLoading(false);
-      }, 1000);
+        
+        response = await apiResponse.json();
+      } catch (apiError) {
+        console.error("API error:", apiError);
+        // For development/testing purposes - always login successfully in development
+        if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+          console.warn("Development mode: Using mock authentication");
+          response = {
+            success: true,
+            token: `admin-token-${Date.now()}`,  // Generate a unique token
+            role: 'admin'
+          };
+        } else {
+          throw apiError; // In production, don't ignore API errors
+        }
+      }
+      
+      // Store token and role in localStorage
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('role', 'admin');
+      
+      // Redirect to admin dashboard
+      navigate('/admin/dashboard');
+      
+      setIsLoading(false);
       
     } catch (err) {
       setError('Invalid credentials. Please try again.');
@@ -83,12 +119,9 @@ const AdminLoginForm = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setFormData({...formData, role: 'moderator'})}
-                  className={`py-2.5 px-4 text-sm font-medium rounded-md border transition-all ${
-                    formData.role === 'moderator'
-                      ? 'bg-farmio text-white border-farmio'
-                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  }`}
+                  onClick={() => navigate('/moderator/login')}
+                  className={`py-2.5 px-4 text-sm font-medium rounded-md border transition-all 
+                    bg-white text-gray-700 border-gray-300 hover:bg-gray-50`}
                 >
                   Moderator
                 </button>

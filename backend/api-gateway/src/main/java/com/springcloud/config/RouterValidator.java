@@ -8,10 +8,81 @@ import java.util.List;
 
 @Component
 public class RouterValidator {
-    private static final List<String> openEndpoints = Arrays.asList("/auth/login", "/auth/register");
+    private static final List<String> openEndpoints = Arrays.asList(
+            "/api/auth/",
+            "/auth/login",
+            "/auth/register",
+            "/api/payment/payhere/notify",
+            "/actuator/health",
+            "/api/warehouses", // Temporarily open for testing
+            "/api/slots", // Temporarily open for testing
+            "/api/bookings", // Temporarily open for testing
+            "/api/user/get", // Temporarily open for testing
+            "/api/buyer/", // Public buyer endpoints for farmers
+            "/api/warehouses/public/", // Public warehouse browsing endpoints
+            "/api/warehouses/available", // Public available warehouses endpoint
+            "/api/warehouses/capacity/", // Public warehouse capacity checking
+        "/api/analytics/admin/users", 
+        "/api/analytics/admin/users/count",
+        "/api/analytics/admin/users/status-count",
+        "/api/analytics/admin/users/by-status",
+        "/api/analytics/admin/orders",
+        "/api/analytics/admin/orders/count",
+        "/api/analytics/admin/orders/status-count",
+        "/api/analytics/admin/orders/by-status",
+        "/api/analytics/admin/orders/recent",
+        "/api/order/admin/all",
+        "/api/analytics/admin/products",
+        "/api/analytics/admin/products/can-delete",
+        "/api/analytics/admin/moderators", 
+        "/api/analytics/prices",
+        "/api/analytics/prices/category",
+        "/api/analytics/moderator/prices",
+        "/api/order/get-crops",
+        // "/api/order/get",
+        "/api/user/all-dto",
+        
+        "/api/admin/moderators/all-dto",
+        "/api/moderator/login",
+        "/api/moderator/change-temp-password",
+        "/api/products/images/"
+        "/api/analytics/admin/waste/listings",
+        "/api/analytics/admin/waste/agents",
+        "/api/analytics/admin/waste/listings/count",
+        "/api/analytics/admin/waste/agents/count",
+        "/api/analytics/admin/waste/listings/status-count",
+        "/api/analytics/admin/waste/listings/by-status",
+        "/api/analytics/admin/waste/listings/type-count",
+        "/api/analytics/admin/waste/listings/by-type",
+        "/api/analytics/admin/routes",
+        "/api/analytics/admin/routes/count",
+        "/api/analytics/admin/routes/by-location",
+        "/api/analytics/admin/routes/total-distance",
+        "/api/analytics/admin/routes/average-distance",
+        
+        // Moderator endpoints - allow without authentication
+        "/api/analytics/moderator/stats",
+        "/api/analytics/moderator/recent-orders",
+        "/api/analytics/moderator/pending-orders",
+        "/api/analytics/moderator/products-for-review",
+        "/api/analytics/moderator/recent-inventory-updates",
+        "/api/analytics/moderator/orders",
+        "/api/analytics/moderator/products"
+    );
 
     public boolean isSecured(ServerHttpRequest request) {
-        return openEndpoints.stream()
-                .noneMatch(uri -> request.getURI().getPath().contains(uri));
+        String path = request.getURI().getPath();
+        
+        // Check if the path contains any of the explicitly open endpoints
+        if (openEndpoints.stream().anyMatch(path::contains)) {
+            return false;
+        }
+        
+        // Special handling for moderator endpoints - allow all moderator price endpoints
+        if (path.contains("/api/analytics/moderator/prices")) {
+            return false;
+        }
+        
+        return true;
     }
 }

@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 const menu = [
 	{ label: "Listing", to: "listings" },
 	{ label: "Requests", to: "requests" },
+	{ label: "finalise", to: "finalise" },
 	{ label: "manage Payments", to: "manage-payments" },
 	{ label: "Profile", to: "profile" },
 	{ label: "chat", to: "chat" },
@@ -83,6 +84,7 @@ export default function Sidebar() {
 					<button
 						className="flex items-center gap-4 text-gray-700 dark:text-gray-300 hover:text-red-500 transition text-sm"
 						aria-label="Logout"
+						onClick={() => navigate("/logout")}
 					>
 						<ArrowRightStartOnRectangleIcon className="h-7 w-8 flex-shrink-0" />
 						<span>Logout</span>

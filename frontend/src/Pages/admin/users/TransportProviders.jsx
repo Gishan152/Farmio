@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserManagement from '../../../components/templates/UserManagement';
+import { fetchUsersByRole, transformApiUsers, getSampleDataByRole, ROLES, approveUser } from '../../../Utils/roleUtils';
 
 // Transport Provider icon
 const TransportIcon = () => (
@@ -313,8 +314,38 @@ const TransportProviderManagement = () => {
   // State for modals
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showApproveModal, setShowApproveModal] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [activeTab, setActiveTab] = useState('provider');
+  
+  // State for API data
+  const [transportProviders, setTransportProviders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch transport providers data from API
+  useEffect(() => {
+    const fetchTransportProviders = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const usersData = await fetchUsersByRole(ROLES.TRANSPORT);
+        const transformedProviders = transformApiUsers(usersData);
+        
+        setTransportProviders(transformedProviders);
+      } catch (err) {
+        console.error('Error fetching transport providers:', err);
+        setError(err.message);
+        // Fallback to sample data on error
+        setTransportProviders(getSampleDataByRole(ROLES.TRANSPORT));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransportProviders();
+  }, []);
 
   // Handle view provider details
   const handleViewProvider = (provider) => {
@@ -337,6 +368,25 @@ const TransportProviderManagement = () => {
     // In a real app, you would update the state or call an API
   };
 
+  // Handle approve provider
+  const handleApproveProvider = (provider) => {
+    setSelectedProvider(provider);
+    setShowApproveModal(true);
+  };
+
+  // Confirm approve provider
+  const confirmApproveProvider = async () => {
+    try {
+      await approveUser(selectedProvider.id);
+      console.log(`Approved transport provider: ${selectedProvider.name}`);
+      setShowApproveModal(false);
+      // Refresh the provider list or update the status locally
+      // In a real app, you would update the state or refetch data
+    } catch (error) {
+      console.error('Failed to approve transport provider:', error);
+    }
+  };
+
   // Table columns
   const columns = [
     { accessor: 'name', header: 'Name' },
@@ -348,8 +398,15 @@ const TransportProviderManagement = () => {
       accessor: 'status',
       header: 'Status',
       cell: (row) => (
-        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${row.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
+        <span className={`inline-flex px-2 text-xs font-semibold leading-5 rounded-full ${
+          row.status === 'Active' || row.status === 'APPROVED' 
+            ? 'bg-green-100 text-green-800' 
+            : row.status === 'PENDING'
+            ? 'bg-yellow-100 text-yellow-800'
+            : row.status === 'DEACTIVATED'
+            ? 'bg-gray-100 text-gray-800'
+            : 'bg-red-100 text-red-800'
+        }`}>
           {row.status}
         </span>
       )
@@ -371,17 +428,46 @@ const TransportProviderManagement = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
           </button>
-          <button
-            className="text-red-600 hover:text-red-800"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteProvider(row);
-            }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+          {row.status === 'PENDING' && (
+            <button
+              className="text-green-600 hover:text-green-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApproveProvider(row);
+              }}
+              title="Approve Provider"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
+          )}
+          {row.status === 'DEACTIVATED' ? (
+            <button
+              className="text-blue-600 hover:text-blue-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleApproveProvider(row);
+              }}
+              title="Activate Provider"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </button>
+          ) : (
+            <button
+              className="text-red-600 hover:text-red-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteProvider(row);
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          )}
         </div>
       )
     }
@@ -394,7 +480,10 @@ const TransportProviderManagement = () => {
       label: 'Status',
       options: [
         { label: 'Active', value: 'Active' },
-        { label: 'Inactive', value: 'Inactive' }
+        { label: 'Inactive', value: 'Inactive' },
+        { label: 'PENDING', value: 'PENDING' },
+        { label: 'APPROVED', value: 'APPROVED' },
+        { label: 'Deactivated', value: 'DEACTIVATED' }
       ]
     },
     {
@@ -772,6 +861,39 @@ const TransportProviderManagement = () => {
                   className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none"
                 >
                   Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Approve Confirmation Modal */}
+      {showApproveModal && selectedProvider && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-opacity-20 backdrop-filter backdrop-blur-sm" onClick={() => setShowApproveModal(false)}></div>
+          <div className="relative flex items-center justify-center min-h-full p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Confirm Approval</h3>
+              </div>
+              <div className="px-6 py-4">
+                <p className="text-gray-700">
+                  Are you sure you want to approve transport provider <span className="font-medium">{selectedProvider.name}</span>? This will change their status to APPROVED.
+                </p>
+              </div>
+              <div className="px-6 py-3 bg-gray-50 flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowApproveModal(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 focus:outline-none"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmApproveProvider}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none"
+                >
+                  Approve
                 </button>
               </div>
             </div>

@@ -12,10 +12,6 @@ spring:
       default-filters:
         - name: AuthenticationFilter
       routes:
-#        - id: product-service
-#          uri: lb://product-service
-#          predicates:
-#            - Path=/products/**
         - id: auth-service
           uri: lb://auth-service
           predicates:
@@ -39,9 +35,9 @@ spring:
         - id: warehouse-service
           uri: lb://warehouse-service
           predicates:
-            - Path=/api/warehouse/**
-        - id: analytics-service
-          uri: lb://analytics-service
+            - Path=/api/warehouses/**,/api/facilities/**,/api/slots/**,/api/bookings/**
+        - id: analytic-service
+          uri: lb://analytic-service
           predicates:
             - Path=/api/analytics/**
         - id: payment-service
@@ -56,6 +52,23 @@ spring:
           uri: lb://chat-service
           predicates:
             - Path=/api/chat/**
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - http://localhost:5173
+              - http://localhost:5174
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            exposedHeaders:
+              - "*"
+            allowCredentials: true
 
   security:
     user:
@@ -65,7 +78,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
 
 jwt:
   secret: your256bitsecretyour256bitsecretyour256bitsecret # Generate using: openssl rand -base64 32

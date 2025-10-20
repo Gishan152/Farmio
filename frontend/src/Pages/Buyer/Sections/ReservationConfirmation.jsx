@@ -5,6 +5,14 @@ import { useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
+// Format slot ID with S- prefix
+const formatSlotId = (id) => {
+    if (typeof id === 'string' && id.startsWith('S-')) {
+        return id; // Already formatted
+    }
+    return `S-${String(id).padStart(3, '0')}`;
+};
+
 export default function ReservationConfirmation() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -70,7 +78,7 @@ export default function ReservationConfirmation() {
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {slots.map(slot => (
                       <span key={slot.id} className="inline-block bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded px-2 py-0.5 mr-1 mb-1 text-xs font-medium">
-                        {slot.id} ({slot.capacityKg}kg)
+                        {formatSlotId(slot.id)} ({slot.capacityKg}kg)
                       </span>
                     ))}
                   </div>

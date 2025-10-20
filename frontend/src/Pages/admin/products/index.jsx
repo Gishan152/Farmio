@@ -3,6 +3,8 @@ import DashboardLayout from '../../../components/layout/DashboardLayout';
 import Card from '../../../components/ui/Card';
 import Table from '../../../components/ui/Table';
 import StatCard from '../../../components/ui/StatCard';
+import productService from '../../../API/productService';
+import { fetchAllProducts } from '../../../Utils/cropUtils';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -82,152 +84,10 @@ const ViewIcon = () => (
   </svg>
 );
 
-// Sample product data
-const products = [
-  {
-    id: 'P1001',
-    name: 'Organic Tomatoes',
-    category: 'Vegetables',
-    farmer: 'Kumara Perera',
-    location: 'Nuwara Eliya',
-    price: '350/kg',
-    stock: 120,
-    unit: 'kg',
-    stockStatus: 'In Stock',
-    certifications: 'Organic',
-    harvested: '2023-06-10',
-    image: 'https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Fresh organic tomatoes grown using sustainable farming practices in the cool climate of Nuwara Eliya. Perfect for curries, salads, or cooking.',
-    lifespan: '7-10 days',
-    storageConditions: 'Store at room temperature away from direct sunlight. Refrigerate after ripening.'
-  },
-  {
-    id: 'P1002',
-    name: 'Free-Range Eggs',
-    category: 'Dairy & Eggs',
-    farmer: 'Malini Gunasekara',
-    location: 'Kandy',
-    price: '650/dozen',
-    stock: 80,
-    unit: 'dozen',
-    stockStatus: 'In Stock',
-    certifications: 'Free Range, Organic',
-    harvested: '2023-06-17',
-    image: 'https://images.unsplash.com/photo-1598965402089-897ce52e8355?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Free-range eggs from our happy, healthy chickens raised in the hills of Kandy. Each egg is collected daily and inspected for quality.',
-    lifespan: '3-4 weeks',
-    storageConditions: 'Refrigerate immediately. Keep in original carton to protect from odors and maintain humidity.'
-  },
-  {
-    id: 'P1003',
-    name: 'Local Beef',
-    category: 'Meat',
-    farmer: 'Asanka Fernando',
-    location: 'Ratnapura',
-    price: '1500/kg',
-    stock: 45,
-    unit: 'kg',
-    stockStatus: 'Low Stock',
-    certifications: 'Pasture-Raised',
-    harvested: '2023-06-14',
-    image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Premium cuts of grass-fed beef from cattle raised on open pastures. No hormones or antibiotics. Our beef is aged for tenderness and rich flavor.',
-    lifespan: 'Use within 3-5 days or freeze for up to 6 months',
-    storageConditions: 'Keep refrigerated at 40°F or below. Freeze for longer storage.'
-  },
-  {
-    id: 'P1004',
-    name: 'Kithul Honey',
-    category: 'Specialty',
-    farmer: 'Priyantha Weerasinghe',
-    location: 'Matara',
-    price: '1800/bottle',
-    stock: 30,
-    unit: 'bottle',
-    stockStatus: 'Low Stock',
-    certifications: 'Raw, Unfiltered',
-    harvested: '2023-05-20',
-    image: 'https://images.unsplash.com/photo-1587049352851-8d4e89133924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Pure, raw kithul treacle collected from the kithul palm trees in the southern region. This traditional Sri Lankan sweetener has a distinct smoky flavor.',
-    lifespan: '2+ years',
-    storageConditions: 'Store at room temperature. Crystallization is natural and can be reversed by gentle warming.'
-  },
-  {
-    id: 'P1005',
-    name: 'Organic Gotukola',
-    category: 'Vegetables',
-    farmer: 'Dinesh Rajapaksa',
-    location: 'Bandarawela',
-    price: '150/bundle',
-    stock: 0,
-    unit: 'bundle',
-    stockStatus: 'Out of Stock',
-    certifications: 'Organic',
-    harvested: '2023-05-25',
-    image: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Fresh organic gotukola (Centella asiatica), a traditional Sri Lankan leafy green herb. Perfect for sambols, mallums, or as a nutritious addition to your diet.',
-    lifespan: '5-7 days',
-    storageConditions: 'Refrigerate immediately. Keep in crisper drawer.'
-  },
-  {
-    id: 'P1006',
-    name: 'Fresh Milk',
-    category: 'Dairy & Eggs',
-    farmer: 'Emma Davis',
-    price: '$4.49/gallon',
-    stock: 65,
-    unit: 'gallon',
-    stockStatus: 'In Stock',
-    certifications: 'Hormone-Free',
-    rating: 4.7,
-    lastUpdated: '2023-06-19',
-    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Fresh whole milk from our hormone-free dairy cows. Pasteurized but not homogenized for a rich, creamy texture.',
-    harvested: '2023-06-18',
-    lifespan: '7-10 days',
-    storageConditions: 'Keep refrigerated at 40°F or below. Store in the back of the refrigerator, not the door.'
-  },
-  {
-    id: 'P1007',
-    name: 'Heirloom Carrots',
-    category: 'Vegetables',
-    farmer: 'John Smith',
-    price: '$3.49/bunch',
-    stock: 90,
-    unit: 'bunch',
-    stockStatus: 'In Stock',
-    certifications: 'Organic',
-    rating: 4.2,
-    lastUpdated: '2023-06-17',
-    image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Colorful mix of heirloom carrot varieties including purple, yellow, white, and orange. Sweet flavor and crisp texture.',
-    harvested: '2023-06-15',
-    lifespan: '2-3 weeks',
-    storageConditions: 'Refrigerate in a plastic bag in the crisper drawer. Remove tops if attached to extend freshness.'
-  },
-  {
-    id: 'P1008',
-    name: 'Organic Apples',
-    category: 'Fruits',
-    farmer: 'Sarah Williams',
-    price: '$1.99/lb',
-    stock: 15,
-    unit: 'lb',
-    stockStatus: 'Low Stock',
-    certifications: 'Organic',
-    rating: 4.4,
-    lastUpdated: '2023-06-12',
-    image: 'https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-    description: 'Crisp and juicy organic apples grown in our pesticide-free orchards. Perfect balance of sweet and tart flavors.',
-    harvested: '2023-06-08',
-    lifespan: '1-2 months',
-    storageConditions: 'Store in the refrigerator crisper drawer. Keep away from strong-smelling foods as apples absorb odors.'
-  }
-];
-
 const ProductsManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [allProducts, setAllProducts] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -239,29 +99,120 @@ const ProductsManagement = () => {
   const [editFormData, setEditFormData] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Simulate loading
+  // Fetch products from API using products table
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setFilteredData(products);
-    }, 1000);
-    return () => clearTimeout(timer);
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const products = await fetchAllProducts();
+        console.log('Fetched products from products table:', products);
+        
+        // Map product data to match the expected product structure based on API response (camelCase)
+        const mappedProducts = products.map((product) => ({
+          id: product.id || 'N/A',
+          name: product.productName || 'Unknown Product',
+          category: product.measurement || 'Uncategorized',
+          farmer: 'Product Owner', // Not available in products table
+          farmerId: product.userId || '', // Available as userId
+          location: product.location || 'Unknown location',
+          price: product.pricePerUnit ? `LKR ${product.pricePerUnit}/${product.measurement || 'unit'}` : 'Price not set',
+          stock: product.availableStock || 0,
+          unit: product.measurement || 'unit',
+          stockStatus: product.availableStock > 20 ? 'In Stock' : 
+                        product.availableStock > 0 ? 'Low Stock' : 'Out of Stock',
+          certifications: product.badges && product.badges.length > 0 ? product.badges.join(', ') : 'Standard',
+          harvested: product.createdAt ? new Date(product.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          // Use imageUrls from API or fallback to default
+          image: product.imageUrls && product.imageUrls.length > 0 ? product.imageUrls[0] : 
+                 'https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
+          // Store all images if available
+          allImages: product.imageUrls || [],
+          description: `${product.productName || 'Product'} from ${product.location || 'farm'}`,
+          lifespan: '7-10 days',
+          storageConditions: 'Store in a cool, dry place',
+          verified: false, // Not available in products table
+          rating: 0, // Not available in products table
+          transportationAvailable: product.transportAvailability === 'Yes',
+          returnsAccepted: product.returnAccepted === 'Yes',
+          createdAt: product.createdAt,
+          pricePerUnit: product.pricePerUnit,
+          availableStock: product.availableStock
+        }));
+        
+        setAllProducts(mappedProducts);
+        setFilteredData(mappedProducts);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+        setIsLoading(false);
+        setAllProducts([]);
+        setFilteredData([]);
+      }
+    };
+    
+    fetchProducts();
   }, []);
 
   // Handle search
   useEffect(() => {
-    if (products) {
-      const results = products.filter(product => {
-        return Object.keys(product).some(key =>
-          product[key].toString().toLowerCase().includes(searchTerm.toLowerCase())
-        );
+    if (searchTerm.trim() === '') {
+      // If search is empty, apply filters only
+      applyFilters(allProducts);
+    } else {
+      // Apply search on all products
+      const results = allProducts.filter(product => {
+        return Object.keys(product).some(key => {
+          if (product[key]) {
+            return product[key].toString().toLowerCase().includes(searchTerm.toLowerCase());
+          }
+          return false;
+        });
       });
+      // Apply filters on search results
+      applyFilters(results);
+    }
+  }, [searchTerm, allProducts]);
 
-      setFilteredData(results);
+  // Helper function to apply filters
+  const applyFilters = (productsToFilter) => {
+    if (!productsToFilter || Object.keys(selectedFilters).length === 0) {
+      setFilteredData(productsToFilter);
+      return;
     }
 
-  }, [searchTerm, products]);
+    const results = productsToFilter.filter(product => {
+      return Object.entries(selectedFilters).every(([key, value]) => {
+        if (!value || value === 'all') return true;
+
+        // Special handling for date ranges
+        if (key === 'harvested') {
+          const productDate = new Date(product.harvested);
+          const today = new Date();
+
+          switch (value) {
+            case '7days':
+              const sevenDaysAgo = new Date();
+              sevenDaysAgo.setDate(today.getDate() - 7);
+              return productDate >= sevenDaysAgo;
+            case '14days':
+              const fourteenDaysAgo = new Date();
+              fourteenDaysAgo.setDate(today.getDate() - 14);
+              return productDate >= fourteenDaysAgo;
+            case '30days':
+              const thirtyDaysAgo = new Date();
+              thirtyDaysAgo.setDate(today.getDate() - 30);
+              return productDate >= thirtyDaysAgo;
+            default:
+              return true;
+          }
+        }
+
+        return product[key] && product[key].toString().includes(value);
+      });
+    });
+
+    setFilteredData(results);
+  };
 
   // Filter options
   const filters = [
@@ -338,46 +289,22 @@ const ProductsManagement = () => {
     }));
   };
 
-  // Apply filters
+  // Apply filters when they change
   useEffect(() => {
-    if (!products || Object.keys(selectedFilters).length === 0) {
-      setFilteredData(products);
-      return;
-    }
-
-    const results = products.filter(product => {
-      return Object.entries(selectedFilters).every(([key, value]) => {
-        if (!value || value === 'all') return true;
-
-        // Special handling for date ranges
-        if (key === 'harvested') {
-          const productDate = new Date(product.harvested);
-          const today = new Date();
-
-          switch (value) {
-            case '7days':
-              const sevenDaysAgo = new Date();
-              sevenDaysAgo.setDate(today.getDate() - 7);
-              return productDate >= sevenDaysAgo;
-            case '14days':
-              const fourteenDaysAgo = new Date();
-              fourteenDaysAgo.setDate(today.getDate() - 14);
-              return productDate >= fourteenDaysAgo;
-            case '30days':
-              const thirtyDaysAgo = new Date();
-              thirtyDaysAgo.setDate(today.getDate() - 30);
-              return productDate >= thirtyDaysAgo;
-            default:
-              return true;
+    if (searchTerm.trim() === '') {
+      applyFilters(allProducts);
+    } else {
+      const searchResults = allProducts.filter(product => {
+        return Object.keys(product).some(key => {
+          if (product[key]) {
+            return product[key].toString().toLowerCase().includes(searchTerm.toLowerCase());
           }
-        }
-
-        return product[key].includes(value);
+          return false;
+        });
       });
-    });
-
-    setFilteredData(results);
-  }, [selectedFilters, products]);
+      applyFilters(searchResults);
+    }
+  }, [selectedFilters]);
 
   // Handle view product details
   const handleViewProduct = (product) => {
@@ -404,6 +331,7 @@ const ProductsManagement = () => {
       description: product.description,
       certifications: product.certifications,
       image: product.image,
+      allImages: product.allImages || [],
       harvested: product.harvested,
       lifespan: product.lifespan,
       storageConditions: product.storageConditions
@@ -460,21 +388,54 @@ const ProductsManagement = () => {
   };
 
   // Handle delete confirmation
-  const handleDeleteConfirm = () => {
-    // Here you would typically send a request to your backend API to delete the product
-    // For this example, we'll just simulate deletion by filtering it out
-
-    const updatedProducts = filteredData.filter(p => p.id !== selectedProduct.id);
-    setFilteredData(updatedProducts);
-
-    // Show success message
-    setSuccessMessage('Product deleted successfully');
-
-    // Close the modal after a delay
-    setTimeout(() => {
-      setShowDeleteModal(false);
-      setSuccessMessage('');
-    }, 2000);
+  const handleDeleteConfirm = async () => {
+    if (!selectedProduct || !selectedProduct.id) {
+      setSuccessMessage('Error: No product selected');
+      return;
+    }
+    
+    try {
+      // First check if the product can be deleted
+      const canDeleteCheck = await productService.checkProductCanBeDeleted(selectedProduct.id);
+      
+      if (!canDeleteCheck.canDelete) {
+        setSuccessMessage(canDeleteCheck.message || 'Cannot delete this product as it is associated with existing orders');
+        
+        // Show error message for longer
+        setTimeout(() => {
+          setShowDeleteModal(false);
+          setSuccessMessage('');
+        }, 3000);
+        return;
+      }
+      
+      // If product can be deleted, proceed with deletion
+      const result = await productService.deleteProduct(selectedProduct.id);
+      
+      if (result.success) {
+        // Update the local data by filtering out the deleted product
+        const updatedProducts = filteredData.filter(p => p.id !== selectedProduct.id);
+        setFilteredData(updatedProducts);
+        setSuccessMessage(result.message || 'Product deleted successfully');
+      } else {
+        setSuccessMessage(result.message || 'Failed to delete product. Please try again.');
+      }
+      
+      // Close the modal after a delay
+      setTimeout(() => {
+        setShowDeleteModal(false);
+        setSuccessMessage('');
+      }, 2000);
+    } catch (error) {
+      console.error('Error during product deletion:', error);
+      setSuccessMessage('An unexpected error occurred. Please try again.');
+      
+      // Close the modal after a delay
+      setTimeout(() => {
+        setShowDeleteModal(false);
+        setSuccessMessage('');
+      }, 3000);
+    }
   };
 
   // Handle closing the modals
@@ -546,8 +507,8 @@ const ProductsManagement = () => {
       header: 'Stock',
       cell: (row) => (
         <span className={`px-2 py-1 text-xs rounded-full ${row.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' :
-            row.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
-              'bg-red-100 text-red-800'
+          row.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
+            'bg-red-100 text-red-800'
           }`}>
           {row.stockStatus} {row.stockStatus !== 'Out of Stock' && `(${row.stock} ${row.unit})`}
         </span>
@@ -594,17 +555,30 @@ const ProductsManagement = () => {
 
   // Product Card Component
   const ProductCard = ({ product }) => {
+    const fallbackImage = "https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80";
+    const [isImageError, setIsImageError] = useState(false);
+    
     return (
       <div className="bg-white rounded-lg border border-dashboard-border shadow-card hover:shadow-card-hover transition-all">
         <div className="relative h-40 overflow-hidden rounded-t-lg">
           <img
-            src={product.image}
+            src={isImageError ? fallbackImage : (product.image || fallbackImage)}
             alt={product.name}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.onerror = null; 
+              e.target.src = fallbackImage;
+              setIsImageError(true);
+            }}
           />
+          {product.allImages && product.allImages.length > 1 && (
+            <div className="absolute bottom-2 right-2 bg-white bg-opacity-75 px-2 py-1 rounded-full text-xs font-medium text-gray-700">
+              {product.allImages.length} images
+            </div>
+          )}
           <div className={`absolute top-2 right-2 px-2 py-1 text-xs font-medium rounded-full ${product.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' :
-              product.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
+            product.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-red-100 text-red-800'
             }`}>
             {product.stockStatus}
           </div>
@@ -615,15 +589,15 @@ const ProductsManagement = () => {
               <h3 className="font-medium text-dashboard-text-primary">{product.name}</h3>
               <p className="text-xs text-dashboard-text-light">{product.category}</p>
             </div>
-            <p className="font-medium text-farmio">LKR {product.price}</p>
+            <p className="font-medium text-farmio">{product.price}</p>
           </div>
           <div className="mb-2 text-sm text-dashboard-text-secondary">
-            <p>Farmer: {product.farmer}</p>
-            <p className="text-xs text-dashboard-text-light mt-1">Location: {product.location}</p>
+            <p>Farmer: {product.farmer || 'Unknown'}</p>
+            <p className="text-xs text-dashboard-text-light mt-1">Location: {product.location || 'N/A'}</p>
           </div>
           <div className="flex items-center text-xs text-dashboard-text-light mb-3">
             <CalendarIcon />
-            <span className="ml-1">Harvested: {product.harvested}</span>
+            <span className="ml-1">Added: {product.harvested}</span>
           </div>
           <div className="mt-3 flex justify-between">
             <button
@@ -709,7 +683,7 @@ const ProductsManagement = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <StatCard
           title="Total Products"
-          value={products.length.toString()}
+          value={allProducts.length.toString()}
           subtitle="Across all categories"
           icon={<ProductsIcon />}
           color="blue"
@@ -717,7 +691,7 @@ const ProductsManagement = () => {
         />
         <StatCard
           title="Low Stock Items"
-          value={products.filter(p => p.stockStatus === 'Low Stock').length.toString()}
+          value={allProducts.filter(p => p.stockStatus === 'Low Stock').length.toString()}
           subtitle="Need attention"
           icon={<WarningIcon />}
           color="yellow"
@@ -725,7 +699,7 @@ const ProductsManagement = () => {
         />
         <StatCard
           title="Out of Stock Items"
-          value={products.filter(p => p.stockStatus === 'Out of Stock').length.toString()}
+          value={allProducts.filter(p => p.stockStatus === 'Out of Stock').length.toString()}
           subtitle="Require reordering"
           icon={<WarningIcon />}
           color="red"
@@ -830,17 +804,49 @@ const ProductsManagement = () => {
                   </svg>
                 </button>
               </div>
-              
+
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <div className="rounded-lg overflow-hidden border border-dashboard-border h-56">
-                      <img 
-                        src={selectedProduct.image} 
-                        alt={selectedProduct.name} 
+                      <img
+                        src={selectedProduct.image}
+                        alt={selectedProduct.name}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80";
+                        }}
                       />
                     </div>
+
+                    {/* Additional product images if available */}
+                    {selectedProduct.allImages && selectedProduct.allImages.length > 1 && (
+                      <div className="mt-3 flex space-x-2 overflow-x-auto pb-2">
+                        {selectedProduct.allImages.map((imgUrl, i) => (
+                          <div 
+                            key={i} 
+                            className={`flex-shrink-0 w-14 h-14 rounded border-2 cursor-pointer ${
+                              imgUrl === selectedProduct.image ? 'border-farmio' : 'border-gray-200'
+                            }`}
+                            onClick={() => {
+                              // Update the selected image when thumbnail is clicked
+                              setSelectedProduct({...selectedProduct, image: imgUrl});
+                            }}
+                          >
+                            <img 
+                              src={imgUrl} 
+                              alt={`${selectedProduct.name} - view ${i+1}`} 
+                              className="w-full h-full object-cover rounded" 
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80";
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                     <div className="mt-4">
                       <div className="flex justify-between items-center">
@@ -852,22 +858,21 @@ const ProductsManagement = () => {
                     </div>
 
                     <div className="mt-4">
-                      <span className={`px-3 py-1.5 text-sm rounded-full ${
-                        selectedProduct.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' : 
-                        selectedProduct.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' : 
-                        'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`px-3 py-1.5 text-sm rounded-full ${selectedProduct.stockStatus === 'In Stock' ? 'bg-green-100 text-green-800' :
+                          selectedProduct.stockStatus === 'Low Stock' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                        }`}>
                         {selectedProduct.stockStatus} {selectedProduct.stockStatus !== 'Out of Stock' && `(${selectedProduct.stock} ${selectedProduct.unit})`}
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Description</h4>
                       <p className="text-dashboard-text-secondary">{selectedProduct.description}</p>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Listed By</h4>
@@ -886,12 +891,12 @@ const ProductsManagement = () => {
                         <p className="text-dashboard-text-secondary">{selectedProduct.certifications}</p>
                       </div>
                     </div>
-                    
+
                     <div>
                       <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Storage Conditions</h4>
                       <p className="text-dashboard-text-secondary">{selectedProduct.storageConditions}</p>
                     </div>
-                    
+
                     <div>
                       <h4 className="text-sm font-medium text-dashboard-text-primary mb-1">Shelf Life</h4>
                       <p className="text-dashboard-text-secondary">{selectedProduct.lifespan}</p>
@@ -899,7 +904,7 @@ const ProductsManagement = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
                 <button
                   onClick={handleCloseModal}
@@ -945,7 +950,7 @@ const ProductsManagement = () => {
                   </svg>
                 </button>
               </div>
-              
+
               {successMessage && (
                 <div className="mx-6 mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
                   <div className="flex">
@@ -960,15 +965,15 @@ const ProductsManagement = () => {
                   </div>
                 </div>
               )}
-              
+
               <form onSubmit={handleEditSubmit} className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700">Product Name</label>
-                      <input 
-                        type="text" 
-                        id="name" 
+                      <input
+                        type="text"
+                        id="name"
                         name="name"
                         value={editFormData.name || ''}
                         onChange={handleInputChange}
@@ -976,11 +981,11 @@ const ProductsManagement = () => {
                         required
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
-                      <select 
-                        id="category" 
+                      <select
+                        id="category"
                         name="category"
                         value={editFormData.category || ''}
                         onChange={handleInputChange}
@@ -995,16 +1000,16 @@ const ProductsManagement = () => {
                         <option value="Specialty">Specialty</option>
                       </select>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price (LKR)</label>
                       <div className="relative mt-1">
                         <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
                           LKR
                         </span>
-                        <input 
-                          type="text" 
-                          id="price" 
+                        <input
+                          type="text"
+                          id="price"
                           name="price"
                           value={editFormData.price || ''}
                           onChange={handleInputChange}
@@ -1014,13 +1019,13 @@ const ProductsManagement = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label htmlFor="stock" className="block text-sm font-medium text-gray-700">Stock</label>
-                        <input 
-                          type="number" 
-                          id="stock" 
+                        <input
+                          type="number"
+                          id="stock"
                           name="stock"
                           value={editFormData.stock || ''}
                           onChange={handleInputChange}
@@ -1030,9 +1035,9 @@ const ProductsManagement = () => {
                       </div>
                       <div>
                         <label htmlFor="unit" className="block text-sm font-medium text-gray-700">Unit</label>
-                        <input 
-                          type="text" 
-                          id="unit" 
+                        <input
+                          type="text"
+                          id="unit"
                           name="unit"
                           value={editFormData.unit || ''}
                           onChange={handleInputChange}
@@ -1041,12 +1046,12 @@ const ProductsManagement = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="certifications" className="block text-sm font-medium text-gray-700">Certifications</label>
-                      <input 
-                        type="text" 
-                        id="certifications" 
+                      <input
+                        type="text"
+                        id="certifications"
                         name="certifications"
                         value={editFormData.certifications || ''}
                         onChange={handleInputChange}
@@ -1054,13 +1059,13 @@ const ProductsManagement = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="image" className="block text-sm font-medium text-gray-700">Image URL</label>
-                      <input 
-                        type="url" 
-                        id="image" 
+                      <label htmlFor="image" className="block text-sm font-medium text-gray-700">Main Image URL</label>
+                      <input
+                        type="url"
+                        id="image"
                         name="image"
                         value={editFormData.image || ''}
                         onChange={handleInputChange}
@@ -1068,15 +1073,98 @@ const ProductsManagement = () => {
                       />
                       {editFormData.image && (
                         <div className="mt-2 rounded-md overflow-hidden h-24 w-24 border border-gray-200">
-                          <img src={editFormData.image} alt="Product" className="h-full w-full object-cover" />
+                          <img 
+                            src={editFormData.image} 
+                            alt="Product" 
+                            className="h-full w-full object-cover" 
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80";
+                            }}
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Display all available images if any */}
+                      {editFormData.allImages && editFormData.allImages.length > 0 && (
+                        <div className="mt-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">All Product Images</label>
+                          <div className="flex flex-wrap gap-2">
+                            {editFormData.allImages.map((imgUrl, index) => (
+                              <div key={index} className="relative group">
+                                <div className={`h-16 w-16 rounded border-2 overflow-hidden ${
+                                  imgUrl === editFormData.image ? 'border-farmio' : 'border-gray-200'
+                                }`}>
+                                  <img 
+                                    src={imgUrl} 
+                                    alt={`Product image ${index + 1}`} 
+                                    className="h-full w-full object-cover"
+                                    onClick={() => setEditFormData({...editFormData, image: imgUrl})} 
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = "https://images.unsplash.com/photo-1582284540020-8acbe03f4924?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80";
+                                    }}
+                                  />
+                                </div>
+                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex items-center justify-center transition-all">
+                                  <button 
+                                    type="button"
+                                    className="opacity-0 group-hover:opacity-100 p-1 bg-white rounded-full shadow-sm"
+                                    onClick={() => {
+                                      const newImages = [...editFormData.allImages];
+                                      newImages.splice(index, 1);
+                                      
+                                      // If removing the current main image, set main image to first remaining image or empty
+                                      const newMainImage = imgUrl === editFormData.image 
+                                        ? (newImages.length > 0 ? newImages[0] : '')
+                                        : editFormData.image;
+                                        
+                                      setEditFormData({
+                                        ...editFormData, 
+                                        allImages: newImages,
+                                        image: newMainImage
+                                      });
+                                    }}
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                            
+                            {/* Add new image button */}
+                            <button
+                              type="button"
+                              className="h-16 w-16 border-2 border-dashed border-gray-300 rounded flex items-center justify-center text-gray-400 hover:text-gray-500 hover:border-gray-400"
+                              onClick={() => {
+                                const newImageUrl = prompt("Enter the URL for the new product image:");
+                                if (newImageUrl && newImageUrl.trim()) {
+                                  const newImages = [...(editFormData.allImages || []), newImageUrl.trim()];
+                                  // If this is the first image, also set it as the main image
+                                  const newMainImage = editFormData.image || newImageUrl.trim();
+                                  setEditFormData({
+                                    ...editFormData,
+                                    allImages: newImages,
+                                    image: newMainImage
+                                  });
+                                }
+                              }}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>
-                    
+
                     <div>
                       <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-                      <textarea 
-                        id="description" 
+                      <textarea
+                        id="description"
                         name="description"
                         value={editFormData.description || ''}
                         onChange={handleInputChange}
@@ -1085,35 +1173,35 @@ const ProductsManagement = () => {
                         required
                       ></textarea>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="harvested" className="block text-sm font-medium text-gray-700">Harvest Date</label>
-                      <input 
-                        type="date" 
-                        id="harvested" 
+                      <input
+                        type="date"
+                        id="harvested"
                         name="harvested"
                         value={editFormData.harvested || ''}
                         onChange={handleInputChange}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="lifespan" className="block text-sm font-medium text-gray-700">Shelf Life</label>
-                      <input 
-                        type="text" 
-                        id="lifespan" 
+                      <input
+                        type="text"
+                        id="lifespan"
                         name="lifespan"
                         value={editFormData.lifespan || ''}
                         onChange={handleInputChange}
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="storageConditions" className="block text-sm font-medium text-gray-700">Storage Conditions</label>
-                      <textarea 
-                        id="storageConditions" 
+                      <textarea
+                        id="storageConditions"
                         name="storageConditions"
                         value={editFormData.storageConditions || ''}
                         onChange={handleInputChange}
@@ -1121,12 +1209,12 @@ const ProductsManagement = () => {
                         className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
                       ></textarea>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
-                      <input 
-                        type="text" 
-                        id="location" 
+                      <input
+                        type="text"
+                        id="location"
                         name="location"
                         value={editFormData.location || ''}
                         onChange={handleInputChange}
@@ -1136,7 +1224,7 @@ const ProductsManagement = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mt-6 flex justify-end space-x-3">
                   <button
                     type="button"
@@ -1172,22 +1260,42 @@ const ProductsManagement = () => {
                   </svg>
                 </button>
               </div>
-              
+
               {successMessage && (
-                <div className="mx-6 mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+                <div className={`mx-6 mt-4 p-4 ${
+                  successMessage.toLowerCase().includes('cannot') || 
+                  successMessage.toLowerCase().includes('error') || 
+                  successMessage.toLowerCase().includes('failed') 
+                    ? 'bg-red-50 border border-red-200' 
+                    : 'bg-green-50 border border-green-200'
+                } rounded-md`}>
                   <div className="flex">
                     <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
+                      {successMessage.toLowerCase().includes('cannot') || 
+                       successMessage.toLowerCase().includes('error') || 
+                       successMessage.toLowerCase().includes('failed') ? (
+                        <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                      ) : (
+                        <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      )}
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm text-green-800">{successMessage}</p>
+                      <p className={`text-sm ${
+                        successMessage.toLowerCase().includes('cannot') || 
+                        successMessage.toLowerCase().includes('error') || 
+                        successMessage.toLowerCase().includes('failed') 
+                          ? 'text-red-800' 
+                          : 'text-green-800'
+                      }`}>{successMessage}</p>
                     </div>
                   </div>
                 </div>
               )}
-              
+
               <div className="p-6">
                 <div className="flex items-center mb-4">
                   <div className="flex-shrink-0 bg-red-100 rounded-full p-2">
@@ -1198,9 +1306,10 @@ const ProductsManagement = () => {
                   <div className="ml-3">
                     <h3 className="text-lg font-medium text-gray-900">Delete this product?</h3>
                     <p className="text-sm text-gray-500">Are you sure you want to delete "{selectedProduct.name}"? This action cannot be undone.</p>
+                    <p className="text-xs text-gray-500 mt-1">Note: Products that are associated with existing orders cannot be deleted.</p>
                   </div>
                 </div>
-                
+
                 <div className="mt-4 flex justify-end space-x-3">
                   <button
                     onClick={handleCloseModal}
@@ -1210,7 +1319,18 @@ const ProductsManagement = () => {
                   </button>
                   <button
                     onClick={handleDeleteConfirm}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                    disabled={successMessage && (
+                      successMessage.toLowerCase().includes('cannot') || 
+                      successMessage.toLowerCase().includes('error') || 
+                      successMessage.toLowerCase().includes('failed')
+                    )}
+                    className={`px-4 py-2 ${
+                      successMessage && (
+                        successMessage.toLowerCase().includes('cannot') || 
+                        successMessage.toLowerCase().includes('error') || 
+                        successMessage.toLowerCase().includes('failed')
+                      ) ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
+                    } text-white rounded-md`}
                   >
                     Delete
                   </button>

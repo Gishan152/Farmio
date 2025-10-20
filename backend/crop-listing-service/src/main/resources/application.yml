@@ -2,6 +2,10 @@
 server:
   port: 8087
 
+# File Storage Configuration
+file:
+  upload-dir: ./uploads
+
 # Database
 spring:
   application:
@@ -11,7 +15,7 @@ spring:
       import-check:
         enabled: false
   rabbitmq:
-    host: rabbitmq
+    host: ${RABBITMQ_HOST:localhost}
     port: 5672
 
   datasource:
@@ -43,4 +47,4 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}

@@ -11,17 +11,17 @@ spring:
       import-check:
         enabled: false
   rabbitmq:
-    host: rabbitmq
+    host: ${RABBITMQ_HOST:localhost}
     port: 5672
 
   datasource:
-    url: jdbc:postgresql://pg-349c31eb-gishan768-629b.e.aivencloud.com:15794/transportdb?sslmode=require
-    username: avnadmin
-    password: AVNS_W5zTqR7lJoTKHHmmmKQ
+    url: jdbc:postgresql://ep-dry-snow-a1szex24-pooler.ap-southeast-1.aws.neon.tech/transportdb?sslmode=require&channelBinding=require
+    username: neondb_owner
+    password: npg_l2wurAbES8Cq
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
@@ -43,4 +43,4 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}

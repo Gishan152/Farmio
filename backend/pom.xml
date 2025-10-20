@@ -6,6 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.5.0</version>
+		<!-- <version>3.3.5</version> -->
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.springcloud</groupId>
@@ -35,6 +36,7 @@
         <module>analytic-service</module>
         <module>chat-service</module>
         <module>payment-service</module>
+        <module>notification-service</module>
     </modules>
 	<scm>
 		<connection/>
@@ -43,10 +45,14 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>24</java.version>
+		<!-- <java.version>17</java.version>
+		<spring-cloud.version>2023.0.3</spring-cloud.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target> -->
+		<java.version>17</java.version>
 		<spring-cloud.version>2025.0.0</spring-cloud.version>
-		<maven.compiler.source>24</maven.compiler.source>
-		<maven.compiler.target>24</maven.compiler.target>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 		<lombok.version>1.18.38</lombok.version>
 	</properties>
 	<dependencies>
@@ -54,7 +60,12 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter</artifactId>
 		</dependency>
-
+		<!-- https://mvnrepository.com/artifact/org.modelmapper/modelmapper -->
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>3.2.5</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -112,6 +123,14 @@
 		</plugins>
 	</build>
 	<repositories>
+		<repository>
+			<id>central</id>
+			<name>Maven Central</name>
+			<url>https://repo.maven.apache.org/maven2</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
 		<repository>
 			<id>spring-milestones</id>
 			<name>Spring Milestones</name>

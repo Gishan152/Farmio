@@ -1,12 +1,13 @@
 package com.springcloud.controller;
 
 import com.springcloud.dto.*;
-import com.springcloud.service.AuthService;
+import com.springcloud.model.User;
 import com.springcloud.service.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
@@ -20,5 +21,41 @@ public class UserController {
     public ResponseEntity<PublicUserData> getUser(@RequestBody UserRequest request) {
         System.out.println("username : " + request.username());
         return ResponseEntity.ok(userService.getUser(request));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/all-dto")
+    public ResponseEntity<List<UserDTO>> getAllUsersDTO() {
+        return ResponseEntity.ok(userService.getAllUsersDTO());
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<PublicUserData> getUserById(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getUserById(userId));
+    }
+
+    //deactivate the user
+    @PostMapping("/deactivate")
+    public ResponseEntity<Void> deactivateUser(@RequestBody UserRequest request) {
+        userService.deactivateUser(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    //approve the user
+    @PostMapping("/approve")
+    public ResponseEntity<Void> approveUser(@RequestBody UserRequest request) {
+        userService.approveUser(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    //activate the user (specifically for buyers to set status to "Active")
+    @PostMapping("/activate")
+    public ResponseEntity<Void> activateUser(@RequestBody UserRequest request) {
+        userService.activateUser(request);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import wasteAgentAPI from '../../API/wasteAgent';
 
 const WasteAgentContext = createContext();
 
@@ -16,151 +17,88 @@ export const WasteAgentProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Sample data for development
-    const sampleAgents = [
-        {
-            id: "WA-001",
-            name: "Green Waste Solutions",
-            type: "compost",
-            distance: 15.2,
-            contact: {
-                phone: "+94 77 123 4567",
-                email: "contact@greenwaste.lk",
-                address: "Industrial Zone, Colombo 15"
-            },
-            rating: 4.5,
-            reviewCount: 48,
-            specialties: ["Organic waste", "Vegetable waste", "Fruit waste"],
-            capacity: "500kg/day",
-            priceRange: "Rs. 50-75 per kg",
-            verified: true,
-            availability: "available"
-        },
-        {
-            id: "WA-002",
-            name: "Lanka Recycling Co.",
-            type: "recycler",
-            distance: 22.8,
-            contact: {
-                phone: "+94 71 987 6543",
-                email: "info@lankarecycling.com",
-                address: "Kelaniya Industrial Area"
-            },
-            rating: 4.2,
-            reviewCount: 32,
-            specialties: ["Plastic packaging", "Cardboard", "Mixed recyclables"],
-            capacity: "1000kg/day",
-            priceRange: "Rs. 25-40 per kg",
-            verified: true,
-            availability: "available"
-        },
-        {
-            id: "WA-003",
-            name: "Feed Masters",
-            type: "animal feed",
-            distance: 18.5,
-            contact: {
-                phone: "+94 76 555 0123",
-                email: "orders@feedmasters.lk",
-                address: "Gampaha District"
-            },
-            rating: 4.7,
-            reviewCount: 67,
-            specialties: ["Vegetable scraps", "Grain waste", "Fruit peels"],
-            capacity: "750kg/day",
-            priceRange: "Rs. 30-50 per kg",
-            verified: true,
-            availability: "busy"
-        },
-        {
-            id: "WA-004",
-            name: "Eco Compost Ltd",
-            type: "compost",
-            distance: 35.4,
-            contact: {
-                phone: "+94 75 444 7890",
-                email: "hello@ecocompost.lk",
-                address: "Kaduwela"
-            },
-            rating: 4.0,
-            reviewCount: 28,
-            specialties: ["All organic waste", "Garden waste"],
-            capacity: "300kg/day",
-            priceRange: "Rs. 40-60 per kg",
-            verified: false,
-            availability: "available"
-        }
-    ];
-
-    const sampleRequests = [
-        {
-            id: "HR-001",
-            agentId: "WA-001",
-            agentName: "Green Waste Solutions",
-            wasteType: "Spoiled vegetables",
-            quantity: 150,
-            pickupDate: "2024-01-28",
-            message: "Mixed vegetables that have spoiled due to power outage. Need pickup ASAP.",
-            status: "pending",
-            createdAt: "2024-01-25",
-            response: null
-        },
-        {
-            id: "HR-002",
-            agentId: "WA-002",
-            agentName: "Lanka Recycling Co.",
-            wasteType: "Packaging materials",
-            quantity: 75,
-            pickupDate: "2024-01-30",
-            message: "Cardboard boxes and plastic containers from produce packaging.",
-            status: "accepted",
-            createdAt: "2024-01-24",
-            response: "Pickup scheduled for 2 PM. Please have materials sorted."
-        }
-    ];
-
-    // Get nearby waste agents
+    // Get nearby waste agents (now using real API)
     const getNearbyAgents = useCallback(async (lat, lon, radius = 50, searchTerm = '') => {
         setLoading(true);
+        setError(null);
+        
         try {
-            // TODO: Replace with actual API call
-            // const response = await fetch(`/api/waste-agents/nearby?lat=${lat}&lon=${lon}&radius=${radius}&search=${searchTerm}`);
-            // const data = await response.json();
+            let response;
             
-            let filteredAgents = [...sampleAgents];
-            
-            if (searchTerm) {
-                filteredAgents = filteredAgents.filter(agent =>
-                    agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    agent.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    agent.specialties.some(specialty => 
-                        specialty.toLowerCase().includes(searchTerm.toLowerCase())
-                    )
-                );
+            if (searchTerm && searchTerm.trim()) {
+                // If there's a search term, use search API
+                response = await wasteAgentAPI.searchWasteAgents(searchTerm.trim());
+            } else {
+                // Otherwise get active and verified agents
+                response = await wasteAgentAPI.getActiveVerifiedWasteAgents();
             }
             
-            // Sort by distance
-            filteredAgents.sort((a, b) => a.distance - b.distance);
+            const wasteAgents = response.data;
             
-            setAgents(filteredAgents);
+            // Transform API data to match frontend expectations
+            const transformedAgents = wasteAgents.map(agent => ({
+                id: agent.id,
+                name: agent.name || agent.companyName || 'Unknown Agent',
+                type: mapSpecializationToType(agent.specialization),
+                distance: calculateDistance(), // Placeholder distance
+                contact: {
+                    phone: agent.phoneNumber || 'N/A',
+                    email: agent.email || 'N/A',
+                    address: agent.address && agent.city && agent.state 
+                        ? `${agent.address}, ${agent.city}, ${agent.state}`
+                        : 'Address not available'
+                },
+                rating: agent.rating || 0,
+                reviewCount: agent.totalReviews || 0,
+                specialties: [agent.specialization || 'general'],
+                capacity: `${agent.serviceRadius || 0}km radius`,
+                priceRange: 'Contact for pricing',
+                verified: agent.isVerified || false,
+                availability: agent.isActive ? 'available' : 'unavailable',
+                serviceRadius: agent.serviceRadius || 0,
+                city: agent.city,
+                state: agent.state,
+                licenseNumber: agent.licenseNumber,
+                companyName: agent.companyName
+            }));
+            
+            setAgents(transformedAgents);
         } catch (error) {
-            console.error('Error fetching nearby agents:', error);
-            setError('Failed to load waste agents');
+            console.error('Error fetching waste agents:', error);
+            setError('Failed to load waste agents. Please try again.');
+            setAgents([]); // Clear agents on error
         } finally {
             setLoading(false);
         }
+        
+        // Note: radius parameter is kept for API compatibility but not used in current implementation
+        // In future, this could be used to filter agents by distance from warehouse
+        console.log(`Searching within ${radius}km radius of coordinates: ${lat}, ${lon}`);
     }, []);
 
-    // Send hire request
+    // Helper function to map specialization to frontend type
+    const mapSpecializationToType = (specialization) => {
+        if (!specialization) return 'general';
+        const spec = specialization.toLowerCase();
+        if (spec.includes('organic') || spec.includes('compost')) return 'compost';
+        if (spec.includes('electronic') || spec.includes('recycl')) return 'recycler';
+        if (spec.includes('animal') || spec.includes('feed')) return 'animal feed';
+        return 'general';
+    };
+
+    // Helper function to calculate distance (simplified placeholder)
+    const calculateDistance = () => {
+        // For now, return a placeholder distance
+        // In a real implementation, you'd calculate based on agent coordinates
+        return Math.floor(Math.random() * 50) + 5; // Random distance between 5-55km
+    };
+
+    // Send hire request (placeholder - implement when hire request API is available)
     const sendHireRequest = useCallback(async (requestData) => {
         try {
-            // TODO: Replace with actual API call
-            // const response = await fetch('/api/waste-agents/hire', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(requestData)
-            // });
-            // const data = await response.json();
+            // TODO: Replace with actual API call when hire request endpoint is available
+            // const response = await api.post('/api/hire-requests', requestData);
+            // const data = response.data;
             
             const newRequest = {
                 id: `HR-${Date.now()}`,
@@ -174,21 +112,24 @@ export const WasteAgentProvider = ({ children }) => {
             return newRequest;
         } catch (error) {
             console.error('Error sending hire request:', error);
+            setError('Failed to send hire request. Please try again.');
             throw error;
         }
     }, []);
 
-    // Get hire requests
+    // Get hire requests (placeholder - implement when hire request API is available)
     const getHireRequests = useCallback(async () => {
         try {
-            // TODO: Replace with actual API call
-            // const response = await fetch('/api/waste-agents/requests');
-            // const data = await response.json();
+            // TODO: Replace with actual API call when hire request endpoint is available
+            // const response = await api.get('/api/hire-requests');
+            // setHireRequests(response.data);
             
-            setHireRequests(sampleRequests);
+            // For now, initialize with empty array since no hire request system exists yet
+            setHireRequests([]);
         } catch (error) {
             console.error('Error fetching hire requests:', error);
             setError('Failed to load hire requests');
+            setHireRequests([]);
         }
     }, []);
 

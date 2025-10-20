@@ -3,6 +3,7 @@ import DashboardLayout from '../../../components/layout/DashboardLayout';
 import Table from '../../../components/ui/Table';
 import Modal from '../../../components/ui/Modal';
 import StatCard from '../../../components/ui/StatCard';
+import productPriceService from '../../../API/productPriceService';
 
 // Icons
 const PricingIcon = () => (
@@ -44,34 +45,42 @@ const PricingPage = () => {
   });
   const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'ascending' });
 
-  // Load products data (normally would fetch from API)
+  // Load products data from API
   useEffect(() => {
-    // Simulated data for now - would be fetched from an API
-    const sriLankanProducts = [
-      { id: 1, name: 'Rice (White)', category: 'Grains', currentGovPrice: 120, currentMarketPrice: 140, lastUpdated: '2023-05-12' },
-      { id: 2, name: 'Rice (Red)', category: 'Grains', currentGovPrice: 125, currentMarketPrice: 145, lastUpdated: '2023-05-12' },
-      { id: 3, name: 'Rice (Basmati)', category: 'Grains', currentGovPrice: 350, currentMarketPrice: 380, lastUpdated: '2023-05-10' },
-      { id: 4, name: 'Coconut', category: 'Fruits', currentGovPrice: 80, currentMarketPrice: 100, lastUpdated: '2023-05-14' },
-      { id: 5, name: 'Mango', category: 'Fruits', currentGovPrice: 200, currentMarketPrice: 250, lastUpdated: '2023-05-15' },
-      { id: 6, name: 'Banana', category: 'Fruits', currentGovPrice: 60, currentMarketPrice: 70, lastUpdated: '2023-05-15' },
-      { id: 7, name: 'Pineapple', category: 'Fruits', currentGovPrice: 150, currentMarketPrice: 180, lastUpdated: '2023-05-13' },
-      { id: 8, name: 'Carrot', category: 'Vegetables', currentGovPrice: 90, currentMarketPrice: 120, lastUpdated: '2023-05-16' },
-      { id: 9, name: 'Potato', category: 'Vegetables', currentGovPrice: 100, currentMarketPrice: 130, lastUpdated: '2023-05-16' },
-      { id: 10, name: 'Onion', category: 'Vegetables', currentGovPrice: 150, currentMarketPrice: 180, lastUpdated: '2023-05-15' },
-      { id: 11, name: 'Green Chili', category: 'Vegetables', currentGovPrice: 250, currentMarketPrice: 300, lastUpdated: '2023-05-14' },
-      { id: 12, name: 'Tomato', category: 'Vegetables', currentGovPrice: 120, currentMarketPrice: 150, lastUpdated: '2023-05-15' },
-      { id: 13, name: 'Chicken', category: 'Meat', currentGovPrice: 480, currentMarketPrice: 550, lastUpdated: '2023-05-13' },
-      { id: 14, name: 'Beef', category: 'Meat', currentGovPrice: 1200, currentMarketPrice: 1350, lastUpdated: '2023-05-12' },
-      { id: 15, name: 'Pork', category: 'Meat', currentGovPrice: 900, currentMarketPrice: 1000, lastUpdated: '2023-05-12' },
-      { id: 16, name: 'Fish (Thalapath)', category: 'Seafood', currentGovPrice: 850, currentMarketPrice: 950, lastUpdated: '2023-05-14' },
-      { id: 17, name: 'Prawn', category: 'Seafood', currentGovPrice: 1500, currentMarketPrice: 1800, lastUpdated: '2023-05-15' },
-      { id: 18, name: 'Crab', category: 'Seafood', currentGovPrice: 1800, currentMarketPrice: 2000, lastUpdated: '2023-05-13' },
-      { id: 19, name: 'Tea', category: 'Beverages', currentGovPrice: 400, currentMarketPrice: 450, lastUpdated: '2023-05-10' },
-      { id: 20, name: 'Coconut Oil', category: 'Oil', currentGovPrice: 350, currentMarketPrice: 400, lastUpdated: '2023-05-11' }
-    ];
+    const fetchProductPrices = async () => {
+      try {
+        setLoading(true);
+        const data = await productPriceService.getAllProductPrices();
+        
+        // Map API data to match the expected format
+        const mappedData = data.map(price => ({
+          id: price.id,
+          name: price.productName,
+          category: price.category || 'Uncategorized',
+          currentGovPrice: price.minPrice,
+          currentMarketPrice: price.recommendedPrice,
+          lastUpdated: price.updatedAt ? new Date(price.updatedAt).toISOString().split('T')[0] : 'N/A',
+          unit: price.unit || 'unit',
+          description: price.description
+        }));
+        
+        setProducts(mappedData);
+      } catch (error) {
+        console.error('Error fetching product prices:', error);
+        
+        // Fallback to sample data if API call fails
+        const sampleProducts = [
+          { id: 1, name: 'Rice (White)', category: 'Grains', currentGovPrice: 120, currentMarketPrice: 140, lastUpdated: '2023-05-12' },
+          { id: 2, name: 'Rice (Red)', category: 'Grains', currentGovPrice: 125, currentMarketPrice: 145, lastUpdated: '2023-05-12' },
+          { id: 3, name: 'Potato', category: 'Vegetables', currentGovPrice: 100, currentMarketPrice: 130, lastUpdated: '2023-05-16' }
+        ];
+        setProducts(sampleProducts);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setProducts(sriLankanProducts);
-    setLoading(false);
+    fetchProductPrices();
   }, []);
 
   // Sort products based on sortConfig
@@ -221,9 +230,21 @@ const PricingPage = () => {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (currentProduct) {
-      setProducts(prevProducts => prevProducts.filter(p => p.id !== currentProduct.id));
+      try {
+        // Call API to delete the product price
+        await productPriceService.deleteProductPrice(currentProduct.id);
+        
+        // Remove from local state
+        setProducts(prevProducts => prevProducts.filter(p => p.id !== currentProduct.id));
+        
+        // Show success message (could add a toast notification here)
+        console.log('Product price deleted successfully');
+      } catch (error) {
+        console.error('Error deleting product price:', error);
+        // Show error message
+      }
       setShowDeleteModal(false);
     }
   };
@@ -236,22 +257,44 @@ const PricingPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Update product in state (in real app would call API)
-    setProducts(prevProducts => 
-      prevProducts.map(product => 
-        product.id === currentProduct.id 
-          ? {
-              ...product,
-              currentGovPrice: Number(priceData.governmentPrice),
-              currentMarketPrice: Number(priceData.marketPrice),
-              lastUpdated: new Date().toISOString().split('T')[0]
-            }
-          : product
-      )
-    );
+    try {
+      // Prepare update data
+      const updateData = {
+        productName: currentProduct.name,
+        category: currentProduct.category,
+        minPrice: Number(priceData.governmentPrice),
+        maxPrice: Number(priceData.marketPrice) * 1.1, // Setting max a bit higher than market
+        recommendedPrice: Number(priceData.marketPrice),
+        unit: currentProduct.unit || 'kg',
+        description: priceData.notes || currentProduct.description || ''
+      };
+      
+      // Call API to update product price
+      await productPriceService.updateProductPrice(currentProduct.id, updateData);
+      
+      // Update product in local state
+      setProducts(prevProducts => 
+        prevProducts.map(product => 
+          product.id === currentProduct.id 
+            ? {
+                ...product,
+                currentGovPrice: Number(priceData.governmentPrice),
+                currentMarketPrice: Number(priceData.marketPrice),
+                lastUpdated: new Date().toISOString().split('T')[0]
+              }
+            : product
+        )
+      );
+      
+      // Show success message (could add a toast notification here)
+      console.log('Price updated successfully');
+    } catch (error) {
+      console.error('Error updating price:', error);
+      // Show error message
+    }
     
     // Close modal
     setModalOpen(false);
@@ -274,21 +317,45 @@ const PricingPage = () => {
     }));
   };
 
-  const handleAddNewPrice = (e) => {
+  const handleAddNewPrice = async (e) => {
     e.preventDefault();
     
-    // Create a new product with the entered data
-    const newProduct = {
-      id: products.length + 1,
-      name: newPriceData.name,
-      category: newPriceData.category,
-      currentGovPrice: Number(newPriceData.governmentPrice),
-      currentMarketPrice: Number(newPriceData.marketPrice),
-      lastUpdated: new Date().toISOString().split('T')[0]
-    };
-    
-    // Add to products list
-    setProducts(prevProducts => [...prevProducts, newProduct]);
+    try {
+      // Prepare data for API
+      const priceData = {
+        productName: newPriceData.name,
+        category: newPriceData.category,
+        minPrice: Number(newPriceData.governmentPrice),
+        maxPrice: Number(newPriceData.marketPrice) * 1.1, // Setting max a bit higher than market
+        recommendedPrice: Number(newPriceData.marketPrice),
+        unit: 'kg', // Default unit
+        description: `Price effective from ${newPriceData.effectiveDate}`,
+        active: true
+      };
+      
+      // Call API to create new price
+      const response = await productPriceService.createProductPrice(priceData);
+      
+      // Create a new product with the response data
+      const newProduct = {
+        id: response.id,
+        name: response.productName,
+        category: response.category,
+        currentGovPrice: response.minPrice,
+        currentMarketPrice: response.recommendedPrice,
+        lastUpdated: new Date().toISOString().split('T')[0],
+        unit: response.unit
+      };
+      
+      // Add to products list
+      setProducts(prevProducts => [...prevProducts, newProduct]);
+      
+      // Show success message (could add a toast notification here)
+      console.log('New price added successfully');
+    } catch (error) {
+      console.error('Error adding new price:', error);
+      // Show error message
+    }
     
     // Reset form data
     setNewPriceData({

@@ -11,7 +11,7 @@ spring:
       import-check:
         enabled: false
   rabbitmq:
-    host: rabbitmq
+    host: ${RABBITMQ_HOST:localhost}
     port: 5672
 
   datasource:
@@ -40,7 +40,34 @@ management:
   security:
     enabled: false
 
+
+auth:
+  service:
+    url: http://localhost:8085/api/user/all # This is the endpoint that returns UserDTO[]
+
+order:
+  service:
+    url: http://localhost:8086/api/order/admin/all # This is the endpoint that returns Order[]
+
+warehouse:
+  service:
+    url: http://localhost:8090/api/warehouse/admin/all # This is the endpoint that returns Warehouse[]
+
+crop-listing:
+  service:
+    url: http://localhost:8087/api/products/admin/all # This is the endpoint that returns Product[]
+
+waste:
+  service:
+    url:
+      listings: http://waste-service:8095/waste-listings # This is the endpoint that returns WasteListingDTO[]
+      agents: http://waste-service:8095/waste-agents # This is the endpoint that returns WasteAgentDTO[]
+
+transport:
+  service:
+    url: http://localhost:8089/api/routes # This is the endpoint that returns Route[]
+
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}

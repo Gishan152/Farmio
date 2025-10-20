@@ -5,113 +5,168 @@ import wheat from "../../../Assets/Farmer/Crops/wheat.webp";
 import corn from "../../../Assets/Farmer/Crops/corn.jpeg";
 import { Link } from 'react-router-dom';
 import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
+import api from '../../../API/client';
+import { useEffect } from 'react';
+import { useContext } from "react";
 
-export function MyProductsLoader() {
-   return [
-        {
-                   id: 1,
-                   type: 'Corn',
-                   pricePerUnit: 120,
-                   farm: 'Sunny Farm',
-                   location: 'Iowa, USA',
-                   rating: 4.5,
-                   verified: true,
-                   imageUrls: [corn],
-                   badges: ['Organic', 'On Sale'],
-                   measurement: 'kg',
-                   stock: 100,
-                   transport: 'Yes',
-                   return:'No',
-               },
-               {
-                   id: 2,
-                   type: 'Wheat',
-                   pricePerUnit: 175,
-                   farm: 'Golden Fields',
-                   location: 'Kansas, USA',
-                   rating: 4.2,
-                   verified: false,
-                   imageUrls: [wheat],
-                   badges: [],
-                   measurement: 'kg',
-                   stock: 50,
-                   transport: 'No',
-                   return:'Yes',
-               },
-               {
-                   id: 3,
-                   type: 'Rice',
-                   pricePerUnit: 110,
-                   farm: 'Green Valley',
-                   location: 'Kandy, Sri Lanka',
-                   rating: 4.7,
-                   verified: true,
-                   imageUrls: [wheat],
-                   badges: ['Organic'],
-                   measurement: 'kg',
-                   stock: 200,
-                   transport: 'Yes',
-                   return:'Yes',
-               },
-               {
-                   id: 4,
-                   type: 'Tomato',
-                   pricePerUnit: 95,
-                   farm: 'Highland Farms',
-                   location: 'Nuwara Eliya, Sri Lanka',
-                   rating: 4.0,
-                   verified: false,
-                   imageUrls: [wheat],
-                   badges: ['On Sale'],
-                   measurement: 'unit',
-                   stock: 150,
-                   transport: 'No',
-                   return:'Yes',
-               },
-               {
-                   id: 5,
-                   type: 'Potato',
-                   pricePerUnit: 80,
-                   farm: 'Riverbend Farm',
-                   location: 'Badulla, Sri Lanka',
-                   rating: 4.3,
-                   verified: true,
-                   imageUrls: [wheat],
-                   badges: [],
-                   measurement: 'kg',
-                   stock: 80,
-                   transport: 'Yes',
-                   return:'No',
-               },
-               {
-                   id: 6,
-                   type: 'Green Gram',
-                   pricePerUnit: 210,
-                   farm: 'AgroCare Co-op',
-                   location: 'Kurunegala, Sri Lanka',
-                   rating: 4.8,
-                   verified: true,
-                   imageUrls: [wheat],
-                   badges: ['Organic', 'Certified'],
-                   measurement: 'g',
-                   stock: 300,
-                   transport: 'Yes',
-                   return:'Yes',
-               },
-    ];
+
+function getCurrentUserId() {
+    const userId = localStorage.getItem('userId');
+    return userId;
+}
+
+export async function MyProductsLoader() {
+    try {
+        // Get the current user's ID from our system function.
+        const userId = getCurrentUserId();
+
+           const response = await api.get(`/api/products/my-products`, {
+            headers: {
+                'X-User-Id': String(userId),
+            },
+        });
+
+        const products = response.data;
+        const API_BASE_URL = import.meta.env.VITE_API_GATEWAY_URL ;
+        
+        
+        // Transform data to match frontend component's expected props
+        return products.map(product => ({
+            ...product, // includes id, location, badges, createdAt, updatedAt etc.
+            id: product.id, 
+            type: product.productName,
+            stock: product.availableStock,
+            pricePerUnit: product.pricePerUnit,
+            transport: product.transportAvailability,
+            return: product.returnAccepted,
+            measurement: product.measurement,
+            imageUrls: product.imageUrls.map(url => `${API_BASE_URL}/api/products/images/${url}`),
+            farm: 'My Farm', 
+            location : product.location ,
+            badges : product.badges, 
+            rating: product.averageRating, // Placeholder rating
+            verified: true, // Placeholder verification
+        }));
+    } catch (err) {
+        console.error("Failed to fetch products:", err);
+        return []; 
+    }
+//    return [
+//         {
+//                    id: 1,
+//                    type: 'Corn',
+//                    pricePerUnit: 120,
+//                    farm: 'Sunny Farm',
+//                    location: 'Iowa, USA',
+//                    rating: 4.5,
+//                    verified: true,
+//                    imageUrls: [corn],
+//                    badges: ['Organic', 'On Sale'],
+//                    measurement: 'kg',
+//                    stock: 100,
+//                    transport: 'Yes',
+//                    return:'No',
+//                },
+//                {
+//                    id: 2,
+//                    type: 'Wheat',
+//                    pricePerUnit: 175,
+//                    farm: 'Golden Fields',
+//                    location: 'Kansas, USA',
+//                    rating: 4.2,
+//                    verified: false,
+//                    imageUrls: [wheat],
+//                    badges: [],
+//                    measurement: 'kg',
+//                    stock: 50,
+//                    transport: 'No',
+//                    return:'Yes',
+//                },
+//                {
+//                    id: 3,
+//                    type: 'Rice',
+//                    pricePerUnit: 110,
+//                    farm: 'Green Valley',
+//                    location: 'Kandy, Sri Lanka',
+//                    rating: 4.7,
+//                    verified: true,
+//                    imageUrls: [wheat],
+//                    badges: ['Organic'],
+//                    measurement: 'kg',
+//                    stock: 200,
+//                    transport: 'Yes',
+//                    return:'Yes',
+//                },
+//                {
+//                    id: 4,
+//                    type: 'Tomato',
+//                    pricePerUnit: 95,
+//                    farm: 'Highland Farms',
+//                    location: 'Nuwara Eliya, Sri Lanka',
+//                    rating: 4.0,
+//                    verified: false,
+//                    imageUrls: [wheat],
+//                    badges: ['On Sale'],
+//                    measurement: 'unit',
+//                    stock: 150,
+//                    transport: 'No',
+//                    return:'Yes',
+//                },
+//                {
+//                    id: 5,
+//                    type: 'Potato',
+//                    pricePerUnit: 80,
+//                    farm: 'Riverbend Farm',
+//                    location: 'Badulla, Sri Lanka',
+//                    rating: 4.3,
+//                    verified: true,
+//                    imageUrls: [wheat],
+//                    badges: [],
+//                    measurement: 'kg',
+//                    stock: 80,
+//                    transport: 'Yes',
+//                    return:'No',
+//                },
+//                {
+//                    id: 6,
+//                    type: 'Green Gram',
+//                    pricePerUnit: 210,
+//                    farm: 'AgroCare Co-op',
+//                    location: 'Kurunegala, Sri Lanka',
+//                    rating: 4.8,
+//                    verified: true,
+//                    imageUrls: [wheat],
+//                    badges: ['Organic', 'Certified'],
+//                    measurement: 'g',
+//                    stock: 300,
+//                    transport: 'Yes',
+//                    return:'Yes',
+//                },
+//     ];
 }
 
 export default function MyProducts() {
-    const crops = MyProductsLoader();
+    const [crops, setCrops] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [isAddPopupOpen, setIsAddPopupOpen] = useState(false);
     const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
+
+     useEffect(() => {
+        MyProductsLoader().then((data) => {
+        setCrops(data);
+        setLoading(false);
+        });
+     }, []);
 
     const handleEditProduct = (product) => {
         setSelectedProduct(product);
         setIsEditPopupOpen(true);
     };
 
+     
+    if (loading) return <p className="p-6 text-gray-500">Loading products...</p>;
+    if (!loading ) {
     return (
         <section className="p-6">
             <div className="flex items-center justify-between mb-6">
@@ -132,6 +187,7 @@ export default function MyProducts() {
                     >
                         <div>
                             <div className="relative h-48 bg-gray-200">
+                            
                                 <img
                                     src={crop.imageUrls?.[0] || wheat} // Use first image from array
                                     alt={crop.type}
@@ -153,6 +209,11 @@ export default function MyProducts() {
                                 <div className="text-sm text-gray-500 dark:text-gray-400">
                                     <span className="font-medium dark:text-gray-300">{crop.farm}</span>{' '}
                                     • {crop.location}
+                                </div>
+
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="font-medium dark:text-gray-300">{crop.farm}</span>{' '}
+                                    • {crop.imageUrls[0]}
                                 </div>
 
                                 <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -204,7 +265,7 @@ export default function MyProducts() {
                 />
             )}
         </section>
-    );
+    ); }
 }
 
 function AddProductPopup({ onClose }) {

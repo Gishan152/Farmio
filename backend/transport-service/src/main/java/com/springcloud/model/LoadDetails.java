@@ -1,0 +1,39 @@
+package com.springcloud.model;
+
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "load_details")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class LoadDetails {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String loadId;
+
+    private String fromLocation;
+    private String toLocation;
+    private String from;
+    private String to;
+    private Double weight;
+    private Double payment;
+    private String product;
+    private LocalDateTime pickupTime;
+    private LocalDateTime estimatedDelivery;
+    @Column(nullable = false)
+//    private String status = "Pending";
+    private String driverStatus;
+    private String buyerStatus;
+    private String sellerStatus;
+    private Long driverId;
+//    private Double driverRating;
+
+}

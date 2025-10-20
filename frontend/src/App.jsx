@@ -14,7 +14,7 @@ import ProductPage from './Pages/ProductsPage';
 import BuyerLayout from './Pages/Buyer/BuyerLayout';
 import Crops from './Pages/Buyer/Sections/Crops';
 import Warehouses from './Pages/Buyer/Sections/Warehouses';
-import ReservedStorage, { reservedLoader } from './Pages/Buyer/Sections/ReservedStorage';
+import ReservedStorage from './Pages/Buyer/Sections/ReservedStorage';
 import TransportProviders, { transportProvidersLoader } from './Pages/Buyer/Sections/TransportProviders';
 import TransportSchedules from './Pages/Buyer/Sections/TransportSchedules';
 import CropDetails, { cropDetailsLoader } from './Pages/Buyer/Sections/CropDetails';
@@ -150,6 +150,7 @@ import warehouseRoutes from './Routes/WarehouseRoutes';
 import adminRoutes from './Routes/AdminRoutes';
 import moderatorRoutes from './Routes/ModeratorRoutes';
 import { TempCommonProvider } from './Contexts/TempCommonContext';
+import PaymentContextProvider from './Contexts/Buyer/PaymentContext';
 
 
 let router = createBrowserRouter([
@@ -183,8 +184,10 @@ function App() {
 	return (
 		<UserContextProvider>
 			<TempCommonProvider>
-				<GoogleMapsProvider>
-					<RouterProvider router={router} />
+				<GoogleMapsProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+					<PaymentContextProvider>
+						<RouterProvider router={router} />
+					</PaymentContextProvider>
 				</GoogleMapsProvider>
 			</TempCommonProvider>
 		</UserContextProvider>

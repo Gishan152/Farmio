@@ -27,6 +27,7 @@ import FarmerChat from '../Pages/Farmer/Sections/FarmerChat';
 import Offers from '../Pages/Farmer/Sections/Offerstobuyers';
 import FarmerProfile from '../Pages/Farmer/Sections/FarmerProfile';
 import FarmerPayments from '../Pages/Farmer/Sections/FarmerPayments';
+import FarmerWasteRequest from '../Pages/Farmer/Sections/FarmerWasteRequest';
 
 const farmerRoutes = {
     path: '/farmer',
@@ -112,7 +113,7 @@ const farmerRoutes = {
             path: 'warehouses',
             children: [
                 {
-                    path: 'all',
+                    path: '',
                     Component: FarmerWarehouses
                 },
                 {
@@ -156,7 +157,10 @@ const farmerRoutes = {
         {
             path: 'wastemanagement',
             Component: WasteAgents
-
+        },
+        {
+            path: 'waste-requests',
+            Component: FarmerWasteRequest
         },
     ],
 }

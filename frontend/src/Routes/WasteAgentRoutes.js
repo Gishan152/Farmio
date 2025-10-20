@@ -5,6 +5,7 @@ import Payments from '../Pages/WasteAgent/Sections/Payments';
 import BrowseDiscover from '../Pages/WasteAgent/Sections/BrowseDiscover';
 import AgentProfile from '../Pages/WasteAgent/Sections/AgentProfile';
 import Chat from '../Pages/WasteAgent/Sections/chat';
+import PaymentManagement from '@/Pages/WasteAgent/Sections/PaymentManagement';
 
 
 const wasteAgentRoutes = {
@@ -24,7 +25,15 @@ const wasteAgentRoutes = {
             Component: BrowseDiscover
         },
         {
+            path: "finalise",
+            Component: Payments
+        },
+        {
             path: "manage-payments",
+            Component: PaymentManagement
+        },
+        {
+            path: "manage-payments:id",
             Component: Payments
         },
         {

@@ -1,6 +1,7 @@
 // Moderator imports
 import ModeratorLogin from '../Pages/moderator/Login';
 import ModeratorDashboard from '../Pages/moderator/Dashboard';
+import ModeratorPasswordChange from '../Pages/moderator/PasswordChange';
 import ModeratorProducts from '../Pages/moderator/products/index';
 import ModeratorProductReview from '../Pages/moderator/products/review';
 import ModeratorProductQuality from '../Pages/moderator/products/quality';
@@ -18,6 +19,10 @@ const moderatorRoutes = // Add Moderator routes
         {
             path: 'login',
             Component: ModeratorLogin
+        },
+        {
+            path: 'password-change',
+            Component: ModeratorPasswordChange
         },
         {
             path: 'dashboard',

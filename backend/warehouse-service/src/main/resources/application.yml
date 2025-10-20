@@ -11,7 +11,7 @@ spring:
       import-check:
         enabled: false
   rabbitmq:
-    host: rabbitmq
+    host: ${RABBITMQ_HOST:localhost}
     port: 5672
 
   datasource:
@@ -19,6 +19,10 @@ spring:
     username: neondb_owner
     password: npg_l2wurAbES8Cq
     driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
+      platform: postgresql
   jpa:
     hibernate:
       ddl-auto: update
@@ -27,6 +31,9 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        connection:
+          characterEncoding: utf8
+          useUnicode: true
 management:
   endpoints:
     web:
@@ -43,4 +50,10 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+
+# Google Maps API Configuration
+google:
+  maps:
+    api-key: AIzaSyBMWejZ_jHcTFdSgpuV2h9Y-ktL-LMfymw
+    base-url: https://maps.googleapis.com/maps/api
