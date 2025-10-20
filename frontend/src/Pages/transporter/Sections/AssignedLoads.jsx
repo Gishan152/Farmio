@@ -14,14 +14,14 @@ import api from "../../../API/client"
 export async function AssignedLoadsLoader() {
   try {
     // Fetch all loads assigned to the current driver
-    const response = await api.get("/transport/load/all");
+    const response = await api.get("/api/transport/getAllLoads");
 
     const loads = response.data;
     const API_BASE_URL = import.meta.env.VITE_API_GATEWAY_URL;
 
     // Transform data into frontend-friendly structure
     return loads
-    .filter((load) => load.status === "accepted" || load.status === "in_transit" || load.status === "delivered")
+    .filter((load) => load.status === "accepted" || load.status === "in_transit")
     .map((load) => ({
       id: load.id,
       crop: load.cropType || "Unknown Crop",

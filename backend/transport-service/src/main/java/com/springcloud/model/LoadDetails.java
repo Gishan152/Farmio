@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class LoadDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     private String loadId;
 
@@ -29,8 +29,11 @@ public class LoadDetails {
     private LocalDateTime pickupTime;
     private LocalDateTime estimatedDelivery;
     @Column(nullable = false)
-    private String status = "Pending";
+//    private String status = "Pending";
+    private String driverStatus;
+    private String buyerStatus;
+    private String sellerStatus;
     private Long driverId;
-    private Double driverRating;
+//    private Double driverRating;
 
 }

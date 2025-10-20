@@ -30,15 +30,15 @@ const menu = [
     to: 'assignedLoads/all', 
     icon: ClipboardDocumentCheckIcon
   },
-  // { 
-  //   label: 'My Deliveries', 
-  //   to: 'assignedLoads/all',
-  //   icon: ClipboardDocumentCheckIcon,
-  //   children: [
-  //     { label: 'Confirm Pickup', to: 'confirm/id' },
-  //     { label: 'Confirm Delivery', to: 'confirmDelivery' },
-  //   ]
-  // },
+  { 
+    label: 'My Deliveries', 
+    to: 'assignedLoads/all',
+    icon: ClipboardDocumentCheckIcon,
+    children: [
+      { label: 'Confirm Pickup', to: 'confirmPickup/id' },
+      { label: 'Confirm Delivery', to: 'confirmDelivery/id' },
+    ]
+  },
   { 
     label: 'Route Planner', 
     to: 'routePlanner', 

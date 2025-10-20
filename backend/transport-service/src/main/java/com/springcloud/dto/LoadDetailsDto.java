@@ -20,9 +20,12 @@ public class LoadDetailsDto {
     private String to;
     private Double weight;
     private Double payment;
-    private String produce;
+    private String product;
     private LocalDateTime pickupTime;
     private LocalDateTime estimatedDelivery;
-    private String status;
+    private String driverStatus;
+    private String buyerStatus;
+    private String sellerStatus;
+    private Long driverId;
 
 }

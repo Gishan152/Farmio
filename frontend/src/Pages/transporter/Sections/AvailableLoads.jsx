@@ -69,7 +69,7 @@ export default function AvailableLoads() {
       const { user } = useUserContext(); 
       const driverId = user?.id;
 
-    await api.put(`/api/transport/assignDriver/${loadId}/${driverId}`);
+    await api.put(`/api/transport/acceptLoadDriver/${loadId}/${driverId}`);
 
     setLoads(prevLoads => prevLoads.filter(load => load.id !== loadId));
 

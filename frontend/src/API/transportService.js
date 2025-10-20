@@ -4,10 +4,17 @@ const transportService = {
   // ---- ROUTES ----
   getAllRoutesByProvider: async (providerId) => {
     try {
+      if (!providerId) {
+        throw new Error('Provider ID is required');
+      }
       const response = await api.get(`/api/transport/getAllRoutes/${providerId}`);
-      return response.data; // backend returns array
+      return response.data; 
     } catch (error) {
-      console.error('Error fetching routes:', error?.response || error.message);
+      if (error.message === 'Provider ID is required') {
+        console.error('Error fetching routes: Provider ID is required');
+        return []; // Return empty array if no provider ID
+      }
+      console.error('Error fetching routes:', error?.response?.data || error.message);
       throw error;
     }
   },

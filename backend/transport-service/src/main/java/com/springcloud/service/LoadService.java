@@ -12,5 +12,7 @@ public interface LoadService {
     LoadDetailsDto getLoadById(Long id);
     LoadDetailsDto updateLoad(Long id,LoadDetailsDto loadDetailsDto);
     void deleteLoad(Long id);
-    LoadDetailsDto acceptLoad(Long id, Long driverId);
+    LoadDetailsDto acceptLoadDriver(Long id, Long driverId);
+    LoadDetailsDto acceptLoadBuyer(Long id);
+    LoadDetailsDto acceptLoadSeller(Long id);
 }

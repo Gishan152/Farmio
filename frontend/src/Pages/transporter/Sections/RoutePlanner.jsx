@@ -11,6 +11,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { update } from 'lodash';
 import api from '../../../API/client';
+import {useUserContext} from '../../../Contexts/UserContext'
+import transportService from '../../../API/transportService';
 
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, itemType }) => {
   if (!isOpen) return null;
@@ -77,19 +79,30 @@ export default function RoutePlanner() {
     availableFrom: '',
     availableTo: '',
   });
+  const { user } = useUserContext(); 
+  const driverId = user?.id;
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const routes = await transportService.getAllRoutesByProvider(1);
-        const availabilities =
-          await transportService.getAllAvailabilitiesByProvider(1);
+      // Only fetch data when we have a driverId
+      if (!driverId) {
+        return;
+      }
 
-        if (routes.data?.length > 0) {
-          setRoute(routes.data[0]);
+      try {
+        const [routes, availabilities] = await Promise.all([
+          transportService.getAllRoutesByProvider(driverId),
+          transportService.getAllAvailabilitiesByProvider(driverId)
+        ]);
+
+        console.log("API Routes Response:", routes);
+        console.log("API Availabilities Response:", availabilities);
+
+        if (routes?.length > 0) {
+          setRoute(routes[0]);
           setMode("route");
-        } else if (availabilities.data?.length > 0) {
-          setAvailabilityData(availabilities.data[0]);
+        } else if (availabilities?.length > 0) {
+          setAvailabilityData(availabilities[0]);
           setMode("availability");
         } else {
           setIsEditing(true); // no data yet → start in edit mode
@@ -151,7 +164,7 @@ export default function RoutePlanner() {
 
     const newRoute = {
       ...formData,
-      providerId: 1,
+      providerId: driverId,
       updatedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),
     };
@@ -161,7 +174,7 @@ export default function RoutePlanner() {
       }else{
         await transportService.createRoute(newRoute);
       }
-       const routes = await transportService.getAllRoutesByProvider(1);
+       const routes = await transportService.getAllRoutesByProvider(driverId);
       setRoute(routes.data[0]);
       setIsEditing(false);
       setMode("route");
@@ -177,7 +190,7 @@ export default function RoutePlanner() {
 
   const data = {
     ...availabilityData,
-    providerId: 1,
+    providerId: driverId,
     updatedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
   };
@@ -189,8 +202,8 @@ export default function RoutePlanner() {
       await transportService.createAvailability(data);
     }
 
-    const availabilities = await transportService.getAllAvailabilitiesByProvider(1);
-    setAvailabilityData(availabilities.data[0]);
+    const availabilities = await transportService.getAllAvailabilitiesByProvider(driverId);
+    setAvailabilityData(availabilities?.data?.[0]);
     setIsEditing(false);
     setMode("availability");
   } catch (error) {
@@ -299,7 +312,7 @@ const handleDeleteCancel = () => {
                       {route ? 'Your Current Route' : 'Your Availability Settings'}
                     </h2>
                     <p className="text-sm text-green-600">
-                      Last updated: {new Date(route?.updatedAt || availabilityData.updatedAt).toLocaleDateString()}
+                      Last updated: {new Date(route?.updatedAt || availabilityData?.updatedAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
