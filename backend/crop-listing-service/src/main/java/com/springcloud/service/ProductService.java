@@ -21,7 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.springframework.beans.factory.annotation.Value;
 @Service
 public class ProductService {
 
@@ -33,7 +37,26 @@ public class ProductService {
 
     @Autowired 
     private RatingRepository ratingRepository;
-    
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
+    public Resource loadImageAsResource(String filename) {
+    try {
+        Path filePath = Paths.get(uploadDir).resolve(filename).normalize();
+        Resource resource = new UrlResource(filePath.toUri());
+        
+        if (resource.exists() && resource.isReadable()) {
+            return resource;
+        } else {
+            throw new RuntimeException("File not found: " + filename);
+        }
+    } catch (Exception e) {
+        throw new RuntimeException("Error loading file: " + filename, e);
+    }
+}
+
+
    public List<ProductResponseDTO> getAllProducts() {
         List<Product> products = productRepository.findAll();
         return products.stream()

@@ -9,6 +9,9 @@ import com.springcloud.dto.RatingDTO;
 import com.springcloud.dto.CropOrderDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -69,7 +72,6 @@ public class ProductController {
         }
     }
 
-    // NEW ENDPOINT: To add or update a rating
     @PostMapping("/{id}/rate")
     public ResponseEntity<?> rateProduct(
             @PathVariable Long id,
@@ -84,7 +86,6 @@ public class ProductController {
         }
     }
     
-    // NEW ENDPOINT: To deduct stock when an order is placed
     @PutMapping("/{id}/deduct-stock")
     public ResponseEntity<?> deductStock(
             @PathVariable Long id,
@@ -98,7 +99,6 @@ public class ProductController {
         }
     }
     
-    // NEW ENDPOINT: To fetch products by a list of IDs (returns CropOrderDTO for order-service)
     @PostMapping("/by-ids")
     public ResponseEntity<List<CropOrderDTO>> getProductsByIds(@RequestBody List<Long> productIds) {
         List<CropOrderDTO> products = productService.getProductsByIds(productIds);
@@ -109,5 +109,41 @@ public class ProductController {
     public ResponseEntity<List<com.springcloud.dto.CropOrderDTO>> getAllProductsForOrder() {
         List<com.springcloud.dto.CropOrderDTO> products = productService.getAllProductsForOrder();
         return ResponseEntity.ok(products);
+    }
+
+    // NEW ENDPOINT: Serve images
+    @GetMapping("/images/{filename:.+}")
+    public ResponseEntity<Resource> getImage(@PathVariable String filename) {
+        try {
+            Resource resource = productService.loadImageAsResource(filename);
+            
+            String contentType = determineContentType(filename);
+            
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    private String determineContentType(String filename) {
+        String extension = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
+        switch (extension) {
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+            case "png":
+                return "image/png";
+            case "gif":
+                return "image/gif";
+            case "webp":
+                return "image/webp";
+            case "svg":
+                return "image/svg+xml";
+            default:
+                return "application/octet-stream";
+        }
     }
 }

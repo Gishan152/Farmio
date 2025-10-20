@@ -29,7 +29,8 @@ public class RouterValidator {
         "/api/user/all-dto",
         "/api/admin/moderators/all-dto",
         "/api/moderator/login",
-        "/api/moderator/change-temp-password"
+        "/api/moderator/change-temp-password",
+        "/api/products/images/"
     );
 
     public boolean isSecured(ServerHttpRequest request) {
