@@ -1,6 +1,7 @@
 // userUtils.js - Utility functions for user data management
 
-const API_BASE_URL = 'http://localhost:8080'; // API Gateway URL
+import API from './API';
+import { API_BASE_URL } from '../config/apiConfig';
 
 /**
  * Fetch all users from the backend
@@ -8,13 +9,7 @@ const API_BASE_URL = 'http://localhost:8080'; // API Gateway URL
  */
 export const fetchAllUsers = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/user/all-dto`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const users = await response.json();
+    const users = await API.get(`${API_BASE_URL}/api/user/all-dto`);
     console.log('Fetched users:', users?.length || 0);
     return users || [];
   } catch (error) {
@@ -32,16 +27,9 @@ export const getUserCount = async () => {
     console.log('Attempting to fetch user count...');
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/analytics/admin/users/count`);
-      console.log('User count endpoint response status:', response.status);
-      
-      if (response.ok) {
-        const count = await response.json();
-        console.log('User count endpoint success:', count);
-        return count;
-      } else {
-        console.log(`User count endpoint failed with status ${response.status}, trying fallback...`);
-      }
+      const count = await API.get(`${API_BASE_URL}/api/analytics/admin/users/count`);
+      console.log('User count endpoint success:', count);
+      return count;
     } catch (endpointError) {
       console.log('Error with user count endpoint:', endpointError.message);
     }
