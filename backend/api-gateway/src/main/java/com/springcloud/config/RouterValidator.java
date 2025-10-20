@@ -45,7 +45,7 @@ public class RouterValidator {
         "/api/admin/moderators/all-dto",
         "/api/moderator/login",
         "/api/moderator/change-temp-password",
-        "/api/products/images/"
+        "/api/products/images/",
         "/api/analytics/admin/waste/listings",
         "/api/analytics/admin/waste/agents",
         "/api/analytics/admin/waste/listings/count",

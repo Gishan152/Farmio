@@ -4,8 +4,6 @@ server:
 
 # Database
 spring:
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   application:
     name: waste-service
   cloud:
