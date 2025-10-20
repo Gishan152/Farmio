@@ -206,13 +206,6 @@ services:
       watch:
         - action: rebuild
           path: ./auth-service/target/*-SNAPSHOT.jar
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: '0.75'
-        reservations:
-          memory: 512M
 
 
   api-gateway:

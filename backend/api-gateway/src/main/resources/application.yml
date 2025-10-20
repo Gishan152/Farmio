@@ -12,10 +12,6 @@ spring:
       default-filters:
         - name: AuthenticationFilter
       routes:
-#        - id: product-service
-#          uri: lb://product-service
-#          predicates:
-#            - Path=/products/**
         - id: auth-service
           uri: lb://auth-service
           predicates:
@@ -39,7 +35,7 @@ spring:
         - id: warehouse-service
           uri: lb://warehouse-service
           predicates:
-            - Path=/api/warehouse/**
+            - Path=/api/warehouses/**,/api/facilities/**,/api/slots/**,/api/bookings/**
         - id: analytic-service
           uri: lb://analytic-service
           predicates:
@@ -56,6 +52,23 @@ spring:
           uri: lb://chat-service
           predicates:
             - Path=/api/chat/**
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - http://localhost:5173
+              - http://localhost:5174
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            exposedHeaders:
+              - "*"
+            allowCredentials: true
 
   security:
     user:

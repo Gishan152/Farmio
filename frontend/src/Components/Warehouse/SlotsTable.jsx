@@ -1,3 +1,5 @@
+import { formatSlotId } from '../../Utils/slotUtils';
+
 export default function SlotsTable({ slots, getSlotStatusColor, getUsagePercentage }) {
     return (
         <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
@@ -12,18 +14,22 @@ export default function SlotsTable({ slots, getSlotStatusColor, getUsagePercenta
                             <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Available</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Usage %</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Temperature</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Booked By</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Until</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Produce</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Product Type</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Reserved By</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {slots.map((slot, index) => {
-                            const usagePercentage = getUsagePercentage(slot);
+                            const usagePercentage = slot.utilizationPercentage || getUsagePercentage(slot);
+                            const currentLoad = slot.currentLoadKg || 0;
+                            const reservedLoad = slot.reservedLoadKg || 0;
+                            const totalUsed = currentLoad + reservedLoad;
+                            const available = slot.availableCapacity || (slot.capacityKg - totalUsed);
+                            
                             return (
-                                <tr key={slot.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                <tr key={slot.id || slot.slotNumber || `slot-${index}`} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="text-sm font-semibold text-gray-900">#{slot.id}</span>
+                                        <span className="text-sm font-semibold text-gray-900">{slot.slotNumber || formatSlotId(slot.id)}</span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getSlotStatusColor(slot)}`}>
@@ -31,13 +37,13 @@ export default function SlotsTable({ slots, getSlotStatusColor, getUsagePercenta
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {slot.capacity} sqft
+                                        {slot.capacityKg} kg
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {slot.used} sqft
+                                        {totalUsed} kg
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
-                                        {slot.capacity - slot.used} sqft
+                                        {available} kg
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
@@ -47,32 +53,28 @@ export default function SlotsTable({ slots, getSlotStatusColor, getUsagePercenta
                                                         usagePercentage > 90 ? 'bg-red-500' :
                                                         usagePercentage > 70 ? 'bg-yellow-500' : 'bg-green-500'
                                                     }`}
-                                                    style={{ width: `${usagePercentage}%` }}
+                                                    style={{ width: `${Math.min(usagePercentage, 100)}%` }}
                                                 ></div>
                                             </div>
-                                            <span className="text-sm font-medium text-gray-900">{usagePercentage}%</span>
+                                            <span className="text-sm font-medium text-gray-900">{Math.round(usagePercentage)}%</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {slot.temperature}°C
+                                        {slot.temperature ? `${slot.temperature}°C` : '-'}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {slot.status === 'booked' ? (
-                                            <span className="font-medium">{slot.bookedBy}</span>
-                                        ) : (
-                                            <span className="text-gray-400">-</span>
-                                        )}
+                                        <span className="font-medium">{slot.productType || '-'}</span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {slot.status === 'booked' ? (
-                                            <span className="font-medium">{slot.bookedUntil}</span>
-                                        ) : (
-                                            <span className="text-gray-400">-</span>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {slot.status === 'booked' ? (
-                                            <span className="font-medium">{slot.produce}</span>
+                                        {slot.status === 'RESERVED' || slot.status === 'OCCUPIED' ? (
+                                            <div>
+                                                <div className="font-medium">{slot.reservedByUserName || 'Unknown'}</div>
+                                                {slot.reservedUntil && (
+                                                    <div className="text-xs text-gray-500">
+                                                        Until: {new Date(slot.reservedUntil).toLocaleDateString()}
+                                                    </div>
+                                                )}
+                                            </div>
                                         ) : (
                                             <span className="text-gray-400">-</span>
                                         )}
