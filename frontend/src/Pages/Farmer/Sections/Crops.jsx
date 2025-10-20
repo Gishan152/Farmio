@@ -28,7 +28,7 @@ export async function FarmercropsLoader() {
             transport: product.transportAvailability,
             return: product.returnAccepted,
             measurement: product.measurement,
-            imageUrls: product.imageUrls.map(url => `${API_BASE_URL}${url}`),
+            imageUrls: product.imageUrls.map(url => `${API_BASE_URL}/api/products/images/${url}`),
             farm: 'My Farm', 
             location : product.location ,
             badges : product.badges, 
