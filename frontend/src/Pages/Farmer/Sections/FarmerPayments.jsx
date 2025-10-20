@@ -1,213 +1,502 @@
-import React, { useState } from 'react';
-import { WalletIcon, ClockIcon } from '@heroicons/react/24/solid';
-import payhere from  '../../../Assets/Farmer/payhere.png'
-import paypal from '../../../Assets/Farmer/paypal.png'
-import bank from '../../../Assets/Farmer/bank.png'
+import React, { useState, useEffect } from 'react';
+import CustomModal from '../../../Components/CustomModel';
+import {
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  DocumentArrowDownIcon,
+  XMarkIcon,
+  CurrencyDollarIcon,
+  BanknotesIcon,
+  ReceiptRefundIcon,
+  CalendarIcon
+} from '@heroicons/react/24/outline';
+import { useUserContext } from '@/Contexts/UserContext';
+import { usePaymentContext } from '@/Contexts/Buyer/PaymentContext';
+
+function PaymentTable({ payments }) {
+  return (
+    <table className="min-w-full text-sm">
+      <thead>
+        <tr className="bg-gray-100 dark:bg-gray-800">
+          <th className="p-2 text-left font-semibold">Transaction ID</th>
+          <th className="p-2 text-left font-semibold">Type</th>
+          <th className="p-2 text-left font-semibold">Reference</th>
+          <th className="p-2 text-left font-semibold">Amount</th>
+          <th className="p-2 text-left font-semibold">Status</th>
+          <th className="p-2 text-left font-semibold">Date</th>
+          <th className="p-2 text-left font-semibold">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {payments.map(p => (
+          <tr key={p.id} className="border-b border-gray-100 dark:border-gray-700">
+            <td className="p-2 font-mono text-xs">{p.id}</td>
+            <td className="p-2">
+              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                p.transactionType === 'CREDIT' ? 'bg-green-100 text-green-800' : 
+                p.transactionType === 'ESCROW' ? 'bg-yellow-100 text-yellow-800' : 
+                p.transactionType === 'DEBIT' ? 'bg-red-100 text-red-800' :
+                p.transactionType === 'REFUND' ? 'bg-blue-100 text-blue-800' :
+                'bg-gray-100 text-gray-800'
+              }`}>
+                {p.transactionType}
+              </span>
+            </td>
+            <td className="p-2">{p.reference}</td>
+            <td className="p-2 font-semibold">Rs. {(p.amount ?? 0).toLocaleString()}</td>
+            <td className="p-2">
+              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${p.status === 'settled' ? 'bg-green-100 text-green-800' : p.status === 'refunded' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-500'}`}>{p.status}</span>
+            </td>
+            <td className="p-2">{p.paymentDate}</td>
+            <td className="p-2 text-xs text-gray-600">{p.description}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 
 export default function FarmerPayments() {
-  const transactions = [
-    { date: '2023-05-01', description: 'Sale of tomatoes', amount: 150.00 },
-    { date: '2023-05-03', description: 'Sale of potatoes', amount: 200.00 },
-    { date: '2023-05-05', description: 'Sale of corn', amount: 100.00 },
-  ];
+  const { 
+    payments, 
+    walletData, 
+    bankDetails: currentBankDetails,
+    walletLoading,
+    bankDetailsLoading,
+    withdrawFunds,
+    saveBankDetails,
+    exportPayments: exportPaymentsFromContext,
+    fetchBankDetails,
+    refreshPaymentData
+  } = usePaymentContext();
 
-  const holds = [
-    { amount: 50.00, startDate: '2024-01-01', releaseDate: '2024-02-01' },
-    { amount: 75.00, startDate: '2024-01-05', releaseDate: '2025-10-05' },
-  ];
+  const [withdrawModal, setWithdrawModal] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawError, setWithdrawError] = useState('');
 
-  const currentBalance = 500.00;
-  const currentDate = new Date();
+  const [bankDetailsModal, setBankDetailsModal] = useState(false);
+  const [viewBankDetailsModal, setViewBankDetailsModal] = useState(false);
+  const [bankDetails, setBankDetails] = useState({
+    accountNumber: '',
+    accountHolderName: '',
+    bank: '',
+    branch: '',
+    swiftCode: ''
+  });
+  const [bankDetailsError, setBankDetailsError] = useState('');
+  const [cameFromWithdraw, setCameFromWithdraw] = useState(false);
 
-  const userProfile = {
-    payoutMethods: [
-      { type: 'Bank Account',  logo: bank },
-      { type: 'PayHere',  logo: payhere },
-      { type: 'PayPal',  logo: paypal},
-    ],
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    status: 'all',
+    type: 'all',
+    minAmount: '',
+    maxAmount: '',
+    startDate: '',
+    endDate: '',
+    search: ''
+  });
+
+  const filteredPayments = payments.filter(payment => {
+    if (filters.status !== 'all' && payment.status !== filters.status) return false;
+    if (filters.type !== 'all' && payment.transactionType !== filters.type) return false;
+    if (filters.minAmount && payment.amount < Number(filters.minAmount)) return false;
+    if (filters.maxAmount && payment.amount > Number(filters.maxAmount)) return false;
+    if (filters.startDate && payment.paymentDate < filters.startDate) return false;
+    if (filters.endDate && payment.paymentDate > filters.endDate) return false;
+    if (filters.search && !(
+      payment.reference.toLowerCase().includes(filters.search.toLowerCase()) ||
+      payment.description.toLowerCase().includes(filters.search.toLowerCase())
+    )) return false;
+    return true;
+  });
+
+  const stats = {
+    totalPaid: payments.filter(p => p.transactionType === 'CREDIT').reduce((sum, p) => sum + p.amount, 0),
+    totalEscrow: payments.filter(p => p.transactionType === 'ESCROW').reduce((sum, p) => sum + p.amount, 0),
+    refunds: payments.filter(p => p.transactionType === 'REFUND').reduce((sum, p) => sum + p.amount, 0),
+    completed: payments.filter(p => p.status === 'completed').length,
+    pending: payments.filter(p => p.status === 'pending').length,
+    creditTransactions: payments.filter(p => p.transactionType === 'CREDIT').length,
+    escrowTransactions: payments.filter(p => p.transactionType === 'ESCROW').length
   };
 
-  const [selectedPayoutMethod, setSelectedPayoutMethod] = useState(userProfile.payoutMethods[0]);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [isPayoutConfirmationOpen, setIsPayoutConfirmationOpen] = useState(false);
+  const { user } = useUserContext();
 
-  const calculateProgress = (startDate, releaseDate) => {
-    const start = new Date(startDate);
-    const release = new Date(releaseDate);
-    const total = release - start;
-    const elapsed = currentDate - start;
-    if (total <= 0) return 100;
-    const progress = (elapsed / total) * 100;
-    return Math.min(100, Math.max(0, progress));
+  const handleBankDetailsSubmit = async () => {
+    setBankDetailsError('');
+    if (!bankDetails.accountNumber || !bankDetails.accountHolderName || 
+      !bankDetails.bank || !bankDetails.branch || !bankDetails.swiftCode) {
+      setBankDetailsError('All fields are required.');
+      return;
+    }
+
+    const result = await saveBankDetails(bankDetails);
+    if (result.success) {
+      setBankDetailsModal(false);
+      setBankDetails({ accountNumber: '', accountHolderName: '', bank: '', branch: '', swiftCode: '' });
+      if (cameFromWithdraw) {
+        setCameFromWithdraw(false);
+        setTimeout(() => setWithdrawModal(true), 500);
+      }
+    } else {
+      setBankDetailsError(result.error);
+    }
   };
 
-  const calculateDaysLeft = (releaseDate) => {
-    const release = new Date(releaseDate);
-    const diffTime = release - currentDate;
-    const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return daysLeft > 0 ? daysLeft : 0;
+  const openBankDetailsModal = (fromWithdraw = false) => {
+    setCameFromWithdraw(fromWithdraw);
+    if (currentBankDetails) {
+      setBankDetails({
+        accountNumber: currentBankDetails.accountNumber || '',
+        accountHolderName: currentBankDetails.accountHolderName || '',
+        bank: currentBankDetails.bank || '',
+        branch: currentBankDetails.branch || '',
+        swiftCode: currentBankDetails.swiftCode || ''
+      });
+    }
+    setBankDetailsModal(true);
   };
 
-  const handlePayoutRequest = () => {
-    console.log(`Payout requested via ${selectedPayoutMethod.type} to ${selectedPayoutMethod.details}`);
-  };
+  const handleWithdraw = async () => {
+    setWithdrawError('');
+    const amount = parseFloat(withdrawAmount);
+    if (isNaN(amount) || amount <= 0) {
+      setWithdrawError('Please enter a valid amount.');
+      return;
+    }
+    if (amount > (walletData?.amount || 0)) {
+      setWithdrawError('Insufficient wallet balance.');
+      return;
+    }
 
-  const activeHolds = holds.filter(hold => calculateDaysLeft(hold.releaseDate) > 0);
-  const totalHolds = activeHolds.reduce((sum, hold) => sum + hold.amount, 0);
+    const result = await withdrawFunds(amount, 'Farmer withdrawal from wallet');
+    if (result.success) {
+      setWithdrawModal(false);
+      setWithdrawAmount('');
+    } else {
+      if (result.needsBankDetails) {
+        setWithdrawError(
+          <div>
+            {result.error}
+            <button
+              onClick={() => { setWithdrawModal(false); openBankDetailsModal(true); }}
+              className="ml-2 text-blue-600 underline hover:text-blue-800"
+            >
+              Add Bank Details
+            </button>
+          </div>
+        );
+      } else {
+        setWithdrawError('Withdrawal failed: ' + result.error);
+      }
+    }
+  };
 
   return (
-    <div className="p-6 bg-gray-10 min-h-screen">
-      <h1 className="text-2xl font-semibold dark:text-gray-100">Payments</h1> <br />
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-green-100 p-6 rounded-xl shadow-md flex items-center space-x-4 transition-transform hover:scale-105 cursor-pointer">
-          <WalletIcon className="h-10 w-10 text-green-600" />
-          <div>
-            <h2 className="text-lg font-semibold text-green-800">Current Balance</h2>
-            <p className="text-3xl font-bold text-green-700">${currentBalance.toFixed(2)}</p>
+    <div className="bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto space-y-4 p-4">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Farmer Payments</h1>
+              <p className="text-gray-600 mt-1 text-sm">View your payouts, escrow and history</p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm"
+              >
+                <FunnelIcon className="h-4 w-4 mr-2" />
+                Filters
+              </button>
+              <button
+                onClick={() => exportPaymentsFromContext()}
+                className="flex items-center bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm"
+              >
+                <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
+                Export
+              </button>
+              <button
+                onClick={() => setViewBankDetailsModal(true)}
+                className="flex items-center bg-blue-100 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-200 transition-colors duration-200 text-sm font-semibold shadow border border-blue-400"
+              >
+                <BanknotesIcon className="h-4 w-4 mr-2" />
+                Bank Details
+              </button>
+              <button
+                className="flex items-center bg-green-100 text-green-700 px-3 py-2 rounded-lg hover:bg-green-200 transition-colors duration-200 text-sm font-semibold shadow border border-green-400"
+                onClick={() => setWithdrawModal(true)}
+              >
+                <CurrencyDollarIcon className="h-4 w-4 mr-2" />
+                Withdraw
+              </button>
+            </div>
           </div>
         </div>
 
-        <div
-          className="bg-yellow-100 p-6 rounded-xl shadow-md flex items-center space-x-4 transition-transform hover:scale-105 cursor-pointer"
-          onClick={() => setIsPopupOpen(true)}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="bg-white rounded-lg shadow-sm border border-green-400 p-4 flex flex-col justify-between">
+            <div className="flex items-center">
+              <CurrencyDollarIcon className="h-7 w-7 text-green-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-gray-500">Available Balance</p>
+                <p className="text-xl font-bold text-green-700">Rs. {(walletData?.amount || 0).toLocaleString()}</p>
+                <p className="text-xs text-gray-500 mt-1">Escrow: Rs. {(walletData?.escrowAmount || 0).toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center">
+              <CurrencyDollarIcon className="h-6 w-6 text-green-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-gray-500">Total Credits</p>
+                <p className="text-lg font-bold text-gray-900">Rs. {stats.totalPaid.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center">
+              <BanknotesIcon className="h-6 w-6 text-yellow-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-gray-500">Total Escrow</p>
+                <p className="text-lg font-bold text-gray-900">Rs. {stats.totalEscrow.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center">
+              <ReceiptRefundIcon className="h-6 w-6 text-blue-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-gray-500">Refunds</p>
+                <p className="text-lg font-bold text-gray-900">Rs. {stats.refunds.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center">
+              <CalendarIcon className="h-6 w-6 text-purple-600" />
+              <div className="ml-3">
+                <p className="text-xs font-medium text-gray-500">Total Transactions</p>
+                <p className="text-lg font-bold text-gray-900">{payments.length}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <CustomModal
+          isOpen={withdrawModal}
+          onClose={() => { setWithdrawModal(false); setWithdrawError(''); setWithdrawAmount(''); }}
+          title="Withdraw Funds"
+          description="Enter the amount you want to withdraw from your wallet."
+          submitText="Withdraw"
+          onSubmit={handleWithdraw}
         >
-          <ClockIcon className="h-10 w-10 text-yellow-600" />
-          <div>
-            <h2 className="text-lg font-semibold text-yellow-800">Active Holds</h2>
-            <p className="text-3xl font-bold text-yellow-700">${totalHolds.toFixed(2)}</p>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Available Balance</label>
+              <div className="p-2 bg-gray-100 rounded text-green-700 font-bold">Rs. {(walletData?.amount || 0).toLocaleString()}</div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Withdraw Amount</label>
+              <input
+                type="number"
+                className="w-full border rounded px-3 py-2"
+                placeholder="Enter amount"
+                value={withdrawAmount}
+                onChange={e => setWithdrawAmount(e.target.value)}
+                min={1}
+                max={walletData?.amount || 0}
+              />
+            </div>
+            {withdrawError && (
+              <div className="text-red-600 text-sm font-medium">
+                {typeof withdrawError === 'string' ? withdrawError : withdrawError}
+              </div>
+            )}
           </div>
-        </div>
+        </CustomModal>
 
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Payout Method</h2>
-          <select
-            value={selectedPayoutMethod.type}
-            onChange={(e) => {
-              const selectedType = e.target.value;
-              const method = userProfile.payoutMethods.find(m => m.type === selectedType);
-              setSelectedPayoutMethod(method);
-            }}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-700"
-          >
-            {userProfile.payoutMethods.map((method) => (
-              <option key={method.type} value={method.type}>
-                {method.type} 
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={() => setIsPayoutConfirmationOpen(true)}
-            className="mt-4 w-full p-2 rounded text-white bg-green-600 hover:bg-green-700 transition"
-          >
-            Payout
-          </button>
-        </div>
-      </div>
+        <CustomModal
+          isOpen={bankDetailsModal}
+          onClose={() => { 
+            setBankDetailsModal(false); 
+            setBankDetailsError(''); 
+            setCameFromWithdraw(false);
+            setBankDetails({ accountNumber: '', accountHolderName: '', bank: '', branch: '', swiftCode: '' });
+          }}
+          title="Bank Details"
+          description="Enter or update your bank account details for withdrawals."
+          submitText="Save"
+          onSubmit={handleBankDetailsSubmit}
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Account Number</label>
+              <input type="text" className="w-full border rounded px-3 py-2" placeholder="Enter account number" value={bankDetails.accountNumber} onChange={e => setBankDetails(prev => ({ ...prev, accountNumber: e.target.value }))} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Account Holder Name</label>
+              <input type="text" className="w-full border rounded px-3 py-2" placeholder="Enter account holder name" value={bankDetails.accountHolderName} onChange={e => setBankDetails(prev => ({ ...prev, accountHolderName: e.target.value }))} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Bank Name</label>
+              <input type="text" className="w-full border rounded px-3 py-2" placeholder="Enter bank name" value={bankDetails.bank} onChange={e => setBankDetails(prev => ({ ...prev, bank: e.target.value }))} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Branch Name</label>
+              <input type="text" className="w-full border rounded px-3 py-2" placeholder="Enter branch name" value={bankDetails.branch} onChange={e => setBankDetails(prev => ({ ...prev, branch: e.target.value }))} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">SWIFT Code</label>
+              <input type="text" className="w-full border rounded px-3 py-2" placeholder="Enter SWIFT code" value={bankDetails.swiftCode} onChange={e => setBankDetails(prev => ({ ...prev, swiftCode: e.target.value }))} />
+            </div>
+            {bankDetailsError && <div className="text-red-600 text-sm font-medium">{bankDetailsError}</div>}
+          </div>
+        </CustomModal>
 
-      {/* Recent Transactions */}
-      <div className="bg-white p-6 rounded-xl shadow-md">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Transactions</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-gray-100 text-gray-600 uppercase text-sm">
-                <th className="p-4">Date</th>
-                <th className="p-4">Description</th>
-                <th className="p-4 text-right">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((transaction, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+        <CustomModal
+          isOpen={viewBankDetailsModal}
+          onClose={() => setViewBankDetailsModal(false)}
+          title="Bank Account Details"
+          description="Your registered bank account information."
+          showFooter={false}
+        >
+          <div className="space-y-4">
+            {bankDetailsLoading ? (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <p className="mt-2 text-gray-600 text-sm">Loading bank details...</p>
+              </div>
+            ) : currentBankDetails ? (
+              <>
+                <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Account Number</label>
+                    <p className="text-gray-900 font-mono">{currentBankDetails.accountNumber}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Account Holder Name</label>
+                    <p className="text-gray-900">{currentBankDetails.accountHolderName}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Bank Name</label>
+                    <p className="text-gray-900">{currentBankDetails.bank}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Branch Name</label>
+                    <p className="text-gray-900">{currentBankDetails.branch}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">SWIFT Code</label>
+                    <p className="text-gray-900">{currentBankDetails.swiftCode}</p>
+                  </div>
+                </div>
+                <div className="flex justify-between mt-6">
+                  <button
+                    onClick={() => { setViewBankDetailsModal(false); openBankDetailsModal(); }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Edit Details
+                  </button>
+                  <button
+                    onClick={() => setViewBankDetailsModal(false)}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                  >
+                    Close
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <BanknotesIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 mb-4">No bank details found</p>
+                <button
+                  onClick={() => { setViewBankDetailsModal(false); setBankDetailsModal(true); }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
-                  <td className="p-4 text-gray-700">{transaction.date}</td>
-                  <td className="p-4 text-gray-700">{transaction.description}</td>
-                  <td className="p-4 text-right text-green-600 font-medium">
-                    ${transaction.amount.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  Add Bank Details
+                </button>
+              </div>
+            )}
+          </div>
+        </CustomModal>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-3 items-end">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Status</label>
+              <select
+                value={filters.status}
+                onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              >
+                <option value="all">All Statuses</option>
+                <option value="settled">Settled</option>
+                <option value="refunded">Refunded</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
+              <select
+                value={filters.type}
+                onChange={e => setFilters(f => ({ ...f, type: e.target.value }))}
+                className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              >
+                <option value="all">All Types</option>
+                <option value="CREDIT">Credit</option>
+                <option value="ESCROW">Escrow</option>
+                <option value="DEBIT">Debit</option>
+                <option value="REFUND">Refund</option>
+                <option value="WITHDRAWAL">Withdrawal</option>
+                <option value="RELEASE">Release</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Min Amount</label>
+              <input type="number" value={filters.minAmount} onChange={e => setFilters(f => ({ ...f, minAmount: e.target.value }))} placeholder="Min" className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" min="0" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Max Amount</label>
+              <input type="number" value={filters.maxAmount} onChange={e => setFilters(f => ({ ...f, maxAmount: e.target.value }))} placeholder="Max" className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" min="0" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Start Date</label>
+              <input type="date" value={filters.startDate} onChange={e => setFilters(f => ({ ...f, startDate: e.target.value }))} className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">End Date</label>
+              <input type="date" value={filters.endDate} onChange={e => setFilters(f => ({ ...f, endDate: e.target.value }))} className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Search</label>
+              <div className="relative">
+                <MagnifyingGlassIcon className="h-4 w-4 text-gray-400 absolute left-2 top-1/2 transform -translate-y-1/2" />
+                <input type="text" placeholder="Search by reference or description..." value={filters.search} onChange={e => setFilters(f => ({ ...f, search: e.target.value }))} className="w-full pl-8 pr-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" />
+              </div>
+            </div>
+            <button type="button" onClick={() => setFilters({ status: 'all', type: 'all', minAmount: '', maxAmount: '', startDate: '', endDate: '', search: '' })} className="ml-auto px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300 transition">
+              Clear Filters
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900">Payment History</h2>
+          </div>
+          {walletLoading ? (
+            <div className="p-8 text-center">
+              <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+              <p className="mt-2 text-gray-600 text-sm">Loading payments...</p>
+            </div>
+          ) : (
+            <div className="p-4 overflow-x-auto">
+              <PaymentTable payments={filteredPayments} />
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Popup for Active Holds */}
-      {isPopupOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="absolute inset-0 bg-black opacity-50" onClick={() => setIsPopupOpen(false)}></div>
-          <div className="bg-white rounded-xl shadow-lg p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto z-10">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold dark:text-gray-100">Release Dates</h3>
-              <button onClick={() => setIsPopupOpen(false)} className="text-gray-500 hover:text-gray-700">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <ul className="space-y-4">
-              {activeHolds.map((hold, index) => {
-                const progress = calculateProgress(hold.startDate, hold.releaseDate);
-                const daysLeft = calculateDaysLeft(hold.releaseDate);
-                return (
-                  <li key={index} className="text-sm text-gray-700 space-y-1">
-                    <div className="flex justify-between">
-                      <span>${hold.amount.toFixed(2)}</span>
-                      <span>Release in {daysLeft} days</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className="bg-green-600 h-2.5 rounded-full transition-all duration-300"
-                        style={{ width: `${progress}%` }}
-                      ></div>
-                    </div>
-                    <br />
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
-      )}
-
-      {/* Payout Confirmation Popup */}
-      {isPayoutConfirmationOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="absolute inset-0 bg-black opacity-50" onClick={() => setIsPayoutConfirmationOpen(false)}></div>
-          <div className="bg-white rounded-xl shadow-lg p-6 max-w-lg w-full z-10">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Confirm Payout</h3>
-              <button onClick={() => setIsPayoutConfirmationOpen(false)} className="text-gray-500 hover:text-gray-700">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <p className="text-gray-700 mb-4">Payment will be sent to your account within 2-3 business days.</p>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setIsPayoutConfirmationOpen(false)}
-                className="px-4 py-2 rounded text-gray-700 bg-gray-200 hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  handlePayoutRequest();
-                  setIsPayoutConfirmationOpen(false);
-                }}
-                className="px-4 py-2 rounded text-white bg-green-600 hover:bg-green-700"
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
