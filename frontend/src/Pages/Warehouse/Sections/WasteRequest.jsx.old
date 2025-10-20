@@ -1,0 +1,968 @@
+import React, { useState, useEffect } from 'react';
+import {
+    PlusIcon,
+    XMarkIcon,
+    TrashIcon,
+    ClockIcon,
+    CheckCircleIcon,
+    XCircleIcon,
+    MagnifyingGlassIcon,
+    CalendarIcon,
+    CurrencyDollarIcon,
+    ScaleIcon,
+    EyeIcon,
+} from '@heroicons/react/24/outline';
+import { ChevronsUpDown, Check } from 'lucide-react';
+import { getMyRequests, createRequest, cancelRequest } from '../../../API/wasteRequestService';
+import { Button } from '@/Components/WasteUI/button';
+import { Input } from '@/Components/WasteUI/input';
+import { Label } from '@/Components/WasteUI/label';
+import { Textarea } from '@/Components/WasteUI/textarea';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/Components/WasteUI/select';
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/Components/WasteUI/command';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/Components/WasteUI/popover';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/Components/WasteUI/dialog';
+import { Badge } from '@/Components/WasteUI/badge';
+import { cn } from '@/lib/utils';
+import { IoLocationOutline } from 'react-icons/io5';
+
+export default function WasteRequest() {
+    const [requests, setRequests] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [selectedRequest, setSelectedRequest] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [locationOpen, setLocationOpen] = useState(false);
+    const [locationValue, setLocationValue] = useState('');
+    const [formData, setFormData] = useState({
+        requesterLocation: '',
+        wasteType: '',
+        customWasteType: '',
+        quantity: '',
+        unit: 'kg',
+        preferredPickupTime: '',
+        description: '',
+        offeredPrice: '',
+        totalOffer: '',
+    });
+    const [formErrors, setFormErrors] = useState({});
+    const [submitLoading, setSubmitLoading] = useState(false);
+
+    // District options
+    const districts = [
+        { value: "colombo", label: "Colombo" },
+        { value: "gampaha", label: "Gampaha" },
+        { value: "kalutara", label: "Kalutara" },
+        { value: "kandy", label: "Kandy" },
+        { value: "matale", label: "Matale" },
+        { value: "nuwara_eliya", label: "Nuwara Eliya" },
+        { value: "galle", label: "Galle" },
+        { value: "matara", label: "Matara" },
+        { value: "hambantota", label: "Hambantota" },
+        { value: "jaffna", label: "Jaffna" },
+        { value: "kilinochchi", label: "Kilinochchi" },
+        { value: "mannar", label: "Mannar" },
+        { value: "vavuniya", label: "Vavuniya" },
+        { value: "mullaitivu", label: "Mullaitivu" },
+        { value: "batticaloa", label: "Batticaloa" },
+        { value: "ampara", label: "Ampara" },
+        { value: "trincomalee", label: "Trincomalee" },
+        { value: "kurunegala", label: "Kurunegala" },
+        { value: "puttalam", label: "Puttalam" },
+        { value: "anuradhapura", label: "Anuradhapura" },
+        { value: "polonnaruwa", label: "Polonnaruwa" },
+        { value: "badulla", label: "Badulla" },
+        { value: "monaragala", label: "Monaragala" },
+        { value: "ratnapura", label: "Ratnapura" },
+        { value: "kegalle", label: "Kegalle" },
+    ];
+
+    // Waste type options
+    const wasteTypes = [
+        { value: "Organic Waste", label: "Organic Waste" },
+        { value: "Vegetable Waste", label: "Vegetable Waste" },
+        { value: "Fruit Waste", label: "Fruit Waste" },
+        { value: "Crop Residue", label: "Crop Residue" },
+        { value: "Animal Feed Waste", label: "Animal Feed Waste" },
+        { value: "Plastic", label: "Plastic" },
+        { value: "Metal", label: "Metal" },
+        { value: "Glass", label: "Glass" },
+        { value: "Paper", label: "Paper" },
+        { value: "Other", label: "Other (Specify)" },
+    ];
+
+    // Pickup time options
+    const pickupTimes = [
+        { value: "Morning (6:00 AM - 12:00 PM)", label: "Morning (6:00 AM - 12:00 PM)" },
+        { value: "Afternoon (12:00 PM - 6:00 PM)", label: "Afternoon (12:00 PM - 6:00 PM)" },
+        { value: "Evening (6:00 PM - 10:00 PM)", label: "Evening (6:00 PM - 10:00 PM)" },
+        { value: "Anytime", label: "Anytime" },
+    ];
+
+    // Unit options
+    const units = [
+        { value: "kg", label: "Kilograms (kg)" },
+        { value: "ton", label: "Tons (ton)" },
+        { value: "lbs", label: "Pounds (lbs)" },
+        { value: "quintal", label: "Quintals (quintal)" },
+    ];
+
+    // Load requests on component mount
+    useEffect(() => {
+        loadRequests();
+    }, []);
+
+    const loadRequests = async () => {
+        try {
+            setLoading(true);
+            const data = await getMyRequests();
+            setRequests(data);
+        } catch (error) {
+            console.error('Error loading requests:', error);
+            // You could add toast notification here
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+
+        // Auto-calculate total offer when quantity or price changes
+        if (name === 'quantity' || name === 'offeredPrice') {
+            const qty = name === 'quantity' ? value.replace(/[^0-9.]/g, '') : formData.quantity.replace(/[^0-9.]/g, '');
+            const price = name === 'offeredPrice' ? parseFloat(value) : parseFloat(formData.offeredPrice);
+            
+            if (qty && !isNaN(qty) && !isNaN(price) && parseFloat(qty) > 0 && price > 0) {
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value,
+                    totalOffer: (parseFloat(qty) * price).toFixed(2)
+                }));
+            } else {
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            }
+        }
+
+        // Clear error for this field
+        if (formErrors[name]) {
+            setFormErrors(prev => ({
+                ...prev,
+                [name]: ''
+            }));
+        }
+    };
+
+    const validateForm = () => {
+        const errors = {};
+        
+        if (!formData.requesterLocation.trim()) {
+            errors.requesterLocation = 'Location is required';
+        }
+        
+        if (!formData.wasteType.trim()) {
+            errors.wasteType = 'Waste type is required';
+        }
+
+        if (formData.wasteType === 'Other' && !formData.customWasteType.trim()) {
+            errors.customWasteType = 'Please specify the waste type';
+        }
+        
+        if (!formData.quantity || parseFloat(formData.quantity) <= 0) {
+            errors.quantity = 'Valid quantity is required';
+        }
+        
+        if (!formData.offeredPrice || parseFloat(formData.offeredPrice) <= 0) {
+            errors.offeredPrice = 'Valid price is required';
+        }
+        
+        if (!formData.totalOffer || parseFloat(formData.totalOffer) <= 0) {
+            errors.totalOffer = 'Valid total offer is required';
+        }
+
+        if (formData.description && formData.description.length > 1000) {
+            errors.description = 'Description cannot exceed 1000 characters';
+        }
+        
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!validateForm()) {
+            return;
+        }
+
+        try {
+            setSubmitLoading(true);
+            
+            // Prepare the request data
+            const requestData = {
+                requesterLocation: formData.requesterLocation.trim(),
+                wasteType: formData.wasteType === 'Other' ? formData.customWasteType.trim() : formData.wasteType.trim(),
+                quantity: `${formData.quantity.replace(/[^0-9.]/g, '')} ${formData.unit}`,
+                preferredPickupTime: formData.preferredPickupTime.trim() || null,
+                description: formData.description.trim() || null,
+                offeredPrice: parseFloat(formData.offeredPrice),
+                totalOffer: parseFloat(formData.totalOffer),
+            };
+
+            await createRequest(requestData);
+            
+            // Reset form and close modal
+            setFormData({
+                requesterLocation: '',
+                wasteType: '',
+                customWasteType: '',
+                quantity: '',
+                unit: 'kg',
+                preferredPickupTime: '',
+                description: '',
+                offeredPrice: '',
+                totalOffer: '',
+            });
+            setShowCreateModal(false);
+            
+            // Reload requests
+            await loadRequests();
+            
+            // You could add success toast here
+        } catch (error) {
+            console.error('Error creating request:', error);
+            // You could add error toast here
+        } finally {
+            setSubmitLoading(false);
+        }
+    };
+
+    const handleCancelRequest = async (requestId) => {
+        if (!window.confirm('Are you sure you want to cancel this request?')) {
+            return;
+        }
+
+        try {
+            await cancelRequest(requestId);
+            await loadRequests();
+            // You could add success toast here
+        } catch (error) {
+            console.error('Error canceling request:', error);
+            alert(error.response?.data?.message || 'Failed to cancel request');
+        }
+    };
+
+    const handleViewDetails = (request) => {
+        setSelectedRequest(request);
+        setShowDetailsModal(true);
+    };
+
+    const closeDetailsModal = () => {
+        setShowDetailsModal(false);
+        setSelectedRequest(null);
+    };
+
+    const getStatusIcon = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'pending':
+                return <ClockIcon className="h-5 w-5 text-yellow-500" />;
+            case 'accepted':
+                return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
+            case 'rejected':
+                return <XCircleIcon className="h-5 w-5 text-red-500" />;
+            default:
+                return <ClockIcon className="h-5 w-5 text-gray-500" />;
+        }
+    };
+
+    const getStatusColor = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+            case 'accepted': return 'bg-green-100 text-green-800 border-green-200';
+            case 'rejected': return 'bg-red-100 text-red-800 border-red-200';
+            default: return 'bg-gray-100 text-gray-800 border-gray-200';
+        }
+    };
+
+    const filteredRequests = requests.filter(request => {
+        const matchesSearch = 
+            request.wasteType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            request.requesterLocation?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            request.description?.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        const matchesStatus = statusFilter === 'all' || 
+            request.status?.toLowerCase() === statusFilter.toLowerCase();
+        
+        return matchesSearch && matchesStatus;
+    });
+
+    return (
+        <div className="p-4 bg-gray-50 min-h-screen">
+            <div className="max-w-7xl mx-auto space-y-4">
+                {/* Header */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                    <div className="flex justify-between items-center mb-4">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-800">My Waste Requests</h1>
+                            <p className="text-gray-500 text-sm mt-1">
+                                Create and manage your waste collection requests
+                            </p>
+                        </div>
+                        <Button
+                            onClick={() => setShowCreateModal(true)}
+                            className="bg-green-500 hover:bg-green-600 flex items-center gap-2"
+                        >
+                            <PlusIcon className="h-5 w-5" />
+                            New Request
+                        </Button>
+                    </div>
+
+                    {/* Search and Filters */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <MagnifyingGlassIcon className="h-4 w-4 text-gray-400" />
+                            </div>
+                            <Input
+                                type="text"
+                                placeholder="Search requests..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-9"
+                            />
+                        </div>
+
+                        <Select
+                            value={statusFilter}
+                            onValueChange={(value) => setStatusFilter(value)}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Status</SelectItem>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="accepted">Accepted</SelectItem>
+                                <SelectItem value="rejected">Rejected</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                {/* Requests List */}
+                <div className="space-y-3">
+                    {loading ? (
+                        <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                            <p className="mt-3 text-gray-500 text-sm">Loading requests...</p>
+                        </div>
+                    ) : filteredRequests.length === 0 ? (
+                        <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
+                            <div className="text-5xl mb-3">📋</div>
+                            <h3 className="text-lg font-semibold text-gray-800 mb-2">No Requests Found</h3>
+                            <p className="text-gray-500 text-sm mb-4">
+                                {searchTerm || statusFilter !== 'all'
+                                    ? 'Try adjusting your filters'
+                                    : 'Create your first waste collection request'}
+                            </p>
+                            {!searchTerm && statusFilter === 'all' && (
+                                <Button
+                                    onClick={() => setShowCreateModal(true)}
+                                    className="bg-green-500 hover:bg-green-600"
+                                >
+                                    <PlusIcon className="h-4 w-4 mr-2" />
+                                    Create Request
+                                </Button>
+                            )}
+                        </div>
+                    ) : (
+                        filteredRequests.map((request) => (
+                            <div
+                                key={request.id}
+                                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200"
+                            >
+                                <div className="p-4">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <h3 className="font-semibold text-lg text-gray-900">
+                                                    {request.wasteType}
+                                                </h3>
+                                                <div className="flex items-center">
+                                                    {getStatusIcon(request.status)}
+                                                    <Badge 
+                                                        className={`ml-2 ${getStatusColor(request.status)}`}
+                                                        variant="outline"
+                                                    >
+                                                        {request.status}
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                            <p className="text-sm text-gray-600 mb-2">
+                                                📍 {request.requesterLocation}
+                                            </p>
+                                            {request.description && (
+                                                <p className="text-sm text-gray-600 italic">
+                                                    "{request.description}"
+                                                </p>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="ml-4 flex gap-2">
+                                            <Button
+                                                onClick={() => handleViewDetails(request)}
+                                                variant="outline"
+                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
+                                            >
+                                                <EyeIcon className="h-4 w-4 mr-2" />
+                                                View Details
+                                            </Button>
+                                            {request.status?.toLowerCase() === 'pending' && (
+                                                <Button
+                                                    onClick={() => handleCancelRequest(request.id)}
+                                                    variant="outline"
+                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                                                >
+                                                    <TrashIcon className="h-4 w-4 mr-2" />
+                                                    Cancel
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                                        <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                            <div className="flex items-center gap-2 text-gray-600 text-xs mb-1">
+                                                <ScaleIcon className="h-4 w-4" />
+                                                <span className="font-medium">Quantity</span>
+                                            </div>
+                                            <p className="text-gray-900 font-semibold">{request.quantity}</p>
+                                        </div>
+
+                                        <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                            <div className="flex items-center gap-2 text-gray-600 text-xs mb-1">
+                                                <CurrencyDollarIcon className="h-4 w-4" />
+                                                <span className="font-medium">Price/Unit</span>
+                                            </div>
+                                            <p className="text-gray-900 font-semibold">Rs {request.offeredPrice}</p>
+                                        </div>
+
+                                        <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                                            <div className="flex items-center gap-2 text-green-700 text-xs mb-1">
+                                                <CurrencyDollarIcon className="h-4 w-4" />
+                                                <span className="font-medium">Total Offer</span>
+                                            </div>
+                                            <p className="text-green-900 font-bold">Rs {request.totalOffer}</p>
+                                        </div>
+
+                                        <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                            <div className="flex items-center gap-2 text-gray-600 text-xs mb-1">
+                                                <ClockIcon className="h-4 w-4" />
+                                                <span className="font-medium">Pickup Time</span>
+                                            </div>
+                                            <p className="text-gray-900 font-semibold text-sm">
+                                                {request.preferredPickupTime || 'Flexible'}
+                                            </p>
+                                        </div>
+
+                                        <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                                            <div className="flex items-center gap-2 text-gray-600 text-xs mb-1">
+                                                <CalendarIcon className="h-4 w-4" />
+                                                <span className="font-medium">Requested</span>
+                                            </div>
+                                            <p className="text-gray-900 font-semibold text-sm">
+                                                {new Date(request.requestDate).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+
+            {/* Create Request Modal */}
+            <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold text-gray-800">
+                            Create New Waste Request
+                        </DialogTitle>
+                        <DialogDescription>
+                            Fill in the details to create a new waste collection request
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                        {/* Location - Searchable Dropdown (Popover + Command) */}
+                        <div className="space-y-2">
+                            <Label htmlFor="location">
+                                Location (District) <span className="text-red-500">*</span>
+                            </Label>
+                            <Popover open={locationOpen} onOpenChange={setLocationOpen}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        aria-expanded={locationOpen}
+                                        className={cn(
+                                            "w-full justify-between",
+                                            !formData.requesterLocation && "text-muted-foreground",
+                                            formErrors.requesterLocation && "border-red-500"
+                                        )}
+                                    >
+                                        <div className="flex items-center">
+                                            <IoLocationOutline className="h-4 w-4 mr-2" />
+                                            {formData.requesterLocation || "Select district"}
+                                        </div>
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full p-0">
+                                    <Command>
+                                        <CommandInput placeholder="Search district..." />
+                                        <CommandList>
+                                            <CommandEmpty>No district found.</CommandEmpty>
+                                            <CommandGroup>
+                                                {districts
+                                                    .sort((a, b) => a.label.localeCompare(b.label))
+                                                    .map((district) => (
+                                                        <CommandItem
+                                                            key={district.value}
+                                                            value={district.value}
+                                                            onSelect={(currentValue) => {
+                                                                const selectedDistrict = districts.find(
+                                                                    (d) => d.value === currentValue
+                                                                );
+                                                                setFormData({
+                                                                    ...formData,
+                                                                    requesterLocation: selectedDistrict?.label || "",
+                                                                });
+                                                                setLocationOpen(false);
+                                                                if (formErrors.requesterLocation) {
+                                                                    setFormErrors({
+                                                                        ...formErrors,
+                                                                        requesterLocation: "",
+                                                                    });
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Check
+                                                                className={cn(
+                                                                    "mr-2 h-4 w-4",
+                                                                    formData.requesterLocation === district.label
+                                                                        ? "opacity-100"
+                                                                        : "opacity-0"
+                                                                )}
+                                                            />
+                                                            {district.label}
+                                                        </CommandItem>
+                                                    ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                            {formErrors.requesterLocation && (
+                                <p className="text-red-500 text-xs mt-1">{formErrors.requesterLocation}</p>
+                            )}
+                        </div>
+
+                        {/* Waste Type - Select Dropdown */}
+                        <div className="space-y-2">
+                            <Label htmlFor="wasteType">
+                                Waste Type <span className="text-red-500">*</span>
+                            </Label>
+                            <Select
+                                value={formData.wasteType}
+                                onValueChange={(value) => {
+                                    setFormData({ ...formData, wasteType: value });
+                                    if (formErrors.wasteType) {
+                                        setFormErrors({ ...formErrors, wasteType: "" });
+                                    }
+                                }}
+                            >
+                                <SelectTrigger className={cn(
+                                    "w-full",
+                                    formErrors.wasteType && "border-red-500"
+                                )}>
+                                    <SelectValue placeholder="Select waste type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {wasteTypes.map((type) => (
+                                        <SelectItem key={type.value} value={type.value}>
+                                            {type.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {formErrors.wasteType && (
+                                <p className="text-red-500 text-xs mt-1">{formErrors.wasteType}</p>
+                            )}
+                        </div>
+
+                        {/* Custom Waste Type (shown only when "Other" is selected) */}
+                        {formData.wasteType === 'Other' && (
+                            <div className="space-y-2">
+                                <Label htmlFor="customWasteType">
+                                    Specify Waste Type <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="customWasteType"
+                                    name="customWasteType"
+                                    value={formData.customWasteType}
+                                    onChange={handleInputChange}
+                                    placeholder="e.g., Mixed Agricultural Waste"
+                                    className={formErrors.customWasteType ? 'border-red-500' : ''}
+                                />
+                                {formErrors.customWasteType && (
+                                    <p className="text-red-500 text-xs mt-1">{formErrors.customWasteType}</p>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Quantity and Unit */}
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="col-span-2 space-y-2">
+                                <Label htmlFor="quantity">
+                                    Quantity <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="quantity"
+                                    name="quantity"
+                                    type="number"
+                                    value={formData.quantity}
+                                    onChange={handleInputChange}
+                                    placeholder="e.g., 280, 500"
+                                    step="0.01"
+                                    min="0"
+                                    className={formErrors.quantity ? 'border-red-500' : ''}
+                                />
+                                {formErrors.quantity && (
+                                    <p className="text-red-500 text-xs mt-1">{formErrors.quantity}</p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="unit">
+                                    Unit <span className="text-red-500">*</span>
+                                </Label>
+                                <Select
+                                    value={formData.unit}
+                                    onValueChange={(value) => {
+                                        setFormData({ ...formData, unit: value });
+                                    }}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select unit" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {units.map((unit) => (
+                                            <SelectItem key={unit.value} value={unit.value}>
+                                                {unit.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        {/* Price and Total in a grid */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="offeredPrice">
+                                    Price per {formData.unit} (Rs) <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="offeredPrice"
+                                    name="offeredPrice"
+                                    type="number"
+                                    value={formData.offeredPrice}
+                                    onChange={handleInputChange}
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="e.g., 25.00"
+                                    className={formErrors.offeredPrice ? 'border-red-500' : ''}
+                                />
+                                {formErrors.offeredPrice && (
+                                    <p className="text-red-500 text-xs mt-1">{formErrors.offeredPrice}</p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="totalOffer">
+                                    Total Offer (Rs) <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="totalOffer"
+                                    name="totalOffer"
+                                    type="number"
+                                    value={formData.totalOffer}
+                                    onChange={handleInputChange}
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="Auto-calculated"
+                                    className={cn(
+                                        "bg-gray-50",
+                                        formErrors.totalOffer && "border-red-500"
+                                    )}
+                                    readOnly
+                                />
+                                {formErrors.totalOffer && (
+                                    <p className="text-red-500 text-xs mt-1">{formErrors.totalOffer}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Preferred Pickup Time - Select Dropdown */}
+                        <div className="space-y-2">
+                            <Label htmlFor="preferredPickupTime">Preferred Pickup Time</Label>
+                            <Select
+                                value={formData.preferredPickupTime}
+                                onValueChange={(value) => {
+                                    setFormData({ ...formData, preferredPickupTime: value });
+                                }}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select pickup time" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {pickupTimes.map((time) => (
+                                        <SelectItem key={time.value} value={time.value}>
+                                            {time.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Description */}
+                        <div className="space-y-2">
+                            <Label htmlFor="description">Description</Label>
+                            <Textarea
+                                id="description"
+                                name="description"
+                                value={formData.description}
+                                onChange={handleInputChange}
+                                rows={3}
+                                maxLength={1000}
+                                placeholder="Additional details about the waste..."
+                                className={formErrors.description ? 'border-red-500' : ''}
+                            />
+                            <div className="flex justify-between items-center">
+                                {formErrors.description && (
+                                    <p className="text-red-500 text-xs">{formErrors.description}</p>
+                                )}
+                                <p className="text-gray-400 text-xs ml-auto">
+                                    {formData.description.length}/1000 characters
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex gap-3 pt-4 border-t">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setShowCreateModal(false)}
+                                className="flex-1"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={submitLoading}
+                                className="flex-1 bg-green-500 hover:bg-green-600"
+                            >
+                                {submitLoading ? 'Creating...' : 'Create Request'}
+                            </Button>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Details Modal */}
+            <Dialog open={showDetailsModal} onOpenChange={closeDetailsModal}>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-2xl">
+                            <EyeIcon className="h-6 w-6 text-blue-600" />
+                            Request Details
+                        </DialogTitle>
+                    </DialogHeader>
+
+                    {selectedRequest && (
+                        <div className="space-y-6 py-4">
+                            {/* Status Badge */}
+                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                    {getStatusIcon(selectedRequest.status)}
+                                    <div>
+                                        <p className="text-sm text-gray-600">Status</p>
+                                        <Badge 
+                                            className={`${getStatusColor(selectedRequest.status)} mt-1`}
+                                            variant="outline"
+                                        >
+                                            {selectedRequest.status}
+                                        </Badge>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm text-gray-600">Request ID</p>
+                                    <p className="font-semibold text-gray-900">#{selectedRequest.id}</p>
+                                </div>
+                            </div>
+
+                            {/* Waste Information */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-4 border rounded-lg">
+                                    <p className="text-sm text-gray-600 mb-1">Waste Type</p>
+                                    <p className="font-semibold text-lg">{selectedRequest.wasteType}</p>
+                                </div>
+                                <div className="p-4 border rounded-lg">
+                                    <p className="text-sm text-gray-600 mb-1">Quantity</p>
+                                    <div className="flex items-center gap-2">
+                                        <ScaleIcon className="h-5 w-5 text-gray-500" />
+                                        <p className="font-semibold text-lg">{selectedRequest.quantity}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Location and Pickup */}
+                            <div className="space-y-3">
+                                <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
+                                    <div className="flex-shrink-0">
+                                        <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">Location</p>
+                                        <p className="font-medium text-gray-900">{selectedRequest.requesterLocation}</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg">
+                                    <CalendarIcon className="h-5 w-5 text-green-600 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-sm text-gray-600">Preferred Pickup Time</p>
+                                        <p className="font-medium text-gray-900">{selectedRequest.preferredPickupTime}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Price Information */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-4 border-2 border-green-200 rounded-lg bg-green-50">
+                                    <p className="text-sm text-gray-600 mb-1">Price per Unit</p>
+                                    <div className="flex items-center gap-2">
+                                        <CurrencyDollarIcon className="h-5 w-5 text-green-600" />
+                                        <p className="font-bold text-xl text-green-700">Rs {selectedRequest.offeredPrice}</p>
+                                    </div>
+                                </div>
+                                <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
+                                    <p className="text-sm text-gray-600 mb-1">Total Offer</p>
+                                    <div className="flex items-center gap-2">
+                                        <CurrencyDollarIcon className="h-5 w-5 text-blue-600" />
+                                        <p className="font-bold text-xl text-blue-700">Rs {selectedRequest.totalOffer}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Description */}
+                            {selectedRequest.description && (
+                                <div className="p-4 border rounded-lg bg-gray-50">
+                                    <p className="text-sm text-gray-600 mb-2">Description</p>
+                                    <p className="text-gray-900 whitespace-pre-wrap">{selectedRequest.description}</p>
+                                </div>
+                            )}
+
+                            {/* Requester Information */}
+                            <div className="p-4 border rounded-lg bg-purple-50">
+                                <p className="text-sm text-gray-600 mb-2">Requester</p>
+                                <p className="font-semibold text-gray-900">{selectedRequest.requesterName}</p>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-3 pt-4 border-t">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={closeDetailsModal}
+                                    className="flex-1"
+                                >
+                                    Close
+                                </Button>
+                                {selectedRequest.status?.toLowerCase() === 'pending' && (
+                                    <Button
+                                        onClick={() => {
+                                            closeDetailsModal();
+                                            handleCancelRequest(selectedRequest.id);
+                                        }}
+                                        variant="outline"
+                                        className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                                    >
+                                        <TrashIcon className="h-4 w-4 mr-2" />
+                                        Cancel Request
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* CSS animations */}
+            <style jsx>{`
+                @keyframes scaleIn {
+                    from { 
+                        opacity: 0;
+                        transform: scale(0.95);
+                    }
+                    to { 
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+                
+                .animate-scaleIn {
+                    animation: scaleIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+                }
+            `}</style>
+        </div>
+    );
+}

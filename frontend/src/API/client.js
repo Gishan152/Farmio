@@ -61,9 +61,11 @@ api.interceptors.response.use(
       // Redirect based on role
       if (currentRole === 'moderator') {
         window.location.href = '/moderator/login';
-      } else {
-        // Default to admin login
+      } else if (currentRole === 'admin') {
         window.location.href = '/admin/login';
+      } else {
+        // Default to user login
+        window.location.href = '/login';
       }
     }
     return Promise.reject(error);

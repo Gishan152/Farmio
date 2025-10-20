@@ -12,6 +12,7 @@ public class RouterValidator {
             "/api/auth/",
             "/auth/login",
             "/auth/register",
+            "/api/payment/payhere/notify",
             "/actuator/health",
             "/api/warehouses", // Temporarily open for testing
             "/api/slots", // Temporarily open for testing

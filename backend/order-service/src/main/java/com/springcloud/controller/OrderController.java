@@ -30,15 +30,17 @@ public class OrderController {
      * Endpoint for buyer to make payment for an order
      */
     @PostMapping("/pay")
-    public ResponseEntity<Order> payForOrder(
+    public ResponseEntity<?> payForOrder(
             @RequestHeader("X-User-Id") String userId,
             @RequestHeader("X-User-Name") String username,
             @RequestHeader("X-Roles") String rolesCsv,
             @RequestBody PaymentRequest request
     ) {
-        var order = paymentService.makePayment(Long.valueOf(userId), request);
-        return ResponseEntity.ok(order);
+        // Updated to handle PaymentInitiationResponse DTO
+        var response = paymentService.makePayment(Long.valueOf(userId), request);
+        return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/create")
     public ResponseEntity<List<Order>> createOrder(
@@ -117,6 +119,20 @@ public class OrderController {
         return ResponseEntity.ok(order);
     }
 
+    /**
+     * Buyer marks an order as COMPLETED depending on transport/status rules
+     */
+    @PostMapping("/complete/{orderId}")
+    public ResponseEntity<Order> completeOrder(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Name") String username,
+            @RequestHeader("X-Roles") String rolesCsv,
+            @PathVariable("orderId") @NotNull Long orderId
+    ) {
+        var order = orderService.markCompleted(Long.valueOf(userId), orderId);
+        return ResponseEntity.ok(order);
+    }
+
     @PostMapping("/get")
     public ResponseEntity<List<Order>> getOrders(
             @RequestHeader("X-User-Id") String userId,
@@ -127,6 +143,53 @@ public class OrderController {
         var orderList = orderService.get(Long.valueOf(userId), rolesCsv);
 
         return ResponseEntity.ok(orderList);
+    }
+
+    // New: Farmer dashboards
+    @GetMapping("/farmer/awaiting-shipment")
+    public ResponseEntity<List<Order>> getFarmerAwaitingShipment(
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        return ResponseEntity.ok(orderService.getFarmerAwaitingShipment(Long.valueOf(userId)));
+    }
+
+    @GetMapping("/farmer/ongoing-shipment")
+    public ResponseEntity<List<Order>> getFarmerOngoingShipment(
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        return ResponseEntity.ok(orderService.getFarmerOngoingShipment(Long.valueOf(userId)));
+    }
+
+    @GetMapping("/farmer/paid-and-shipped")
+    public ResponseEntity<List<Order>> getFarmerPaidAndShipped(
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        return ResponseEntity.ok(orderService.getFarmerPaidAndShipped(Long.valueOf(userId)));
+    }
+
+    // New: transitions respecting transportation availability
+    @PostMapping("/farmer/mark-awaiting-pickup/{orderId}")
+    public ResponseEntity<Order> markAwaitingPickup(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable Long orderId
+    ) {
+        return ResponseEntity.ok(orderService.markAwaitingPickup(Long.valueOf(userId), orderId));
+    }
+
+    @PostMapping("/farmer/mark-in-transport/{orderId}")
+    public ResponseEntity<Order> markInTransportByFarmer(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable Long orderId
+    ) {
+        return ResponseEntity.ok(orderService.markInTransportByFarmer(Long.valueOf(userId), orderId));
+    }
+
+    @PostMapping("/farmer/mark-delivered/{orderId}")
+    public ResponseEntity<Order> markDeliveredByFarmer(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable Long orderId
+    ) {
+        return ResponseEntity.ok(orderService.markDeliveredByFarmer(Long.valueOf(userId), orderId));
     }
 
     @PostMapping("get-crops")
@@ -140,6 +203,44 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
+    /**
+     * Endpoint to get payment status by reference (calls payment-service via Feign)
+     */
+    @GetMapping("/payment-status/{reference}")
+    public ResponseEntity<?> getPaymentStatusByReference(@PathVariable String reference) {
+
+        System.out.println("Checking payment status for reference: " + reference);
+
+        try {
+            var statusResponse = paymentService.getPaymentStatusByReference(reference);
+            String status = null;
+            if (statusResponse instanceof ResponseEntity) {
+                Object body = ((ResponseEntity<?>) statusResponse).getBody();
+                if (body != null) status = body.toString();
+            } else if (statusResponse != null) {
+                status = statusResponse.toString();
+            }
+
+            System.out.println("Payment status for reference " + reference + ": " + status);
+
+            boolean isCompleted = "COMPLETED".equalsIgnoreCase(status);
+            if (isCompleted) {
+                // If payment is completed, update the order status to PROCESSING
+                try {
+                    Long orderId = Long.valueOf(reference); // assuming reference is orderId
+                    // orderService.markPaymentCompleted(orderId);
+                } catch (Exception ex) {
+                    // Optionally log or handle error
+                }
+            }
+
+            System.out.println("Is payment completed: " + isCompleted);
+
+            return ResponseEntity.ok(java.util.Collections.singletonMap("status", isCompleted));
+        } catch (Exception e) {
+            return ResponseEntity.ok(java.util.Collections.singletonMap("status", false));
+        }
+    }
 
 
 //    @PostMapping("/create")

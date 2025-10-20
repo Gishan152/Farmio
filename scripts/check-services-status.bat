@@ -28,8 +28,9 @@ set services[9]=Warehouse Service:8090
 set services[10]=Analytics Service:8091
 set services[11]=Chat Service:8092
 set services[12]=Payment Service:8093
+set services[13]=Notification Service:8094
 
-for /L %%i in (0,1,12) do (
+for /L %%i in (0,1,13) do (
     for /f "tokens=1,2 delims=:" %%a in ("!services[%%i]!") do (
         netstat -an | find "LISTENING" | find ":%%b " >nul
         if !errorlevel! equ 0 (

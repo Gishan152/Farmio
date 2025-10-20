@@ -150,6 +150,7 @@ import warehouseRoutes from './Routes/WarehouseRoutes';
 import adminRoutes from './Routes/AdminRoutes';
 import moderatorRoutes from './Routes/ModeratorRoutes';
 import { TempCommonProvider } from './Contexts/TempCommonContext';
+import PaymentContextProvider from './Contexts/Buyer/PaymentContext';
 
 
 let router = createBrowserRouter([
@@ -184,7 +185,9 @@ function App() {
 		<UserContextProvider>
 			<TempCommonProvider>
 				<GoogleMapsProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
-					<RouterProvider router={router} />
+					<PaymentContextProvider>
+						<RouterProvider router={router} />
+					</PaymentContextProvider>
 				</GoogleMapsProvider>
 			</TempCommonProvider>
 		</UserContextProvider>

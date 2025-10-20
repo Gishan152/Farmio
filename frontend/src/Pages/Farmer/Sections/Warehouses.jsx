@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Star, ShieldCheck, Search } from "lucide-react";
 import warehouesImg1 from "../../../Assets/Farmer/Warehouses/warehouse.webp";
 import warehouesImg2 from "../../../Assets/Farmer/Warehouses/warehouse2.webp";
+import { Link } from "react-router-dom";
 
 export function FarmerwarehousesLoader() {
     return [
@@ -178,7 +179,9 @@ export default function FarmerWarehouses() {
                                 ))}
                             </div>
                             <button className="block text-center mt-4 w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
-                                View Details
+                                <Link to={`./${w.id}`} className="block text-center w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+                                    View Details
+                                </Link>
                             </button>
                         </div>
                     </div>

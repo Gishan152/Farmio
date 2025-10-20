@@ -72,10 +72,11 @@ echo 10. Warehouse Service (Port 8090) - Warehouse
 echo 11. Analytics Service (Port 8091) - Analytics
 echo 12. Chat Service (Port 8092) - Chat/Messaging
 echo 13. Payment Service (Port 8093) - Payments
+echo 14. Notification Service (Port 8094) - Notifications
 echo.
 echo 0. Back to main menu
 echo.
-set /p service_choice="Enter service number to start (0-13): "
+set /p service_choice="Enter service number to start (0-14): "
 
 if "%service_choice%"=="0" goto menu
 if "%service_choice%"=="1" goto start_eureka
@@ -91,8 +92,9 @@ if "%service_choice%"=="10" goto start_warehouse
 if "%service_choice%"=="11" goto start_analytics
 if "%service_choice%"=="12" goto start_chat
 if "%service_choice%"=="13" goto start_payment
+if "%service_choice%"=="14" goto start_notification
 
-echo Invalid choice! Please enter a number between 0-13.
+echo Invalid choice! Please enter a number between 0-14.
 timeout /t 2 >nul
 goto start_specific
 
@@ -187,6 +189,13 @@ echo Payment Service started in new tab.
 timeout /t 3 >nul
 goto menu
 
+:start_notification
+echo Starting Notification Service...
+wt -w 0 nt -d "%~dp0../backend/notification-service" cmd /k "echo Starting Notification Service... && mvn spring-boot:run -Dspring.profiles.active=local"
+echo Notification Service started in new tab.
+timeout /t 3 >nul
+goto menu
+
 :stop_specific
 cls
 echo ============================================
@@ -234,6 +243,7 @@ echo - 8090 (Warehouse Service)
 echo - 8091 (Analytics Service)
 echo - 8092 (Chat Service)
 echo - 8093 (Payment Service)
+echo - 8094 (Notification Service)
 echo.
 set /p port="Enter port number (or 0 to cancel): "
 
@@ -290,6 +300,7 @@ echo - warehouse-service
 echo - analytic-service
 echo - chat-service
 echo - payment-service
+echo - notification-service
 echo.
 set /p service_name="Enter service name (or 'cancel' to go back): "
 
@@ -392,10 +403,11 @@ echo 10. Warehouse Service
 echo 11. Analytics Service
 echo 12. Chat Service
 echo 13. Payment Service
+echo 14. Notification Service
 echo.
 echo 0. Back to main menu
 echo.
-set /p build_choice="Enter service number to build (0-13): "
+set /p build_choice="Enter service number to build (0-14): "
 
 if "%build_choice%"=="0" goto menu
 if "%build_choice%"=="1" call :build_eureka & goto build_specific
@@ -411,8 +423,9 @@ if "%build_choice%"=="10" call :build_warehouse & goto build_specific
 if "%build_choice%"=="11" call :build_analytics & goto build_specific
 if "%build_choice%"=="12" call :build_chat & goto build_specific
 if "%build_choice%"=="13" call :build_payment & goto build_specific
+if "%build_choice%"=="14" call :build_notification & goto build_specific
 
-echo Invalid choice! Please enter a number between 0-13.
+echo Invalid choice! Please enter a number between 0-14.
 timeout /t 2 >nul
 goto build_specific
 
@@ -481,9 +494,14 @@ echo Building Payment Service...
 wt -w 0 nt -d "%~dp0../backend/payment-service" cmd /k "echo Building Payment Service... && mvn clean install -DskipTests"
 goto :eof
 
+:build_notification
+echo Building Notification Service...
+wt -w 0 nt -d "%~dp0../backend/notification-service" cmd /k "echo Building Notification Service... && mvn clean install -DskipTests"
+goto :eof
+
 :invalid
 echo.
-echo Invalid choice! Please enter a number between 0-13.
+echo Invalid choice! Please enter a number between 0-14.
 timeout /t 2 >nul
 goto menu
 

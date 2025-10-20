@@ -7,6 +7,7 @@ import CustomModal from "../../../Components/CustomModel";
 import wheat from "../../../Assets/Buyer/Crops/wheat.webp";
 import corn from "../../../Assets/Buyer/Crops/corn.jpeg";
 import api from "@/API/client";
+import { useUserContext } from "@/Contexts/UserContext";
 
 export default function OrderDetails() {
     const { orders, updateOrder, loading } = useOrderContext();
@@ -22,6 +23,35 @@ export default function OrderDetails() {
         isOpen: false,
         model: "",
     });
+
+    // Check for order_id in URL and trigger payment status check
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const redirectedOrderId = params.get('order_id');
+        if (redirectedOrderId) {
+            checkPaymentStatus();
+        }
+    }, [order]);
+
+    // Optionally, check payment status on mount or after payment
+    useEffect(() => {
+        checkPaymentStatus();
+    }, [order]);
+
+    // Check payment status and update order state
+    const checkPaymentStatus = async () => {
+        try {
+            if(order && order.status === "PENDING"){
+                const res = await api.get(`/api/order/payment-status/${orderId}`);
+                console.log('payment status response : ', res.data);
+                if (res.data && res.data.status === true) {
+                    updateOrder(orderId, { status: "PROCESSING" });
+                }
+            }
+        } catch (err) {
+            console.error("Failed to check payment status:", err);
+        }
+    };
 
     const openModel = (model) => {
         setModelDetails(prev => {
@@ -57,11 +87,51 @@ export default function OrderDetails() {
         try {
             // Call backend to make payment
             const res = await api.post('/api/order/pay', { orderId });
-            // Update local state with new order status and paymentId if present
-            if (res.data) {
-                updateOrder(orderId, { status: res.data.status, paymentId: res.data.paymentId });
+            console.log("init pay : ", res.data);
+            // return
+            // If all required PayHere params are present, create and submit a form
+            if (res.data && res.data.hash) {
+                // Required PayHere params from backend response
+                const params = {
+                    merchant_id: res.data.merchantId,
+                    return_url: `http://localhost:5173/buyer/orders/${orderId}`, // Hardcoded
+                    cancel_url: `http://localhost:5173/buyer/orders/${orderId}`, // Hardcoded
+                    notify_url: "https://nrvzmq9j-8080.asse.devtunnels.ms/api/payment/payhere/notify", // Hardcoded
+                    first_name: res.data.firstName,
+                    last_name: res.data.lastName,
+                    email: res.data.email,
+                    phone: res.data.phone,
+                    address: res.data.address,
+                    city: res.data.city,
+                    country: res.data.country,
+                    order_id: res.data.orderId,
+                    items: res.data.description,
+                    currency: res.data.currency,
+                    amount: Number(res.data.amount).toFixed(2),
+                    hash: res.data.hash,
+                    custom_1: res.data.paymentId
+                };
+
+                console.log("PayHere params: ", params);
+                // return
+                // Create form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'https://sandbox.payhere.lk/pay/checkout';
+                Object.entries(params).forEach(([key, value]) => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    form.appendChild(input);
+                });
+                document.body.appendChild(form);
+                form.submit();
+                // After redirect, you may want to check payment status
+                // Optionally, you can call checkPaymentStatus here or on return page
             } else {
-                updateOrder(orderId, { status: "PROCESSING" });
+                // Fallback: update local state if hash not present
+                updateOrder(orderId, { status: res.data?.status || "PROCESSING", paymentId: res.data?.paymentId });
             }
         } catch (err) {
             console.error("Payment failed:", err);
@@ -118,6 +188,17 @@ export default function OrderDetails() {
         closeModal();
     }
 
+    const handleMarkCompleted = async () => {
+        try {
+            await api.post(`/api/order/complete/${orderId}`);
+            updateOrder(orderId, { status: "COMPLETED" });
+        } catch (err) {
+            console.error("Error completing order: ", err);
+        } finally {
+            closeModal();
+        }
+    }
+
     const modelValues = {
         MAKE_PAYMENT: {
             title: "Make Payment",
@@ -154,9 +235,14 @@ export default function OrderDetails() {
             description: "Request release of funds held in escrow after confirmation.",
             submitText: "Request Funds",
             onSubmit: handleRefundRequest
+        },
+        COMPLETE_ORDER: {
+            title: "Mark Order as Completed",
+            description: "Confirm you've received the goods. This will release payment to the farmer.",
+            submitText: "Mark as Completed",
+            onSubmit: handleMarkCompleted
         }
     };
-
 
     return (
         <div className="bg-gray-50 min-h-screen">
@@ -229,6 +315,13 @@ export default function OrderDetails() {
                                     {(order.status === "IN_TRANSPORT" || order.status === "DELIVERED") && <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold shadow" onClick={handleViewTransport}>View Transport</button>}
                                     {(order.status === "PENDING" || order.status === "PROCESSING" || order.status === "AWAITING_PICKUP") && (
                                         <button className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold shadow" onClick={() => openModel("CANCEL_ORDER")}>Cancel Order</button>
+                                    )}
+                                    {/* Buyer can mark as COMPLETED under specific transport/state combinations */}
+                                    {(
+                                        (order.transport === "BY_BUYER" && order.status === "AWAITING_PICKUP") ||
+                                        ((order.transport === "BY_FARMER" || order.transport === "BY_BUYER_SYSTEM" || order.transport === "BY_FARMER_SYSTEM") && order.status === "IN_TRANSPORT")
+                                    ) && (
+                                        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow" onClick={() => openModel("COMPLETE_ORDER")}>Mark as Completed</button>
                                     )}
                                     {order.status === "IN_TRANSPORT" && (
                                         <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow" onClick={() => openModel("CONFIRM_DELIVERY")}>Confirm Delivery</button>

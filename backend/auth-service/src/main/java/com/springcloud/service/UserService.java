@@ -102,6 +102,12 @@ public class UserService {
                 .collect(java.util.stream.Collectors.toList());
     }
 
+    public PublicUserData getUserById(Long userId) {
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+        return new PublicUserData(user.getUsername(), user.getId(), user.getEmail(), user.getStatus(), user.getPhoneNo());
+    }
+
     public void deactivateUser(UserRequest request) {
         // TODO Auto-generated method stub
         var user = userRepository.findByUsername(request.username())

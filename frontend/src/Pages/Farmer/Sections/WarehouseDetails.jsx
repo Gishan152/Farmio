@@ -122,7 +122,7 @@ export default function FarmerWarehouseDetails() {
     };
 
     return (
-        <div className="p-6 max-w-6xl mx-auto space-y-6">
+        <div className="p-6 max-w-4xl mx-auto space-y-6">
             {/* Header */}
             <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="flex flex-col lg:flex-row lg:items-start gap-6">

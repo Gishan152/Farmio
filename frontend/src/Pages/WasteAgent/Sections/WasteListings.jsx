@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	Table,
 	TableBody,
@@ -22,13 +22,13 @@ import {
 } from "@/Components/WasteUI/select";
 import { Label } from "@/Components/WasteUI/label";
 import { HiDotsVertical } from "react-icons/hi";
-import { 
-	ChevronsUpDown, 
-	Check, 
-	CheckCircle, 
-	RotateCcw, 
-	DollarSign, 
-	Banknote 
+import {
+	ChevronsUpDown,
+	Check,
+	CheckCircle,
+	RotateCcw,
+	DollarSign,
+	Banknote,
 } from "lucide-react";
 import {
 	DropdownMenu,
@@ -58,486 +58,10 @@ import { Toaster, toast } from "sonner";
 import { Input } from "@/Components/WasteUI/input";
 import { CardDescription, CardTitle } from "@/Components/WasteUI/card";
 import { PopoverAnchor } from "@radix-ui/react-popover";
+import api from "@/API/client";
 
 const WasteListings = () => {
-	// These are accepted requests that now show as listings
-	const [listings, setListings] = useState([
-		{
-			id: 1,
-			requesterId: "farmer001",
-			wasteType: "Rice Straw Residue",
-			farmer: "Kumara Silva",
-			location: "Anuradhapura",
-			quantity: "350 kg",
-			pricePerKg: "$0.14",
-			totalValue: "$49",
-			description: "Rice straw waste from recent harvest - clean and dry",
-			availableDate: "2025-01-08",
-			expiryDate: "2025-01-15",
-			pickupWindow: "Morning (8AM - 12PM)",
-			status: "Accepted",
-			farmRating: 4.5,
-			contactNumber: "+94 71 234 5678",
-			acceptedDate: "2025-01-05",
-			additionalNotes: "Farm located 2km from main road. Easy truck access available."
-		},
-		{
-			id: 2,
-			requesterId: "farmer003",
-			wasteType: "Tea Leaf Waste",
-			farmer: "Nimal Jayawardena",
-			location: "Kandy",
-			quantity: "280 kg",
-			pricePerKg: "$0.09",
-			totalValue: "$25.20",
-			description: "Used tea leaves and stems from estate processing",
-			availableDate: "2025-01-09",
-			expiryDate: "2025-01-20",
-			pickupWindow: "Afternoon (1PM - 5PM)",
-			status: "Accepted",
-			farmRating: 4.9,
-			contactNumber: "+94 75 456 7890",
-			acceptedDate: "2025-01-06",
-			additionalNotes: "Weekly recurring collection. Well-organized waste storage."
-		},
-		{
-			id: 3,
-			requesterId: "farmer005",
-			wasteType: "Coconut Husk Fiber",
-			farmer: "Sunil Perera",
-			location: "Galle",
-			quantity: "420 kg",
-			pricePerKg: "$0.11",
-			totalValue: "$46.20",
-			description: "Fresh coconut husk and coir fiber from processing plant",
-			availableDate: "2025-01-10",
-			expiryDate: "2025-01-25",
-			pickupWindow: "Morning (7AM - 11AM)",
-			status: "In Progress",
-			farmRating: 4.7,
-			contactNumber: "+94 77 789 0123",
-			acceptedDate: "2025-01-07",
-			additionalNotes: "Large quantities available. Truck parking available on site."
-		},
-		{
-			id: 4,
-			requesterId: "farmer007",
-			wasteType: "Banana Plant Waste",
-			farmer: "Chaminda Rathnayake",
-			location: "Matale",
-			quantity: "150 kg",
-			pricePerKg: "$0.16",
-			totalValue: "$24",
-			description: "Banana stems and leaves from plantation maintenance",
-			availableDate: "2025-01-11",
-			expiryDate: "2025-01-18",
-			pickupWindow: "Afternoon (2PM - 6PM)",
-			status: "Accepted",
-			farmRating: 4.3,
-			contactNumber: "+94 78 456 1234",
-			acceptedDate: "2025-01-08",
-			additionalNotes: "Organic farm. Regular monthly collection needed."
-		},
-		{
-			id: 5,
-			requesterId: "farmer009",
-			wasteType: "Sugarcane Bagasse",
-			farmer: "Priyantha Fernando",
-			location: "Kurunegala",
-			quantity: "500 kg",
-			pricePerKg: "$0.08",
-			totalValue: "$40",
-			description: "Dried sugarcane bagasse from juice extraction",
-			availableDate: "2025-01-12",
-			expiryDate: "2025-01-30",
-			pickupWindow: "Morning (6AM - 10AM)",
-			status: "Completed",
-			farmRating: 4.8,
-			contactNumber: "+94 72 345 6789",
-			acceptedDate: "2025-01-04",
-			additionalNotes: "High-quality bagasse. Consistent supplier with good storage facilities."
-		},
-		{
-			id: 6,
-			requesterId: "farmer011",
-			wasteType: "Paddy Husk",
-			farmer: "Lakmal Wickramasinghe",
-			location: "Polonnaruwa",
-			quantity: "320 kg",
-			pricePerKg: "$0.12",
-			totalValue: "$38.40",
-			description: "Clean paddy husk from rice milling operations",
-			availableDate: "2025-01-13",
-			expiryDate: "2025-01-22",
-			pickupWindow: "Evening (4PM - 8PM)",
-			status: "Accepted",
-			farmRating: 4.6,
-			contactNumber: "+94 76 123 4567",
-			acceptedDate: "2025-01-09",
-			additionalNotes: "Mill located near main highway. Easy access for large vehicles."
-		},
-		{
-			id: 7,
-			requesterId: "farmer013",
-			wasteType: "Vegetable Crop Residue",
-			farmer: "Sanduni Alwis",
-			location: "Nuwara Eliya",
-			quantity: "180 kg",
-			pricePerKg: "$0.18",
-			totalValue: "$32.40",
-			description: "Mixed vegetable waste from carrot and cabbage farming",
-			availableDate: "2025-01-14",
-			expiryDate: "2025-01-21",
-			pickupWindow: "Morning (9AM - 1PM)",
-			status: "In Progress",
-			farmRating: 4.4,
-			contactNumber: "+94 77 890 1234",
-			acceptedDate: "2025-01-10",
-			additionalNotes: "High-altitude farm. Quality organic waste suitable for composting."
-		},
-		{
-			id: 8,
-			requesterId: "farmer015",
-			wasteType: "Rubber Tree Leaves",
-			farmer: "Jagath Ranasinghe",
-			location: "Ratnapura",
-			quantity: "240 kg",
-			pricePerKg: "$0.13",
-			totalValue: "$31.20",
-			description: "Fallen rubber tree leaves and small branches",
-			availableDate: "2025-01-15",
-			expiryDate: "2025-01-28",
-			pickupWindow: "Afternoon (1PM - 5PM)",
-			status: "Accepted",
-			farmRating: 4.2,
-			contactNumber: "+94 75 567 8901",
-			acceptedDate: "2025-01-11",
-			additionalNotes: "Rubber plantation with regular leaf fall. Seasonal collection available."
-		},
-		{
-			id: 9,
-			requesterId: "farmer017",
-			wasteType: "Fruit Processing Waste",
-			farmer: "Ranjith Gunawardena",
-			location: "Hambantota",
-			quantity: "300 kg",
-			pricePerKg: "$0.15",
-			totalValue: "$45",
-			description: "Mango and papaya peels from fruit processing facility",
-			availableDate: "2025-01-16",
-			expiryDate: "2025-01-23",
-			pickupWindow: "Morning (8AM - 12PM)",
-			status: "Completed",
-			farmRating: 4.9,
-			contactNumber: "+94 78 234 5678",
-			acceptedDate: "2025-01-06",
-			additionalNotes: "Processing facility with consistent waste generation. High nutritional value."
-		},
-		{
-			id: 10,
-			requesterId: "farmer019",
-			wasteType: "Corn Stalks and Husks",
-			farmer: "Mahinda Bandara",
-			location: "Badulla",
-			quantity: "380 kg",
-			pricePerKg: "$0.10",
-			totalValue: "$38",
-			description: "Dried corn stalks and husks from recent harvest",
-			availableDate: "2025-01-17",
-			expiryDate: "2025-01-31",
-			pickupWindow: "Morning (7AM - 11AM)",
-			status: "Accepted",
-			farmRating: 4.1,
-			contactNumber: "+94 71 345 6789",
-			acceptedDate: "2025-01-12",
-			additionalNotes: "Hill country farm. Seasonal corn harvest waste. Good for biofuel production."
-		},
-		{
-			id: 11,
-			requesterId: "farmer021",
-			wasteType: "Cassava Peel Waste",
-			farmer: "Nimali Dissanayake",
-			location: "Moneragala",
-			quantity: "200 kg",
-			pricePerKg: "$0.17",
-			totalValue: "$34",
-			description: "Fresh cassava peels from starch extraction process",
-			availableDate: "2025-01-18",
-			expiryDate: "2025-01-25",
-			pickupWindow: "Afternoon (2PM - 6PM)",
-			status: "In Progress",
-			farmRating: 4.5,
-			contactNumber: "+94 76 890 1234",
-			acceptedDate: "2025-01-13",
-			additionalNotes: "Starch processing facility. High moisture content. Requires quick collection."
-		},
-		{
-			id: 12,
-			requesterId: "farmer023",
-			wasteType: "Pineapple Crown Waste",
-			farmer: "Ajith Kumara",
-			location: "Gampaha",
-			quantity: "120 kg",
-			pricePerKg: "$0.19",
-			totalValue: "$22.80",
-			description: "Pineapple crowns and leaves from fruit harvesting",
-			availableDate: "2025-01-19",
-			expiryDate: "2025-01-26",
-			pickupWindow: "Morning (9AM - 1PM)",
-			status: "Accepted",
-			farmRating: 4.7,
-			contactNumber: "+94 77 567 8901",
-			acceptedDate: "2025-01-14",
-			additionalNotes: "Pineapple plantation. Regular harvest waste. Good for enzyme extraction."
-		},
-		{
-			id: 13,
-			requesterId: "farmer025",
-			wasteType: "Cinnamon Bark Waste",
-			farmer: "Sampath Jayasuriya",
-			location: "Kalutara",
-			quantity: "80 kg",
-			pricePerKg: "$0.22",
-			totalValue: "$17.60",
-			description: "Cinnamon bark shavings and rejected pieces",
-			availableDate: "2025-01-20",
-			expiryDate: "2025-02-03",
-			pickupWindow: "Evening (4PM - 8PM)",
-			status: "Completed",
-			farmRating: 4.8,
-			contactNumber: "+94 78 123 4567",
-			acceptedDate: "2025-01-08",
-			additionalNotes: "Spice processing facility. Aromatic waste with essential oil potential."
-		},
-		{
-			id: 14,
-			requesterId: "farmer027",
-			wasteType: "Betel Leaf Waste",
-			farmer: "Chandra Wickremasinghe",
-			location: "Kegalle",
-			quantity: "140 kg",
-			pricePerKg: "$0.20",
-			totalValue: "$28",
-			description: "Rejected betel leaves and vine trimmings",
-			availableDate: "2025-01-21",
-			expiryDate: "2025-01-28",
-			pickupWindow: "Morning (8AM - 12PM)",
-			status: "Accepted",
-			farmRating: 4.3,
-			contactNumber: "+94 75 234 5678",
-			acceptedDate: "2025-01-15",
-			additionalNotes: "Betel cultivation. Medicinal properties. Regular supply available."
-		},
-		{
-			id: 15,
-			requesterId: "farmer029",
-			wasteType: "Cashew Shell Waste",
-			farmer: "Indika Peiris",
-			location: "Puttalam",
-			quantity: "320 kg",
-			pricePerKg: "$0.11",
-			totalValue: "$35.20",
-			description: "Cashew shells from nut processing operations",
-			availableDate: "2025-01-22",
-			expiryDate: "2025-02-05",
-			pickupWindow: "Afternoon (1PM - 5PM)",
-			status: "In Progress",
-			farmRating: 4.6,
-			contactNumber: "+94 72 456 7890",
-			acceptedDate: "2025-01-16",
-			additionalNotes: "Cashew processing plant. Hard shell waste. Suitable for activated carbon production."
-		},
-		{
-			id: 16,
-			requesterId: "farmer031",
-			wasteType: "Jackfruit Seed Waste",
-			farmer: "Tharanga Mendis",
-			location: "Matara",
-			quantity: "180 kg",
-			pricePerKg: "$0.14",
-			totalValue: "$25.20",
-			description: "Jackfruit seeds and pod waste from processing",
-			availableDate: "2025-01-23",
-			expiryDate: "2025-01-30",
-			pickupWindow: "Morning (7AM - 11AM)",
-			status: "Accepted",
-			farmRating: 4.4,
-			contactNumber: "+94 77 678 9012",
-			acceptedDate: "2025-01-17",
-			additionalNotes: "Fruit processing center. Nutritious waste with high starch content."
-		},
-		{
-			id: 17,
-			requesterId: "farmer033",
-			wasteType: "Pepper Vine Waste",
-			farmer: "Lalith Rodrigo",
-			location: "Kandy",
-			quantity: "110 kg",
-			pricePerKg: "$0.21",
-			totalValue: "$23.10",
-			description: "Black pepper vine trimmings and leaves",
-			availableDate: "2025-01-24",
-			expiryDate: "2025-02-07",
-			pickupWindow: "Afternoon (2PM - 6PM)",
-			status: "Completed",
-			farmRating: 4.9,
-			contactNumber: "+94 76 789 0123",
-			acceptedDate: "2025-01-09",
-			additionalNotes: "Spice plantation. Aromatic waste with antimicrobial properties."
-		},
-		{
-			id: 18,
-			requesterId: "farmer035",
-			wasteType: "Coconut Shell Waste",
-			farmer: "Ravi Senanayake",
-			location: "Negombo",
-			quantity: "450 kg",
-			pricePerKg: "$0.09",
-			totalValue: "$40.50",
-			description: "Coconut shells from copra processing",
-			availableDate: "2025-01-25",
-			expiryDate: "2025-02-15",
-			pickupWindow: "Morning (6AM - 10AM)",
-			status: "Accepted",
-			farmRating: 4.2,
-			contactNumber: "+94 78 890 1234",
-			acceptedDate: "2025-01-18",
-			additionalNotes: "Coconut oil mill. Hard shell waste. Excellent for charcoal production."
-		},
-		{
-			id: 19,
-			requesterId: "farmer037",
-			wasteType: "Tobacco Leaf Waste",
-			farmer: "Kamal Dissanayake",
-			location: "Jaffna",
-			quantity: "160 kg",
-			pricePerKg: "$0.16",
-			totalValue: "$25.60",
-			description: "Rejected tobacco leaves and stems",
-			availableDate: "2025-01-26",
-			expiryDate: "2025-02-02",
-			pickupWindow: "Evening (4PM - 8PM)",
-			status: "In Progress",
-			farmRating: 4.0,
-			contactNumber: "+94 71 123 4567",
-			acceptedDate: "2025-01-19",
-			additionalNotes: "Tobacco processing facility. Requires proper handling. Good for pest control products."
-		},
-		{
-			id: 20,
-			requesterId: "farmer039",
-			wasteType: "Turmeric Root Waste",
-			farmer: "Shirani Jayawardena",
-			location: "Kurunegala",
-			quantity: "250 kg",
-			pricePerKg: "$0.18",
-			totalValue: "$45",
-			description: "Turmeric root peels and processing waste",
-			availableDate: "2025-01-27",
-			expiryDate: "2025-02-10",
-			pickupWindow: "Morning (8AM - 12PM)",
-			status: "Accepted",
-			farmRating: 4.7,
-			contactNumber: "+94 75 345 6789",
-			acceptedDate: "2025-01-20",
-			additionalNotes: "Spice processing unit. High curcumin content. Valuable for extract production."
-		},
-		{
-			id: 21,
-			requesterId: "farmer041",
-			wasteType: "Ginger Processing Waste",
-			farmer: "Upali Amarasinghe",
-			location: "Matale",
-			quantity: "220 kg",
-			pricePerKg: "$0.15",
-			totalValue: "$33",
-			description: "Ginger peels and fiber from processing plant",
-			availableDate: "2025-01-28",
-			expiryDate: "2025-02-04",
-			pickupWindow: "Afternoon (1PM - 5PM)",
-			status: "Completed",
-			farmRating: 4.5,
-			contactNumber: "+94 72 567 8901",
-			acceptedDate: "2025-01-12",
-			additionalNotes: "Ginger processing facility. Aromatic waste with medicinal properties."
-		},
-		{
-			id: 22,
-			requesterId: "farmer043",
-			wasteType: "Plantain Peel Waste",
-			farmer: "Nishantha Silva",
-			location: "Colombo",
-			quantity: "350 kg",
-			pricePerKg: "$0.13",
-			totalValue: "$45.50",
-			description: "Plantain peels from banana chip manufacturing",
-			availableDate: "2025-01-29",
-			expiryDate: "2025-02-05",
-			pickupWindow: "Morning (9AM - 1PM)",
-			status: "Accepted",
-			farmRating: 4.8,
-			contactNumber: "+94 77 234 5678",
-			acceptedDate: "2025-01-21",
-			additionalNotes: "Food processing plant. High-volume regular waste. Good for animal feed."
-		},
-		{
-			id: 23,
-			requesterId: "farmer045",
-			wasteType: "Cardamom Pod Waste",
-			farmer: "Chamara Gunasekara",
-			location: "Nuwara Eliya",
-			quantity: "75 kg",
-			pricePerKg: "$0.25",
-			totalValue: "$18.75",
-			description: "Empty cardamom pods and stems",
-			availableDate: "2025-01-30",
-			expiryDate: "2025-02-13",
-			pickupWindow: "Evening (3PM - 7PM)",
-			status: "In Progress",
-			farmRating: 4.6,
-			contactNumber: "+94 76 456 7890",
-			acceptedDate: "2025-01-22",
-			additionalNotes: "Cardamom plantation. Premium spice waste. Suitable for essential oil extraction."
-		},
-		{
-			id: 24,
-			requesterId: "farmer047",
-			wasteType: "Passion Fruit Pulp Waste",
-			farmer: "Dilshan Perera",
-			location: "Badulla",
-			quantity: "230 kg",
-			pricePerKg: "$0.12",
-			totalValue: "$27.60",
-			description: "Passion fruit pulp and seed waste from juice production",
-			availableDate: "2025-01-31",
-			expiryDate: "2025-02-07",
-			pickupWindow: "Morning (7AM - 11AM)",
-			status: "Accepted",
-			farmRating: 4.4,
-			contactNumber: "+94 78 678 9012",
-			acceptedDate: "2025-01-23",
-			additionalNotes: "Fruit processing plant. Seasonal waste with high nutritional value."
-		},
-		{
-			id: 25,
-			requesterId: "farmer049",
-			wasteType: "Lemongrass Waste",
-			farmer: "Sumith Rathnayake",
-			location: "Hambantota",
-			quantity: "150 kg",
-			pricePerKg: "$0.19",
-			totalValue: "$28.50",
-			description: "Lemongrass stems and leaves from essential oil extraction",
-			availableDate: "2025-02-01",
-			expiryDate: "2025-02-14",
-			pickupWindow: "Afternoon (2PM - 6PM)",
-			status: "Accepted",
-			farmRating: 4.5,
-			contactNumber: "+94 77 678 9012",
-			acceptedDate: "2025-01-24",
-			additionalNotes: "Essential oil distillery. Aromatic waste with therapeutic properties."
-		}
-	]);
+	
 
 	const cities = [
 		{ value: "colombo", label: "Colombo" },
@@ -577,32 +101,59 @@ const WasteListings = () => {
 		status: "All",
 	});
 
+	const [listingsResp, setListingsResp] = useState([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		setLoading(true);
+		api.get("/api/waste/listings")
+			.then((res) => {
+				return res.data
+			})
+			.then((data) => {
+				setListingsResp(data);
+				setLoading(false);
+			})
+			.catch((err) => {
+				console.error("Error fetching listings:", err);
+				setLoading(false);
+			});
+	}, []);
+
 	const getStatusBadge = (status) => {
+		if (!status) return "bg-gray-100 text-gray-800";
+
+		// Normalize backend values to match your style keys
+		const normalized = status.replace("_", " ").toLowerCase();
+
 		const styles = {
-			Accepted: "bg-green-100 text-green-800",
-			"In Progress": "bg-blue-100 text-blue-800",
-			Completed: "bg-purple-100 text-purple-800",
-			Reserved: "bg-yellow-100 text-yellow-800",
+			accepted: "bg-green-100 text-green-800",
+			"in progress": "bg-blue-100 text-blue-800",
+			completed: "bg-purple-100 text-purple-800",
+			reserved: "bg-yellow-100 text-yellow-800",
 		};
-		return styles[status] || "bg-gray-100 text-gray-800";
+
+		return styles[normalized] || "bg-gray-100 center text-gray-800";
 	};
 
 	const handleStartCollection = (listingId) => {
-		const listing = listings.find((l) => l.id === listingId);
+		const listing = listingsResp.find((l) => l.id === listingId);
 
-		const startTask = () =>
-			new Promise((resolve) =>
-				setTimeout(() => {
-					setListings(
-						listings.map((listing) =>
-							listing.id === listingId
-								? { ...listing, status: "In Progress" }
-								: listing
-						)
-					);
-					resolve({ name: listing?.wasteType || "Listing" });
-				}, 2000)
+		const startTask = async () => {
+			const res = await api.put(
+				`api/waste/listings/${listingId}/status?status=IN_PROGRESS`
 			);
+			const updated = res.data;
+
+			// update local state with backend response
+			setListingsResp((prev) =>
+				prev.map((l) =>
+					l.id === listingId ? { ...l, status: updated.status } : l
+				)
+			);
+
+			return { name: listing?.wasteType || "Listing" };
+		};
 
 		toast.promise(startTask(), {
 			loading: "Starting collection process...",
@@ -612,21 +163,22 @@ const WasteListings = () => {
 	};
 
 	const handleCompleteCollection = (listingId) => {
-		const listing = listings.find((l) => l.id === listingId);
+		const listing = listingsResp.find((l) => l.id === listingId);
 
-		const completeTask = () =>
-			new Promise((resolve) =>
-				setTimeout(() => {
-					setListings(
-						listings.map((listing) =>
-							listing.id === listingId
-								? { ...listing, status: "Completed" }
-								: listing
-						)
-					);
-					resolve({ name: listing?.wasteType || "Listing" });
-				}, 2000)
+		const completeTask = async () => {
+			const res = await api.put(
+				`api/waste/listings/${listingId}/status?status=COMPLETED`
 			);
+			const updated = res.data;
+
+			setListingsResp((prev) =>
+				prev.map((l) =>
+					l.id === listingId ? { ...l, status: updated.status } : l
+				)
+			);
+
+			return { name: listing?.wasteType || "Listing" };
+		};
 
 		toast.promise(completeTask(), {
 			loading: "Completing collection...",
@@ -636,7 +188,7 @@ const WasteListings = () => {
 	};
 
 	const handleSave = (listingId) => {
-		const listing = listings.find((l) => l.id === listingId);
+		const listing = listingsResp.find((l) => l.id === listingId);
 		toast.success(
 			`${listing?.wasteType || "Listing"} saved to your favorites!`
 		);
@@ -644,33 +196,45 @@ const WasteListings = () => {
 	};
 
 	const handleContactFarmer = (listing) => {
-		toast.success(`Contact information sent for ${listing.farmer}`);
+		toast.success(
+			`Contact information sent for ${
+				listing.requester?.name || listing.farmer
+			}`
+		);
 		// Implementation for contacting farmer
 	};
 
-	const filteredListings = listings.filter((listing) => {
+	const filteredListings = listingsResp.filter((listing) => {
+		// Normalize status for comparison (handle "ACCEPTED", "IN_PROGRESS", etc.)
+		const normalizedStatus =
+			filters.status === "In Progress"
+				? "IN_PROGRESS"
+				: filters.status === "Accepted"
+				? "ACCEPTED"
+				: filters.status === "Completed"
+				? "COMPLETED"
+				: filters.status;
 
 		return (
 			(filters.wasteType === "" ||
 				listing.wasteType
-					.toLowerCase()
+					?.toLowerCase()
 					.includes(filters.wasteType.toLowerCase())) &&
 			(filters.location === "" ||
-				listing.location
-					.toLowerCase()
+				listing.requester?.location
+					?.toLowerCase()
 					.includes(filters.location.toLowerCase())) &&
 			(filters.status === "" ||
 				filters.status === "All" ||
-				listing.status === filters.status) &&
+				listing.status === normalizedStatus) &&
 			(filters.minQuantity === "" ||
-				parseInt(listing.quantity.replace(/[^\d]/g, "")) >=
+				(listing.quantity || 0) >=
 					parseInt(filters.minQuantity || 0)) &&
 			(filters.maxPrice === "" ||
-				parseFloat(listing.pricePerKg.replace("$", "")) <=
+				(listing.pricePerUnit || 0) <=
 					parseFloat(filters.maxPrice || 999))
 		);
 	});
-
 	return (
 		<div className="space-y-6 mt-6">
 			<div className="flex justify-between items-center">
@@ -682,8 +246,7 @@ const WasteListings = () => {
 						Manage waste collection requests that you have accepted
 					</p>
 				</div>
-				<div className="flex space-x-2">
-				</div>
+				<div className="flex space-x-2"></div>
 			</div>
 
 			{/* Summary Cards */}
@@ -692,12 +255,14 @@ const WasteListings = () => {
 					<div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
 					<CheckCircle className="h-7 w-7 text-green-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Accepted Requests</p>
+						<p className="text-xs font-medium text-gray-500">
+							Accepted Requests
+						</p>
 						<p className="text-lg font-bold text-gray-900">
 							<NumberFlow
 								value={
 									filteredListings.filter(
-										(l) => l.status === "Accepted"
+										(l) => l.status === "ACCEPTED"
 									).length
 								}
 							/>
@@ -708,15 +273,22 @@ const WasteListings = () => {
 					<div className="absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-l-lg" />
 					<RotateCcw className="h-7 w-7 text-blue-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Total Quantity</p>
+						<p className="text-xs font-medium text-gray-500">
+							Total Quantity
+						</p>
 						<p className="text-lg font-bold text-gray-900">
 							<NumberFlow
 								value={filteredListings.reduce(
-									(total, listing) =>
-										total +
-										parseInt(
-											listing.quantity.replace(/[^\d]/g, "")
-										),
+									(total, listing) => {
+										const quantity = listing.quantity || 0;
+										const unit =
+											listing.unit?.toUpperCase();
+										// Convert to KG for consistency
+										if (unit === "TON" || unit === "TONS") {
+											return total + quantity * 907.185;
+										}
+										return total + quantity;
+									},
 									0
 								)}
 								suffix=" kg"
@@ -728,9 +300,13 @@ const WasteListings = () => {
 					<div className="absolute left-0 top-0 h-full w-1 bg-yellow-500 rounded-l-lg" />
 					<DollarSign className="h-7 w-7 text-yellow-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Avg Price/kg</p>
+						<p className="text-xs font-medium text-gray-500">
+							Avg Price/
+							{filteredListings[0]?.unit?.toLowerCase() || "kg"}
+						</p>
 						<p className="text-lg font-bold text-gray-900">
-							$<NumberFlow
+							$
+							<NumberFlow
 								value={
 									filteredListings.length > 0
 										? parseFloat(
@@ -738,12 +314,8 @@ const WasteListings = () => {
 													filteredListings.reduce(
 														(total, listing) =>
 															total +
-															parseFloat(
-																listing.pricePerKg.replace(
-																	"$",
-																	""
-																)
-															),
+															(listing.pricePerUnit ||
+																0),
 														0
 													) / filteredListings.length
 												).toFixed(2)
@@ -758,15 +330,15 @@ const WasteListings = () => {
 					<div className="absolute left-0 top-0 h-full w-1 bg-purple-500 rounded-l-lg" />
 					<Banknote className="h-7 w-7 text-purple-500 mr-3 z-10" />
 					<div className="z-10">
-						<p className="text-xs font-medium text-gray-500">Potential Value</p>
+						<p className="text-xs font-medium text-gray-500">
+							Potential Value
+						</p>
 						<p className="text-lg font-bold text-gray-900">
-							$<NumberFlow
+							$
+							<NumberFlow
 								value={filteredListings.reduce(
 									(total, listing) =>
-										total +
-										parseFloat(
-											listing.totalValue.replace("$", "")
-										),
+										total + (listing.totalPrice || 0),
 									0
 								)}
 							/>
@@ -782,7 +354,8 @@ const WasteListings = () => {
 						Waste Listings ({filteredListings.length})
 					</CardTitle>
 					<CardDescription>
-						Manage and track waste collection requests that you have accepted from farmers
+						Manage and track waste collection requests that you have
+						accepted from farmers
 					</CardDescription>
 					<div id="waste-search" className="flex mt-5 gap-1">
 						<div className="flex-1">
@@ -901,7 +474,9 @@ const WasteListings = () => {
 									<SelectValue placeholder="Status" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="All">All status</SelectItem>
+									<SelectItem value="All">
+										All status
+									</SelectItem>
 									<SelectItem value="Accepted">
 										Accepted
 									</SelectItem>
@@ -1002,68 +577,137 @@ const WasteListings = () => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{filteredListings.map((listing) => (
-							<TableRow key={listing.id}>
-								<TableCell>
-									<div>
-										<div className="font-medium text-gray-900 dark:text-gray-100">
-											{listing.wasteType}
+						{loading ? (
+							// Loading skeleton
+							Array.from({ length: 5 }).map((_, index) => (
+								<TableRow key={`skeleton-${index}`}>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-36 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-48 bg-gray-200 rounded animate-pulse" />
 										</div>
-										<div className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs">
-											{listing.description.length > 30 
-												? listing.description.substring(0, 40) + "..."
-												: listing.description
-											}
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
 										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-16 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-28 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="space-y-2">
+											<div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+											<div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+									<TableCell>
+										<div className="h-6 w-24 bg-gray-200 rounded-full animate-pulse" />
+									</TableCell>
+									<TableCell>
+										<div className="flex justify-end gap-2">
+											<div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
+											<div className="h-8 w-10 bg-gray-200 rounded animate-pulse" />
+										</div>
+									</TableCell>
+								</TableRow>
+							))
+						) : filteredListings.length === 0 ? (
+							<TableRow>
+								<TableCell colSpan={7} className="text-center py-8">
+									<div className="text-gray-500">
+										No listings found
 									</div>
 								</TableCell>
-								<TableCell>
-									<div>
-										<div className="font-medium text-gray-900 dark:text-gray-100">
-											{listing.farmer}
+							</TableRow>
+						) : (
+							filteredListings.map((listing) => (
+								<TableRow key={listing.id}>
+									{/* Waste Details */}
+									<TableCell>
+										<div>
+											<div className="font-medium text-gray-900 dark:text-gray-100">
+												{listing.wasteType}
+											</div>
+											<div className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs">
+												{listing.description?.length > 30
+													? listing.description.substring(
+															0,
+															40
+													  ) + "..."
+													: listing.description}
+											</div>
 										</div>
-										<div className="text-sm text-gray-500 dark:text-gray-400">
-											{listing.location}
+									</TableCell>
+
+									{/* Farmer / Location */}
+									<TableCell>
+										<div>
+											<div className="font-medium text-gray-900 dark:text-gray-100">
+												{listing.requesterName}
+											</div>
+											<div className="text-sm text-gray-500 dark:text-gray-400">
+												{listing.requesterLocation}
+											</div>
+											<div className="text-xs text-yellow-600 flex items-center mt-1">
+												⭐ {listing.requesterRating}/5
+											</div>
 										</div>
-										<div className="text-xs text-yellow-600 flex items-center mt-1">
-											⭐ {listing.farmRating}/5
-										</div>
-									</div>
 								</TableCell>
+
+								{/* Quantity */}
 								<TableCell>
 									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{listing.quantity}
+										{listing.quantity} {listing.unit}
 									</div>
 									<div className="text-sm text-gray-500 dark:text-gray-400">
-										{listing.pickupWindow}
+										{listing.timeSlot}
 									</div>
 								</TableCell>
+
+								{/* Pricing */}
 								<TableCell>
 									<div>
 										<div className="font-medium text-gray-900 dark:text-gray-100">
-											{listing.pricePerKg}/kg
+											{listing.pricePerUnit}/
+											{listing.unit?.toLowerCase()}
 										</div>
 										<div className="text-sm font-semibold text-green-600">
-											{listing.totalValue} total
+											{listing.totalPrice} total
 										</div>
 									</div>
 								</TableCell>
+
+								{/* Availability */}
 								<TableCell>
 									<div className="text-sm text-gray-900 dark:text-gray-100">
 										<div>
 											Available:{" "}
 											{new Date(
-												listing.availableDate
+												listing.availableFrom
 											).toLocaleDateString()}
 										</div>
 										<div className="text-gray-500 dark:text-gray-400">
 											Expires:{" "}
 											{new Date(
-												listing.expiryDate
+												listing.expiresOn
 											).toLocaleDateString()}
 										</div>
 									</div>
 								</TableCell>
+
+								{/* Status */}
 								<TableCell>
 									<Badge
 										className={`${getStatusBadge(
@@ -1071,9 +715,11 @@ const WasteListings = () => {
 										)} leading-normal rounded-full`}
 										variant="outline"
 									>
-										{listing.status}
+										{listing.status ? listing.status.replace("_", " ") : "N/A"}
 									</Badge>
 								</TableCell>
+
+								{/* Actions */}
 								<TableCell className="text-right">
 									<div className="flex justify-end space-x-2">
 										<DropdownMenu>
@@ -1102,7 +748,8 @@ const WasteListings = () => {
 												>
 													Contact Farmer
 												</DropdownMenuItem>
-												{listing.status === "Accepted" && (
+												{listing.status ===
+													"ACCEPTED" && (
 													<DropdownMenuItem
 														onClick={() =>
 															handleStartCollection(
@@ -1113,7 +760,8 @@ const WasteListings = () => {
 														Start Collection
 													</DropdownMenuItem>
 												)}
-												{listing.status === "In Progress" && (
+												{listing.status ===
+													"IN_PROGRESS" && (
 													<DropdownMenuItem
 														onClick={() =>
 															handleCompleteCollection(
@@ -1124,7 +772,8 @@ const WasteListings = () => {
 														Complete Collection
 													</DropdownMenuItem>
 												)}
-												{listing.status === "Completed" && (
+												{listing.status ===
+													"COMPLETED" && (
 													<DropdownMenuItem>
 														View Report
 													</DropdownMenuItem>
@@ -1134,16 +783,21 @@ const WasteListings = () => {
 									</div>
 								</TableCell>
 							</TableRow>
-						))}
+							))
+						)}
 					</TableBody>
 				</Table>
 			</div>
-			<Toaster position="bottom-right" richColors toastOptions={{
-				classNames: {
-					icon: '360px',
-					description: 'mt[-5px]'
-				}
-			}}/>
+			<Toaster
+				position="bottom-right"
+				richColors
+				toastOptions={{
+					classNames: {
+						icon: "360px",
+						description: "mt[-5px]",
+					},
+				}}
+			/>
 		</div>
 	);
 };
