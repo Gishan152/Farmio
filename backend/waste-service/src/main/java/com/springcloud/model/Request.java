@@ -30,10 +30,14 @@ public class Request {
     private BigDecimal offeredPrice;
     private BigDecimal totalOffer;
 
-    // Status: Pending / Accepted / Rejected
+    // Status: Pending / Accepted / Rejected / In Progress / Completed / Payment Pending / Paid
     private String status;
 
     private LocalDate requestDate;
+
+    // Waste agent who accepted the request
+    private Long acceptedByAgentId;
+    private String acceptedByAgentName;
 
     // --- getters & setters ---
     public Long getId() { return id; }
@@ -74,4 +78,10 @@ public class Request {
 
     public LocalDate getRequestDate() { return requestDate; }
     public void setRequestDate(LocalDate requestDate) { this.requestDate = requestDate; }
+
+    public Long getAcceptedByAgentId() { return acceptedByAgentId; }
+    public void setAcceptedByAgentId(Long acceptedByAgentId) { this.acceptedByAgentId = acceptedByAgentId; }
+
+    public String getAcceptedByAgentName() { return acceptedByAgentName; }
+    public void setAcceptedByAgentName(String acceptedByAgentName) { this.acceptedByAgentName = acceptedByAgentName; }
 }

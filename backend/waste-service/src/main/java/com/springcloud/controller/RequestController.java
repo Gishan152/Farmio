@@ -94,6 +94,32 @@ public class RequestController {
         requestService.deleteRequest(id);
     }
 
+    // Cancel a request (only if status is Pending)
+    @DeleteMapping("/{id}/cancel")
+    public void cancelRequest(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Name", required = false) String username
+    ) {
+        if (username == null || username.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "X-User-Name header is required");
+        }
+        requestService.cancelRequest(id, username);
+    }
+
+    // Get requests created by the current user
+    @GetMapping("/my-requests")
+    public List<RequestDTO> getMyRequests(
+            @RequestHeader(value = "X-User-Name", required = false) String username
+    ) {
+        if (username == null || username.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "X-User-Name header is required");
+        }
+        return requestService.getRequestsByRequesterName(username)
+                .stream()
+                .map(requestMapper::toDTO)
+                .toList();
+    }
+
     @PutMapping("/{id}/accept")
     public WasteListingDTO acceptRequest(
             @PathVariable Long id,

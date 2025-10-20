@@ -33,7 +33,11 @@ const menu = [
         label: 'Transport', to: 'transport/schedules'
     },
      {
-        label: 'Waste Management', to:'wastemanagement'
+        label: 'Waste Management',
+        children: [
+            { label: 'Waste Agents', to: 'wastemanagement' },
+            { label: 'Waste Requests', to: 'waste-requests' },
+        ],
     },
     { label: 'Payments', to: 'payments'},
     { label: 'Chat  💬', to: 'chat'},
