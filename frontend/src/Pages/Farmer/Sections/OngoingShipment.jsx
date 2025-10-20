@@ -1,95 +1,100 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { TruckIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
-import corn from "../../../Assets/Farmer/Crops/corn.jpeg";
+import api from "../../../API/client";
 
 // Single ongoing shipment card
-export function OngoingShipment({ order }) {
-  const {
-    id,
-    buyerName,
-    buyerAddress,
-    buyerLocation,
-    productName,
-    quantity,
-    totalPrice,
-    imageUrl,
-    vehicleReg,
-    driverName,
-    driverPhone,
-    driverEmail,
-    loadNumber,
-  } = order;
-
-  const transportData = { vehicleReg, driverName, driverPhone, driverEmail, loadNumber, loadPicked: true, loadDelivered: false, buyerConfirmation: false };
+export function OngoingShipment({ order, onMarkDelivered }) {
+  const { id, orderId, buyerId, status, total, items = [] } = order;
   const [showDetails, setShowDetails] = useState(false);
+  const totalNumber = typeof total === 'number' ? total : Number(total || 0);
+  const firstItem = items?.[0];
+  const itemSummary = firstItem ? `${firstItem.quantity} ${firstItem.unitMeasurement} of ${firstItem.__product?.type || ('#' + firstItem.cropId)}` : '—';
+  const canViewTransport = order.transport === 'BY_FARMER_SYSTEM' || order.transport === 'BY_BUYER_SYSTEM';
+  const transportData = { vehicleReg: '-', driverName: '-', driverPhone: '-', driverEmail: '-', loadNumber: '-', loadPicked: true, loadDelivered: false, buyerConfirmation: false };
 
   return (
-    <div className="max-w mx-auto bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
-      <div className="flex flex-col sm:flex-row">
-        {/* Info Section */}
-     <div className="m-8 max-w-sm min-w-sm">
-      <div className="sm:col-span-2 grid grid-cols-2 gap-5">
-        {[
-          { label: 'Order ID', value: id },
-          { label: 'Buyer', value: buyerName },
-          { label: 'Address', value: buyerAddress },
-          { label: 'Location', value: buyerLocation },
-          { label: 'Product', value: productName },
-          { label: 'Quantity', value: quantity },
-          { label: 'Order Total', value: `$${totalPrice.toFixed(2)}` },
-          { label: 'Payout', value: `$${totalPrice.toFixed(2)}` },
-        ].map(field => (
-          <div key={field.label} className="flex flex-col space-y-1">
-            <span className="text-sm text-gray-500">{field.label}</span>
-            <span className="text-md font-medium text-gray-800">{field.value}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-
-        {/* Transport Section */}
-       
-        <div className="flex-1 p-6 space-y-3 border-l border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800">Transport </h2>
-          {!showDetails ? (
-            <button
-              onClick={() => setShowDetails(true)}
-              className="flex items-center space-x-2 p-3 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-md"
-            >
-              <TruckIcon className="h-6 w-6" />
-              <span className="font-semibold">Show </span>
-            </button>
-          ) : (
-            <>
-              {['vehicleReg', 'driverName', 'driverPhone', 'driverEmail', 'loadNumber'].map(key => (
-                <p key={key}>
-                  <span className="font-medium">{key.replace(/([A-Z])/g, ' $1')}:</span> {transportData[key]}
-                </p>
-              ))}
-              <div className="flex items-center space-x-4 mt-4">
-                {['loadPicked', 'loadDelivered', 'buyerConfirmation'].map(flag => (
-                  <div key={flag} className="flex items-center space-x-1">
-                    {transportData[flag] ? <CheckIcon className="h-5 w-5 text-green-500" /> : <XMarkIcon className="h-5 w-5 text-red-500" />}
-                    <span className="text-sm text-gray-700">{flag.replace(/([A-Z])/g, ' $1')}</span>
+    <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
+      <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {/* Order Details */}
+        <div className="sm:col-span-2 grid grid-cols-2 gap-4">
+          {[
+            { label: 'Order ID', value: id || orderId },
+            { label: 'Buyer ID', value: buyerId },
+            { label: 'Status', value: status },
+            { label: 'Items', value: itemSummary },
+            { label: 'Order Total', value: `$${totalNumber.toFixed(2)}` },
+            { label: 'Payout', value: `$${totalNumber.toFixed(2)}` },
+          ].map(field => (
+            <div key={field.label} className="flex flex-col">
+              <span className="text-sm text-gray-500">{field.label}</span>
+              <span className="text-md font-medium text-gray-800">{field.value}</span>
+            </div>
+          ))}
+          {/* Detailed items list */}
+          <div className="col-span-2">
+            <div className="mt-4 border-t pt-3">
+              <p className="text-sm font-medium text-gray-700 mb-2">Order Items</p>
+              <div className="space-y-1">
+                {(items || []).map((it, idx) => (
+                  <div key={idx} className="text-sm text-gray-700 flex gap-3">
+                    <span className="min-w-24">{it.__product?.type || `Crop #${it.cropId}`}</span>
+                    <span>
+                      {Number(it.quantity || 0)} {it.unitMeasurement || ''}
+                    </span>
                   </div>
                 ))}
+                {(!items || items.length === 0) && (
+                  <div className="text-sm text-gray-500">No items</div>
+                )}
               </div>
-              <button
-                onClick={() => setShowDetails(false)}
-                className="mt-4 px-4 py-2 rounded-full border hover:bg-gray-100 shadow-md"
-              >
-                Hide Details
-              </button>
-            </>
-          )}
+            </div>
+          </div>
         </div>
 
-        {/* Image Section */}
-        {imageUrl && (
-          <div className="sm:w-1/3 bg-gray-100 flex items-center justify-center">
-            <img src={imageUrl} alt={productName} className="object-cover h-full w-full" />
-          </div>
-        )}
+        {/* Right column: transport controls and actions */}
+        <div className="flex flex-col items-center space-y-4">
+          {canViewTransport && (
+            !showDetails ? (
+              <button
+                onClick={() => setShowDetails(true)}
+                className="mt-auto w-full py-2 px-4 rounded-lg bg-green-600 hover:bg-green-700 text-white"
+              >
+                <span className="inline-flex items-center gap-2"><TruckIcon className="h-5 w-5" /> View Transport</span>
+              </button>
+            ) : (
+              <div className="w-full">
+                <div className="space-y-2 text-sm text-gray-800">
+                  {['vehicleReg','driverName','driverPhone','driverEmail','loadNumber'].map(key => (
+                    <p key={key}>
+                      <span className="font-medium">{key.replace(/([A-Z])/g,' $1')}:</span> {transportData[key]}
+                    </p>
+                  ))}
+                  <div className="flex items-center space-x-4 mt-2">
+                    {['loadPicked','loadDelivered','buyerConfirmation'].map(flag => (
+                      <div key={flag} className="flex items-center space-x-1">
+                        {transportData[flag] ? <CheckIcon className="h-5 w-5 text-green-500" /> : <XMarkIcon className="h-5 w-5 text-red-500" />}
+                        <span className="text-sm text-gray-700">{flag.replace(/([A-Z])/g,' $1')}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowDetails(false)}
+                  className="mt-4 w-full py-2 rounded-lg border hover:bg-gray-100"
+                >
+                  Hide Transport
+                </button>
+              </div>
+            )
+          )}
+
+          <button
+            onClick={() => onMarkDelivered(id || orderId)}
+            className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
+            Mark Delivered
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -99,27 +104,57 @@ export function OngoingShipment({ order }) {
 export default function OngoingShipmentsList() {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [productMap, setProductMap] = useState({});
 
-  // Simulate fetch
   useEffect(() => {
-    setTimeout(() => {
-      setOrders([
-        { id: '223456', buyerName: 'Alice Green', buyerAddress: '142 nisalagiri uyana boralugoda poruwadanda', buyerLocation: 'Gotham, NJ', productName: 'Smart Watch', quantity: 3, totalPrice: 299.97, imageUrl: corn, vehicleReg: 'CAN1677', driverName: 'Manuja', driverPhone: '0789656563', driverEmail: 'ransara@example.com', loadNumber: 'LD-8975' },
-        { id: '223457', buyerName: 'Bob Blue', buyerAddress: '321 Pine Rd', buyerLocation: 'Star City, CA', productName: 'Drone', quantity: 1, totalPrice: 499.99, imageUrl: corn, vehicleReg: 'CAN8921', driverName: 'Rana', driverPhone: '0771234567', driverEmail: 'rana@example.com', loadNumber: 'LD-1234' },
-        // add more orders here
-      ]);
-      setIsLoading(false);
-    }, 1500);
+    let mounted = true;
+    setIsLoading(true);
+    api
+      .get('/api/order/farmer/ongoing-shipment')
+      .then(res => { if (mounted) setOrders(Array.isArray(res.data) ? res.data : []); })
+      .catch(err => { setError(err?.response?.data || 'Failed to load orders'); })
+      .finally(() => { if (mounted) setIsLoading(false); });
+    return () => { mounted = false; };
   }, []);
+
+  useEffect(() => {
+    const ids = Array.from(new Set(orders.flatMap(o => (o.items || []).map(it => it.cropId)).filter(Boolean)));
+    if (ids.length === 0) { setProductMap({}); return; }
+    api.post('/api/products/by-ids', ids)
+      .then(res => {
+        const list = Array.isArray(res.data) ? res.data : [];
+        const map = list.reduce((acc, p) => { acc[p.id] = p; return acc; }, {});
+        setProductMap(map);
+      })
+      .catch(() => {})
+  }, [orders]);
 
   // Details summary
   const summary = useMemo(() => {
     const late = 0;
     const count = orders.length;
-    const totalQty = orders.reduce((sum, o) => sum + o.quantity, 0);
-    const totalValue = orders.reduce((sum, o) => sum + o.totalPrice, 0);
+    const totalQty = orders.reduce((sum, o) => sum + (o.items?.reduce((s,i)=> s + Number(i.quantity || 0), 0) || 0), 0);
+    const totalValue = orders.reduce((sum, o) => sum + Number(o.total || 0), 0);
     return { late,count, totalQty, totalValue };
   }, [orders]);
+
+  const refresh = () => {
+    setIsLoading(true);
+    api.get('/api/order/farmer/ongoing-shipment')
+      .then(res => setOrders(Array.isArray(res.data) ? res.data : []))
+      .catch(err => setError(err?.response?.data || 'Failed to refresh orders'))
+      .finally(() => setIsLoading(false));
+  };
+
+  const handleMarkDelivered = async (orderId) => {
+    try {
+      await api.post(`/api/order/farmer/mark-delivered/${orderId}`);
+      refresh();
+    } catch (e) {
+      alert(e?.response?.data || 'Failed to mark delivered');
+    }
+  };
 
   return (
     <section className="p-6 space-y-6">
@@ -158,9 +193,19 @@ export default function OngoingShipmentsList() {
           </svg>
         </div>
       ) : (
-        orders.map(order => (
-          <OngoingShipment key={order.id} order={order} />
-        ))
+        <>
+          {error && (<div className="p-3 bg-red-50 text-red-700 rounded">{String(error)}</div>)}
+          {orders.map(order => (
+            <OngoingShipment
+              key={order.id || order.orderId}
+              order={{
+                ...order,
+                items: (order.items || []).map(it => ({ ...it, __product: productMap[it.cropId] }))
+              }}
+              onMarkDelivered={handleMarkDelivered}
+            />
+          ))}
+        </>
       )}
     </section>
   );

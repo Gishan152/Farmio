@@ -32,6 +32,12 @@ const OrderConfirmation = () => {
     const handlePlaceOrder = () => {
         setLoadingOrder(true);
         console.log("items : ", items)
+        console.log("placing the order : ", items.map(item => ({ 
+                cropId: item.id,
+                quantity: item.quantity,
+                pricePerUnit: item.pricePerUnit,
+                unitMeasurement: item.unitMeasurement
+            })))
         api.post('/api/order/create', {
             items: items.map(item => ({ 
                 cropId: item.id,

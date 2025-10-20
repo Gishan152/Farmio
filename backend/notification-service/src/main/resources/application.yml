@@ -39,21 +39,22 @@ spring:
   
   # Email Configuration
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:your-email@gmail.com}
-    password: ${MAIL_PASSWORD:your-app-password}
+    host: ${EMAIL_HOST:smtp.gmail.com}
+    port: ${EMAIL_PORT:587}
+    username: ${EMAIL_USERNAME:notifications.farmio@gmail.com}
+    password: ${EMAIL_PASSWORD:umcvmossguekifmi}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+            required: true
+          ssl:
+            trust: smtp.gmail.com
           connectiontimeout: 5000
           timeout: 3000
           writetimeout: 5000
-          ssl:
-            trust: "*"
 
 # Eureka Client Configuration
 eureka:

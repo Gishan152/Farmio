@@ -20,6 +20,7 @@ public class RabbitMQConfig {
     // Queue names
     public static final String ORDER_NOTIFICATION_QUEUE = "farmio.order.notification.queue";
     public static final String PAYMENT_NOTIFICATION_QUEUE = "farmio.payment.notification.queue";
+    public static final String PAYMENT_CONFIRMED_QUEUE = "payment.confirmed.queue";  // From payment-service
     public static final String TRANSPORT_NOTIFICATION_QUEUE = "farmio.transport.notification.queue";
     public static final String USER_NOTIFICATION_QUEUE = "farmio.user.notification.queue";
     public static final String SYSTEM_NOTIFICATION_QUEUE = "farmio.system.notification.queue";
@@ -81,6 +82,11 @@ public class RabbitMQConfig {
     @Bean
     public Queue systemNotificationQueue() {
         return QueueBuilder.durable(SYSTEM_NOTIFICATION_QUEUE).build();
+    }
+    
+    @Bean
+    public Queue paymentConfirmedQueue() {
+        return QueueBuilder.durable(PAYMENT_CONFIRMED_QUEUE).build();
     }
     
     // Bindings

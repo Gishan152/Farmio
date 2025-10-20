@@ -6,6 +6,7 @@ import com.springcloud.dto.AddProductDTO;
 import com.springcloud.dto.EditProductDTO;
 import com.springcloud.dto.ProductResponseDTO;
 import com.springcloud.dto.RatingDTO;
+import com.springcloud.dto.CropOrderDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -81,5 +82,32 @@ public class ProductController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+    
+    // NEW ENDPOINT: To deduct stock when an order is placed
+    @PutMapping("/{id}/deduct-stock")
+    public ResponseEntity<?> deductStock(
+            @PathVariable Long id,
+            @RequestParam("quantity") Integer quantity
+    ) {
+        try {
+            productService.deductStock(id, quantity);
+            return ResponseEntity.ok().body("Stock deducted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
+    // NEW ENDPOINT: To fetch products by a list of IDs (returns CropOrderDTO for order-service)
+    @PostMapping("/by-ids")
+    public ResponseEntity<List<CropOrderDTO>> getProductsByIds(@RequestBody List<Long> productIds) {
+        List<CropOrderDTO> products = productService.getProductsByIds(productIds);
+        return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/suggest")
+    public ResponseEntity<List<com.springcloud.dto.CropOrderDTO>> getAllProductsForOrder() {
+        List<com.springcloud.dto.CropOrderDTO> products = productService.getAllProductsForOrder();
+        return ResponseEntity.ok(products);
     }
 }

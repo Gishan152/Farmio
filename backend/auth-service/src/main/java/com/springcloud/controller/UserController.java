@@ -33,6 +33,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsersDTO());
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<PublicUserData> getUserById(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getUserById(userId));
+    }
+
     //deactivate the user
     @PostMapping("/deactivate")
     public ResponseEntity<Void> deactivateUser(@RequestBody UserRequest request) {
