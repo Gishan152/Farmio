@@ -39,7 +39,7 @@ public class RouterValidator {
         "/api/analytics/prices/category",
         "/api/analytics/moderator/prices",
         "/api/order/get-crops",
-        "/api/order/get",
+        // "/api/order/get",
         "/api/user/all-dto",
         
         "/api/admin/moderators/all-dto",
