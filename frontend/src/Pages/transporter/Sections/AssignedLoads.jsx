@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   TruckIcon, 
   CheckCircleIcon, 
@@ -8,56 +9,101 @@ import {
   ArrowDownTrayIcon,
   CheckBadgeIcon
 } from '@heroicons/react/24/outline';
+import api from "../../../API/client"
+
+export async function AssignedLoadsLoader() {
+  try {
+    // Fetch all loads assigned to the current driver
+    const response = await api.get("/api/transport/getAllLoads");
+
+    const loads = response.data;
+    const API_BASE_URL = import.meta.env.VITE_API_GATEWAY_URL;
+
+    // Transform data into frontend-friendly structure
+    return loads
+    .filter((load) => load.status === "accepted" || load.status === "in_transit")
+    .map((load) => ({
+      id: load.id,
+      crop: load.cropType || "Unknown Crop",
+      quantity: `${load.quantity} ${load.unit || "kg"}`,
+      pickupLocation: load.pickupLocation || "N/A",
+      deliveryLocation: load.deliveryLocation || "N/A",
+      status: load.status || "Pending Pickup",
+      confirmedBy: {
+        driverPickup: load.driverPickupConfirmed || false,
+        driverDelivery: load.driverDeliveryConfirmed || false,
+        buyer: load.buyerConfirmed || false,
+      },
+      pickupTime: load.pickupTime,
+      estimatedDelivery: load.estimatedDeliveryTime,
+      imageUrls: load.imageUrls
+        ? load.imageUrls.map((url) => `${API_BASE_URL}${url}`)
+        : [],
+    }));
+  } catch (error) {
+    console.error("Failed to fetch assigned loads:", error);
+    return [];
+  }
+}
 
 const AssignedLoads = () => {
-  const [loads, setLoads] = useState([
-    {
-      id: 1,
-      crop: 'Tomatoes',
-      quantity: '50 kg',
-      pickupLocation: 'Galle',
-      deliveryLocation: 'Colombo',
-      status: 'Pending Pickup',
-      confirmedBy: {
-        driverPickup: false,
-        driverDelivery: false,
-        buyer: false,
-      },
-      pickupTime: '2023-05-15 08:30',
-      estimatedDelivery: '2023-05-15 14:00'
-    },
-    {
-      id: 2,
-      crop: 'Bananas',
-      quantity: '30 kg',
-      pickupLocation: 'Matara',
-      deliveryLocation: 'Kandy',
-      status: 'In Transit',
-      confirmedBy: {
-        driverPickup: true,
-        driverDelivery: false,
-        buyer: false,
-      },
-      pickupTime: '2023-05-16 09:15',
-      estimatedDelivery: '2023-05-16 16:30'
-    },
-    {
-      id: 3,
-      crop: 'Carrots',
-      quantity: '20 kg',
-      pickupLocation: 'Nuwara Eliya',
-      deliveryLocation: 'Gampaha',
-      status: 'Delivered',
-      confirmedBy: {
-        driverPickup: true,
-        driverDelivery: true,
-        buyer: true,
-      },
-      pickupTime: '2023-05-14 10:00',
-      estimatedDelivery: '2023-05-14 18:00'
-    },
-  ]);
+  const navigate = useNavigate();
+  // const [loads, setLoads] = useState([
+  //   {
+  //     id: 1,
+  //     crop: 'Tomatoes',
+  //     quantity: '50 kg',
+  //     pickupLocation: 'Galle',
+  //     deliveryLocation: 'Colombo',
+  //     status: 'Pending Pickup',
+  //     confirmedBy: {
+  //       driverPickup: false,
+  //       driverDelivery: false,
+  //       buyer: false,
+  //     },
+  //     pickupTime: '2023-05-15 08:30',
+  //     estimatedDelivery: '2023-05-15 14:00'
+  //   },
+  //   {
+  //     id: 2,
+  //     crop: 'Bananas',
+  //     quantity: '30 kg',
+  //     pickupLocation: 'Matara',
+  //     deliveryLocation: 'Kandy',
+  //     status: 'In Transit',
+  //     confirmedBy: {
+  //       driverPickup: true,
+  //       driverDelivery: false,
+  //       buyer: false,
+  //     },
+  //     pickupTime: '2023-05-16 09:15',
+  //     estimatedDelivery: '2023-05-16 16:30'
+  //   },
+  //   {
+  //     id: 3,
+  //     crop: 'Carrots',
+  //     quantity: '20 kg',
+  //     pickupLocation: 'Nuwara Eliya',
+  //     deliveryLocation: 'Gampaha',
+  //     status: 'Delivered',
+  //     confirmedBy: {
+  //       driverPickup: true,
+  //       driverDelivery: true,
+  //       buyer: true,
+  //     },
+  //     pickupTime: '2023-05-14 10:00',
+  //     estimatedDelivery: '2023-05-14 18:00'
+  //   },
+  // ]);
+  const [loads, setLoads] = useState([]);
 
+  useEffect(() => {
+    const fetchLoads = async () => {
+      const data = await AssignedLoadsLoader();
+      setLoads(data);
+    };
+    fetchLoads();
+  }, []);
   const handleConfirm = (loadId, type) => {
     setLoads((prevLoads) =>
       prevLoads.map((load) => {
@@ -200,7 +246,7 @@ const AssignedLoads = () => {
                     {/* Pickup Confirmation */}
                     {!load.confirmedBy.driverPickup && load.status === 'Pending Pickup' && (
                       <button
-                        onClick={() => handleConfirm(load.id, 'Pickup')}
+                        onClick={() => navigate(`/transporter/confirmPickup/${load.id}`)}
                         className="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200 flex items-center space-x-2"
                       >
                         <CheckCircleIcon className="h-5 w-5" />
@@ -211,7 +257,7 @@ const AssignedLoads = () => {
                     {/* Delivery Confirmation */}
                     {!load.confirmedBy.driverDelivery && load.status === 'In Transit' && (
                       <button
-                        onClick={() => handleConfirm(load.id, 'Delivery')}
+                        onClick={() => navigate(`/transporter/confirmDelivery/${load.id}`)}
                         className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center space-x-2"
                       >
                         <CheckCircleIcon className="h-5 w-5" />
