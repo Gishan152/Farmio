@@ -1,107 +1,49 @@
 import api from './client';
 
+const headers = { 'X-User-Id': '1' };
+
 const slotsAPI = {
-    // Get all slots for a warehouse
-    getSlotsByWarehouse: (warehouseId) => {
-        return api.get(`/api/slots/warehouse/${warehouseId}`, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  getSlotsByWarehouse(warehouseId) {
+    return api.get(`/api/slots/warehouse/${warehouseId}`, { headers });
+  },
 
-    // Get available slots for a warehouse
-    getAvailableSlots: (warehouseId, requiredCapacity = null) => {
-        const params = requiredCapacity ? { requiredCapacity } : {};
-        return api.get(`/api/slots/warehouse/${warehouseId}/available`, {
-            params,
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  getAllSlotsForWarehouse(warehouseId) {
+    return api.get(`/api/slots/warehouse/${warehouseId}/all`, { headers });
+  },
 
-    // Get warehouse utilization statistics
-    getWarehouseUtilization: (warehouseId) => {
-        return api.get(`/api/slots/warehouse/${warehouseId}/utilization`, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  getAllWarehousesWithSlots() {
+    return api.get('/api/slots/by-warehouse', { headers });
+  },
 
-    // Get slot by ID
-    getSlot: (slotId) => {
-        return api.get(`/api/slots/${slotId}`, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  getBookedAndAvailable(warehouseId) {
+    return api.get(`/api/slots/warehouse/${warehouseId}/booked-available`, { headers });
+  },
 
-    // Create a new slot
-    createSlot: (slotData) => {
-        return api.post('/api/slots', slotData, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  createBooking(warehouseId, payload) {
+    return api.post(`/api/slots/warehouse/${warehouseId}/book`, payload, { headers });
+  },
 
-    // Bulk create slots
-    createSlotsInBulk: (bulkData) => {
-        return api.post('/api/slots/bulk', bulkData, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  // New API for booking requests workflow
+  createBookingRequest(warehouseId, payload) {
+    return api.post(`/api/slots/warehouse/${warehouseId}/request-booking`, payload, { headers });
+  },
 
-    // Update slot
-    updateSlot: (slotId, slotData) => {
-        return api.put(`/api/slots/${slotId}`, slotData, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  getBookingRequests(warehouseId, status) {
+    const params = status && status !== 'all' ? { status } : {};
+    return api.get(`/api/slots/warehouse/${warehouseId}/booking-requests`, { params, headers });
+  },
 
-    // Delete slot
-    deleteSlot: (slotId) => {
-        return api.delete(`/api/slots/${slotId}`, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  approveBookingRequest(warehouseId, requestId, slotPayload) {
+    return api.post(`/api/slots/warehouse/${warehouseId}/booking-requests/${requestId}/approve`, slotPayload, { headers });
+  },
 
-    // Reserve slot capacity
-    reserveSlotCapacity: (slotId, reservationData) => {
-        return api.post(`/api/slots/${slotId}/reserve`, reservationData, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
+  rejectBookingRequest(warehouseId, requestId, reason) {
+    return api.post(`/api/slots/warehouse/${warehouseId}/booking-requests/${requestId}/reject`, { reason }, { headers });
+  },
 
-    // Release reservation
-    releaseReservation: (slotId) => {
-        return api.post(`/api/slots/${slotId}/release`, {}, {
-            headers: {
-                'X-User-Id': '1' // TODO: Replace with actual user ID from auth context
-            }
-        });
-    },
-
-    // Clean up expired reservations
-    cleanupExpiredReservations: () => {
-        return api.post('/api/slots/cleanup-expired', {});
-    },
-
-    // Health check
-    healthCheck: () => {
-        return api.get('/api/slots/health');
-    }
+  createSlot(warehouseId, payload) {
+    return api.post(`/api/slots/warehouse/${warehouseId}/create-slot`, payload, { headers });
+  }
 };
 
 export default slotsAPI;

@@ -19,13 +19,13 @@ public class SlotResponseDTO {
     private String productType;
     private Long reservedByUserId;
     private String reservedByUserName;
+    private String reservedByUserContact;
     private LocalDateTime reservedUntil;
-    private LocalDateTime lastCleaned;
     private Double temperature;
     private Double humidity;
     private String notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean isAvailable;
-    private boolean isReserved;
+    private boolean isReserved;    
 }

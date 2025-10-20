@@ -23,10 +23,14 @@ api.interceptors.request.use(
     if (token) {
       config.headers.set("Authorization", `Bearer ${token}`);
     }
+     if (!config.headers['X-User-Id']) {
+      config.headers['X-User-Id'] = localStorage.getItem('userId') || '1';
+    }
     return config;
   },
   (error) => Promise.reject(error)
 );
+
 
 // Response interceptor
 api.interceptors.response.use(
@@ -46,6 +50,10 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Optional: clear token or user info if stored
       localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+
+      // Redirect to login
+      window.location.href = '/login'; // since you're outside of React components
       
       // Get current role from localStorage or default to admin
       const currentRole = localStorage.getItem('role') || 'admin';

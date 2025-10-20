@@ -2,17 +2,19 @@ import { useState } from 'react';
 import { useWarehouseContext } from '../../../Contexts/Warehouse/WarehouseContext';
 import { PencilIcon, TrashIcon, EyeIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import LocationInput from '../../../Components/Common/LocationInput';
+import { smartGeocode } from '../../../Utils/Geocoding';
+import { useGoogleMaps } from '../../../Contexts/GoogleMapContext';
 
 export default function FacilityManagement() {
-    const { warehouses, loading, error, loadWarehouses, addWarehouse, updateWarehouse, deleteWarehouse } = useWarehouseContext();
+    const { warehouses, loadWarehouses, addWarehouse, updateWarehouse, deleteWarehouse } = useWarehouseContext();
     const [editingWarehouse, setEditingWarehouse] = useState(null);
     const [viewingWarehouse, setViewingWarehouse] = useState(null);
     const [deletingWarehouse, setDeletingWarehouse] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [submitLoading, setSubmitLoading] = useState(false);
+    const [_submitLoading, setSubmitLoading] = useState(false);
     const [notification, setNotification] = useState(null);
-    const [activeTab, setActiveTab] = useState('basic'); // basic, contact, suppliers
+    const [_activeTab, setActiveTab] = useState('basic');
     
     // Form states for different sections
     const [supplierForm, setSupplierForm] = useState({ 
@@ -23,7 +25,7 @@ export default function FacilityManagement() {
         address: '' 
     });
 
-    // Sample warehouses with city instead of lat/lng
+    // Sample warehouses with capacity-based model
     const sampleWarehouses = [
         {
             id: 1,
@@ -33,9 +35,7 @@ export default function FacilityManagement() {
             storageType: "Cold Storage (0°C to 14°C)",
             temperatureMin: 2,
             temperatureMax: 8,
-            totalSlots: 50,
-            capacityPerSlot: 100,
-            totalCapacity: 5000,
+            totalCapacityKg: 5000, // Only total capacity in kg
             pricePerKg: 25,
             certifications: "HACCP, ISO 22000",
             status: "open",
@@ -51,9 +51,7 @@ export default function FacilityManagement() {
             storageType: "Dry Storage",
             temperatureMin: 15,
             temperatureMax: 25,
-            totalSlots: 30,
-            capacityPerSlot: 150,
-            totalCapacity: 4500,
+            totalCapacityKg: 4500, // Only total capacity in kg
             pricePerKg: 15,
             certifications: "Food Safety, GMP",
             status: "open",
@@ -70,9 +68,7 @@ export default function FacilityManagement() {
         storageType: 'Cold Storage (0°C to 14°C)',
         temperatureMin: 0,
         temperatureMax: 14,
-        totalSlots: '',
-        capacityPerSlot: 100,
-        totalCapacity: '',
+        totalCapacityKg: '', // Only total capacity in kg needed
         pricePerKg: '',
         certifications: '',
         photos: [],
@@ -102,14 +98,48 @@ export default function FacilityManagement() {
         warehouseCode: ''
     });
 
+    const { apiKey } = useGoogleMaps();
+    const [geocoding, setGeocoding] = useState(false);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        // Prevent negative price
-        if (name === 'pricePerKg' && value !== '' && parseFloat(value) < 0) return;
+        // Prevent negative price and capacity
+        if ((name === 'pricePerKg' || name === 'totalCapacityKg') && value !== '' && parseFloat(value) < 0) return;
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
+    };
+
+    // Auto-geocode city input and set lat/lng when possible
+    const handleCityChange = async (e) => {
+        const city = e.target.value;
+        setFormData(prev => ({ ...prev, city }));
+        
+        // Auto-geocode when city is entered (at least 3 characters)
+        if (city.length >= 3) {
+            setGeocoding(true);
+            try {
+                const coords = await smartGeocode(city, apiKey);
+                setFormData(prev => ({
+                    ...prev,
+                    lat: coords.lat,
+                    lng: coords.lng
+                }));
+                showNotification(
+                    `Coordinates found for ${city} (${coords.source === 'google_maps' ? 'Google Maps' : 'Database'})`,
+                    'success'
+                );
+            } catch (error) {
+                console.error('Geocoding failed:', error);
+                showNotification(
+                    'Could not find coordinates for this city. Please enter them manually.',
+                    'info'
+                );
+            } finally {
+                setGeocoding(false);
+            }
+        }
     };
 
     // Show notification helper
@@ -119,7 +149,7 @@ export default function FacilityManagement() {
     };
 
     // Supplier Contact Management
-    const addSupplier = () => {
+    const _addSupplier = () => {
         if (supplierForm.name && supplierForm.category) {
             setFormData(prev => ({
                 ...prev,
@@ -129,7 +159,7 @@ export default function FacilityManagement() {
         }
     };
 
-    const removeSupplier = (id) => {
+    const _removeSupplier = (id) => {
         setFormData(prev => ({
             ...prev,
             supplierContacts: prev.supplierContacts.filter(supplier => supplier.id !== id)
@@ -141,15 +171,15 @@ export default function FacilityManagement() {
 
         if (
             !formData.name || !formData.address || !formData.city ||
-            !formData.totalSlots || !formData.totalCapacity || !formData.pricePerKg ||
+            !formData.totalCapacityKg || !formData.pricePerKg ||
             !formData.keeperName || !formData.keeperContact || !formData.keeperEmail
         ) {
             showNotification('Please fill in all required fields', 'error');
             return;
         }
 
-        if (parseInt(formData.totalSlots) <= 0 || parseInt(formData.totalCapacity) <= 0) {
-            showNotification('Slots and capacity must be positive numbers', 'error');
+        if (parseInt(formData.totalCapacityKg) <= 0) {
+            showNotification('Total capacity must be a positive number', 'error');
             return;
         }
 
@@ -161,15 +191,23 @@ export default function FacilityManagement() {
         setSubmitLoading(true);
         try {
             const warehouseData = {
-                ...formData,
-                totalSlots: parseInt(formData.totalSlots),
-                totalCapacity: parseInt(formData.totalCapacity),
+                name: formData.name,
+                address: formData.address,
+                city: formData.city,
+                totalSlots: Math.ceil(parseInt(formData.totalCapacityKg) / 100), // Assume 100kg per slot
+                capacityPerSlot: 100,
+                totalCapacity: parseInt(formData.totalCapacityKg),
                 pricePerKg: parseFloat(formData.pricePerKg),
-                capacityPerSlot: parseInt(formData.capacityPerSlot) || 100,
                 temperatureMin: parseInt(formData.temperatureMin) || 0,
                 temperatureMax: parseInt(formData.temperatureMax) || 14,
                 storageType: getStorageTypeEnum(formData.storageType),
-                status: formData.status.toUpperCase()
+                certifications: formData.certifications || '',
+                status: formData.status.toUpperCase(),
+                keeperName: formData.keeperName,
+                keeperContact: formData.keeperContact,
+                keeperEmail: formData.keeperEmail,
+                latitude: formData.lat || null,
+                longitude: formData.lng || null
             };
 
             if (editingWarehouse) {
@@ -199,9 +237,7 @@ export default function FacilityManagement() {
             storageType: 'Cold Storage (0°C to 14°C)',
             temperatureMin: 0,
             temperatureMax: 14,
-            totalSlots: '',
-            capacityPerSlot: 100,
-            totalCapacity: '',
+            totalCapacityKg: '', // Only total capacity needed
             pricePerKg: '',
             certifications: '',
             photos: [],
@@ -413,19 +449,21 @@ export default function FacilityManagement() {
                                             </span>
                                         </div>
 
-                                        {/* Slots */}
+                                        {/* Storage Capacity */}
                                         <div className="text-center">
-                                            <div className="bg-white rounded-lg p-3 border border-green-100">
-                                                <div className="text-2xl font-bold text-green-700">{warehouse.totalSlots}</div>
-                                                <div className="text-xs text-green-600 font-medium">Total Slots</div>
+                                            <div className="bg-white rounded-lg p-3 border border-blue-100">
+                                                <div className="text-2xl font-bold text-blue-700">{warehouse.totalCapacityKg || warehouse.totalCapacity}</div>
+                                                <div className="text-xs text-blue-600 font-medium">Storage Capacity</div>
+                                                <div className="text-xs text-gray-500 font-medium">(kg)</div>
                                             </div>
                                         </div>
 
-                                        {/* Capacity */}
+                                        {/* Dynamic Slots */}
                                         <div className="text-center">
-                                            <div className="bg-white rounded-lg p-3 border border-gray-100">
-                                                <div className="text-2xl font-bold text-gray-700">{warehouse.totalCapacity}</div>
-                                                <div className="text-xs text-gray-600 font-medium">Capacity (kg)</div>
+                                            <div className="bg-white rounded-lg p-3 border border-purple-100">
+                                                <div className="text-lg font-bold text-purple-700">Dynamic</div>
+                                                <div className="text-xs text-purple-600 font-medium">Slot Creation</div>
+                                                <div className="text-xs text-gray-500">On Demand</div>
                                             </div>
                                         </div>
 
@@ -533,6 +571,7 @@ export default function FacilityManagement() {
                                         value={formData.address}
                                         onChange={(address) => setFormData(prev => ({ ...prev, address }))}
                                         onLocationSelect={(locationData) => {
+                                            console.log('Location selected:', locationData);
                                             setFormData(prev => ({
                                                 ...prev,
                                                 address: locationData.address,
@@ -546,21 +585,40 @@ export default function FacilityManagement() {
                                         required
                                     />
                                     {formData.lat && formData.lng && (
-                                        <p className="mt-1 text-xs text-gray-500">Lat: {formData.lat.toFixed(6)}, Lng: {formData.lng.toFixed(6)}</p>
+                                        <p className="mt-1 text-xs text-green-600 bg-green-50 p-2 rounded border-l-4 border-green-400">
+                                            📍 Coordinates: {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}
+                                        </p>
+                                    )}
+                                    {formData.address && !formData.lat && !formData.lng && (
+                                        <p className="mt-1 text-xs text-yellow-600 bg-yellow-50 p-2 rounded border-l-4 border-yellow-400">
+                                            ⚠️ Manual address mode - coordinates not available
+                                        </p>
                                     )}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        City *
+                                        {geocoding && (
+                                            <span className="ml-2 text-xs text-blue-600">
+                                                🔍 Finding coordinates...
+                                            </span>
+                                        )}
+                                    </label>
                                     <input
                                         type="text"
                                         name="city"
                                         value={formData.city}
-                                        onChange={handleInputChange}
+                                        onChange={handleCityChange}
                                         placeholder="Enter city name"
                                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
                                         required
                                     />
+                                    {formData.lat && formData.lng && (
+                                        <p className="mt-1 text-xs text-green-600 bg-green-50 p-2 rounded border-l-4 border-green-400">
+                                            📍 Coordinates: {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div>
@@ -600,41 +658,22 @@ export default function FacilityManagement() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Slots *</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Total Storage Capacity (kg) *
+                                    </label>
                                     <input
                                         type="number"
-                                        name="totalSlots"
-                                        value={formData.totalSlots}
-                                        onChange={handleInputChange}
-                                        placeholder="50"
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Capacity per Slot (kg)</label>
-                                    <input
-                                        type="number"
-                                        name="capacityPerSlot"
-                                        value={formData.capacityPerSlot}
-                                        onChange={handleInputChange}
-                                        placeholder="100"
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Capacity (kg) *</label>
-                                    <input
-                                        type="number"
-                                        name="totalCapacity"
-                                        value={formData.totalCapacity}
+                                        name="totalCapacityKg"
+                                        value={formData.totalCapacityKg}
                                         onChange={handleInputChange}
                                         placeholder="5000"
                                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
                                         required
+                                        min="1"
                                     />
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Total storage capacity in kilograms. Slots will be created dynamically based on customer requests.
+                                    </p>
                                 </div>
 
                                 <div>
@@ -774,17 +813,14 @@ export default function FacilityManagement() {
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Temperature Range</label>
                                     <p className="text-gray-900">{viewingWarehouse.temperatureMin}°C - {viewingWarehouse.temperatureMax}°C</p>
                                 </div>
-                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Slots</label>
-                                    <p className="text-lg font-semibold text-gray-900">{viewingWarehouse.totalSlots}</p>
+                                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Storage Capacity</label>
+                                    <p className="text-lg font-semibold text-blue-700">{viewingWarehouse.totalCapacityKg || viewingWarehouse.totalCapacity} kg</p>
                                 </div>
-                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Capacity per Slot</label>
-                                    <p className="text-gray-900">{viewingWarehouse.capacityPerSlot} kg</p>
-                                </div>
-                                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Total Capacity</label>
-                                    <p className="text-lg font-semibold text-gray-900">{viewingWarehouse.totalCapacity} kg</p>
+                                <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Slot Management</label>
+                                    <p className="text-lg font-semibold text-purple-700">Dynamic Creation</p>
+                                    <p className="text-xs text-purple-600 mt-1">Slots created on customer request</p>
                                 </div>
                                 <div className="bg-green-50 p-3 rounded-lg border border-green-100">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Price per kg</label>

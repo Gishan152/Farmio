@@ -9,12 +9,18 @@ import java.util.List;
 @Component
 public class RouterValidator {
     private static final List<String> openEndpoints = Arrays.asList(
-        "/api/auth/",
-        "/actuator/health",
-        "/api/warehouses", // Temporarily open for testing
-        "/api/slots", // Temporarily open for testing
-        "/auth/login", 
-        "/auth/register",
+            "/api/auth/",
+            "/auth/login",
+            "/auth/register",
+            "/actuator/health",
+            "/api/warehouses", // Temporarily open for testing
+            "/api/slots", // Temporarily open for testing
+            "/api/bookings", // Temporarily open for testing
+            "/api/user/get", // Temporarily open for testing
+            "/api/buyer/", // Public buyer endpoints for farmers
+            "/api/warehouses/public/", // Public warehouse browsing endpoints
+            "/api/warehouses/available", // Public available warehouses endpoint
+            "/api/warehouses/capacity/", // Public warehouse capacity checking
         "/api/analytics/admin/users", 
         "/api/analytics/admin/users/count",
         "/api/analytics/admin/users/status-count",

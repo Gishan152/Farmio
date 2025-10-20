@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "slots")
@@ -65,6 +67,9 @@ public class Slot {
     
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    @Column(name = "stored_items", columnDefinition = "jsonb")
+    @Convert(converter = StoredItemsConverter.class)
+    private List<StoredItem> storedItems = new ArrayList<>();
     
     @PrePersist
     public void prePersist() {
@@ -102,4 +107,29 @@ public class Slot {
                reservedUntil != null && 
                reservedUntil.isAfter(LocalDateTime.now());
     }
-}
+
+    @Converter
+    public static class StoredItemsConverter implements AttributeConverter<List<StoredItem>, String> {
+        private static final com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+
+        @Override
+        public String convertToDatabaseColumn(List<StoredItem> attribute) {
+            try {
+                if (attribute == null) return null;
+                return mapper.writeValueAsString(attribute);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to convert StoredItem list to JSON", e);
+            }
+        }
+
+        @Override
+        public List<StoredItem> convertToEntityAttribute(String dbData) {
+            try {
+                if (dbData == null || dbData.isEmpty()) return new ArrayList<>();
+                return mapper.readValue(dbData, new com.fasterxml.jackson.core.type.TypeReference<List<StoredItem>>() {});
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to convert JSON to StoredItem list", e);
+            }
+        }
+    }
+}  

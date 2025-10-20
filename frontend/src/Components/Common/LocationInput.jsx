@@ -1,6 +1,5 @@
-import { useRef, useState } from 'react';
-import { Autocomplete } from '@react-google-maps/api';
-import { useGoogleMaps } from '../../Contexts/GoogleMapContext';
+import { useState } from 'react';
+import { smartGeocode } from '../../Utils/geocoding';
 
 export default function LocationInput({ 
     value, 
@@ -12,178 +11,80 @@ export default function LocationInput({
     id = "location-input",
     name = "address"
 }) {
-    const { isLoaded, loadError } = useGoogleMaps();
-    const autocompleteRef = useRef(null);
-    const [fallbackMode, setFallbackMode] = useState(false);
+    const [localError] = useState(null);
 
-    const handlePlaceChanged = () => {
-        if (autocompleteRef.current) {
-            const place = autocompleteRef.current.getPlace();
-            
-            if (place.geometry) {
-                const location = place.geometry.location;
-                const lat = location.lat();
-                const lng = location.lng();
-                const address = place.formatted_address || place.name || '';
-                
-                // Extract city from address components
-                let city = '';
-                if (place.address_components) {
-                    const cityComponent = place.address_components.find(
-                        component => 
-                            component.types.includes('locality') ||
-                            component.types.includes('administrative_area_level_2')
-                    );
-                    if (cityComponent) {
-                        city = cityComponent.long_name;
-                    }
-                }
+    // No Google Maps usage: always operate in fallback/manual mode
 
-                // Call the callback with all location data
+    // No Autocomplete: we use manual input and try to geocode city/address via smartGeocode when possible
+
+    const handleInputChange = (e) => {
+        const newValue = e.target.value;
+        onChange(newValue);
+        // In manual mode, try to extract a city and auto-geocode it (if it looks like a city)
+        if (onLocationSelect) {
+            const parts = newValue.split(',').map(part => part.trim()).filter(Boolean);
+            const possibleCity = parts.length > 0 ? parts[parts.length - 1] : '';
+
+            // If the last part looks like a city (>=3 chars), attempt smartGeocode
+            if (possibleCity && possibleCity.length >= 3) {
+                    smartGeocode(possibleCity)
+                        .then(coords => {
+                            onLocationSelect({
+                                address: newValue,
+                                lat: coords.lat || null,
+                                lng: coords.lng || null,
+                                city: coords.city || possibleCity,
+                                placeId: coords.placeId || null,
+                                fallback: true,
+                                geocodeSource: coords.source || 'fallback'
+                            });
+                        })
+                        .catch(() => {
+                            // Still call onLocationSelect to update address, but without coords
+                            onLocationSelect({
+                                address: newValue,
+                                lat: null,
+                                lng: null,
+                                city: possibleCity || '',
+                                placeId: null,
+                                fallback: true
+                            });
+                        });
+            } else {
+                // Not enough input to geocode yet
                 onLocationSelect({
-                    address,
-                    lat,
-                    lng,
-                    city,
-                    placeId: place.place_id
+                    address: newValue,
+                    lat: null,
+                    lng: null,
+                    city: possibleCity || '',
+                    placeId: null,
+                    fallback: true
                 });
             }
         }
     };
 
-    const handleInputChange = (e) => {
-        const newValue = e.target.value;
-        onChange(newValue);
-        
-        // In fallback mode, try to extract basic location info
-        if (fallbackMode && onLocationSelect) {
-            // Simple parsing for common address formats
-            const parts = newValue.split(',').map(part => part.trim());
-            const city = parts.length > 1 ? parts[parts.length - 2] : '';
-            
-            onLocationSelect({
-                address: newValue,
-                lat: null,
-                lng: null,
-                city: city,
-                placeId: null,
-                fallback: true
-            });
-        }
-    };
-
-    // Show loading state
-    if (!isLoaded && !loadError && !fallbackMode) {
-        return (
-            <div className="relative">
-                <input
-                    type="text"
-                    id={id}
-                    name={name}
-                    value={value}
-                    onChange={handleInputChange}
-                    placeholder="Loading Google Maps..."
-                    className={className}
-                    disabled
-                />
-                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                    <div className="animate-spin w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full"></div>
+    // Simple manual input rendering
+    return (
+        <div className="space-y-2">
+            <input
+                type="text"
+                id={id}
+                name={name}
+                value={value}
+                onChange={handleInputChange}
+                placeholder={placeholder}
+                className={className}
+                required={required}
+            />
+            {localError && (
+                <div className="text-xs text-red-600 bg-red-50 p-2 rounded border-l-4 border-red-400">
+                    ❌ {localError}
                 </div>
+            )}
+            <div className="text-xs text-gray-600">
+                📍 Manual input mode (no Google Maps required)
             </div>
-        );
-    }
-
-    // Show error state with fallback option
-    if (loadError || fallbackMode) {
-        return (
-            <div className="space-y-2">
-                <div className="relative">
-                    <input
-                        type="text"
-                        id={id}
-                        name={name}
-                        value={value}
-                        onChange={handleInputChange}
-                        placeholder={placeholder}
-                        className={className}
-                        required={required}
-                    />
-                    {loadError && !fallbackMode && (
-                        <button
-                            type="button"
-                            onClick={() => setFallbackMode(true)}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-yellow-600 hover:text-yellow-800"
-                            title="Switch to basic mode"
-                        >
-                            ⚠️
-                        </button>
-                    )}
-                </div>
-                {loadError && !fallbackMode && (
-                    <div className="text-xs text-yellow-600">
-                        ⚠️ Google Maps unavailable. 
-                        <button 
-                            type="button"
-                            onClick={() => setFallbackMode(true)}
-                            className="underline hover:text-yellow-800"
-                        >
-                            Use basic input
-                        </button>
-                    </div>
-                )}
-                {fallbackMode && (
-                    <div className="text-xs text-blue-600">
-                        📍 Basic mode: Enter address manually (e.g., "123 Main St, Colombo")
-                    </div>
-                )}
-            </div>
-        );
-    }
-
-    // Google Maps is loaded successfully
-    try {
-        return (
-            <Autocomplete
-                onLoad={(autocomplete) => {
-                    autocompleteRef.current = autocomplete;
-                }}
-                onPlaceChanged={handlePlaceChanged}
-                options={{
-                    types: ['address', 'establishment'],
-                    componentRestrictions: { country: 'lk' }, // Restrict to Sri Lanka
-                }}
-            >
-                <input
-                    type="text"
-                    id={id}
-                    name={name}
-                    value={value}
-                    onChange={handleInputChange}
-                    placeholder={placeholder}
-                    className={className}
-                    required={required}
-                />
-            </Autocomplete>
-        );
-    } catch (error) {
-        console.error('Google Maps Autocomplete error:', error);
-        // Fallback to basic input on error
-        return (
-            <div className="space-y-2">
-                <input
-                    type="text"
-                    id={id}
-                    name={name}
-                    value={value}
-                    onChange={handleInputChange}
-                    placeholder={placeholder}
-                    className={className}
-                    required={required}
-                />
-                <div className="text-xs text-yellow-600">
-                    ⚠️ Google Maps error. Using basic input mode.
-                </div>
-            </div>
-        );
-    }
+        </div>
+    );
 }

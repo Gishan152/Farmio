@@ -147,15 +147,12 @@ export default function FarmerWarehouses() {
                         key={w.id}
                         className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow hover:shadow-lg transition overflow-hidden"
                     >
-                        <div className="relative h-40 bg-gray-200">
-                            <img src={w.imageUrl} alt={w.name} className="object-cover w-full h-full" />
+                        <div className="p-4 space-y-2 relative">
                             {w.verified && (
                                 <div className="absolute top-2 right-2 bg-white p-1 border-none rounded-[50%]">
                                     <ShieldCheck className="h-6 w-6 text-green-500" />
                                 </div>
                             )}
-                        </div>
-                        <div className="p-4 space-y-2">
                             <h2 className="text-xl font-bold dark:text-gray-100">{w.name}</h2>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Owner: {w.owner}</p>
                             <div className="flex items-center text-gray-700 dark:text-gray-300">

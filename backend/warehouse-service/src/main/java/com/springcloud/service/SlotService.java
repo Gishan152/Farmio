@@ -3,9 +3,8 @@ package com.springcloud.service;
 import com.springcloud.dto.*;
 import com.springcloud.exception.ResourceNotFoundException;
 import com.springcloud.exception.BadRequestException;
-import com.springcloud.model.Slot;
-import com.springcloud.model.SlotStatus;
-import com.springcloud.model.Warehouse;
+import com.springcloud.model.*;
+import com.springcloud.repository.BookingRepository;
 import com.springcloud.repository.SlotRepository;
 import com.springcloud.repository.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +27,7 @@ public class SlotService {
     
     private final SlotRepository slotRepository;
     private final WarehouseRepository warehouseRepository;
+    private final BookingRepository bookingRepository;
     
     // Get all slots for a warehouse
     public List<SlotResponseDTO> getSlotsByWarehouse(Long warehouseId, Long userId) {
@@ -85,49 +85,7 @@ public class SlotService {
         
         log.info("Created slot with id: {}", savedSlot.getId());
         return mapToResponseDTO(savedSlot);
-    }
-    
-    // Bulk create slots
-    public List<SlotResponseDTO> createSlotsInBulk(BulkSlotCreationDTO requestDTO, Long userId) {
-        log.info("Creating {} slots in bulk for warehouse: {} by user: {}", 
-                requestDTO.getNumberOfSlots(), requestDTO.getWarehouseId(), userId);
-        
-        // Verify warehouse exists and user has access
-        Warehouse warehouse = warehouseRepository.findById(requestDTO.getWarehouseId())
-            .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found with id: " + requestDTO.getWarehouseId()));
-        
-        if (!warehouse.getOwnerId().equals(userId)) {
-            throw new BadRequestException("You don't have access to this warehouse");
-        }
-        
-        List<Slot> slots = new ArrayList<>();
-        int startNum = requestDTO.getStartingNumber();
-        
-        for (int i = 0; i < requestDTO.getNumberOfSlots(); i++) {
-            String slotNumber = requestDTO.getSlotNumberPrefix() + String.format("%03d", startNum + i);
-            
-            // Check if slot number already exists
-            if (slotRepository.existsByWarehouseIdAndSlotNumber(requestDTO.getWarehouseId(), slotNumber)) {
-                log.warn("Skipping slot number {} as it already exists", slotNumber);
-                continue;
-            }
-            
-            Slot slot = new Slot();
-            slot.setSlotNumber(slotNumber);
-            slot.setWarehouseId(requestDTO.getWarehouseId());
-            slot.setStatus(SlotStatus.AVAILABLE);
-            slot.setCapacityKg(requestDTO.getCapacityPerSlot());
-            slot.setCurrentLoadKg(0);
-            slot.setReservedLoadKg(0);
-            
-            slots.add(slot);
-        }
-        
-        List<Slot> savedSlots = slotRepository.saveAll(slots);
-        log.info("Created {} slots in bulk", savedSlots.size());
-        
-        return savedSlots.stream().map(this::mapToResponseDTO).collect(Collectors.toList());
-    }
+    }   
     
     // Update slot
     public SlotResponseDTO updateSlot(Long slotId, SlotRequestDTO requestDTO, Long userId) {
@@ -360,7 +318,6 @@ public class SlotService {
         dto.setProductType(slot.getProductType());
         dto.setReservedByUserId(slot.getReservedByUserId());
         dto.setReservedUntil(slot.getReservedUntil());
-        dto.setLastCleaned(slot.getLastCleaned());
         dto.setTemperature(slot.getTemperature());
         dto.setHumidity(slot.getHumidity());
         dto.setNotes(slot.getNotes());
@@ -368,12 +325,16 @@ public class SlotService {
         dto.setUpdatedAt(slot.getUpdatedAt());
         dto.setAvailable(slot.isAvailable());
         dto.setReserved(slot.isReserved());
-        
+
+        dto.setReservedByUserName(
+            slot.getReservedByUserId() == null ? "-" : "User#" + slot.getReservedByUserId());
+        dto.setReservedByUserContact("-");
+
         // Set warehouse name if warehouse is loaded
         if (slot.getWarehouse() != null) {
             dto.setWarehouseName(slot.getWarehouse().getName());
         }
-        
+
         return dto;
     }
     
@@ -388,7 +349,6 @@ public class SlotService {
         slot.setProductType(dto.getProductType());
         slot.setReservedByUserId(dto.getReservedByUserId());
         slot.setReservedUntil(dto.getReservedUntil());
-        slot.setLastCleaned(dto.getLastCleaned());
         slot.setTemperature(dto.getTemperature());
         slot.setHumidity(dto.getHumidity());
         slot.setNotes(dto.getNotes());
@@ -427,4 +387,206 @@ public class SlotService {
         }
         return 0L;
     }
+
+   
+
+@Transactional
+public SlotResponseDTO createBooking(Long warehouseId, SlotBookingDTO dto, Long userId) {
+    Warehouse w = warehouseRepository.findByIdAndOwnerId(warehouseId, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
+
+    if (slotRepository.existsByWarehouseIdAndSlotNumber(warehouseId, dto.getSlotNumber()))
+        throw new BadRequestException("Slot already booked");
+
+    Slot slot = new Slot();
+    slot.setWarehouseId(warehouseId);
+    slot.setSlotNumber(dto.getSlotNumber());
+    slot.setStatus(SlotStatus.RESERVED);
+    slot.setCapacityKg(dto.getCapacityKg());
+    slot.setReservedLoadKg(dto.getReservedLoadKg());
+    slot.setProductType(dto.getProductType());
+    slot.setStoredItems(dto.getStoredItems());
+    slot.setReservedByUserId(userId);
+    slot.setReservedUntil(dto.getReservedUntil());
+    slot.setNotes(dto.getNotes());
+
+    Slot saved = slotRepository.save(slot);
+    return mapToResponseDTO(saved);
+}
+
+public BookedAndAvailableDTO getBookedAndAvailable(Long warehouseId, Long userId) {
+    Warehouse w = warehouseRepository.findByIdAndOwnerId(warehouseId, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
+
+    List<SlotResponseDTO> booked = slotRepository.findBookedSlots(warehouseId)
+            .stream().map(this::mapToResponseDTO).toList();
+
+    List<Integer> available = slotRepository.findAvailableNumbers(warehouseId, w.getTotalSlots());
+
+    return new BookedAndAvailableDTO(booked, available);
+}
+
+// Get all slots for a warehouse (booked + available as virtual slots)
+public List<SlotResponseDTO> getAllSlotsForWarehouse(Long warehouseId, Long userId) {
+    Warehouse warehouse = warehouseRepository.findByIdAndOwnerId(warehouseId, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
+
+    // Get existing slots (booked/reserved/occupied)
+    List<Slot> existingSlots = slotRepository.findByWarehouseIdOrderBySlotNumberAsc(warehouseId);
+    List<SlotResponseDTO> allSlots = new ArrayList<>();
+    
+    // Convert existing slots to DTOs
+    Map<String, SlotResponseDTO> existingSlotsMap = existingSlots.stream()
+            .map(this::mapToResponseDTO)
+            .collect(Collectors.toMap(SlotResponseDTO::getSlotNumber, slot -> slot));
+    
+    // Generate all slots (1 to totalSlots)
+    for (int i = 1; i <= warehouse.getTotalSlots(); i++) {
+        String slotNumber = String.format("%03d", i); // Format as 001, 002, etc.
+        
+        if (existingSlotsMap.containsKey(slotNumber)) {
+            // Use existing slot data
+            allSlots.add(existingSlotsMap.get(slotNumber));
+        } else {
+            // Create virtual available slot
+            SlotResponseDTO virtualSlot = createVirtualAvailableSlot(warehouseId, slotNumber, warehouse.getName());
+            allSlots.add(virtualSlot);
+        }
+    }
+    
+    return allSlots;
+}
+
+// Helper method to create virtual available slot
+private SlotResponseDTO createVirtualAvailableSlot(Long warehouseId, String slotNumber, String warehouseName) {
+    SlotResponseDTO slot = new SlotResponseDTO();
+    slot.setId(null); // Virtual slot has no ID
+    slot.setSlotNumber(slotNumber);
+    slot.setWarehouseId(warehouseId);
+    slot.setWarehouseName(warehouseName);
+    slot.setStatus(SlotStatus.AVAILABLE);
+    slot.setCapacityKg(1000); // Default capacity
+    slot.setCurrentLoadKg(0);
+    slot.setReservedLoadKg(0);
+    slot.setAvailableCapacity(1000);
+    slot.setUtilizationPercentage(0.0);
+    slot.setProductType(null);
+    slot.setReservedByUserId(null);
+    slot.setReservedByUserName("-");
+    slot.setReservedByUserContact("-");
+    slot.setReservedUntil(null);
+    slot.setTemperature(null);
+    slot.setHumidity(null);
+    slot.setNotes(null);
+    slot.setCreatedAt(null);
+    slot.setUpdatedAt(null);
+    slot.setAvailable(true);
+    slot.setReserved(false);
+    return slot;
+}
+
+    // Booking Request Workflow Methods - Updated for new payment flow
+    public Map<String, Object> createBookingRequest(Long warehouseId, Map<String, Object> payload, Long userId) {
+        // Find warehouse and owner
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
+            .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
+        
+        // Create a pending booking in the bookings table
+        Booking booking = new Booking();
+        booking.setWarehouseId(warehouseId);
+        booking.setFarmerId(userId); // Customer who made the request
+        booking.setOwnerId(warehouse.getOwnerId());
+        booking.setStatus(BookingStatus.PENDING);
+        booking.setPaymentStatus(PaymentStatus.NOT_REQUIRED);
+        booking.setQuantityKg(Double.valueOf(payload.get("quantity").toString()));
+        if (payload.containsKey("durationDays")) {
+            booking.setDurationDays(Integer.valueOf(payload.get("durationDays").toString()));
+        }
+        if (payload.containsKey("productType")) {
+            booking.setProductType(payload.get("productType").toString());
+        }
+        
+        Booking saved = bookingRepository.save(booking);
+        
+        return Map.of(
+            "id", saved.getId(),
+            "status", saved.getStatus().name(),
+            "message", "Booking request created successfully. Awaiting warehouse owner approval."
+        );
+    }
+    
+    public List<Map<String, Object>> getBookingRequests(Long warehouseId, String status, Long userId) {
+        // Get bookings for this warehouse
+        List<Booking> bookings;
+        if (status != null && !status.equals("all")) {
+            try {
+                BookingStatus bookingStatus = BookingStatus.valueOf(status.toUpperCase());
+                bookings = bookingRepository.findByWarehouseIdAndOwnerIdAndStatus(warehouseId, userId, bookingStatus);
+            } catch (IllegalArgumentException e) {
+                // Invalid status, return empty list
+                bookings = List.of();
+            }
+        } else {
+            bookings = bookingRepository.findByWarehouseIdAndOwnerId(warehouseId, userId);
+        }
+        
+        return bookings.stream().map(booking -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", booking.getId());
+            map.put("farmerId", booking.getFarmerId());
+            map.put("farmerName", "Farmer " + booking.getFarmerId()); // TODO: Get actual farmer name
+            map.put("farmerPhone", "+947XXXXXXXX"); // TODO: Get actual farmer phone
+            map.put("produce", booking.getProductType() != null ? booking.getProductType() : "Rice"); // TODO: Get actual produce type
+            map.put("quantity", booking.getQuantityKg());
+            map.put("duration", booking.getDurationDays());
+            map.put("status", booking.getStatus().name().toLowerCase());
+            map.put("paymentStatus", booking.getPaymentStatus().name().toLowerCase());
+            map.put("requestDate", booking.getCreatedAt().toString());
+            map.put("warehouseId", booking.getWarehouseId());
+            
+            // Add payment-related info if applicable
+            if (booking.getTotalAmount() != null) {
+                map.put("totalAmount", booking.getTotalAmount());
+            }
+            if (booking.getSlotNumber() != null) {
+                map.put("slotNumber", booking.getSlotNumber());
+            }
+            
+            return map;
+        }).collect(Collectors.toList());
+    }
+    
+    // This method is now deprecated - use BookingService.approveBookingRequest instead
+    @Deprecated
+    @Transactional
+    public Map<String, Object> approveBookingRequest(Long warehouseId, Long requestId, Map<String, Object> slotPayload, Long userId) {
+        // This functionality has been moved to BookingService to handle the payment flow properly
+        throw new BadRequestException("This method is deprecated. Use /api/bookings/{id}/approve endpoint instead.");
+    }
+    
+    public Map<String, Object> rejectBookingRequest(Long warehouseId, Long requestId, Map<String, Object> payload, Long userId) {
+        // Find the booking request
+        Booking booking = bookingRepository.findById(requestId)
+            .filter(b -> b.getWarehouseId().equals(warehouseId) && b.getOwnerId().equals(userId))
+            .orElseThrow(() -> new ResourceNotFoundException("Booking request not found"));
+        
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new BadRequestException("Only pending booking requests can be rejected");
+        }
+        
+        // Update booking status
+        booking.setStatus(BookingStatus.REJECTED);
+        booking.setPaymentStatus(PaymentStatus.NOT_REQUIRED);
+        if (payload.containsKey("reason")) {
+            booking.setRejectionReason(payload.get("reason").toString());
+        }
+        bookingRepository.save(booking);
+        
+        return Map.of(
+            "bookingId", booking.getId(),
+            "status", booking.getStatus().name().toLowerCase(),
+            "message", "Booking request rejected"
+        );
+    }
+
 }
