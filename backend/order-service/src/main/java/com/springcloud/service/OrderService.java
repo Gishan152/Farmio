@@ -237,7 +237,12 @@ public class OrderService {
                         order.getId().toString()
                     );
                     try {
-                        paymentServiceClient.releaseEscrow(releaseRequest);
+                        var releaseResp = paymentServiceClient.releaseEscrow(releaseRequest);
+                        System.out.println(
+                            ">>> [order-service] releaseEscrow response: status=" + releaseResp.status() +
+                            ", message=" + releaseResp.message() +
+                            ", paymentId=" + releaseResp.paymentId()
+                        );
                     } catch (Exception e) {
                         System.err.println("Failed to release escrow: " + e.getMessage());
                     }
@@ -282,7 +287,12 @@ public class OrderService {
                     // Optional: ensure escrow release is triggered before completion if still in transport
                     try {
                         var releaseRequest = new EscrowReleaseRequest(order.getId().toString());
-                        paymentServiceClient.releaseEscrow(releaseRequest);
+                        var releaseResp = paymentServiceClient.releaseEscrow(releaseRequest);
+                        System.out.println(
+                            ">>> [order-service] releaseEscrow (on complete) response: status=" + releaseResp.status() +
+                            ", message=" + releaseResp.message() +
+                            ", paymentId=" + releaseResp.paymentId()
+                        );
                     } catch (Exception e) {
                         System.err.println("Failed to release escrow on completion: " + e.getMessage());
                     }
@@ -337,16 +347,23 @@ public class OrderService {
 //                    order.setRefundAmount(refundAmount);
 
                     // Feign call to refund escrow
-                    var refundRequest = new EscrowRefundRequest(
-                        order.getId().toString()
-                    );
+                    var refundRequest = new EscrowRefundRequest(order.getId().toString());
                     try {
-                        paymentServiceClient.refundEscrow(refundRequest);
+                        var refundResponse = paymentServiceClient.refundEscrow(refundRequest);
+                        System.out.println(
+                            ">>> [order-service] refundEscrow response: status=" + refundResponse.status() +
+                            ", message=" + refundResponse.message() +
+                            ", paymentId=" + refundResponse.paymentId()
+                        );
+                        if ("SUCCESS".equalsIgnoreCase(refundResponse.status())) {
+                            order.setStatus(OrderStatus.CANCELLED);
+                        } else {
+                            throw new IllegalStateException("Refund failed: " + refundResponse.message());
+                        }
                     } catch (Exception e) {
                         System.err.println("Failed to refund escrow: " + e.getMessage());
+                        throw e; // propagate so caller knows cancel did not complete
                     }
-
-                    order.setStatus(OrderStatus.CANCELLED);
                     // TODO : restore the stock of order items
                     return orderRepository.save(order);
                 })
