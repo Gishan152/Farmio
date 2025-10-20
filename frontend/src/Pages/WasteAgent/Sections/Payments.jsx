@@ -249,9 +249,9 @@ const Payments = () => {
 
 				const fields = {
 					merchant_id: merchantId,
-					return_url: `${window.location.origin}/waste-agent/payments`,
-					cancel_url: `${window.location.origin}/waste-agent/payments`,
-					notify_url: "http://localhost:8080/api/payment/payhere/notify",
+					return_url: `${window.location.origin}/waste-agent/manage-payments`,
+					cancel_url: `${window.location.origin}/waste-agent/manage-payments`,
+					notify_url: "https://nrvzmq9j-8080.asse.devtunnels.ms/api/payment/payhere/notify",
 					order_id: orderId,
 					items: res.data.description || "Waste payment",
 					currency: currency,
