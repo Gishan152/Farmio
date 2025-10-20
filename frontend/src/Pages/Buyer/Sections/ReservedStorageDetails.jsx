@@ -4,6 +4,14 @@ import { CheckBadgeIcon, ClockIcon, StarIcon } from "@heroicons/react/24/solid";
 import warehouseImage from "../../../Assets/Buyer/Warehouses/warehouse.webp";
 import { sortedLastIndex } from "lodash";
 
+// Format slot ID with S- prefix
+const formatSlotId = (id) => {
+    if (typeof id === 'string' && id.startsWith('S-')) {
+        return id; // Already formatted
+    }
+    return `S-${String(id).padStart(3, '0')}`;
+};
+
 const sampleReservations = [
     {
         id: 1,

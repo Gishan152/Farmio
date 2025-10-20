@@ -2,10 +2,14 @@ package com.springcloud.controller;
 
 import com.springcloud.dto.RequestDTO;
 import com.springcloud.dto.WasteListingDTO;
+import com.springcloud.dto.RequestCreateDTO;
 import com.springcloud.mapper.RequestMapper;
 import com.springcloud.mapper.WasteListingMapper;
 import com.springcloud.service.RequestService;
+import com.springcloud.client.AuthClient;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,11 +22,13 @@ public class RequestController {
     private final RequestService requestService;
     private final RequestMapper requestMapper;
     private final WasteListingMapper wasteListingMapper;
+    private final AuthClient authClient;
 
-    public RequestController(RequestService requestService, RequestMapper requestMapper, WasteListingMapper wasteListingMapper) {
+    public RequestController(RequestService requestService, RequestMapper requestMapper, WasteListingMapper wasteListingMapper, AuthClient authClient) {
         this.requestService = requestService;
         this.requestMapper = requestMapper;
         this.wasteListingMapper = wasteListingMapper;
+        this.authClient = authClient;
     }
 
     // Get all requests
@@ -66,11 +72,19 @@ public class RequestController {
         return requestMapper.toDTO(updated);
     }
 
-    // Create a new request (DTO → Entity → DTO)
+    // Create a new request (CreateDTO → Entity → DTO)
     @PostMapping
-    public RequestDTO createRequest(@Valid @RequestBody RequestDTO dto) {
-        var entity = requestMapper.toEntity(dto);
-        var saved = requestService.createRequest(entity);
+    public RequestDTO createRequest(@Valid @RequestBody RequestCreateDTO dto,
+                                    @RequestHeader(value = "X-User-Name", required = false) String username) {
+        if (username == null || username.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "X-User-Name header is required");
+        }
+        var user = authClient.getUser(new AuthClient.UserRequest(username));
+
+        var entity = requestMapper.fromCreateDTO(dto);
+        // Override requesterName with resolved username from auth-service
+        entity.setRequesterName(user.username());
+        var saved = requestService.createRequestFromCreateDTO(entity);
         return requestMapper.toDTO(saved);
     }
 
@@ -80,13 +94,42 @@ public class RequestController {
         requestService.deleteRequest(id);
     }
 
+    // Cancel a request (only if status is Pending)
+    @DeleteMapping("/{id}/cancel")
+    public void cancelRequest(
+            @PathVariable Long id,
+            @RequestHeader(value = "X-User-Name", required = false) String username
+    ) {
+        if (username == null || username.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "X-User-Name header is required");
+        }
+        requestService.cancelRequest(id, username);
+    }
+
+    // Get requests created by the current user
+    @GetMapping("/my-requests")
+    public List<RequestDTO> getMyRequests(
+            @RequestHeader(value = "X-User-Name", required = false) String username
+    ) {
+        if (username == null || username.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "X-User-Name header is required");
+        }
+        return requestService.getRequestsByRequesterName(username)
+                .stream()
+                .map(requestMapper::toDTO)
+                .toList();
+    }
+
     @PutMapping("/{id}/accept")
     public WasteListingDTO acceptRequest(
             @PathVariable Long id,
-            @RequestParam Long agentId,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId,
             @RequestParam(required = false) Long relatedListingId
     ) {
-        var listing = requestService.acceptRequest(id, agentId, relatedListingId);
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "X-User-Id header is required");
+        }
+        var listing = requestService.acceptRequest(id, userId, relatedListingId);
         return wasteListingMapper.toDTO(listing);
     }
 }

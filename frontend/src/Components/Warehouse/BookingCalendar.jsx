@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { formatSlotId } from '../../Utils/slotUtils';
 
 export default function BookingCalendar({ slots = [] }) {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -128,7 +129,7 @@ export default function BookingCalendar({ slots = [] }) {
                         <div className="grid grid-cols-7 gap-1">
                             {calendarDays.map((date, index) => {
                                 if (!date) {
-                                    return <div key={index} className="p-3"></div>;
+                                    return <div key={`empty-${index}`} className="p-3"></div>;
                                 }
 
                                 const dateStatus = getDateStatus(date);
@@ -139,7 +140,7 @@ export default function BookingCalendar({ slots = [] }) {
 
                                 return (
                                     <button
-                                        key={date}
+                                        key={`${currentYear}-${currentMonth}-${date}`}
                                         onClick={() => handleDateClick(date)}
                                         className={`
                                             p-3 text-sm font-medium rounded-lg border transition-all duration-200 hover:scale-105
@@ -210,7 +211,7 @@ export default function BookingCalendar({ slots = [] }) {
                                                 {getSelectedDateBookings().map((booking, index) => (
                                                     <div key={index} className="bg-white p-3 rounded border border-gray-200">
                                                         <div className="text-sm">
-                                                            <div className="font-medium text-gray-900">Slot #{booking.id}</div>
+                                                            <div className="font-medium text-gray-900">Slot {formatSlotId(booking.id)}</div>
                                                             <div className="text-gray-600">Booked by: {booking.bookedBy}</div>
                                                             <div className="text-gray-600">Produce: {booking.produce}</div>
                                                             <div className="text-gray-600">

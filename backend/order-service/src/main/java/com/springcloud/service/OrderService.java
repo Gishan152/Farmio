@@ -21,31 +21,41 @@ import com.springcloud.common.enums.OrderStatus;
 @RequiredArgsConstructor
 public class OrderService {
     private final com.springcloud.feign.PaymentServiceClient paymentServiceClient;
+    private final com.springcloud.feign.CropListingServiceClient cropListingServiceClient;
 
     private final OrderRepository orderRepository;
-
-    // Remove: temporary dataset and getter
-    @Getter
-    List<CropInfo> crops = List.of(
-            new CropInfo(1L, "Corn", new BigDecimal("120"), "Sunny Farm", 101L, "Iowa, USA", 4.5, true, "corn.jpg", "kg", true, false, List.of("Organic", "On Sale")),
-            new CropInfo(2L, "Wheat", new BigDecimal("120"), "Golden Fields", 101L, "Kansas, USA", 4.2, false, "wheat.jpg", "kg", true, false, List.of()),
-            new CropInfo(3L, "Rice", new BigDecimal("110"), "Green Valley", 101L, "Kandy, Sri Lanka", 4.7, true, "rice.jpg", "kg", true, false, List.of("Organic")),
-            new CropInfo(4L, "Tomato", new BigDecimal("95"), "Highland Farms", 104L, "Nuwara Eliya, Sri Lanka", 4.0, false, "tomato.jpg", "kg", true, false, List.of("On Sale")),
-            new CropInfo(5L, "Potato", new BigDecimal("80"), "Riverbend Farm", 105L, "Badulla, Sri Lanka", 4.3, true, "potato.jpg", "kg", true, false, List.of()),
-            new CropInfo(6L, "Green Gram", new BigDecimal("210"), "AgroCare Co‑op", 106L, "Kurunegala, Sri Lanka", 4.8, true, "green_gram.jpg", "kg", true, false, List.of("Organic", "Certified"))
-    );
 
 
     public List<Order> create(Long userId, CreateOrderRequest request) {
 
-        // Create a lookup map: cropId -> farmerId
-        Map<Long, Long> cropToFarmer = crops.stream()
-                .collect(Collectors.toMap(CropInfo::getId, CropInfo::getFarmerId));
-        // TODO : Fetch crop items in the order from the crop-listing-service
-        // TODO : Deduce stock by the quantity requested by the buyer for each item in the order
-
-        // Given request.items() is List<OrderItemRequest> with getCropId()
+        // Extract the list of crop IDs from the order request
         List<OrderItemRequest> items = request.items();
+        List<Long> cropIds = items.stream()
+                .map(OrderItemRequest::getCropId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // TODO (COMPLETED): Fetch crop items in the order from the crop-listing-service
+        List<CropInfo> requestedCrops = cropListingServiceClient.getProductsByIds(cropIds);
+        System.out.println("Fetched " + requestedCrops.size() + " crops from crop-listing-service: " + requestedCrops);
+        
+        // Create a lookup map: cropId -> CropInfo
+        Map<Long, CropInfo> cropMap = requestedCrops.stream()
+                .collect(Collectors.toMap(CropInfo::getId, crop -> crop));
+        
+        // Create a lookup map: cropId -> farmerId
+        Map<Long, Long> cropToFarmer = requestedCrops.stream()
+                .collect(Collectors.toMap(CropInfo::getId, CropInfo::getFarmerId));
+
+        // TODO (COMPLETED): Deduce stock by the quantity requested by the buyer for each item in the order
+        // Deduct stock for each item before creating the order
+        items.forEach(item -> {
+            try {
+                cropListingServiceClient.deductStock(item.getCropId(), item.getQuantity().intValue());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to deduct stock for crop " + item.getCropId() + ": " + e.getMessage());
+            }
+        });
 
         Map<Long, List<OrderItemRequest>> itemsByFarmer = items.stream()
                 .filter(item -> cropToFarmer.containsKey(item.getCropId()))
@@ -64,13 +74,24 @@ public class OrderService {
                     .map(item -> item.getPricePerUnit().multiply(item.getQuantity()))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+            // Determine transport mode from product transportation availability
+            boolean anyTransportAvailable = farmerItems.stream().anyMatch(itemReq -> {
+                CropInfo ci = cropMap.get(itemReq.getCropId());
+                try {
+                    return ci != null && ci.isTransportationAvailable();
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            String transportMode = anyTransportAvailable ? "BY_FARMER" : "BY_BUYER";
+
             var order = Order.builder()
-                    .farmerId(1L)
+                    .farmerId(farmerId)
                     .buyerId(userId)
                     .paymentId("123")
                     .status(OrderStatus.PENDING)
                     .total(total)
-                    .transport("BY_BUYER")
+                    .transport(transportMode)
                     .build();
 
 //            orderRepository.saveAndFlush(order);
@@ -111,19 +132,43 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
+    // Lists for farmer dashboard
+    public List<Order> getFarmerAwaitingShipment(Long farmerId) {
+        return orderRepository.findByFarmerIdAndStatusIn(
+                farmerId,
+                java.util.EnumSet.of(OrderStatus.PENDING, OrderStatus.PROCESSING, OrderStatus.AWAITING_PICKUP)
+        );
+    }
+
+    public List<Order> getFarmerOngoingShipment(Long farmerId) {
+        return orderRepository.findByFarmerIdAndStatus(farmerId, OrderStatus.IN_TRANSPORT);
+    }
+
+    public List<Order> getFarmerPaidAndShipped(Long farmerId) {
+        return orderRepository.findByFarmerIdAndStatusIn(
+                farmerId,
+                java.util.EnumSet.of(OrderStatus.DELIVERED, OrderStatus.COMPLETED)
+        );
+    }
+
     public Order markReadyToPickup(Long userId, Long orderId) {
         return orderRepository.findById(orderId)
                 .map(order -> {
                     if(!order.getFarmerId().equals(userId)){
                         throw new RuntimeException("Unauthorized");
                     }
-                    if(order.getStatus().equals(OrderStatus.PROCESSING)){
-                        throw new RuntimeException("Buyer have not made the payment yet");
+                    if(!order.getStatus().equals(OrderStatus.PROCESSING)){
+                        throw new RuntimeException("Order must be in PROCESSING to mark AWAITING_PICKUP");
                     }
                     order.setStatus(OrderStatus.AWAITING_PICKUP);
                     return orderRepository.save(order);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+    }
+
+    // New: explicit method names used by controller
+    public Order markAwaitingPickup(Long userId, Long orderId) {
+        return markReadyToPickup(userId, orderId);
     }
 
     public Order markPaymentCompleted(Long orderId) {
@@ -145,26 +190,46 @@ public class OrderService {
                     if(!order.getFarmerId().equals(userId)){
                         throw new RuntimeException("Unauthorized");
                     }
-                    if(!order.getStatus().equals(OrderStatus.PENDING)){
-                        throw new RuntimeException("Payment is already completed");
+                    // Allow transition when:
+                    // - status == AWAITING_PICKUP (existing path), or
+                    // - status == PROCESSING and transport == BY_FARMER (farmer provides transport)
+                    boolean allowFromAwaiting = order.getStatus() == OrderStatus.AWAITING_PICKUP;
+                    boolean allowFromProcessingFarmer = order.getStatus() == OrderStatus.PROCESSING && "BY_FARMER".equals(order.getTransport());
+                    if (!(allowFromAwaiting || allowFromProcessingFarmer)) {
+                        throw new RuntimeException("Order must be AWAITING_PICKUP or PROCESSING with BY_FARMER transport to mark IN_TRANSPORT");
                     }
-                    order.setStatus(OrderStatus.PROCESSING);
+                    // For AWAITING_PICKUP path, ensure transportationAvailable from product(s)
+                    if (allowFromAwaiting) {
+                        boolean transportAvailable = order.getItems().stream().anyMatch(oi -> {
+                            try {
+                                var crop = cropListingServiceClient.getProductById(oi.getCropId());
+                                return Boolean.TRUE.equals(crop.isTransportationAvailable());
+                            } catch (Exception e) { return false; }
+                        });
+                        if (!transportAvailable) {
+                            throw new IllegalStateException("Transportation is not available for this order's product(s)");
+                        }
+                    }
+                    order.setStatus(OrderStatus.IN_TRANSPORT);
                     return orderRepository.save(order);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
     }
 
+    public Order markInTransportByFarmer(Long userId, Long orderId) {
+        return markInTransport(userId, orderId);
+    }
+
     public Order markDelivered(Long userId, Long orderId) {
         return orderRepository.findById(orderId)
                 .map(order -> {
-                    if(!order.getBuyerId().equals(userId)){
+                    // Allow farmer to mark delivered when transport is used
+                    if(!order.getFarmerId().equals(userId) && !order.getBuyerId().equals(userId)){
                         throw new RuntimeException("Unauthorized");
                     }
                     OrderStatus status = order.getStatus();
-                    if(!EnumSet.of(OrderStatus.AWAITING_PICKUP, OrderStatus.IN_TRANSPORT).contains(status)){
-                        throw new IllegalStateException(
-                                "Order cannot be cancelled in the current state: " + status
-                        );
+                    if(!EnumSet.of(OrderStatus.IN_TRANSPORT).contains(status)){
+                        throw new IllegalStateException("Order must be IN_TRANSPORT to mark DELIVERED");
                     }
 
                     // TODO : Check the code below for releasing escrow to farmer
@@ -178,6 +243,51 @@ public class OrderService {
                     }
 
                     order.setStatus(OrderStatus.DELIVERED);
+                    return orderRepository.save(order);
+                })
+                .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+    }
+
+    public Order markDeliveredByFarmer(Long userId, Long orderId) {
+        return markDelivered(userId, orderId);
+    }
+
+    /**
+     * Buyer marks order as COMPLETED when delivery is confirmed according to transport rules.
+     * Allowed when:
+     * - transport == BY_BUYER and status == AWAITING_PICKUP (buyer self-pickup complete)
+     * - transport == BY_FARMER and status == IN_TRANSPORT (carrier handed over to buyer)
+     * - transport in {BY_BUYER_SYSTEM, BY_FARMER_SYSTEM} and status == IN_TRANSPORT
+     */
+    public Order markCompleted(Long userId, Long orderId) {
+        return orderRepository.findById(orderId)
+                .map(order -> {
+                    // Only buyer can complete their order
+                    if (!order.getBuyerId().equals(userId)) {
+                        throw new RuntimeException("Unauthorized");
+                    }
+
+                    String transport = order.getTransport();
+                    OrderStatus status = order.getStatus();
+
+                    boolean canComplete =
+                            ("BY_BUYER".equals(transport) && status == OrderStatus.AWAITING_PICKUP) ||
+                            ("BY_FARMER".equals(transport) && status == OrderStatus.IN_TRANSPORT) ||
+                            (("BY_BUYER_SYSTEM".equals(transport) || "BY_FARMER_SYSTEM".equals(transport)) && status == OrderStatus.IN_TRANSPORT);
+
+                    if (!canComplete) {
+                        throw new IllegalStateException("Order cannot be completed in the current transport/status combination");
+                    }
+
+                    // Optional: ensure escrow release is triggered before completion if still in transport
+                    try {
+                        var releaseRequest = new EscrowReleaseRequest(order.getId().toString());
+                        paymentServiceClient.releaseEscrow(releaseRequest);
+                    } catch (Exception e) {
+                        System.err.println("Failed to release escrow on completion: " + e.getMessage());
+                    }
+
+                    order.setStatus(OrderStatus.COMPLETED);
                     return orderRepository.save(order);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
@@ -241,6 +351,55 @@ public class OrderService {
                     return orderRepository.save(order);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException("Order with ID " + orderId + " not found"));
+    }
+    
+    /**
+     * Fetch all available crops from crop-listing-service
+     */
+    public List<CropInfo> getCrops() {
+        return cropListingServiceClient.getAllProducts();
+    }
+
+    
+    /**
+     * Check if a product is used in any orders
+     * @param productId The ID of the product to check
+     * @return true if the product is used in at least one order, false otherwise
+     */
+    public boolean isProductInUse(Long productId) {
+        if (productId == null) {
+            return false;
+        }
+        
+        try {
+            // Get all orders
+            List<Order> orders = orderRepository.findAll();
+            
+            // Check each order for the product
+            for (Order order : orders) {
+                // Skip cancelled orders
+                if (order.getStatus() == OrderStatus.CANCELLED) {
+                    continue;
+                }
+                
+                if (order.getItems() != null) {
+                    // Check if any item in the order uses this product
+                    for (OrderItem item : order.getItems()) {
+                        if (productId.equals(item.getCropId())) {
+                            return true; // Product is used in this order
+                        }
+                    }
+                }
+            }
+            
+            // Product not found in any non-cancelled order
+            return false;
+        } catch (Exception e) {
+            System.err.println("Error checking if product is in use: " + e.getMessage());
+            e.printStackTrace();
+            // If there's an error, assume the product is in use to prevent accidental deletion
+            return true;
+        }
     }
 
 }

@@ -3,6 +3,15 @@ import DashboardLayout from '../../../components/layout/DashboardLayout';
 import Card from '../../../components/ui/Card';
 import Table from '../../../components/ui/Table';
 import StatCard from '../../../components/ui/StatCard';
+import { 
+  fetchAllRoutes, 
+  getRouteCount, 
+  getTotalDistance, 
+  getAverageDistance,
+  formatDistance,
+  formatTime,
+  formatRouteDate
+} from '../../../Utils/routeUtils';
 
 // Icons
 const TruckIcon = () => (
@@ -24,136 +33,56 @@ const FilterIcon = () => (
   </svg>
 );
 
-const routes = [
-  {
-    id: 'RT-1001',
-    name: 'Farmville to Central Market',
-    origin: 'Farmville Production Hub',
-    destination: 'Central City Market',
-    distance: '45 km',
-    estimatedTime: '1h 15m',
-    transportProvider: 'Green Mile Transports',
-    activeDrivers: 5,
-    averageLoad: '2.5 tons',
-    status: 'Active',
-    frequency: 'Daily',
-    popularProducts: ['Tomatoes', 'Lettuce', 'Carrots'],
-    routeDetails: [
-      { checkpoint: 'Farmville Loading Bay', time: '06:00 AM', activities: ['Loading', 'Quality Check'] },
-      { checkpoint: 'Highway 101 Junction', time: '06:45 AM', activities: ['Transit'] },
-      { checkpoint: 'Riverside Checkpoint', time: '07:15 AM', activities: ['Document Verification'] },
-      { checkpoint: 'Central City Entry', time: '07:30 AM', activities: ['Transit'] },
-      { checkpoint: 'Central Market Unloading', time: '07:45 AM', activities: ['Unloading', 'Delivery Confirmation'] }
-    ],
-    mapLink: 'https://maps.example.com/route/RT-1001'
-  },
-  {
-    id: 'RT-1002',
-    name: 'Greenfield to Urban Restaurants',
-    origin: 'Greenfield Farms Collective',
-    destination: 'Urban Restaurant District',
-    distance: '65 km',
-    estimatedTime: '1h 45m',
-    transportProvider: 'Fast Track Logistics',
-    activeDrivers: 3,
-    averageLoad: '1.8 tons',
-    status: 'Active',
-    frequency: 'Mon-Wed-Fri',
-    popularProducts: ['Organic Vegetables', 'Fresh Herbs', 'Specialty Greens'],
-    routeDetails: [
-      { checkpoint: 'Greenfield Collection Center', time: '05:30 AM', activities: ['Loading', 'Temperature Check'] },
-      { checkpoint: 'Highway 202 Junction', time: '06:15 AM', activities: ['Transit'] },
-      { checkpoint: 'Mountain Pass', time: '06:45 AM', activities: ['Rest Stop'] },
-      { checkpoint: 'Urban Perimeter', time: '07:15 AM', activities: ['Traffic Management'] },
-      { checkpoint: 'Restaurant District Hub', time: '07:45 AM', activities: ['Unloading', 'Delivery Confirmation'] }
-    ],
-    mapLink: 'https://maps.example.com/route/RT-1002'
-  },
-  {
-    id: 'RT-1003',
-    name: 'Orchard Hills to Processing Plant',
-    origin: 'Orchard Hills Fruit Farms',
-    destination: 'Valley Processing Facility',
-    distance: '30 km',
-    estimatedTime: '50m',
-    transportProvider: 'Rural Routes Delivery',
-    activeDrivers: 2,
-    averageLoad: '3.2 tons',
-    status: 'Inactive',
-    frequency: 'Seasonal (Summer)',
-    popularProducts: ['Apples', 'Pears', 'Peaches'],
-    routeDetails: [
-      { checkpoint: 'Orchard Collection Point', time: '07:00 AM', activities: ['Loading', 'Quality Inspection'] },
-      { checkpoint: 'Country Road 15', time: '07:30 AM', activities: ['Transit'] },
-      { checkpoint: 'Valley Entrance', time: '07:45 AM', activities: ['Transit'] },
-      { checkpoint: 'Processing Plant Delivery', time: '08:00 AM', activities: ['Unloading', 'Weight Verification'] }
-    ],
-    mapLink: 'https://maps.example.com/route/RT-1003'
-  },
-  {
-    id: 'RT-1004',
-    name: 'Riverside Farms to Wholesale Market',
-    origin: 'Riverside Agricultural Cooperative',
-    destination: 'Metropolitan Wholesale Market',
-    distance: '80 km',
-    estimatedTime: '2h 15m',
-    transportProvider: 'Swift Stream Logistics',
-    activeDrivers: 4,
-    averageLoad: '5.5 tons',
-    status: 'Active',
-    frequency: 'Twice Weekly',
-    popularProducts: ['Mixed Vegetables', 'Root Crops', 'Leafy Greens'],
-    routeDetails: [
-      { checkpoint: 'Riverside Collection Center', time: '04:00 AM', activities: ['Loading', 'Documentation'] },
-      { checkpoint: 'Highway 405 Entrance', time: '04:45 AM', activities: ['Transit'] },
-      { checkpoint: 'Rest Area 27', time: '05:45 AM', activities: ['Driver Break', 'Vehicle Inspection'] },
-      { checkpoint: 'Metropolitan Bypass', time: '06:15 AM', activities: ['Transit'] },
-      { checkpoint: 'Wholesale Market Entry', time: '06:45 AM', activities: ['Queue for Unloading'] },
-      { checkpoint: 'Wholesale Market Bay 12', time: '07:15 AM', activities: ['Unloading', 'Quality Verification'] }
-    ],
-    mapLink: 'https://maps.example.com/route/RT-1004'
-  },
-  {
-    id: 'RT-1005',
-    name: 'Highland Dairy to Urban Markets',
-    origin: 'Highland Dairy Cooperative',
-    destination: 'Multiple Urban Markets',
-    distance: '55 km',
-    estimatedTime: '1h 30m',
-    transportProvider: 'Cool Chain Logistics',
-    activeDrivers: 6,
-    averageLoad: '2.0 tons',
-    status: 'Active',
-    frequency: 'Daily',
-    popularProducts: ['Fresh Milk', 'Yogurt', 'Cheese'],
-    routeDetails: [
-      { checkpoint: 'Highland Dairy Cold Storage', time: '03:30 AM', activities: ['Loading', 'Temperature Verification'] },
-      { checkpoint: 'Mountain Highway', time: '04:00 AM', activities: ['Transit'] },
-      { checkpoint: 'Valley Junction', time: '04:30 AM', activities: ['Transit'] },
-      { checkpoint: 'Urban Market 1', time: '04:45 AM', activities: ['Partial Unloading'] },
-      { checkpoint: 'Urban Market 2', time: '05:15 AM', activities: ['Partial Unloading'] },
-      { checkpoint: 'Urban Market 3', time: '05:45 AM', activities: ['Final Unloading'] }
-    ],
-    mapLink: 'https://maps.example.com/route/RT-1005'
-  }
-];
-
 const TransportRoutes = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [routes, setRoutes] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [expandedRouteId, setExpandedRouteId] = useState(null);
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({
+    totalRoutes: 0,
+    totalDistance: 0,
+    averageDistance: 0
+  });
 
-  // Simulate loading
+  // Load routes from API
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setFilteredData(routes);
-    }, 1000);
-    return () => clearTimeout(timer);
+    const loadRoutes = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        // Fetch routes and stats in parallel
+        const [routesData, totalDist, avgDist] = await Promise.all([
+          fetchAllRoutes(),
+          getTotalDistance(),
+          getAverageDistance()
+        ]);
+        
+        console.log('📍 Routes loaded:', routesData);
+        
+        setRoutes(routesData || []);
+        setFilteredData(routesData || []);
+        setStats({
+          totalRoutes: routesData?.length || 0,
+          totalDistance: totalDist || 0,
+          averageDistance: avgDist || 0
+        });
+        
+      } catch (error) {
+        console.error('Error loading routes:', error);
+        setError('Failed to load routes. Please try again.');
+        setRoutes([]);
+        setFilteredData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadRoutes();
   }, []);
 
   // Handle search
@@ -247,81 +176,64 @@ const TransportRoutes = () => {
   // Route Details Component
   const RouteDetails = ({ route }) => {
     return (
-      <div className="p-4 bg-gray-50">
-        <div className="mb-3 flex justify-between items-center">
-          <div>
-            <h4 className="text-sm font-medium text-gray-700">{route.name} (ID: {route.id})</h4>
-            <p className="text-xs text-gray-500">{route.origin} to {route.destination} | {route.distance}</p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-xs text-gray-500">Status:</span>
-            <StatusBadge status={route.status} />
+      <div className="p-6 bg-gray-50">
+        <div className="mb-4">
+          <h4 className="text-lg font-semibold text-gray-800 mb-2">Route Details</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-medium text-gray-600">Route ID:</span>
+              <span className="ml-2 text-gray-800">{route.id}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Route Date:</span>
+              <span className="ml-2 text-gray-800">{formatRouteDate(route.routeDate)}</span>
+            </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h5 className="text-xs font-medium text-gray-500 mb-2">ROUTE CHECKPOINTS</h5>
-            <div className="relative">
-              {route.routeDetails.map((checkpoint, index) => (
-                <div key={index} className="mb-4 pl-6 border-l-2 border-farmio relative">
-                  <div className="absolute left-[-8px] top-0 w-4 h-4 rounded-full bg-farmio"></div>
-                  <div className="text-sm font-medium">{checkpoint.checkpoint}</div>
-                  <div className="text-xs text-gray-500">{checkpoint.time}</div>
-                  <div className="text-xs mt-1">
-                    {checkpoint.activities.join(' • ')}
-                  </div>
-                </div>
-              ))}
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <h5 className="text-sm font-semibold text-gray-700 mb-3">Starting Point</h5>
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <MapIcon />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">{route.startingLocation || 'N/A'}</p>
+                <p className="text-xs text-gray-500 mt-1">Origin</p>
+              </div>
             </div>
           </div>
 
-          <div>
-            <h5 className="text-xs font-medium text-gray-500 mb-2">ROUTE INFORMATION</h5>
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Transport Provider:</span>
-                <span className="font-medium">{route.transportProvider}</span>
+          <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <h5 className="text-sm font-semibold text-gray-700 mb-3">Destination</h5>
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <MapIcon />
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Frequency:</span>
-                <span className="font-medium">{route.frequency}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Active Drivers:</span>
-                <span className="font-medium">{route.activeDrivers}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Average Load:</span>
-                <span className="font-medium">{route.averageLoad}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Estimated Time:</span>
-                <span className="font-medium">{route.estimatedTime}</span>
-              </div>
-              <div className="mt-2">
-                <span className="text-xs font-medium text-gray-500 block mb-1">POPULAR PRODUCTS</span>
-                <div className="flex flex-wrap gap-1">
-                  {route.popularProducts.map((product, idx) => (
-                    <span key={idx} className="px-2 py-1 text-xs bg-gray-100 rounded-full">
-                      {product}
-                    </span>
-                  ))}
-                </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">{route.destination || 'N/A'}</p>
+                <p className="text-xs text-gray-500 mt-1">Endpoint</p>
               </div>
             </div>
+          </div>
+        </div>
 
-            {route.mapLink && (
-              <a
-                href={route.mapLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center px-3 py-1 text-sm text-white bg-farmio rounded-md hover:bg-green-600"
-              >
-                <MapIcon />
-                <span className="ml-2">View Route Map</span>
-              </a>
-            )}
+        <div className="mt-4 bg-white p-4 rounded-lg border border-gray-200">
+          <h5 className="text-sm font-semibold text-gray-700 mb-3">Route Metrics</h5>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div>
+              <p className="text-xs text-gray-500">Distance</p>
+              <p className="text-lg font-semibold text-gray-900">{formatDistance(route.distance)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Estimated Time</p>
+              <p className="text-lg font-semibold text-gray-900">{formatTime(route.estimatedTime)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">Route Date</p>
+              <p className="text-lg font-semibold text-gray-900">{formatRouteDate(route.routeDate)}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -332,20 +244,33 @@ const TransportRoutes = () => {
   const columns = [
     { key: 'id', header: 'Route ID' },
     {
-      key: 'name',
-      header: 'Route Name',
+      key: 'startingLocation',
+      header: 'Starting Location',
       render: (value) => (
-        <div className="font-medium">{value}</div>
+        <div className="font-medium">{value || 'N/A'}</div>
       )
     },
-    { key: 'distance', header: 'Distance' },
-    { key: 'estimatedTime', header: 'Est. Time' },
-    { key: 'transportProvider', header: 'Provider' },
-    { key: 'frequency', header: 'Frequency' },
     {
-      key: 'status',
-      header: 'Status',
-      render: (value) => <StatusBadge status={value} />
+      key: 'destination',
+      header: 'Destination',
+      render: (value) => (
+        <div className="font-medium">{value || 'N/A'}</div>
+      )
+    },
+    { 
+      key: 'distance', 
+      header: 'Distance',
+      render: (value) => formatDistance(value)
+    },
+    { 
+      key: 'estimatedTime', 
+      header: 'Est. Time',
+      render: (value) => formatTime(value)
+    },
+    { 
+      key: 'routeDate', 
+      header: 'Route Date',
+      render: (value) => formatRouteDate(value)
     },
     {
       key: 'actions',
@@ -392,36 +317,43 @@ const TransportRoutes = () => {
       breadcrumbs="Logistics / Transport Routes"
       userRole="admin"
     >
+      {/* Error Display */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-800 text-sm">{error}</p>
+        </div>
+      )}
+
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <StatCard
-          title="Active Routes"
-          value={routes.filter(r => r.status === 'Active').length.toString()}
-          subtitle="Operational"
+          title="Total Routes"
+          value={stats.totalRoutes.toString()}
+          subtitle="All routes"
           icon={<MapIcon />}
           color="green"
           isLoading={isLoading}
         />
         <StatCard
           title="Total Distance"
-          value="275 km"
-          subtitle="All routes"
+          value={formatDistance(stats.totalDistance)}
+          subtitle="Combined distance"
           icon={<MapIcon />}
           color="blue"
           isLoading={isLoading}
         />
         <StatCard
-          title="Transport Providers"
-          value={new Set(routes.map(r => r.transportProvider)).size.toString()}
-          subtitle="Partners"
-          icon={<TruckIcon />}
+          title="Average Distance"
+          value={formatDistance(stats.averageDistance)}
+          subtitle="Per route"
+          icon={<MapIcon />}
           color="purple"
           isLoading={isLoading}
         />
         <StatCard
-          title="Active Drivers"
-          value={routes.reduce((sum, route) => sum + route.activeDrivers, 0).toString()}
-          subtitle="On routes"
+          title="Filtered Routes"
+          value={filteredData.length.toString()}
+          subtitle="Current view"
           icon={<TruckIcon />}
           color="yellow"
           isLoading={isLoading}
@@ -510,7 +442,11 @@ const TransportRoutes = () => {
           isLoading={isLoading}
           columns={columns}
           data={filteredData}
-          emptyMessage="No routes found matching your criteria."
+          emptyMessage={
+            routes.length === 0 
+              ? "No routes found in the database. Routes will appear here once they are added to the transport service."
+              : "No routes found matching your criteria."
+          }
           expandedRowRender={(row) => <RouteDetails route={row} />}
           expandedRowId={expandedRouteId}
         />

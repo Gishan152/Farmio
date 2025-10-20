@@ -47,6 +47,16 @@ public class RequestService {
     // Create a new request
     public Request createRequest(Request request) {
         request.setStatus("Pending"); // default status
+        if (request.getRequestDate() == null) {
+            request.setRequestDate(LocalDate.now());
+        }
+        return requestRepository.save(request);
+    }
+
+    // Overload for convenience when using Create DTO mapping
+    public Request createRequestFromCreateDTO(Request request) {
+        request.setStatus("Pending");
+        request.setRequestDate(LocalDate.now());
         return requestRepository.save(request);
     }
 
@@ -60,6 +70,28 @@ public class RequestService {
     // Delete a request
     public void deleteRequest(Long id) {
         requestRepository.deleteById(id);
+    }
+
+    // Cancel a request (only if Pending and by the requester)
+    public void cancelRequest(Long id, String requesterName) {
+        Request request = getRequestById(id);
+        
+        // Verify the requester owns this request
+        if (!request.getRequesterName().equals(requesterName)) {
+            throw new RuntimeException("You can only cancel your own requests");
+        }
+        
+        // Only allow canceling pending requests
+        if (!"Pending".equalsIgnoreCase(request.getStatus())) {
+            throw new IllegalStateException("Only pending requests can be cancelled");
+        }
+        
+        requestRepository.deleteById(id);
+    }
+
+    // Get requests by requester name
+    public List<Request> getRequestsByRequesterName(String requesterName) {
+        return requestRepository.findByRequesterNameContainingIgnoreCase(requesterName);
     }
 
     // ✅ Accept a request and create a WasteListing
@@ -121,6 +153,8 @@ public class RequestService {
         wasteListingRepository.save(listing);
 
         request.setStatus("Accepted");
+        request.setAcceptedByAgentId(agentId);
+        // You can add agent name lookup here if needed
         requestRepository.save(request);
 
         return listing;

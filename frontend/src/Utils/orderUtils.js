@@ -1,15 +1,17 @@
-// API utility functions for order analytics
+// orderUtils.js - Utility functions for order data management
+
+import API from './API';
+import { API_BASE_URL } from '../config/apiConfig';
 
 /**
  * Fetch all orders from analytic service
+ * @returns {Promise<Array>} Array of order objects
  */
 export const fetchAllOrders = async () => {
   try {
-    const response = await fetch('http://localhost:8080/api/analytics/admin/orders');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return await response.json();
+    const orders = await API.get(`${API_BASE_URL}/api/analytics/admin/orders`);
+    console.log('Fetched orders:', orders?.length || 0);
+    return orders || [];
   } catch (error) {
     console.error('Error fetching orders:', error);
     throw error;
@@ -17,58 +19,43 @@ export const fetchAllOrders = async () => {
 };
 
 /**
- * Get total order count
+ * Get total order count from the system
+ * @returns {Promise<number>} Total number of orders
  */
 export const getOrderCount = async () => {
   try {
     console.log('Attempting to fetch order count...');
     
-    // Try the dedicated count endpoint first
     try {
-      const response = await fetch('http://localhost:8080/api/analytics/admin/orders/count');
-      console.log('Order count endpoint response status:', response.status);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Order count endpoint success:', data);
-        return data;
-      } else {
-        console.log(`Order count endpoint failed with status ${response.status}, trying fallback...`);
-      }
+      const count = await API.get(`${API_BASE_URL}/api/analytics/admin/orders/count`);
+      console.log('Order count endpoint success:', count);
+      return count;
     } catch (endpointError) {
       console.log('Error with order count endpoint:', endpointError.message);
     }
     
-    // Fallback: count all orders
+    // Fall back to counting all orders
     console.log('Trying fallback: counting all orders...');
-    const allOrdersResponse = await fetch('http://localhost:8080/api/analytics/admin/orders');
-    
-    if (!allOrdersResponse.ok) {
-      throw new Error(`HTTP error! status: ${allOrdersResponse.status}`);
-    }
-    
-    const allOrders = await allOrdersResponse.json();
-    console.log(`All orders endpoint success: received ${allOrders?.length || 0} orders`);
-    
-    return Array.isArray(allOrders) ? allOrders.length : 0;
+    const orders = await fetchAllOrders();
+    console.log(`Fallback order count: ${orders?.length || 0} orders`);
+    return orders?.length || 0;
     
   } catch (error) {
     console.error('Error fetching order count:', error);
-    // Return 0 as a fallback value instead of throwing
+    // Return 0 as fallback instead of throwing
     return 0;
   }
 };
 
 /**
  * Get order count by status
+ * @returns {Promise<Object>} Object with status counts
  */
 export const getOrderCountByStatus = async () => {
   try {
-    const response = await fetch('http://localhost:8080/api/analytics/admin/orders/status-count');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return await response.json();
+    const statusCounts = await API.get(`${API_BASE_URL}/api/analytics/admin/orders/status-count`);
+    console.log('Fetched order status counts:', statusCounts);
+    return statusCounts || {};
   } catch (error) {
     console.error('Error fetching order count by status:', error);
     throw error;
@@ -77,14 +64,14 @@ export const getOrderCountByStatus = async () => {
 
 /**
  * Get orders by status
+ * @param {string} status - The status to filter by
+ * @returns {Promise<Array>} Array of orders with the specified status
  */
 export const getOrdersByStatus = async (status) => {
   try {
-    const response = await fetch(`http://localhost:8080/api/analytics/admin/orders/by-status?status=${status}`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return await response.json();
+    const orders = await API.get(`${API_BASE_URL}/api/analytics/admin/orders/by-status?status=${status}`);
+    console.log(`Fetched orders with status '${status}':`, orders?.length || 0);
+    return orders || [];
   } catch (error) {
     console.error('Error fetching orders by status:', error);
     throw error;
@@ -102,29 +89,16 @@ export const getRecentOrders = async (limit = 7) => {
     
     // Try the modern endpoint first
     try {
-      const response = await fetch(`http://localhost:8080/api/analytics/admin/orders/recent?limit=${limit}`);
-      console.log(`Recent orders endpoint response status:`, response.status);
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log(`Recent orders endpoint success: received ${data?.length || 0} orders`);
-        return data;
-      } else {
-        console.log(`Recent orders endpoint failed with status ${response.status}, trying fallback...`);
-      }
+      const orders = await API.get(`${API_BASE_URL}/api/analytics/admin/orders/recent?limit=${limit}`);
+      console.log(`Recent orders endpoint success: received ${orders?.length || 0} orders`);
+      return orders || [];
     } catch (endpointError) {
       console.log(`Error with recent orders endpoint:`, endpointError.message);
     }
     
     // Fallback: fetch all orders and take the most recent ones
     console.log(`Trying fallback: fetching all orders...`);
-    const allOrdersResponse = await fetch(`http://localhost:8080/api/analytics/admin/orders`);
-    
-    if (!allOrdersResponse.ok) {
-      throw new Error(`HTTP error! status: ${allOrdersResponse.status}`);
-    }
-    
-    const allOrders = await allOrdersResponse.json();
+    const allOrders = await fetchAllOrders();
     console.log(`All orders endpoint success: received ${allOrders?.length || 0} orders`);
     
     // Sort orders by date and take the most recent ones
@@ -157,6 +131,8 @@ export const formatOrderStatus = (status) => {
 
 /**
  * Get status color for styling
+ * @param {string} status - The order status
+ * @returns {string} The color class for the status
  */
 export const getStatusColor = (status) => {
   const colorMap = {
@@ -168,4 +144,14 @@ export const getStatusColor = (status) => {
     'CANCELLED': 'red'
   };
   return colorMap[status] || 'gray';
+};
+
+export default {
+  fetchAllOrders,
+  getOrderCount,
+  getOrderCountByStatus,
+  getOrdersByStatus,
+  getRecentOrders,
+  formatOrderStatus,
+  getStatusColor
 };

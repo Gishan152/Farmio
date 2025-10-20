@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import java.util.List;
 
 @RestController
@@ -119,6 +122,20 @@ public class OrderController {
         return ResponseEntity.ok(order);
     }
 
+    /**
+     * Buyer marks an order as COMPLETED depending on transport/status rules
+     */
+    @PostMapping("/complete/{orderId}")
+    public ResponseEntity<Order> completeOrder(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Name") String username,
+            @RequestHeader("X-Roles") String rolesCsv,
+            @PathVariable("orderId") @NotNull Long orderId
+    ) {
+        var order = orderService.markCompleted(Long.valueOf(userId), orderId);
+        return ResponseEntity.ok(order);
+    }
+
     @PostMapping("/get")
     public ResponseEntity<List<Order>> getOrders(
             @RequestHeader("X-User-Id") String userId,
@@ -131,6 +148,53 @@ public class OrderController {
         return ResponseEntity.ok(orderList);
     }
 
+    // New: Farmer dashboards
+    @GetMapping("/farmer/awaiting-shipment")
+    public ResponseEntity<List<Order>> getFarmerAwaitingShipment(
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        return ResponseEntity.ok(orderService.getFarmerAwaitingShipment(Long.valueOf(userId)));
+    }
+
+    @GetMapping("/farmer/ongoing-shipment")
+    public ResponseEntity<List<Order>> getFarmerOngoingShipment(
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        return ResponseEntity.ok(orderService.getFarmerOngoingShipment(Long.valueOf(userId)));
+    }
+
+    @GetMapping("/farmer/paid-and-shipped")
+    public ResponseEntity<List<Order>> getFarmerPaidAndShipped(
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        return ResponseEntity.ok(orderService.getFarmerPaidAndShipped(Long.valueOf(userId)));
+    }
+
+    // New: transitions respecting transportation availability
+    @PostMapping("/farmer/mark-awaiting-pickup/{orderId}")
+    public ResponseEntity<Order> markAwaitingPickup(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable Long orderId
+    ) {
+        return ResponseEntity.ok(orderService.markAwaitingPickup(Long.valueOf(userId), orderId));
+    }
+
+    @PostMapping("/farmer/mark-in-transport/{orderId}")
+    public ResponseEntity<Order> markInTransportByFarmer(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable Long orderId
+    ) {
+        return ResponseEntity.ok(orderService.markInTransportByFarmer(Long.valueOf(userId), orderId));
+    }
+
+    @PostMapping("/farmer/mark-delivered/{orderId}")
+    public ResponseEntity<Order> markDeliveredByFarmer(
+            @RequestHeader("X-User-Id") String userId,
+            @PathVariable Long orderId
+    ) {
+        return ResponseEntity.ok(orderService.markDeliveredByFarmer(Long.valueOf(userId), orderId));
+    }
+
     @PostMapping("get-crops")
     public ResponseEntity<List<CropInfo>> getCrops(){
         return ResponseEntity.ok(orderService.getCrops());
@@ -140,6 +204,22 @@ public class OrderController {
     public ResponseEntity<List<Order>> getAllOrdersForAdmin() {
         List<Order> orders = orderService.getAllOrders();
         return ResponseEntity.ok(orders);
+    }
+    
+    /**
+     * Check if a product is used in any orders
+     * This endpoint is used by other services to verify if a product can be safely deleted
+     */
+    @GetMapping("/check-product-usage/{productId}")
+    public ResponseEntity<Map<String, Object>> checkProductUsage(@PathVariable Long productId) {
+        boolean inUse = orderService.isProductInUse(productId);
+        Map<String, Object> response = new HashMap<>();
+        response.put("productId", productId);
+        response.put("inUse", inUse);
+        response.put("message", inUse ? 
+            "Product is used in one or more orders" : 
+            "Product is not used in any orders");
+        return ResponseEntity.ok(response);
     }
 
     /**

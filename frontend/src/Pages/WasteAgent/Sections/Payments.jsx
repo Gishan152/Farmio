@@ -107,18 +107,31 @@ const Payments = () => {
 
 	const farmerNames = [...new Set(payments.map((p) => p.farmer))].sort();
 
-	useEffect(() => {
-		setLoading(true);
-		api.get("/api/waste/payments")
-			.then((res) => res.data)
-			.then((data) => {
-				setPayments(data);
-				setLoading(false);
-			})
-			.catch((err) => {
-				console.error("Error fetching payments:", err);
-				setLoading(false);
+	// Polling interval to pick up backend updates from the payment listener
+	const POLL_MS = 15000; // 15 seconds
+
+	const fetchPayments = async ({ showLoading = false } = {}) => {
+		try {
+			if (showLoading) setLoading(true);
+			const userId = localStorage.getItem("userId"); // adjust if using an auth context
+			const res = await api.get("/api/waste/payments", {
+				headers: userId ? { "X-User-Id": userId } : undefined,
 			});
+			setPayments(res.data || []);
+		} catch (err) {
+			console.error("Error fetching payments:", err);
+		} finally {
+			if (showLoading) setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		// initial fetch with loading state
+		fetchPayments({ showLoading: true });
+		// periodic refresh to reflect backend listener updates (e.g., PAID)
+		const t = setInterval(() => fetchPayments({ showLoading: false }), POLL_MS);
+		return () => clearInterval(t);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	// Convert quantity to KG if it's in TON
@@ -177,7 +190,7 @@ const Payments = () => {
 			"Date,Farmer Name,Waste Type,Quantity (kg),Rate (Rs/kg),Total Payment,Status,Transaction ID\n";
 		const csvData = filteredPayments
 			.map((payment) => {
-				const quantityInKg = convertToKg(payment.quantity, payment.quantityUnit);
+				const quantityInKg = convertToKg(payment.quantity, payment.unit);
 				const rate = (
 					parseFloat(payment.amount.replace("$", "")) /
 					quantityInKg
@@ -206,74 +219,75 @@ const Payments = () => {
 		});
 	};
 
-	const handleMakePayment = (paymentId) => {
-		const startTask = async () => {
-			try {
-				// Update status to PROCESSING
-				const res = await api.put(
-					`/api/waste/payments/${paymentId}/status?status=PROCESSING`
-				);
-				
-				const updatedPayment = res.data;
-				
-				// Update local state with backend response
-				setPayments((prev) =>
-					prev.map((payment) =>
-						payment.id === paymentId
-							? { ...payment, status: updatedPayment.status }
-							: payment
-					)
-				);
+	const handleMakePayment = async (paymentId) => {
+		try {
+			// Call backend to initiate payment
+			const res = await api.post(`/api/waste/payments/${paymentId}/pay`);
+			console.log("Payment initiation response:", res.data);
 
-				// Open payment gateway in new tab (for testing)
-				window.open("about:blank", "_blank");
+			// If all required PayHere params are present, create and submit a form
+			if (res.data && res.data.hash) {
+				const {
+					merchantId,
+					orderId,
+					amount,
+					currency,
+					hash,
+					firstName,
+					lastName,
+					email,
+					phone,
+					address,
+					city,
+					country,
+				} = res.data;
 
-				// Set timeout to revert to PENDING after 2 minutes if not PAID
-				setTimeout(async () => {
-					try {
-						// Fetch current payment status to check if it changed to PAID
-						const checkRes = await api.get(`/api/waste/payments/${paymentId}`);
-						const currentPayment = checkRes.data;
-						
-						if (currentPayment.status?.toUpperCase() !== "PAID") {
-							// Revert to PENDING if still not PAID
-							const revertRes = await api.put(
-								`/api/waste/payments/${paymentId}/status?status=PENDING`
-							);
-							
-							const revertedPayment = revertRes.data;
-							setPayments((prev) =>
-								prev.map((payment) =>
-									payment.id === paymentId
-										? { ...payment, status: revertedPayment.status }
-										: payment
-								)
-							);
-							
-							toast.warning("Payment timed out", {
-								description: `Payment ${paymentId} has been reverted to pending status.`,
-							});
-						}
-					} catch (error) {
-						console.error("Error checking payment status:", error);
-					}
-				}, 120000); // 2 minutes = 120000ms
+				// Create a form dynamically
+				const form = document.createElement("form");
+				form.method = "POST";
+				form.action = "https://sandbox.payhere.lk/pay/checkout";
 
-				return { paymentId };
-			} catch (error) {
-				console.error("Error processing payment:", error);
-				throw error;
+				const fields = {
+					merchant_id: merchantId,
+					return_url: `${window.location.origin}/waste-agent/manage-payments`,
+					cancel_url: `${window.location.origin}/waste-agent/manage-payments`,
+					notify_url: "https://nrvzmq9j-8080.asse.devtunnels.ms/api/payment/payhere/notify",
+					order_id: orderId,
+					items: res.data.description || "Waste payment",
+					currency: currency,
+					amount: amount,
+					first_name: firstName,
+					last_name: lastName,
+					email: email,
+					phone: phone,
+					address: address,
+					city: city,
+					country: country,
+					hash: hash,
+				};
+
+				for (const [key, value] of Object.entries(fields)) {
+					const input = document.createElement("input");
+					input.type = "hidden";
+					input.name = key;
+					input.value = value;
+					form.appendChild(input);
+				}
+
+				document.body.appendChild(form);
+				form.submit();
+			} else {
+				console.error("Payment initiation failed: missing hash or data");
+				toast.error("Payment initialization failed", {
+					description: "Please try again or contact support.",
+				});
 			}
-		};
-
-		toast.promise(startTask(), {
-			loading: "Initiating payment...",
-			success: (data) => ({
-				message: "Payment processing started!",
-				description: `Payment ${data.paymentId} is now being processed. Complete payment in the new tab.`,
-			}),
-			error: "Failed to initiate payment. Please try again.",
-		});
+		} catch (err) {
+			console.error("Payment failed:", err);
+			toast.error("Payment failed", {
+				description: "Please try again.",
+			});
+		}
 	};
 
 	const handleSchedulePayment = (paymentId) => {
@@ -914,7 +928,7 @@ const Payments = () => {
 								</TableCell>
 								<TableCell>
 									<div className="font-medium text-gray-900 dark:text-gray-100">
-										{convertToKg(payment.quantity, payment.quantityUnit).toLocaleString()} {payment.unit.toLowerCase()}
+										{convertToKg(payment.quantity, payment.unit).toLocaleString()} {payment.unit?.toLowerCase?.() ?? ""}
 									</div>
 								</TableCell>
 								<TableCell>

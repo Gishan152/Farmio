@@ -16,6 +16,10 @@ public class RabbitMQConfig {
     public static final String PAYMENT_EXCHANGE = "payment.exchange";
     public static final String PAYMENT_CONFIRMED_QUEUE = "payment.confirmed.queue";
     public static final String PAYMENT_CONFIRMED_ROUTING_KEY = "payment.confirmed";
+
+    // Separate channel for waste payments for better isolation/throughput
+    public static final String WASTE_PAYMENT_EXCHANGE = "waste.payment.exchange";
+    public static final String WASTE_PAYMENT_CONFIRMED_ROUTING_KEY = "waste.payment.confirmed";
     
     @Bean
     public TopicExchange paymentExchange() {
@@ -33,6 +37,12 @@ public class RabbitMQConfig {
                 .bind(paymentConfirmedQueue())
                 .to(paymentExchange())
                 .with(PAYMENT_CONFIRMED_ROUTING_KEY);
+    }
+
+    // Declare the waste exchange so publisher can emit without depending on waste-service boot order
+    @Bean
+    public TopicExchange wastePaymentExchange() {
+        return new TopicExchange(WASTE_PAYMENT_EXCHANGE);
     }
     
     @Bean

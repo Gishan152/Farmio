@@ -1,5 +1,6 @@
 package com.springcloud.controller;
 
+import com.springcloud.dto.PayHerePaymentResponse;
 import com.springcloud.dto.PaymentDTO;
 import com.springcloud.mapper.PaymentMapper;
 import com.springcloud.service.PaymentService;
@@ -20,9 +21,16 @@ public class PaymentController {
         this.paymentMapper = paymentMapper;
     }
 
+    // @GetMapping
+    // public List<PaymentDTO> getAllPayments() {
+    //     return paymentService.getAllPaymentDTOs();
+    // }
+
+    // Return payments related to the current agent (X-User-Id)
     @GetMapping
-    public List<PaymentDTO> getAllPayments() {
-        return paymentService.getAllPaymentDTOs();
+    public List<PaymentDTO> getMyPayments(@RequestHeader("X-User-Id") String userId) {
+        Long agentId = Long.valueOf(userId);
+        return paymentService.getPaymentDTOsByAgentId(agentId);
     }
 
     @GetMapping("/{id}")
@@ -38,5 +46,15 @@ public class PaymentController {
             @RequestParam(required = false) String transactionRef
     ) {
         return paymentMapper.toDTO(paymentService.updatePaymentStatus(id, status, method, transactionRef));
+    }
+
+    /**
+     * Initiate PayHere payment for a waste payout. Escrow 100%, type WASTE.
+     */
+    @PostMapping("/{id}/pay")
+    public PayHerePaymentResponse initiatePay(@RequestHeader("X-User-Id") String userId,
+                                              @PathVariable("id") Long paymentId) {
+        Long agentId = Long.valueOf(userId);
+        return paymentService.initiateWastePayment(agentId, paymentId);
     }
 }

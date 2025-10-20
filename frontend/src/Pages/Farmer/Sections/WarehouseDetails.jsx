@@ -4,6 +4,14 @@ import { StarIcon, CheckBadgeIcon } from "@heroicons/react/24/solid";
 import warehouseImage from "../../../Assets/Farmer/Warehouses/warehouse.webp";
 import warehouseImage2 from "../../../Assets/Farmer/Warehouses/warehouse2.webp";
 
+// Format slot ID with S- prefix
+const formatSlotId = (id) => {
+    if (typeof id === 'string' && id.startsWith('S-')) {
+        return id; // Already formatted
+    }
+    return `S-${String(id).padStart(3, '0')}`;
+};
+
 export async function FarmerwarehouseDetailsLoader({ params }) {
     const { warehouseId } = params;
     // TODO: Replace with actual API call to GET /warehouses/{id}
@@ -63,7 +71,6 @@ export async function FarmerwarehouseDetailsLoader({ params }) {
 
 export default function FarmerWarehouseDetails() {
     const w = useLoaderData();
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState("");
     const [produceType, setProduceType] = useState("");
@@ -119,37 +126,22 @@ export default function FarmerWarehouseDetails() {
             {/* Header */}
             <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="flex flex-col lg:flex-row lg:items-start gap-6">
-                    <div className="relative w-20 lg:w-1/4 min-w-40">
-                        <img
-                            src={w.images[currentImageIndex]}
-                            alt={w.name}
-                            className="object-cover w-50 h-50"
-                        />
+                    <div className="flex-1 space-y-2 relative">
                         {w.verified && (
                             <div className="absolute top-2 right-2 bg-white p-1 border-none rounded-[50%]">
                                 <CheckBadgeIcon className="h-6 w-6 text-green-500" />
                             </div>
                         )}
-                        <br />
-                        {/* Thumbnail Gallery */}
-                        <div className="flex gap-2">
-                            {w.images.map((img, index) => (
-                                <img
-                                    key={index}
-                                    src={img}
-                                    alt={`Warehouse image ${index + 1}`}
-                                    className={`w-15 h-15 object-cover rounded cursor-pointer transition-all ${
-                                        index === currentImageIndex
-                                            ? "border-2 border-green-500"
-                                            : "border-2 border-transparent"
-                                    } hover:border-green-300`}
-                                    onClick={() => setCurrentImageIndex(index)}
-                                />
+                        <div className="flex flex-wrap gap-2 mb-4">
+                            {w.badges.map((b) => (
+                                <span
+                                    key={b}
+                                    className="bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 text-xs font-medium px-2 py-1 rounded"
+                                >
+                                    {b}
+                                </span>
                             ))}
                         </div>
-                    </div>
-
-                    <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-4">
                             <h1 className="text-3xl font-bold">{w.name}</h1>
                             <div className="flex items-center min-w-65">
@@ -230,7 +222,7 @@ export default function FarmerWarehouseDetails() {
                     <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                         {w.slots.map(slot => (
                             <tr key={slot.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{slot.id}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{formatSlotId(slot.id)}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{slot.capacityKg}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     {slot.temperatureControl ? (
@@ -351,7 +343,7 @@ export default function FarmerWarehouseDetails() {
                                         <option value="">Choose a slot</option>
                                         {availableSlots.map(slot => (
                                             <option key={slot.id} value={slot.id}>
-                                                Slot {slot.id} - Capacity: {slot.capacityKg} kg
+                                                Slot {formatSlotId(slot.id)} - Capacity: {slot.capacityKg} kg
                                             </option>
                                         ))}
                                     </select>

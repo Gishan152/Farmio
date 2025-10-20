@@ -4,10 +4,10 @@ server:
 
 # Database
 spring:
-  application:
-    name: waste-service
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+  application:
+    name: waste-service
   cloud:
 #    gateway:
 #      routes:
@@ -17,15 +17,22 @@ spring:
 #            - Path=/api/waste/**
     config:
       enabled: false
-#  rabbitmq:
-#    host: rabbitmq
-#    port: 5672
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
 
   datasource:
     url: jdbc:postgresql://ep-dry-snow-a1szex24-pooler.ap-southeast-1.aws.neon.tech/wastedb?sslmode=require&channelBinding=require
     username: neondb_owner
     password: npg_l2wurAbES8Cq
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      keepalive-time: 60000
   jpa:
     hibernate:
       ddl-auto: validate

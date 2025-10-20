@@ -1,324 +1,643 @@
-import { useState, useEffect } from "react";
-import { ClipboardDocumentListIcon, CurrencyDollarIcon, CheckBadgeIcon, ClockIcon } from "@heroicons/react/24/solid";
-import warehouesImg1 from "../../../Assets/Buyer/Warehouses/warehouse.webp";
-import warehouesImg2 from "../../../Assets/Buyer/Warehouses/warehouse2.webp";
-
-export async function reservedLoader({ request }) {
-    // TODO: fetch from API
-    return [
-        {
-            warehouseId: 1,
-            warehouseName: "Sunrise Warehouse",
-            // warehouseImage: "/images/warehouse1.jpg",
-            warehouseImage: warehouesImg1,
-            owner: { name: "John Doe", avatarUrl: "https://randomuser.me/api/portraits/men/43.jpg", rating: 4.7 },
-            reservationDate: "2025-07-10",
-            slots: [
-                { slotId: 101, status: "reserved", quantity: 5, reservedUntil: "3h 20m" },
-                { slotId: 102, status: "reserved", quantity: 2, reservedUntil: "1d 2h" }
-            ]
-        },
-        {
-            warehouseId: 2,
-            warehouseName: "Green Field Storage",
-            // warehouseImage: "/images/warehouse2.jpg",
-            warehouseImage: warehouesImg2,
-            owner: { name: "Acme Farms", avatarUrl: "https://randomuser.me/api/portraits/men/44.jpg", rating: 4.3 },
-            reservationDate: "2025-07-12",
-            slots: [
-                { slotId: 201, status: "reserved", quantity: 3, reservedUntil: "4h" }
-            ]
-        },
-        {
-            warehouseId: 2,
-            warehouseName: "Green Field Storage",
-            // warehouseImage: "/images/warehouse2.jpg",
-            warehouseImage: warehouesImg2,
-            owner: { name: "Acme Farms", avatarUrl: "https://randomuser.me/api/portraits/men/44.jpg", rating: 4.3 },
-            reservationDate: "2025-07-12",
-            slots: [
-                { slotId: 201, status: "reserved", quantity: 3, reservedUntil: "4h" }
-            ]
-        },
-        {
-            warehouseId: 2,
-            warehouseName: "Green Field Storage",
-            // warehouseImage: "/images/warehouse2.jpg",
-            warehouseImage: warehouesImg2,
-            owner: { name: "Acme Farms", avatarUrl: "https://randomuser.me/api/portraits/men/44.jpg", rating: 4.3 },
-            reservationDate: "2025-07-12",
-            slots: [
-                { slotId: 201, status: "reserved", quantity: 3, reservedUntil: "4h" }
-            ]
-        }
-    ];
-}
-
-const sampleBookings = [
-    {
-        id: "BK-1001",
-        slotId: "S-101",
-        warehouseName: "Sunrise Warehouse",
-        produce: "Rice",
-        quantity: 1000,           // in kg
-        capacity: 1200,           // in kg
-        ratePerDay: 2,            // Rs per kg per day
-        startDate: "2025-07-01",
-        endDate: "2025-07-15",
-        status: "Active"
-    },
-    {
-        id: "BK-1002",
-        slotId: "S-202",
-        warehouseName: "Cold Storage Colombo",
-        produce: "Bananas",
-        quantity: 500,
-        capacity: 600,
-        ratePerDay: 3,
-        startDate: "2025-06-20",
-        endDate: "2025-06-27",
-        status: "Completed"
-    },
-    {
-        id: "BK-1003",
-        slotId: "S-303",
-        warehouseName: "Negombo Dry Store",
-        produce: "Maize",
-        quantity: 750,
-        capacity: 1000,
-        ratePerDay: 1.5,
-        startDate: "2025-07-05",
-        endDate: "2025-07-25",
-        status: "Active"
-    }
-];
+import React, { useState, useEffect } from "react";
+import { 
+    CreditCardIcon, 
+    CheckCircleIcon, 
+    ClockIcon, 
+    MapPinIcon,
+    DocumentTextIcon
+} from "@heroicons/react/24/outline";
+import axios from "axios";
 
 export default function ReservedStorage() {
-    const [bookings, setBookings] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [filters, setFilters] = useState({
-        warehouse: '',
-        produce: '',
-        status: '',
-        startDate: '',
-        endDate: ''
+    const [reservations, setReservations] = useState({
+        pendingApproval: [], // Phase 1: Awaiting warehouse owner approval
+        pendingPayment: [],  // Phase 1: Approved by warehouse owner, awaiting payment
+        paid: [],            // Phase 2: Payment completed, funds in escrow
+        active: [],          // Storage is currently in use
+        completed: []        // Booking has ended
     });
+    const [activeTab, setActiveTab] = useState("pendingApproval");
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Stat cards
-    const stats = {
-        totalBookings: bookings.length,
-        totalAmount: bookings.reduce((sum, b) => sum + b.quantity * b.ratePerDay * (new Date(b.endDate) - new Date(b.startDate)) / (1000 * 60 * 60 * 24), 0),
-        active: bookings.filter(b => b.status === 'Active').length,
-        completed: bookings.filter(b => b.status === 'Completed').length
+    // API base URL - adjust according to your backend configuration
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+
+    // Fetch reservations from backend
+    useEffect(() => {
+        const fetchReservations = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+
+                console.log('Fetching reservations from:', API_BASE_URL);
+
+                // Get authentication token if using JWT
+                const token = localStorage.getItem('authToken');
+                const headers = { 
+                    'X-User-Id': '1', // Replace with actual user ID from auth context
+                    'Content-Type': 'application/json',
+                    ...(token && { Authorization: `Bearer ${token}` })
+                };
+
+                console.log('Request headers:', headers);
+
+                // Try fetching user's bookings - first try the bookings endpoint
+                let bookingsResponse;
+                try {
+                    bookingsResponse = await axios.get(`${API_BASE_URL}/bookings`, { headers });
+                    console.log('Bookings response:', bookingsResponse.data);
+                } catch (bookingsError) {
+                    console.warn('Bookings endpoint failed, trying warehouse service directly:', bookingsError.message);
+                    // Fallback: try warehouse service directly
+                    bookingsResponse = await axios.get(`http://localhost:8090/api/bookings`, { headers });
+                    console.log('Warehouse service response:', bookingsResponse.data);
+                }
+
+                const allBookings = bookingsResponse.data || [];
+                console.log('All bookings found:', allBookings.length);
+
+                // Categorize bookings by status according to the phases
+                const categorizedReservations = {
+                    pendingApproval: allBookings.filter(booking => 
+                        booking.status === 'SENT' || booking.status === 'SUBMITTED' || booking.status === 'REQUEST_SENT' || 
+                        booking.status === 'PENDING_REVIEW' || booking.status === 'AWAITING_APPROVAL'
+                    ),
+                    pendingPayment: allBookings.filter(booking => 
+                        booking.status === 'APPROVED_AWAITING_PAYMENT' || booking.status === 'PAYMENT_REQUIRED' || 
+                        booking.status === 'PENDING_PAYMENT'
+                    ),
+                    paid: allBookings.filter(booking => 
+                        booking.status === 'PAID' || booking.status === 'PAYMENT_COMPLETED' || 
+                        booking.status === 'APPROVED' || booking.status === 'CONFIRMED' || booking.status === 'PAYMENT_IN_ESCROW'
+                    ),
+                    active: allBookings.filter(booking => 
+                        booking.status === 'ACTIVE' || booking.status === 'IN_PROGRESS' || booking.status === 'ONGOING' ||
+                        booking.status === 'STORAGE_IN_USE'
+                    ),
+                    completed: allBookings.filter(booking => 
+                        booking.status === 'COMPLETED' || booking.status === 'FINISHED' || booking.status === 'DONE' ||
+                        booking.status === 'RELEASED'
+                    )
+                };
+
+                console.log('Categorized reservations:', categorizedReservations);
+                setReservations(categorizedReservations);
+            } catch (err) {
+                console.error('Error fetching reservations:', err);
+                console.error('Error details:', {
+                    message: err.message,
+                    response: err.response?.data,
+                    status: err.response?.status
+                });
+                setError(`Failed to load reservations: ${err.response?.data?.message || err.message}. Please try again later.`);
+                // Set empty data on error
+                setReservations({
+                    pendingApproval: [],
+                    pendingPayment: [],
+                    paid: [],
+                    active: [],
+                    completed: []
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchReservations();
+    }, [API_BASE_URL]);
+
+    const getStatusColor = (status) => {
+        switch (status?.toUpperCase()) {
+            // Phase 1: Pending Approval
+            case 'SENT':
+            case 'SUBMITTED':
+            case 'REQUEST_SENT':
+            case 'PENDING_REVIEW':
+            case 'AWAITING_APPROVAL':
+                return 'bg-purple-100 text-purple-800 border-purple-200';
+            
+            // Phase 1: Payment Required
+            case 'APPROVED_AWAITING_PAYMENT':
+            case 'PAYMENT_REQUIRED':
+            case 'PENDING_PAYMENT': 
+                return 'bg-orange-100 text-orange-800 border-orange-200';
+            
+            // Phase 2: Payment Complete
+            case 'APPROVED':
+            case 'PAID':
+            case 'PAYMENT_COMPLETED':
+            case 'CONFIRMED':
+            case 'PAYMENT_IN_ESCROW': 
+                return 'bg-green-100 text-green-800 border-green-200';
+            
+            // Storage in use
+            case 'ACTIVE':
+            case 'IN_PROGRESS':
+            case 'STORAGE_IN_USE':
+            case 'ONGOING': 
+                return 'bg-blue-100 text-blue-800 border-blue-200';
+            case 'COMPLETED':
+            case 'FINISHED':
+            case 'DONE': 
+                return 'bg-gray-100 text-gray-800 border-gray-200';
+            default: 
+                return 'bg-gray-100 text-gray-800 border-gray-200';
+        }
     };
 
-    useEffect(() => {
-        setTimeout(() => {
-            setBookings(sampleBookings);
-            setLoading(false);
-        }, 1000);
-    }, []);
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('en-LK', {
+            style: 'currency',
+            currency: 'LKR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount);
+    };
 
-    // Filtering logic
-    const filteredBookings = bookings.filter(b => {
-        if (filters.warehouse && b.warehouseName !== filters.warehouse) return false;
-        if (filters.produce && b.produce !== filters.produce) return false;
-        if (filters.status && b.status !== filters.status) return false;
-        if (filters.startDate && b.startDate < filters.startDate) return false;
-        if (filters.endDate && b.endDate > filters.endDate) return false;
-        return true;
-    });
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-GB', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    };
 
-    // Unique options for filters
-    const warehouseOptions = Array.from(new Set(bookings.map(b => b.warehouseName)));
-    const produceOptions = Array.from(new Set(bookings.map(b => b.produce)));
-    const statusOptions = Array.from(new Set(bookings.map(b => b.status)));
+    const TabButton = ({ label, isActive, onClick, count }) => (
+        <button
+            id={`tab-${label.toLowerCase().replace(/\s+/g, '-')}`}
+            onClick={onClick}
+            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                isActive 
+                    ? 'bg-green-500 text-white' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+        >
+            {label} {count > 0 && <span className="ml-1">({count})</span>}
+        </button>
+    );
+
+    const SentRequestCard = ({ request }) => (
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="flex justify-between items-start mb-4">
+                <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                        {request.warehouseName || `Warehouse ID: ${request.warehouseId || 'Unknown'}`}
+                    </h3>
+                    <div className="flex items-center text-gray-600 mt-1">
+                        <MapPinIcon className="h-4 w-4 mr-1" />
+                        <span className="text-sm">{request.city || request.warehouseLocation || 'Location TBD'}</span>
+                    </div>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(request.status)}`}>
+                    Awaiting Approval
+                </span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <p className="text-sm text-gray-500">Sent Date</p>
+                    <p className="font-medium">{formatDate(request.requestDate || request.createdAt)}</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Product Type</p>
+                    <p className="font-medium capitalize">{request.productType || 'Not specified'}</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Quantity</p>
+                    <p className="font-medium">{request.quantity || request.quantityKg}kg</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Duration</p>
+                    <p className="font-medium">{request.duration || request.durationDays} days</p>
+                </div>
+            </div>
+            
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center">
+                    <ClockIcon className="h-5 w-5 text-purple-600 mr-2" />
+                    <div>
+                        <p className="text-sm font-medium text-purple-800">Awaiting Warehouse Response</p>
+                        <p className="text-xs text-purple-600">Your request has been sent to the warehouse owner for review</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div className="flex gap-2">
+                <button 
+                    onClick={() => console.log('Edit request:', request)}
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                >
+                    Edit Request
+                </button>
+                <button 
+                    onClick={() => console.log('Cancel request:', request)}
+                    className="flex-1 px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
+                >
+                    Cancel Request
+                </button>
+            </div>
+        </div>
+    );
+
+    const PaymentPendingCard = ({ request }) => (
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="flex justify-between items-start mb-4">
+                <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                        {request.warehouseName || `Warehouse ID: ${request.warehouseId || 'Unknown'}`}
+                    </h3>
+                    <div className="flex items-center text-gray-600 mt-1">
+                        <MapPinIcon className="h-4 w-4 mr-1" />
+                        <span className="text-sm">{request.city || request.warehouseLocation || 'Location TBD'}</span>
+                    </div>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(request.status)}`}>
+                    Payment Required
+                </span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <p className="text-sm text-gray-500">Request Date</p>
+                    <p className="font-medium">{formatDate(request.requestDate || request.createdAt)}</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Storage Period</p>
+                    <p className="font-medium">{request.durationDays || request.duration || 'N/A'} days</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Quantity</p>
+                    <p className="font-medium">{request.quantityKg || request.quantity || 0} kg</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Product Type</p>
+                    <p className="font-medium">{request.productType || 'Not specified'}</p>
+                </div>
+            </div>
+            
+            <div className="flex gap-2">
+                <button 
+                    id={`pay-now-${request.id || 'unknown'}`}
+                    className="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-600 transition-colors"
+                >
+                    <CreditCardIcon className="h-4 w-4 inline mr-2" />
+                    Pay Now
+                </button>
+                <button 
+                    id={`view-details-${request.id || 'unknown'}`}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                    View Details
+                </button>
+            </div>
+        </div>
+    );
+
+    const ApprovedCard = ({ booking }) => (
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="flex justify-between items-start mb-4">
+                <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{booking.warehouseName || 'Warehouse'}</h3>
+                    <div className="flex items-center text-gray-600 mt-1">
+                        <MapPinIcon className="h-4 w-4 mr-1" />
+                        <span className="text-sm">{booking.city || booking.warehouseLocation || 'N/A'}</span>
+                    </div>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
+                    Payment Complete
+                </span>
+            </div>
+            
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center">
+                    <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2" />
+                    <div>
+                        <p className="text-sm font-medium text-green-800">Payment Complete - Funds in Escrow</p>
+                        <p className="text-xs text-green-600">Slot Reserved: {booking.slotNumber || booking.slot?.slotNumber || 'TBD'}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <p className="text-sm text-gray-500">Start Date</p>
+                    <p className="font-medium">{formatDate(booking.startDate || booking.startTime)}</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Duration</p>
+                    <p className="font-medium">{booking.duration || 'N/A'} days</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Quantity</p>
+                    <p className="font-medium">{booking.quantity || 0} kg</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Total Paid</p>
+                    <p className="font-bold text-green-600">{formatCurrency(booking.totalAmount || booking.totalCost || 0)}</p>
+                </div>
+            </div>
+            
+            <div className="flex gap-2">
+                <button 
+                    id={`download-receipt-${booking.id || 'unknown'}`}
+                    className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-600 transition-colors"
+                >
+                    <DocumentTextIcon className="h-4 w-4 inline mr-2" />
+                    Download Receipt
+                </button>
+                <button 
+                    id={`contact-owner-${booking.id || 'unknown'}`}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                    Contact Owner
+                </button>
+            </div>
+        </div>
+    );
+
+    const ActiveBookingCard = ({ booking }) => (
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="flex justify-between items-start mb-4">
+                <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{booking.warehouseName}</h3>
+                    <div className="flex items-center text-gray-600 mt-1">
+                        <MapPinIcon className="h-4 w-4 mr-1" />
+                        <span className="text-sm">{booking.city}</span>
+                    </div>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
+                    Active
+                </span>
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                        <ClockIcon className="h-5 w-5 text-blue-500 mr-2" />
+                        <span className="font-medium text-blue-800">
+                            {booking.daysRemaining} days remaining
+                        </span>
+                    </div>
+                    <span className="text-sm text-blue-600">
+                        {booking.occupancyPercentage}% occupied
+                    </span>
+                </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <p className="text-sm text-gray-500">Slot Numbers</p>
+                    <p className="font-medium">{booking.slotNumbers?.join(', ')}</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">End Date</p>
+                    <p className="font-medium">{formatDate(booking.endDate)}</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Storage Type</p>
+                    <p className="font-medium">{booking.storageType?.replace('_', ' ')}</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Last Inspection</p>
+                    <p className="font-medium">{formatDate(booking.lastInspection)}</p>
+                </div>
+            </div>
+            
+            <div className="flex gap-2">
+                <button className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-600 transition-colors">
+                    View Live Status
+                </button>
+                <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    Extend Booking
+                </button>
+            </div>
+        </div>
+    );
+
+    const CompletedBookingCard = ({ booking }) => (
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="flex justify-between items-start mb-4">
+                <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{booking.warehouseName}</h3>
+                    <div className="flex items-center text-gray-600 mt-1">
+                        <MapPinIcon className="h-4 w-4 mr-1" />
+                        <span className="text-sm">{booking.city}</span>
+                    </div>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(booking.status)}`}>
+                    Completed
+                </span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <p className="text-sm text-gray-500">Completed Date</p>
+                    <p className="font-medium">{formatDate(booking.completedDate)}</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Duration</p>
+                    <p className="font-medium">{booking.duration} days</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Total Cost</p>
+                    <p className="font-bold text-green-600">{formatCurrency(booking.totalAmount)}</p>
+                </div>
+                <div>
+                    <p className="text-sm text-gray-500">Rating</p>
+                    <p className="font-medium">⭐ {booking.rating}/5</p>
+                </div>
+            </div>
+            
+            {booking.feedback && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-4">
+                    <p className="text-sm text-gray-700 italic">"{booking.feedback}"</p>
+                </div>
+            )}
+            
+            <div className="flex gap-2">
+                <button className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-gray-600 transition-colors">
+                    Download Invoice
+                </button>
+                <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    Book Again
+                </button>
+            </div>
+        </div>
+    );
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading reservations...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        {error}
+                    </div>
+                    <button 
+                        id="retry-button"
+                        onClick={() => window.location.reload()} 
+                        className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="bg-gray-50 min-h-screen">
-            <div className="max-w-7xl mx-auto space-y-4 p-4">
+        <div className="min-h-screen bg-gray-50 p-6">
+            <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-2">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Reserved Storage</h1>
-                            <p className="text-gray-600 mt-1 text-sm">View your reserved warehouse storage and details</p>
-                        </div>
-                    </div>
+                <div className="mb-6">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Reserved Storage</h1>
+                    <p className="text-gray-600">Manage your warehouse reservations and bookings</p>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    {/* Total Bookings */}
-                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-                        <div className="absolute left-0 top-0 h-full w-1 bg-green-500 rounded-l-lg" />
-                        <ClipboardDocumentListIcon className="h-7 w-7 text-green-500 mr-3 z-10" />
-                        <div className="z-10">
-                            <p className="text-xs font-medium text-gray-500">Total Bookings</p>
-                            <p className="text-lg font-bold text-gray-900">{stats.totalBookings}</p>
-                        </div>
-                    </div>
-                    {/* Total Amount */}
-                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-                        <div className="absolute left-0 top-0 h-full w-1 bg-yellow-500 rounded-l-lg" />
-                        <CurrencyDollarIcon className="h-7 w-7 text-yellow-500 mr-3 z-10" />
-                        <div className="z-10">
-                            <p className="text-xs font-medium text-gray-500">Total Amount</p>
-                            <p className="text-lg font-bold text-gray-900">Rs. {stats.totalAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
-                        </div>
-                    </div>
-                    {/* Active */}
-                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-                        <div className="absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-l-lg" />
-                        <CheckBadgeIcon className="h-7 w-7 text-blue-500 mr-3 z-10" />
-                        <div className="z-10">
-                            <p className="text-xs font-medium text-gray-500">Active</p>
-                            <p className="text-lg font-bold text-gray-900">{stats.active}</p>
-                        </div>
-                    </div>
-                    {/* Completed */}
-                    <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex items-center overflow-hidden">
-                        <div className="absolute left-0 top-0 h-full w-1 bg-gray-400 rounded-l-lg" />
-                        <ClockIcon className="h-7 w-7 text-gray-500 mr-3 z-10" />
-                        <div className="z-10">
-                            <p className="text-xs font-medium text-gray-500">Completed</p>
-                            <p className="text-lg font-bold text-gray-900">{stats.completed}</p>
-                        </div>
-                    </div>
+                {/* Tab Navigation */}
+                <div className="flex gap-2 mb-6 overflow-x-auto">
+                    <TabButton 
+                        label="Pending Approval" 
+                        isActive={activeTab === "pendingApproval"} 
+                        onClick={() => setActiveTab("pendingApproval")}
+                        count={reservations.pendingApproval?.length || 0}
+                    />
+                    <TabButton 
+                        label="Payment Required" 
+                        isActive={activeTab === "pendingPayment"} 
+                        onClick={() => setActiveTab("pendingPayment")}
+                        count={reservations.pendingPayment?.length || 0}
+                    />
+                    <TabButton 
+                        label="Paid Bookings" 
+                        isActive={activeTab === "paid"} 
+                        onClick={() => setActiveTab("paid")}
+                        count={reservations.paid?.length || 0}
+                    />
+                    <TabButton 
+                        label="Active Storage" 
+                        isActive={activeTab === "active"} 
+                        onClick={() => setActiveTab("active")}
+                        count={reservations.active?.length || 0}
+                    />
+                    <TabButton 
+                        label="Completed Bookings" 
+                        isActive={activeTab === "completed"} 
+                        onClick={() => setActiveTab("completed")}
+                        count={reservations.completed?.length || 0}
+                    />
                 </div>
 
-                {/* Filters Card */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-                    <div className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+                {/* Content */}
+                <div className="space-y-6">
+                    {activeTab === "pendingApproval" && (
                         <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">Warehouse</label>
-                            <select
-                                value={filters.warehouse}
-                                onChange={e => setFilters(f => ({ ...f, warehouse: e.target.value }))}
-                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            >
-                                <option value="">All Warehouses</option>
-                                {warehouseOptions.map(w => <option key={w} value={w}>{w}</option>)}
-                            </select>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Pending Approval</h2>
+                            <p className="text-sm text-gray-600 mb-4">Requests sent to warehouse owners awaiting their approval</p>
+                            {reservations.pendingApproval?.length === 0 ? (
+                                <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+                                    <ClockIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-500">No pending requests found</p>
+                                    <p className="text-sm text-gray-400 mt-2">Your booking requests to warehouses will appear here</p>
+                                </div>
+                            ) : (
+                                <div className="grid gap-6">
+                                    {reservations.pendingApproval?.map(request => (
+                                        <SentRequestCard key={request.id} request={request} />
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                        <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">Product</label>
-                            <select
-                                value={filters.produce}
-                                onChange={e => setFilters(f => ({ ...f, produce: e.target.value }))}
-                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            >
-                                <option value="">All Products</option>
-                                {produceOptions.map(p => <option key={p} value={p}>{p}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">Status</label>
-                            <select
-                                value={filters.status}
-                                onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
-                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            >
-                                <option value="">All Statuses</option>
-                                {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
-                            <input
-                                type="date"
-                                value={filters.startDate}
-                                onChange={e => setFilters(f => ({ ...f, startDate: e.target.value }))}
-                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">End Date</label>
-                            <input
-                                type="date"
-                                value={filters.endDate}
-                                onChange={e => setFilters(f => ({ ...f, endDate: e.target.value }))}
-                                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                            />
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => setFilters({ warehouse: '', produce: '', status: '', startDate: '', endDate: '' })}
-                            className="ml-auto px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300 transition"
-                        >
-                            Clear Filters
-                        </button>
-                    </div>
-                </div>
+                    )}
 
-                {/* Bookings Table with loading spinner */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div className="p-4 border-b border-gray-200">
-                        <h2 className="text-lg font-semibold text-gray-900">Booking History</h2>
-                    </div>
-                    {loading ? (
-                        <div className="p-8 text-center">
-                            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
-                            <p className="mt-2 text-gray-600 text-sm">Loading bookings...</p>
+                    {activeTab === "pendingPayment" && (
+                        <div>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Payment Required</h2>
+                            <p className="text-sm text-gray-600 mb-4">Requests approved by warehouse owners - payment needed to confirm booking</p>
+                            {reservations.pendingPayment?.length === 0 ? (
+                                <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+                                    <CreditCardIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-500">No payments pending</p>
+                                    <p className="text-sm text-gray-400 mt-2">Approved requests requiring payment will appear here</p>
+                                </div>
+                            ) : (
+                                <div className="grid gap-6">
+                                    {reservations.pendingPayment?.map(request => (
+                                        <PaymentPendingCard key={request.id} request={request} />
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    ) : (
-                        <div className="p-4 overflow-x-auto">
-                            <table className="min-w-full text-sm">
-                                <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="p-2 text-left font-semibold">Booking ID</th>
-                                        <th className="p-2 text-left font-semibold">Slot</th>
-                                        <th className="p-2 text-left font-semibold">Status</th>
-                                        <th className="p-2 text-left font-semibold">Total</th>
-                                        <th className="p-2 text-left font-semibold">Product</th>
-                                        <th className="p-2 text-left font-semibold">Capacity</th>
-                                        <th className="p-2 text-left font-semibold">Used</th>
-                                        <th className="p-2 text-left font-semibold">Warehouse</th>
-                                        <th className="p-2 text-left font-semibold">Duration</th>
-                                        <th className="p-2 text-left font-semibold">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredBookings.map(b => {
-                                        let badgeClass = 'bg-gray-100 text-gray-700';
-                                        let status = b.status?.toUpperCase();
-                                        if (status === 'COMPLETED') badgeClass = 'bg-blue-100 text-blue-800';
-                                        else if (status === 'ACTIVE') badgeClass = 'bg-green-100 text-green-800';
-                                        else if (status === 'CANCELLED') badgeClass = 'bg-red-100 text-red-800';
-                                        // Humanize status
-                                        let displayStatus = b.status
-                                            ? b.status
-                                                .toLowerCase()
-                                                .split('_')
-                                                .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-                                                .join(' ')
-                                            : '';
-                                        return (
-                                            <tr key={b.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                                <td className="p-2 font-medium text-green-700">{b.id}</td>
-                                                <td className="p-2">{b.slotId}</td>
-                                                <td className="p-2">
-                                                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badgeClass}`}>{displayStatus}</span>
-                                                </td>
-                                                <td className="p-2 font-semibold">Rs. {(b.quantity * b.ratePerDay * ((new Date(b.endDate) - new Date(b.startDate)) / (1000 * 60 * 60 * 24))).toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
-                                                <td className="p-2">{b.produce}</td>
-                                                <td className="p-2">{b.capacity} kg</td>
-                                                <td className="p-2">{b.quantity} kg</td>
-                                                <td className="p-2">{b.warehouseName}</td>
-                                                <td className="p-2">{b.startDate} - {b.endDate}</td>
-                                                <td className="p-2 space-x-2">
-                                                    {status === 'ACTIVE' && (
-                                                        <>
-                                                            <button className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">Early Retrieval</button>
-                                                            <button className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Extend</button>
-                                                        </>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
+                    )}
+
+                    {activeTab === "paid" && (
+                        <div>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Paid Bookings</h2>
+                            <p className="text-sm text-gray-600 mb-4">Payment completed and funds held in escrow</p>
+                            {reservations.paid?.length === 0 ? (
+                                <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+                                    <CheckCircleIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-500">No paid bookings found</p>
+                                    <p className="text-sm text-gray-400 mt-2">Your paid bookings will appear here</p>
+                                </div>
+                            ) : (
+                                <div className="grid gap-6">
+                                    {reservations.paid?.map(booking => (
+                                        <ApprovedCard key={booking.id} booking={booking} />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === "active" && (
+                        <div>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Active Storage</h2>
+                            <p className="text-sm text-gray-600 mb-4">Your products are currently in storage at these warehouses</p>
+                            {reservations.active?.length === 0 ? (
+                                <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+                                    <ClockIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-500">No active storage bookings found</p>
+                                    <p className="text-sm text-gray-400 mt-2">Your active storage will appear here</p>
+                                </div>
+                            ) : (
+                                <div className="grid gap-6">
+                                    {reservations.active?.map(booking => (
+                                        <ActiveBookingCard key={booking.id} booking={booking} />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === "completed" && (
+                        <div>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Completed Bookings</h2>
+                            <p className="text-sm text-gray-600 mb-4">Storage bookings that have been completed</p>
+                            {reservations.completed?.length === 0 ? (
+                                <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+                                    <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-500">No completed bookings found</p>
+                                    <p className="text-sm text-gray-400 mt-2">Your completed bookings will appear here</p>
+                                </div>
+                            ) : (
+                                <div className="grid gap-6">
+                                    {reservations.completed?.map(booking => (
+                                        <CompletedBookingCard key={booking.id} booking={booking} />
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

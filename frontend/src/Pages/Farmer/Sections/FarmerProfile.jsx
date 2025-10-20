@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import Profilepicture from "../../../Assets/Farmer/Profile Pictures/2.1.jpg";
 import {
   UserIcon,
@@ -8,7 +8,8 @@ import {
   PencilIcon,
   TrashIcon,
 } from "@heroicons/react/24/solid";
-import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+import { GoogleMap, Marker } from "@react-google-maps/api";
+import { useGoogleMaps } from "../../../Contexts/GoogleMapContext";
 
 export default function FarmerProfilePage() {
   const [currentTab, setCurrentTab] = useState("account");
@@ -27,10 +28,8 @@ export default function FarmerProfilePage() {
   const [payments, setPayments] = useState([]);
   const [newPayment, setNewPayment] = useState({ type: "", details: "" });
 
-  // Google Maps loader
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
-  });
+  // Use Google Maps from context instead of loading separately
+  const { isLoaded, loadError } = useGoogleMaps();
 
   // Modal states
   const [mapModalOpen, setMapModalOpen] = useState(false);
@@ -130,14 +129,14 @@ export default function FarmerProfilePage() {
             />
             <label
               htmlFor="fileInput"
-              className="absolute inset-0 flex items-center justify-center bg-black opacity-0 text-white text-sm font-medium opacity-0 group-hover:opacity-30 transition-opacity duration-200 cursor-pointer rounded-full"
+              className="absolute inset-0 flex items-center justify-center bg-black text-white text-sm font-medium opacity-0 group-hover:opacity-30 transition-opacity duration-200 cursor-pointer rounded-full"
             >
               Change 
             </label>
             <input
               type="file"
               accept="image/*"
-              onChange={(e)=>{handleFileChange;savePicture;}}
+              onChange={()=>{handleFileChange;savePicture;}}
               className="hidden"
               id="fileInput"
             />

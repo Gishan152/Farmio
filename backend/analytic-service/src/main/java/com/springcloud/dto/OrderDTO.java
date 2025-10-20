@@ -20,5 +20,6 @@ public class OrderDTO {
     private Long buyerId;
     private String status;
     private String transport;
+    private String orderDate;
     private List<OrderItemDTO> items;
 }

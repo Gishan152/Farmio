@@ -78,6 +78,78 @@ public class NotificationMessageListener {
     }
     
     /**
+     * Listen to payment confirmed messages from payment-service
+     */
+    @RabbitListener(queues = RabbitMQConfig.PAYMENT_CONFIRMED_QUEUE)
+    public void handlePaymentConfirmed(Map<String, Object> message) {
+        try {
+            log.info("Received payment confirmed message: {}", message);
+            
+            // Extract payment confirmation data
+            String paymentReference = (String) message.get("reference");
+            Object amountObj = message.get("amount");
+            Object paymentIdObj = message.get("paymentId");
+            String paymentId = paymentIdObj != null ? String.valueOf(paymentIdObj) : null;
+            String paymentStatus = (String) message.get("status");
+            Long payerId = ((Number) message.get("payerId")).longValue();
+            Long payeeId = ((Number) message.get("payeeId")).longValue();
+            
+            // Create notification for payer
+            NotificationRequest payerRequest = new NotificationRequest();
+            payerRequest.setUserId(String.valueOf(payerId));
+            payerRequest.setTitle("Payment Successful");
+            payerRequest.setMessage("Your payment of Rs. " + amountObj + " has been processed successfully. Reference: " + paymentReference);
+            payerRequest.setType(NotificationType.PAYMENT_RECEIVED);
+            payerRequest.setPriority(NotificationPriority.HIGH);
+            payerRequest.setSendEmail(true);
+            payerRequest.setSendWebsocket(true);
+            payerRequest.setCategory("payment");
+            payerRequest.setActionUrl("/payments/" + paymentReference);
+            payerRequest.setRelatedEntityType("PAYMENT");
+            payerRequest.setRelatedEntityId(paymentId);
+            payerRequest.setEmailTemplate("general-notification");
+            
+            // Set metadata
+            Map<String, Object> payerMetadata = new java.util.HashMap<>();
+            payerMetadata.put("amount", String.valueOf(amountObj));
+            payerMetadata.put("paymentReference", paymentReference);
+            payerMetadata.put("paymentStatus", paymentStatus);
+            payerRequest.setMetadata(payerMetadata);
+            
+            notificationService.createNotification(payerRequest);
+            
+            // Create notification for payee
+            NotificationRequest payeeRequest = new NotificationRequest();
+            payeeRequest.setUserId(String.valueOf(payeeId));
+            payeeRequest.setTitle("Payment Received");
+            payeeRequest.setMessage("You have received a payment of Rs. " + amountObj + ". Reference: " + paymentReference);
+            payeeRequest.setType(NotificationType.PAYMENT_RECEIVED);
+            payeeRequest.setPriority(NotificationPriority.HIGH);
+            payeeRequest.setSendEmail(true);
+            payeeRequest.setSendWebsocket(true);
+            payeeRequest.setCategory("payment");
+            payeeRequest.setActionUrl("/payments/" + paymentReference);
+            payeeRequest.setRelatedEntityType("PAYMENT");
+            payeeRequest.setRelatedEntityId(paymentId);
+            payeeRequest.setEmailTemplate("general-notification");
+            
+            // Set metadata
+            Map<String, Object> payeeMetadata = new java.util.HashMap<>();
+            payeeMetadata.put("amount", String.valueOf(amountObj));
+            payeeMetadata.put("paymentReference", paymentReference);
+            payeeMetadata.put("paymentStatus", paymentStatus);
+            payeeRequest.setMetadata(payeeMetadata);
+            
+            notificationService.createNotification(payeeRequest);
+            
+            log.info("Successfully processed payment confirmed notification for reference: {}", paymentReference);
+            
+        } catch (Exception e) {
+            log.error("Failed to process payment confirmed message: {}", message, e);
+        }
+    }
+    
+    /**
      * Listen to transport-related notifications
      */
     @RabbitListener(queues = RabbitMQConfig.TRANSPORT_NOTIFICATION_QUEUE)

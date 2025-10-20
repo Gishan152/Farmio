@@ -9,6 +9,7 @@ import com.springcloud.dto.ProductResponseDTO;
 import com.springcloud.repository.RatingRepository; // Import Rating 
 import com.springcloud.model.Rating; // Import Rating model
 import com.springcloud.dto.ProductResponseDTO;
+import com.springcloud.dto.CropOrderDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -159,5 +160,98 @@ public class ProductService {
         product.setImageUrls(updatedImageUrls);
 
         return productRepository.save(product);
+    }
+    
+    /**
+     * Deduct stock from a product when an order is placed
+     */
+    public void deductStock(Long productId, Integer quantity) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Product not found with id " + productId
+                ));
+        
+        int currentStock = product.getAvailableStock();
+        if (currentStock < quantity) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Insufficient stock. Available: " + currentStock + ", Requested: " + quantity
+            );
+        }
+        
+        product.setAvailableStock(currentStock - quantity);
+        productRepository.save(product);
+    }
+
+    
+    /**
+     * Get all products as CropOrderDTO (for order-service)
+     */
+    public List<CropOrderDTO> getAllProductsForOrder() {
+        List<Product> products = productRepository.findAll();
+        return products.stream()
+                .map(this::mapToCropOrderDTO)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Fetch products by a list of IDs
+     */
+    public List<CropOrderDTO> getProductsByIds(List<Long> productIds) {
+        List<Product> products = productRepository.findAllById(productIds);
+        return products.stream()
+                .map(this::mapToCropOrderDTO)
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Fetch products by a list of IDs and return as CropOrderDTO for order-service
+     */
+    // public List<CropOrderDTO> getAllProductsForOrder(List<Long> productIds) {
+    //     List<Product> products = productRepository.findAll(productIds);
+    //     return products.stream()
+    //             .map(this::mapToCropOrderDTO)
+    //             .collect(Collectors.toList());
+    // }
+    
+    /**
+     * Map Product entity to CropOrderDTO (for order-service)
+     * Maps fields from Product in crop-listing-service to CropInfo structure in order-service
+     */
+    private CropOrderDTO mapToCropOrderDTO(Product product) {
+        CropOrderDTO dto = new CropOrderDTO();
+        
+        // Map basic fields
+        dto.setId(product.getId());
+        dto.setType(product.getProductName());
+        dto.setPricePerUnit(java.math.BigDecimal.valueOf(product.getPricePerUnit()));
+        dto.setFarm("Farm-" + product.getUserId()); // Create a farm name from userId
+        dto.setAvailableStock(product.getAvailableStock());
+        dto.setFarmerId(product.getUserId());
+        dto.setLocation(product.getLocation());
+        dto.setUnitMeasurement(product.getMeasurement());
+        dto.setTransportationAvailable("Yes".equalsIgnoreCase(product.getTransportAvailability()));
+        dto.setReturnsAccepted("Yes".equalsIgnoreCase(product.getReturnAccepted()));
+        dto.setBadges(product.getBadges() != null ? product.getBadges() : new ArrayList<>());
+        
+        // Map first image URL (CropInfo uses single imageUrl, Product uses list)
+        List<String> imageUrls = product.getImageUrls();
+        dto.setImageUrl(imageUrls != null && !imageUrls.isEmpty() ? imageUrls.get(0) : "default.jpg");
+        
+        // Calculate average rating
+        List<Rating> ratings = ratingRepository.findByProductId(product.getId());
+        double averageRating = ratings.stream()
+                .mapToInt(Rating::getRating)
+                .average()
+                .orElse(0.0);
+        dto.setRating(averageRating);
+        
+        // Set verified based on badge presence (if has "Certified" or "Organic" badge)
+        boolean isVerified = product.getBadges() != null && 
+                (product.getBadges().contains("Certified") || product.getBadges().contains("Organic"));
+        dto.setVerified(isVerified);
+        
+        return dto;
     }
 }
