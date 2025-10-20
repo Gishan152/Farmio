@@ -1,13 +1,11 @@
-// ConfirmDelivery.jsx
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from "../../../API/client"; 
+import api from "../../../API/client"; // FIX: Adjusted path depth
 import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/24/outline'; 
 
 export default function ConfirmDelivery() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [photo, setPhoto] = useState(null);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -19,13 +17,10 @@ export default function ConfirmDelivery() {
     setError(null);
     setSuccess(false);
 
-    // 1. Build the payload for the LoadDetailsDto update
     const updateData = {
-        // These fields are sent to the backend's LoadController -> updateLoad
         driverDeliveryConfirmed: true,
         status: 'awaiting_buyer', 
         driverDeliveryNote: note,
-        // (Photo upload logic is omitted for this simple example)
     };
 
     try {
@@ -52,16 +47,7 @@ export default function ConfirmDelivery() {
       <p className="text-sm text-gray-600 mb-4">You’re about to confirm delivery for <strong>{id}</strong>.</p>
 
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-md w-full max-w-xl">
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Upload Photo Proof (optional)</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setPhoto(e.target.files[0])}
-            className="w-full border rounded p-2"
-            disabled={loading}
-          />
-        </div>
+        {/* Removed Photo Upload Section */}
 
         <div className="mb-4">
           <label className="block text-sm font-semibold text-gray-700 mb-1">Note (optional)</label>

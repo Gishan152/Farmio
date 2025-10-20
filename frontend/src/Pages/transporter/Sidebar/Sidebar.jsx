@@ -39,31 +39,31 @@ const menu = [
       { label: 'Confirm Delivery', to: 'confirmDelivery/id' },
     ]
   },
-  { 
-    label: 'Route Planner', 
-    to: 'routePlanner', 
-    icon: MapIcon 
-  },
+  // { 
+  //   label: 'Route Planner', 
+  //   to: 'routePlanner', 
+  //   icon: MapIcon 
+  // },
   { 
     label: 'Delivery History', 
     to: 'deliveryHistory', 
     icon: ClockIcon 
   },
-  { 
-    label: 'Ratings & Feedback', 
-    to: 'ratingsFeedback', 
-    icon: StarIcon 
-  },
+  // { 
+  //   label: 'Ratings & Feedback', 
+  //   to: 'ratingsFeedback', 
+  //   icon: StarIcon 
+  // },
    { 
     label: 'Vehicle Info', 
     to: 'vehicleInfo', 
     icon: CogIcon 
   },
-  { 
-    label: 'Notifications', 
-    to: 'notifications', 
-    icon: BellIcon 
-  },
+  // { 
+  //   label: 'Notifications', 
+  //   to: 'notifications', 
+  //   icon: BellIcon 
+  // },
 ];
 
 export default function Sidebar() {

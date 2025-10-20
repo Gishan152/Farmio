@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import {useUserContext} from '../../../Contexts/UserContext'
+import React, { useState, useEffect, useCallback } from 'react';
+// FIX: Resetting import paths to a common project structure depth (3 levels)
+import {useUserContext} from '../../../Contexts/UserContext' 
 import { 
   TruckIcon,
   PencilIcon,
   TrashIcon,
   CheckCircleIcon,
-  XCircleIcon,
-  CameraIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
-import transportService from '../../../API/transportService';
+// FIX: Resetting import paths to a common project structure depth (3 levels)
+import transportService from '../../../API/transportService'; 
 
 
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
@@ -57,46 +57,55 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
 
 export default function VehicleInfo() {
   const { user } = useUserContext(); 
-  const providerId = user?.id;
-  console.log("Provider ID in VehicleInfo:", providerId);
+  // Ensure providerId is a number if the backend expects Long, otherwise pass as string
+  const providerId = user?.id; 
 
   const [vehicle, setVehicle] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(''); 
+  
   const [formData, setFormData] = useState({
     regNo: '',
     type: '',
     kind: '',
     maxLoad: '',
-    frontPhoto: '',
-    sidePhoto: '',
   });
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    if (providerId) {
-      loadVehicle(providerId);
+  const loadVehicle = useCallback(async () => {
+    if (!providerId) {
+        setLoading(false);
+        setVehicle(null);
+        return;
     }
-  }, [providerId]);
-
-  useEffect(() => {
-    loadVehicle();
-  }, [providerId]);
-
-  const loadVehicle = async () => {
+    
     try {
       setLoading(true);
-      const vehicleData = await transportService.getVehicleByProvider(providerId);
+      setError('');
+      // Passing providerId as parameter for the service layer logic
+      const vehicleData = await transportService.getVehicleByProvider(providerId); 
+      
       if (vehicleData) {
         setVehicle(vehicleData);
+      } else {
+        setVehicle(null);
       }
     } catch (error) {
       console.error('Error loading vehicle:', error);
-      // It's okay if no vehicle exists yet
+      setError('Failed to load vehicle data.');
+      setVehicle(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [providerId]);
+
+  // COMBINED and cleaned up useEffect logic
+  useEffect(() => {
+    loadVehicle();
+  }, [loadVehicle]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -113,59 +122,97 @@ export default function VehicleInfo() {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-
-  const handlePhotoChange = (e, view) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, [view]: reader.result });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+    if (!providerId) {
+        setError("User ID is missing. Cannot save.");
+        return;
+    }
 
     try {
       setLoading(true);
       setError('');
+      
+      // 🌟 ADDED CURRENT DATE/TIME HERE
+      const now = new Date().toISOString(); 
 
       const vehicleData = {
         ...formData,
-        providerId: providerId
+        providerId: Number(providerId), 
+        updatedAt: now, // Send current date/time string to backend
+        // Note: Backend should handle creation date (createdAt) if inserting new data
       };
 
       let savedVehicle;
-      if (vehicle) {
-        // Update existing vehicle
-        savedVehicle = await vehicleService.updateVehicle(vehicleData);
+      if (vehicle && vehicle.id) {
+        // Update existing vehicle - passing the vehicle ID for the PUT endpoint
+        savedVehicle = await transportService.updateVehicle(vehicle.id, vehicleData);
       } else {
         // Create new vehicle
-        savedVehicle = await vehicleService.saveVehicle(vehicleData);
+        savedVehicle = await transportService.saveVehicle(vehicleData);
       }
 
       setVehicle(savedVehicle);
       setIsEditing(false);
-    } catch (error) {
-      console.error('Error saving vehicle:', error);
-      setError('Failed to save vehicle. Please try again.');
+    } catch (err) {
+      console.error('Error saving vehicle:', err);
+      // Use the service error message if available, otherwise generic
+      const message = err.response?.data?.message || 'Failed to save vehicle. Please check your network and try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEdit = () => {
+    setFormData({
+      regNo: vehicle.regNo,
+      type: vehicle.type,
+      kind: vehicle.kind,
+      maxLoad: vehicle.maxLoad,
+    });
+    setIsEditing(true);
   };
 
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
+  console.log("🧩 Delete button clicked!");
+  console.log("vehicle =", vehicle);
+
+  if (!vehicle || !vehicle.vehicleId) {
+    console.warn("⚠️ No vehicle or vehicle.vehicleId found. Aborting delete.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setError('');
+    console.log("Deleting vehicle with ID:", vehicle.vehicleId);
+    await transportService.deleteVehicle(vehicle.vehicleId);
+    console.log("✅ Vehicle deleted successfully");
+
     setVehicle(null);
-    localStorage.removeItem('transportProviderVehicle');
+    setFormData({
+      regNo: '',
+      type: '',
+      kind: '',
+      maxLoad: '',
+    });
     setShowDeleteModal(false);
-  };
+    setIsEditing(false);
+
+  } catch (error) {
+    console.error("❌ Error deleting vehicle:", error);
+    setError('Failed to delete vehicle. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleDeleteCancel = () => {
     setShowDeleteModal(false);
@@ -178,6 +225,14 @@ export default function VehicleInfo() {
     { value: 'Tuk Tuk', label: '🛺 Tuk Tuk' },
     { value: 'Tractor', label: '🚜 Tractor' },
   ];
+  
+  if (loading) {
+    return (
+        <div className="p-6 bg-gray-50 min-h-screen flex items-center justify-center">
+            <p className="text-xl font-medium text-gray-700">Loading vehicle information... 🚛</p>
+        </div>
+    );
+  }
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -187,7 +242,7 @@ export default function VehicleInfo() {
         onConfirm={handleDeleteConfirm}
       />
 
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
           <h1 className="text-2xl font-bold text-gray-800">My Vehicle Information</h1>
@@ -195,6 +250,13 @@ export default function VehicleInfo() {
             {vehicle ? 'Manage your vehicle details' : 'Add your vehicle information'}
           </p>
         </div>
+        
+        {/* Error Display */}
+        {error && (
+            <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-center font-medium">
+                {error}
+            </div>
+        )}
 
         {/* Display Vehicle Info */}
         {vehicle && !isEditing && (
@@ -209,7 +271,9 @@ export default function VehicleInfo() {
                   <div>
                     <h2 className="text-lg font-bold text-gray-800">{vehicle.kind}</h2>
                     <p className="text-sm text-green-600">
-                      Last updated: {new Date(vehicle.updatedAt).toLocaleDateString()}
+                      Last updated: {vehicle.updatedAt 
+                        ? new Date(vehicle.updatedAt).toLocaleDateString() + ' ' + new Date(vehicle.updatedAt).toLocaleTimeString()
+                        : 'N/A'}
                     </p>
                   </div>
                 </div>
@@ -232,9 +296,9 @@ export default function VehicleInfo() {
               </div>
             </div>
 
-            {/* Vehicle Details */}
+            {/* Vehicle Details - Consolidated into one column */}
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Registration Number</h3>
@@ -258,44 +322,6 @@ export default function VehicleInfo() {
                     <p className="font-medium">{vehicle.maxLoad} kg</p>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="text-center">
-                    {vehicle.frontPhoto ? (
-                      <img
-                        src={vehicle.frontPhoto}
-                        alt="Front View"
-                        className="w-full h-48 object-contain border rounded shadow"
-                      />
-                    ) : (
-                      <div className="w-full h-48 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                        <div className="text-center">
-                          <CameraIcon className="mx-auto h-12 w-12 text-gray-400" />
-                          <p className="mt-1 text-sm text-gray-500">No front photo</p>
-                        </div>
-                      </div>
-                    )}
-                    <p className="text-xs text-gray-400 mt-2">Front View</p>
-                  </div>
-
-                  <div className="text-center">
-                    {vehicle.sidePhoto ? (
-                      <img
-                        src={vehicle.sidePhoto}
-                        alt="Side View"
-                        className="w-full h-48 object-contain border rounded shadow"
-                      />
-                    ) : (
-                      <div className="w-full h-48 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                        <div className="text-center">
-                          <CameraIcon className="mx-auto h-12 w-12 text-gray-400" />
-                          <p className="mt-1 text-sm text-gray-500">No side photo</p>
-                        </div>
-                      </div>
-                    )}
-                    <p className="text-xs text-gray-400 mt-2">Side View</p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -308,6 +334,7 @@ export default function VehicleInfo() {
               {vehicle ? 'Edit Vehicle Information' : 'Add Vehicle Information'}
             </h2>
 
+            {/* Simplified to a single column layout for inputs */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="space-y-6">
                 <div>
@@ -348,7 +375,9 @@ export default function VehicleInfo() {
                   </select>
                   {errors.type && <p className="mt-1 text-sm text-red-600">{errors.type}</p>}
                 </div>
-
+              </div>
+              
+              <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Vehicle Kind *
@@ -383,70 +412,6 @@ export default function VehicleInfo() {
                   {errors.maxLoad && <p className="mt-1 text-sm text-red-600">{errors.maxLoad}</p>}
                 </div>
               </div>
-
-              <div className="space-y-6">
-                <div className="text-center">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Front View Photo
-                  </label>
-                  {formData.frontPhoto ? (
-                    <img
-                      src={formData.frontPhoto}
-                      alt="Front View Preview"
-                      className="w-full h-48 object-contain border rounded shadow mb-2 mx-auto"
-                    />
-                  ) : (
-                    <div className="w-full h-48 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg mb-2">
-                      <div className="text-center">
-                        <CameraIcon className="mx-auto h-12 w-12 text-gray-400" />
-                        <p className="mt-1 text-sm text-gray-500">No photo selected</p>
-                      </div>
-                    </div>
-                  )}
-                  <label className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-200 inline-flex items-center cursor-pointer">
-                    <CameraIcon className="h-4 w-4 mr-2" />
-                    <span>Select Photo</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handlePhotoChange(e, 'frontPhoto')}
-                      className="hidden"
-                    />
-                  </label>
-                  <p className="text-xs text-gray-400 mt-2">Front View</p>
-                </div>
-
-                <div className="text-center">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Side View Photo
-                  </label>
-                  {formData.sidePhoto ? (
-                    <img
-                      src={formData.sidePhoto}
-                      alt="Side View Preview"
-                      className="w-full h-48 object-contain border rounded shadow mb-2 mx-auto"
-                    />
-                  ) : (
-                    <div className="w-full h-48 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg mb-2">
-                      <div className="text-center">
-                        <CameraIcon className="mx-auto h-12 w-12 text-gray-400" />
-                        <p className="mt-1 text-sm text-gray-500">No photo selected</p>
-                      </div>
-                    </div>
-                  )}
-                  <label className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-200 inline-flex items-center cursor-pointer">
-                    <CameraIcon className="h-4 w-4 mr-2" />
-                    <span>Select Photo</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handlePhotoChange(e, 'sidePhoto')}
-                      className="hidden"
-                    />
-                  </label>
-                  <p className="text-xs text-gray-400 mt-2">Side View</p>
-                </div>
-              </div>
             </div>
 
             <div className="mt-8 flex justify-end space-x-4">
@@ -461,7 +426,8 @@ export default function VehicleInfo() {
               )}
               <button
                 type="submit"
-                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 flex items-center space-x-2"
+                disabled={loading}
+                className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-400 transition-colors duration-200 flex items-center space-x-2"
               >
                 <CheckCircleIcon className="h-5 w-5" />
                 <span>{vehicle ? 'Update Vehicle' : 'Save Vehicle'}</span>
