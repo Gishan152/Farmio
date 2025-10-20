@@ -46,12 +46,15 @@ public class RequestDTO {
     @NotNull(message = "Request date is required")
     private LocalDate requestDate;
 
+    private Long acceptedByAgentId;
+    private String acceptedByAgentName;
+
     // constructor
     public RequestDTO(Long id, String requesterName, String requesterLocation, BigDecimal farmRating,
                       String requesterAvatar, String wasteType, String quantity,
                       String preferredPickupTime,
                       BigDecimal offeredPrice, BigDecimal totalOffer,
-                      String status, LocalDate requestDate) {
+                      String status, LocalDate requestDate, Long acceptedByAgentId, String acceptedByAgentName) {
         this.id = id;
         this.requesterName = requesterName;
         this.requesterLocation = requesterLocation;
@@ -65,6 +68,8 @@ public class RequestDTO {
         this.totalOffer = totalOffer;
         this.status = status;
         this.requestDate = requestDate;
+        this.acceptedByAgentId = acceptedByAgentId;
+        this.acceptedByAgentName = acceptedByAgentName;
     }
 
     // getters
@@ -81,4 +86,6 @@ public class RequestDTO {
     public BigDecimal getTotalOffer() { return totalOffer; }
     public String getStatus() { return status; }
     public LocalDate getRequestDate() { return requestDate; }
+    public Long getAcceptedByAgentId() { return acceptedByAgentId; }
+    public String getAcceptedByAgentName() { return acceptedByAgentName; }
 }

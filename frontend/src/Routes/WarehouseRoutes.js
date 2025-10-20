@@ -6,6 +6,7 @@ import SlotManagement from '../Pages/Warehouse/Sections/SlotManagement';
 import BookingManagement from '../Pages/Warehouse/Sections/BookingManagement';
 import PaymentManagement from '../Pages/Warehouse/Sections/PaymentManagement';
 import WasteAgent from '../Pages/Warehouse/Sections/WasteAgent';
+import WasteRequest from '../Pages/Warehouse/Sections/WasteRequest';
 import UserProfile from '../Pages/Warehouse/Sections/Profile';
 import SettingsPage from '../Pages/SettingsPage';
 // import WarehouseNotifications from '../Pages/Warehouse/Sections/Notifications';
@@ -38,6 +39,10 @@ const warehouseRoutes = {
         {
             path: 'waste-agents',
             Component: WasteAgent
+        },
+        {
+            path: 'waste-requests',
+            Component: WasteRequest
         },
         {
             path: 'profile',

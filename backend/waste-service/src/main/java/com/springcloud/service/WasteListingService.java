@@ -1,8 +1,10 @@
 package com.springcloud.service;
 
 import com.springcloud.model.Payment;
+import com.springcloud.model.Request;
 import com.springcloud.model.WasteListing;
 import com.springcloud.repository.PaymentRepository;
+import com.springcloud.repository.RequestRepository;
 import com.springcloud.repository.WasteListingRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +16,14 @@ public class WasteListingService {
 
     private final WasteListingRepository wasteListingRepository;
     private final PaymentRepository paymentRepository;
+    private final RequestRepository requestRepository;
 
     public WasteListingService(WasteListingRepository wasteListingRepository,
-                               PaymentRepository paymentRepository) {
+                               PaymentRepository paymentRepository,
+                               RequestRepository requestRepository) {
         this.wasteListingRepository = wasteListingRepository;
         this.paymentRepository = paymentRepository;
+        this.requestRepository = requestRepository;
     }
 
     public List<WasteListing> getAllWasteListings() {
@@ -41,6 +46,9 @@ public class WasteListingService {
         listing.setStatus(newStatus);
         WasteListing saved = wasteListingRepository.save(listing);
 
+        // Sync status with the original Request if it exists
+        syncRequestStatus(saved, newStatus);
+
         // If marked COMPLETED, create a payment record
         if ("COMPLETED".equalsIgnoreCase(newStatus)) {
             Payment payment = new Payment();
@@ -57,5 +65,48 @@ public class WasteListingService {
         }
 
         return saved;
+    }
+
+    /**
+     * Synchronizes Request status when WasteListing status changes
+     * Maps WasteListing statuses to Request statuses
+     */
+    private void syncRequestStatus(WasteListing listing, String listingStatus) {
+        // Find requests from the same requester with matching waste type and location
+        // In a better implementation, you'd have a direct foreign key relationship
+        List<Request> matchingRequests = requestRepository.findByRequesterNameContainingIgnoreCase(
+            listing.getRequester().getName()
+        );
+
+        for (Request request : matchingRequests) {
+            // Match by requester name, waste type, and accepted status
+            if (request.getWasteType().equalsIgnoreCase(listing.getWasteType()) &&
+                request.getAcceptedByAgentId() != null &&
+                request.getAcceptedByAgentId().equals(listing.getAcceptedBy())) {
+                
+                String requestStatus = mapListingStatusToRequestStatus(listingStatus);
+                request.setStatus(requestStatus);
+                requestRepository.save(request);
+                break; // Only update the first matching request
+            }
+        }
+    }
+
+    /**
+     * Maps WasteListing status to Request status
+     */
+    private String mapListingStatusToRequestStatus(String listingStatus) {
+        if (listingStatus == null) return "Pending";
+        
+        switch (listingStatus.toUpperCase()) {
+            case "ACCEPTED":
+                return "Accepted";
+            case "IN_PROGRESS":
+                return "In Progress";
+            case "COMPLETED":
+                return "Completed";
+            default:
+                return "Accepted"; // Default to accepted for any other status
+        }
     }
 }

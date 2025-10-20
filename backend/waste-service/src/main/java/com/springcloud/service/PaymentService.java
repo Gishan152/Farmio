@@ -4,8 +4,10 @@ import com.springcloud.dto.PaymentDTO;
 import com.springcloud.dto.PaymentInitiationRequest;
 import com.springcloud.dto.PayHerePaymentResponse;
 import com.springcloud.model.Payment;
+import com.springcloud.model.Request;
 import com.springcloud.model.WasteListing;
 import com.springcloud.repository.PaymentRepository;
+import com.springcloud.repository.RequestRepository;
 import com.springcloud.repository.WasteListingRepository;
 import com.springcloud.client.PaymentServiceClient;
 import org.springframework.stereotype.Service;
@@ -18,13 +20,16 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final WasteListingRepository wasteListingRepository;
+    private final RequestRepository requestRepository;
     private final PaymentServiceClient paymentServiceClient;
 
     public PaymentService(PaymentRepository paymentRepository,
                           WasteListingRepository wasteListingRepository,
+                          RequestRepository requestRepository,
                           PaymentServiceClient paymentServiceClient) {
         this.paymentRepository = paymentRepository;
         this.wasteListingRepository = wasteListingRepository;
+        this.requestRepository = requestRepository;
         this.paymentServiceClient = paymentServiceClient;
     }
 
@@ -117,7 +122,62 @@ public class PaymentService {
         }
 
         payment.setUpdatedAt(LocalDateTime.now());
-        return paymentRepository.save(payment);
+        Payment savedPayment = paymentRepository.save(payment);
+
+        // Sync Request status based on payment status
+        syncRequestStatusFromPayment(savedPayment, status);
+
+        return savedPayment;
+    }
+
+    /**
+     * Synchronizes Request status when Payment status changes
+     */
+    private void syncRequestStatusFromPayment(Payment payment, String paymentStatus) {
+        // Get the waste listing
+        WasteListing listing = wasteListingRepository.findById(payment.getWasteListingId())
+                .orElse(null);
+        
+        if (listing == null) return;
+
+        // Find matching request
+        List<Request> matchingRequests = requestRepository.findByRequesterNameContainingIgnoreCase(
+            listing.getRequester().getName()
+        );
+
+        for (Request request : matchingRequests) {
+            if (request.getWasteType().equalsIgnoreCase(listing.getWasteType()) &&
+                request.getAcceptedByAgentId() != null &&
+                request.getAcceptedByAgentId().equals(listing.getAcceptedBy())) {
+                
+                // Map payment status to request status
+                String requestStatus = mapPaymentStatusToRequestStatus(paymentStatus);
+                request.setStatus(requestStatus);
+                requestRepository.save(request);
+                break;
+            }
+        }
+    }
+
+    /**
+     * Maps Payment status to Request status
+     */
+    private String mapPaymentStatusToRequestStatus(String paymentStatus) {
+        if (paymentStatus == null) return "Completed";
+        
+        switch (paymentStatus.toUpperCase()) {
+            case "PENDING":
+                return "Payment Pending";
+            case "PAID":
+            case "COMPLETED":
+            case "SUCCESS":
+                return "Paid";
+            case "FAILED":
+            case "CANCELLED":
+                return "Completed"; // Keep at completed but payment failed
+            default:
+                return "Payment Pending";
+        }
     }
 
     /**
@@ -161,6 +221,9 @@ public class PaymentService {
         PayHerePaymentResponse response = paymentServiceClient.initiatePayment(paymentInitRequest);
 
         System.out.println("Payment initiation response: " + response.hash());
+
+        // Sync Request status to "Payment Pending"
+        syncRequestStatusFromPayment(payment, "PENDING");
 
         // Return payment initiation response to client
         return response;

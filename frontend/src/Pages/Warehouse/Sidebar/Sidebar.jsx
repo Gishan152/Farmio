@@ -9,7 +9,8 @@ import {
     UsersIcon,
     BellIcon,
     ChartBarIcon,
-    TrashIcon
+    TrashIcon,
+    DocumentTextIcon
 } from '@heroicons/react/24/solid';
 import SidebarItem from './SidebarItem';
 
@@ -20,6 +21,7 @@ const menu = [
     { label: 'Booking Management', to: '/warehouse/bookings', icon: CreditCardIcon },
     { label: 'Payment Management', to: '/warehouse/payments', icon: CreditCardIcon },
     { label: 'Waste Agent Management', to: '/warehouse/waste-agents', icon: TrashIcon },
+    { label: 'Waste Requests', to: '/warehouse/waste-requests', icon: DocumentTextIcon },
     // { label: 'Notifications', to: '/warehouse/notifications', icon: BellIcon },
     // { label: 'Analytics', to: '/warehouse/analytics', icon: ChartBarIcon }
 ];
