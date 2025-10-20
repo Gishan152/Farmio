@@ -10,14 +10,17 @@ import {
 } from "@heroicons/react/24/solid";
 import { GoogleMap, Marker } from "@react-google-maps/api";
 import { useGoogleMaps } from "../../../Contexts/GoogleMapContext";
+import { useUserContext } from "../../../Contexts/UserContext"; 
+
 
 export default function FarmerProfilePage() {
+    const {user} = useUserContext();
   const [currentTab, setCurrentTab] = useState("account");
   const [avatarUrl, setAvatarUrl] = useState(Profilepicture);
   const [isPictureModalOpen, setIsPictureModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [username, setUsername] = useState("FarmerBob");
-  const [email, setEmail] = useState("bob@farmers.com");
+  const [username, setUsername] = useState(user?.username || "Loading...");
+  const [email, setEmail] = useState(user?.email || "Loading...");
   const [password, setPassword] = useState("••••••••");
   const [isEditing, setIsEditing] = useState({ username: false, email: false, password: false });
   const [farms, setFarms] = useState([

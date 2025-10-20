@@ -7,6 +7,8 @@ import { Link } from 'react-router-dom';
 import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import api from '../../../API/client';
 import { useEffect } from 'react';
+import { useContext } from "react";
+
 
 function getCurrentUserId() {
     const userId = localStorage.getItem('userId');
@@ -38,7 +40,7 @@ export async function MyProductsLoader() {
             transport: product.transportAvailability,
             return: product.returnAccepted,
             measurement: product.measurement,
-            imageUrls: product.imageUrls.map(url => `${API_BASE_URL}${url}`),
+            imageUrls: product.imageUrls.map(url => `${API_BASE_URL}/api/products/images/${url}`),
             farm: 'My Farm', 
             location : product.location ,
             badges : product.badges, 
@@ -208,9 +210,10 @@ export default function MyProducts() {
                                     <span className="font-medium dark:text-gray-300">{crop.farm}</span>{' '}
                                     • {crop.location}
                                 </div>
-                                  <div className="text-sm text-gray-500 dark:text-gray-400">
+
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
                                     <span className="font-medium dark:text-gray-300">{crop.farm}</span>{' '}
-                                    • {crop.imageUrls}
+                                    • {crop.imageUrls[0]}
                                 </div>
 
                                 <div className="text-sm text-gray-500 dark:text-gray-400">

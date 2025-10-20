@@ -44,6 +44,8 @@ public class RouterValidator {
         
         "/api/admin/moderators/all-dto",
         "/api/moderator/login",
+        "/api/moderator/change-temp-password",
+        "/api/products/images/"
         "/api/analytics/admin/waste/listings",
         "/api/analytics/admin/waste/agents",
         "/api/analytics/admin/waste/listings/count",
@@ -57,8 +59,6 @@ public class RouterValidator {
         "/api/analytics/admin/routes/by-location",
         "/api/analytics/admin/routes/total-distance",
         "/api/analytics/admin/routes/average-distance",
-        "/api/moderator/change-temp-password",
-        "/actuator/health",
         
         // Moderator endpoints - allow without authentication
         "/api/analytics/moderator/stats",

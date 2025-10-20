@@ -2,6 +2,7 @@ import { ArrowRightStartOnRectangleIcon, Cog8ToothIcon, UserIcon } from '@heroic
 import SidebarItem from './SidebarItem';
 import Profilepicture from "../../../Assets/Farmer/Profile Pictures/2.1.jpg";
 import { Link, useNavigate } from "react-router-dom";
+import { useUserContext } from "../../../Contexts/UserContext"; 
 
 
 const menu = [
@@ -45,6 +46,7 @@ const menu = [
 
 export default function Sidebar() {
     const navigate = useNavigate();
+    const {user} = useUserContext();
 
     return (
         <aside className="w-64 bg-white border-r border-gray-200 p-6 flex flex-col justify-between min-h-screen">
@@ -69,8 +71,8 @@ export default function Sidebar() {
                 <div className="flex items-center mb-8">
                     <img src={Profilepicture} alt="profile" className="w-10 h-10 rounded-full mr-3" />
                     <div>
-                        <div className="font-semibold">Manuja Ransa <span className="bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded ml-1">Pro</span></div>
-                        <div className="text-xs text-gray-500">ransaramanuja@gmail.com</div>
+                        <div className="font-semibold"> {user ? user.username : "Loading..."}<span className="bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded ml-1">Pro</span></div>
+                        <div className="text-xs text-gray-500">{user ? user.email : "Loading..."}</div>
                     </div>
                 </div> 
              </Link>
