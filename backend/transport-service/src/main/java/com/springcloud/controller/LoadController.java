@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/transport")
+// @CrossOrigin(origins = "*") // allow frontend to access the API (you can restrict later)
 public class LoadController {
 
     @Autowired

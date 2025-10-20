@@ -24,7 +24,10 @@ public class Route {
     @Column(nullable = false)
     private long id;
 
+    @Column(name = "\"to\"")
     private String to;
+    
+    @Column(name = "\"from\"")
     private String from;
 
     @ElementCollection
