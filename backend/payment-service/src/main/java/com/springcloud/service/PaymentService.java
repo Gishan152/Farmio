@@ -136,8 +136,8 @@ public class PaymentService {
             // Calculate escrow and direct amounts from NET amount (after commission)
             BigDecimal escrowPercentage = payment.getEscrowPercentage() != null ? 
                 payment.getEscrowPercentage() : BigDecimal.ZERO;
-            BigDecimal escrowAmount = netAmount.multiply(escrowPercentage.divide(BigDecimal.valueOf(100)));
-            BigDecimal directAmount = netAmount.subtract(escrowAmount);
+            BigDecimal escrowAmount = calculateEscrowAmount(netAmount, escrowPercentage);
+            BigDecimal directAmount = netAmount.subtract(escrowAmount).setScale(2, RoundingMode.HALF_UP);
             
             Wallet payeeWallet = getOrCreateWallet(payment.getPayeeId());
             
@@ -234,10 +234,11 @@ public class PaymentService {
                 );
             }
 
-            // Calculate escrow amount
+            // Calculate escrow amount from NET amount (after commission)
             BigDecimal escrowPercentage = payment.getEscrowPercentage() != null ? 
                 payment.getEscrowPercentage() : BigDecimal.ZERO;
-            BigDecimal escrowAmount = payment.getAmount().multiply(escrowPercentage.divide(BigDecimal.valueOf(100)));
+            BigDecimal netAmount = computeNetAmount(payment);
+            BigDecimal escrowAmount = calculateEscrowAmount(netAmount, escrowPercentage);
             
             if (escrowAmount.compareTo(BigDecimal.ZERO) <= 0) {
                 return new PaymentResponse(
@@ -250,7 +251,7 @@ public class PaymentService {
             
             // Get payee wallet
             Wallet payeeWallet = getOrCreateWallet(payment.getPayeeId());
-            
+
             // Check if sufficient escrow amount exists
             if (payeeWallet.getEscrowedAmount().compareTo(escrowAmount) < 0) {
                 return new PaymentResponse(
@@ -310,10 +311,11 @@ public class PaymentService {
                 );
             }
 
-            // Calculate escrow amount
+            // Calculate escrow amount from NET amount (after commission)
             BigDecimal escrowPercentage = payment.getEscrowPercentage() != null ? 
                 payment.getEscrowPercentage() : BigDecimal.ZERO;
-            BigDecimal escrowAmount = payment.getAmount().multiply(escrowPercentage.divide(BigDecimal.valueOf(100)));
+            BigDecimal netAmount = computeNetAmount(payment);
+            BigDecimal escrowAmount = calculateEscrowAmount(netAmount, escrowPercentage);
             
             if (escrowAmount.compareTo(BigDecimal.ZERO) <= 0) {
                 return new PaymentResponse(
@@ -658,5 +660,27 @@ public class PaymentService {
 
     public Payment getPaymentByReference(String reference) {
         return paymentRepository.findByReference(reference).orElse(null);
+    }
+
+    // Compute the net amount after commission for a given payment. Prefer stored commission record when available.
+    private BigDecimal computeNetAmount(Payment payment) {
+        try {
+            var commissionOpt = commissionRepository.findByPaymentReference(payment.getReference());
+            if (commissionOpt.isPresent() && commissionOpt.get().getNetAmount() != null) {
+                return commissionOpt.get().getNetAmount();
+            }
+        } catch (Exception ignored) { }
+
+        // Fallback to calculating using the standard commission rate and rounding used at capture time
+        BigDecimal commissionAmount = payment.getAmount().multiply(COMMISSION_RATE)
+            .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        return payment.getAmount().subtract(commissionAmount);
+    }
+
+    // Calculate the escrow amount from net amount and percentage with consistent rounding
+    private BigDecimal calculateEscrowAmount(BigDecimal netAmount, BigDecimal escrowPercentage) {
+        if (netAmount == null || escrowPercentage == null) return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        BigDecimal percent = escrowPercentage.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+        return netAmount.multiply(percent).setScale(2, RoundingMode.HALF_UP);
     }
 }
