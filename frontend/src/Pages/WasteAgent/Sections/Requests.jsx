@@ -240,33 +240,33 @@ const Requests = () => {
 	const handleRequestAction = (requestId, action) => {
 		const actionText = action === "accept" ? "Accepted" : "Rejected";
 
-		// TODO: Replace hardcoded agentId with user.id from UserContext when implemented
-		const agentId = 19;
+		// Get current logged-in user's id (replace with your auth/UserContext if available)
+		const userId = localStorage.getItem("userId");
 
-		// Show loading toast
-		const loadingToast = toast.loading(`${actionText.charAt(0).toUpperCase() + actionText.slice(1)}ing request...`);
+		const loadingToast = toast.loading(
+			`${actionText.charAt(0).toUpperCase() + actionText.slice(1)}ing request...`
+		);
 
-		// Determine the endpoint based on action
-		const endpoint = action === "accept" 
-			? `/api/waste/requests/${requestId}/accept?agentId=${agentId}`
-			: `/api/waste/requests/${requestId}/reject`;
+		// Accept now derives agentId on the backend from X-User-Id
+		const endpoint =
+			action === "accept"
+				? `/api/waste/requests/${requestId}/accept`
+				: `/api/waste/requests/${requestId}/reject`;
 
-		// Call backend API to update status
-		api.put(endpoint)
-			.then((res) => {
-				return res.data;
-			})
-			.then((updatedRequest) => {
-				// Update local state with the updated request
+		// Pass X-User-Id so backend can resolve the agent
+		api
+			.put(endpoint, null, { headers: { "X-User-Id": userId } })
+			.then((res) => res.data)
+			.then(() => {
+				// Accept returns a WasteListingDTO; we just mark this row locally
 				setRequests((prev) =>
 					prev.map((request) =>
 						request.id === requestId
-							? { ...request, status: updatedRequest.status }
+							? { ...request, status: action === "accept" ? "Accepted" : "Rejected" }
 							: request
 					)
 				);
 
-				// Dismiss loading toast and show success
 				toast.dismiss(loadingToast);
 				toast.success(`Request ${actionText} successfully!`, {
 					description: `You have ${actionText} the waste collection request.`,
@@ -274,8 +274,6 @@ const Requests = () => {
 			})
 			.catch((error) => {
 				console.error(`Error ${actionText}ing request:`, error);
-				
-				// Dismiss loading toast and show error
 				toast.dismiss(loadingToast);
 				toast.error(`Failed to ${actionText} request`, {
 					description: "Please try again later.",

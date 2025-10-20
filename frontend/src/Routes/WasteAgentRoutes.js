@@ -28,6 +28,10 @@ const wasteAgentRoutes = {
             Component: Payments
         },
         {
+            path: "manage-payments:id",
+            Component: Payments
+        },
+        {
             path: "requests",
             Component: WasteRequests
         },

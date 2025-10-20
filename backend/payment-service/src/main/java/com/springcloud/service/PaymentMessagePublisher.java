@@ -26,4 +26,19 @@ public class PaymentMessagePublisher {
             e.printStackTrace();
         }
     }
+
+    public void publishWastePaymentConfirmed(PaymentConfirmedMessage message) {
+        try {
+            System.out.println("Publishing WASTE payment confirmation message: " + message.reference());
+            rabbitTemplate.convertAndSend(
+                RabbitMQConfig.WASTE_PAYMENT_EXCHANGE,
+                RabbitMQConfig.WASTE_PAYMENT_CONFIRMED_ROUTING_KEY,
+                message
+            );
+            System.out.println("WASTE payment confirmation message published successfully");
+        } catch (Exception e) {
+            System.err.println("Failed to publish WASTE payment confirmation message: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

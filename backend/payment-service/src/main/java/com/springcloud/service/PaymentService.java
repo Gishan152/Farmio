@@ -175,16 +175,44 @@ public class PaymentService {
             );
             
             // Publish payment confirmation message to RabbitMQ
-            PaymentConfirmedMessage confirmationMessage = new PaymentConfirmedMessage(
-                payment.getReference(),
-                netAmount, // Send net amount after commission
-                payment.getId().toString(),
-                newStatus.toString(),
-                LocalDateTime.now(),
-                payment.getPayerId(),
-                payment.getPayeeId()
-            );
-            paymentMessagePublisher.publishPaymentConfirmed(confirmationMessage);
+            // Route based on payment type for better isolation/throughput
+            if (payment.getType() == PaymentType.ORDER) {
+                // For orders, reference is the Order ID (string), consumed by order-service
+                PaymentConfirmedMessage confirmationMessage = new PaymentConfirmedMessage(
+                    payment.getReference(),
+                    netAmount, // Send net amount after commission
+                    payment.getId().toString(),
+                    newStatus.toString(),
+                    LocalDateTime.now(),
+                    payment.getPayerId(),
+                    payment.getPayeeId()
+                );
+                paymentMessagePublisher.publishPaymentConfirmed(confirmationMessage);
+            } else if (payment.getType() == PaymentType.WASTE) {
+                // For waste payouts, reference should be the Payment ID so waste-service can look it up
+                PaymentConfirmedMessage confirmationMessage = new PaymentConfirmedMessage(
+                    payment.getId().toString(), // reference == payment id for waste-service
+                    netAmount,
+                    payment.getId().toString(),
+                    newStatus.toString(),
+                    LocalDateTime.now(),
+                    payment.getPayerId(),
+                    payment.getPayeeId()
+                );
+                paymentMessagePublisher.publishWastePaymentConfirmed(confirmationMessage);
+            } else {
+                // Default behavior: publish on the general channel (backward compatible)
+                PaymentConfirmedMessage confirmationMessage = new PaymentConfirmedMessage(
+                    payment.getReference(),
+                    netAmount,
+                    payment.getId().toString(),
+                    newStatus.toString(),
+                    LocalDateTime.now(),
+                    payment.getPayerId(),
+                    payment.getPayeeId()
+                );
+                paymentMessagePublisher.publishPaymentConfirmed(confirmationMessage);
+            }
         }
     }
     

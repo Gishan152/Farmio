@@ -1,87 +1,65 @@
-package com.springcloud.model;
+package com.springcloud.dto;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
-@Entity
-@Table(name = "requests")
-public class Request {
+/**
+ * DTO used for creating a new Request via API.
+ * Does not require status or requestDate (they are set by the backend).
+ */
+public class RequestCreateDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    // Who made the request (farmer/warehouse owner)
+    // requesterName is resolved by backend through auth-service; optional here
     private String requesterName;
-    private String requesterLocation;
-    private BigDecimal farmRating;
-    private String requesterAvatar; // optional URL
 
-    // Waste details
+    @NotBlank(message = "Requester location is required")
+    private String requesterLocation;
+
+    @DecimalMin(value = "0.0", inclusive = false, message = "Farm rating must be positive")
+    @DecimalMax(value = "5.0", message = "Farm rating cannot exceed 5")
+    private BigDecimal farmRating;
+
+    private String requesterAvatar;
+
+    @NotBlank(message = "Waste type is required")
     private String wasteType;
+
+    @NotBlank(message = "Quantity is required")
     private String quantity;
+
     private String preferredPickupTime;
 
-    // Optional description provided by requester
     private String description;
 
-    // Offer
+    @NotNull(message = "Offered price is required")
+    @Positive(message = "Offered price must be greater than 0")
     private BigDecimal offeredPrice;
+
+    @NotNull(message = "Total offer is required")
+    @Positive(message = "Total offer must be greater than 0")
     private BigDecimal totalOffer;
 
-    // Status: Pending / Accepted / Rejected / In Progress / Completed / Payment Pending / Paid
-    private String status;
+    public RequestCreateDTO() {}
 
-    private LocalDate requestDate;
-
-    // Waste agent who accepted the request
-    private Long acceptedByAgentId;
-    private String acceptedByAgentName;
-
-    // --- getters & setters ---
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
+    // getters and setters
     public String getRequesterName() { return requesterName; }
     public void setRequesterName(String requesterName) { this.requesterName = requesterName; }
-
     public String getRequesterLocation() { return requesterLocation; }
     public void setRequesterLocation(String requesterLocation) { this.requesterLocation = requesterLocation; }
-
     public BigDecimal getFarmRating() { return farmRating; }
     public void setFarmRating(BigDecimal farmRating) { this.farmRating = farmRating; }
-
     public String getRequesterAvatar() { return requesterAvatar; }
     public void setRequesterAvatar(String requesterAvatar) { this.requesterAvatar = requesterAvatar; }
-
     public String getWasteType() { return wasteType; }
     public void setWasteType(String wasteType) { this.wasteType = wasteType; }
-
     public String getQuantity() { return quantity; }
     public void setQuantity(String quantity) { this.quantity = quantity; }
-
     public String getPreferredPickupTime() { return preferredPickupTime; }
     public void setPreferredPickupTime(String preferredPickupTime) { this.preferredPickupTime = preferredPickupTime; }
-
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-
     public BigDecimal getOfferedPrice() { return offeredPrice; }
     public void setOfferedPrice(BigDecimal offeredPrice) { this.offeredPrice = offeredPrice; }
-
     public BigDecimal getTotalOffer() { return totalOffer; }
     public void setTotalOffer(BigDecimal totalOffer) { this.totalOffer = totalOffer; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-
-    public LocalDate getRequestDate() { return requestDate; }
-    public void setRequestDate(LocalDate requestDate) { this.requestDate = requestDate; }
-
-    public Long getAcceptedByAgentId() { return acceptedByAgentId; }
-    public void setAcceptedByAgentId(Long acceptedByAgentId) { this.acceptedByAgentId = acceptedByAgentId; }
-
-    public String getAcceptedByAgentName() { return acceptedByAgentName; }
-    public void setAcceptedByAgentName(String acceptedByAgentName) { this.acceptedByAgentName = acceptedByAgentName; }
 }
