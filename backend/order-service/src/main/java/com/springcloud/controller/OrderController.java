@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import java.util.List;
 
 @RestController
@@ -201,6 +204,22 @@ public class OrderController {
     public ResponseEntity<List<Order>> getAllOrdersForAdmin() {
         List<Order> orders = orderService.getAllOrders();
         return ResponseEntity.ok(orders);
+    }
+    
+    /**
+     * Check if a product is used in any orders
+     * This endpoint is used by other services to verify if a product can be safely deleted
+     */
+    @GetMapping("/check-product-usage/{productId}")
+    public ResponseEntity<Map<String, Object>> checkProductUsage(@PathVariable Long productId) {
+        boolean inUse = orderService.isProductInUse(productId);
+        Map<String, Object> response = new HashMap<>();
+        response.put("productId", productId);
+        response.put("inUse", inUse);
+        response.put("message", inUse ? 
+            "Product is used in one or more orders" : 
+            "Product is not used in any orders");
+        return ResponseEntity.ok(response);
     }
 
     /**

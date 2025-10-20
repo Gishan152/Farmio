@@ -29,6 +29,8 @@ import LogisticsShipping from '../Pages/admin/logistics/shipping';
 import WasteCollection from '../Pages/admin/waste/collection';
 import WasteProcessing from '../Pages/admin/waste/processing';
 import WasteStats from '../Pages/admin/waste/stats';
+import WasteListings from '../Pages/admin/waste/listings';
+import WasteAgents from '../Pages/admin/waste/agents';
 
 // Admin Analytics pages
 import AnalyticsSales from '../Pages/admin/analytics/sales';
@@ -183,6 +185,14 @@ const adminRoutes = {
                 {
                     path: 'stats',
                     Component: WasteStats
+                },
+                {
+                    path: 'listings',
+                    Component: WasteListings
+                },
+                {
+                    path: 'agents',
+                    Component: WasteAgents
                 }
             ]
         },

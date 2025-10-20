@@ -1,4 +1,5 @@
 // API utility functions for crop/product data
+import api from '../API/client';
 
 /**
  * Fetch all crops from order service
@@ -17,6 +18,25 @@ export const fetchAllCrops = async () => {
     return await response.json();
   } catch (error) {
     console.error('Error fetching crops:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch all products from products table via analytics service
+ */
+export const fetchAllProducts = async () => {
+  try {
+    console.log('Fetching products from products table...');
+    const response = await api.get('/api/analytics/admin/products');
+    
+    if (response.data && Array.isArray(response.data)) {
+      console.log(`Received ${response.data.length} products from products table`);
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching products from products table:', error);
     throw error;
   }
 };
