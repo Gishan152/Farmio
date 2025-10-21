@@ -16,18 +16,18 @@ export async function AssignedLoadsLoader() {
     // Fetch all loads assigned to the current driver
     const response = await api.get("/api/transport/getAllLoads");
 
-    const loads = response.data;
-    const API_BASE_URL = import.meta.env.VITE_API_GATEWAY_URL;
-
-    // Transform data into frontend-friendly structure
-    return loads
-    .filter((load) => load.status === "accepted" || load.status === "in_transit")
-    .map((load) => ({
+    const loads = response.data.filter(load => 
+      load.driverStatus?.toLowerCase() === "accepted" || load.driverStatus === "in_transport" && !load.driverId
+    );
+    const transformedLoads = loads.map((load) =>({
       id: load.id,
-      crop: load.cropType || "Unknown Crop",
-      quantity: `${load.quantity} ${load.unit || "kg"}`,
-      pickupLocation: load.pickupLocation || "N/A",
-      deliveryLocation: load.deliveryLocation || "N/A",
+      loadId: load.loadId,
+      driverId: load.driverId,
+      crop: load.product || "Unknown Crop",
+      // crop: load.cropType || "Unknown Crop",
+      quantity: `${load.weight} ${load.unit || "kg"}`,
+      pickupLocation: load.fromLocation || "N/A",
+      deliveryLocation: load.toLocation || "N/A",
       status: load.status || "Pending Pickup",
       confirmedBy: {
         driverPickup: load.driverPickupConfirmed || false,
@@ -35,11 +35,9 @@ export async function AssignedLoadsLoader() {
         buyer: load.buyerConfirmed || false,
       },
       pickupTime: load.pickupTime,
-      estimatedDelivery: load.estimatedDeliveryTime,
-      imageUrls: load.imageUrls
-        ? load.imageUrls.map((url) => `${API_BASE_URL}${url}`)
-        : [],
-    }));
+      estimatedDelivery: load.estimatedDeliveryTime
+    }))
+    return transformedLoads;
   } catch (error) {
     console.error("Failed to fetch assigned loads:", error);
     return [];
@@ -216,13 +214,13 @@ const AssignedLoads = () => {
                       </p>
                     </div>
 
-                    {/* Delivery Time */}
+                    {/* Delivery Time
                     <div className="space-y-2">
                       <h3 className="text-sm font-medium text-gray-500">Estimated Delivery</h3>
                       <p className="font-medium">
                         {new Date(load.estimatedDelivery).toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute:'2-digit'})}
                       </p>
-                    </div>
+                    </div> */}
 
                     {/* Confirmations */}
                     <div className="space-y-2">
@@ -246,7 +244,7 @@ const AssignedLoads = () => {
                     {/* Pickup Confirmation */}
                     {!load.confirmedBy.driverPickup && load.status === 'Pending Pickup' && (
                       <button
-                        onClick={() => navigate(`/transporter/confirmPickup/${load.id}`)}
+                        onClick={() => navigate(`/transporter/confirmPickup/${load.id}/${load.driverId}`)}
                         className="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200 flex items-center space-x-2"
                       >
                         <CheckCircleIcon className="h-5 w-5" />
@@ -257,7 +255,7 @@ const AssignedLoads = () => {
                     {/* Delivery Confirmation */}
                     {!load.confirmedBy.driverDelivery && load.status === 'In Transit' && (
                       <button
-                        onClick={() => navigate(`/transporter/confirmDelivery/${load.id}`)}
+                        onClick={() => navigate(`/transporter/confirmDelivery/${load.id}/${load.driverId}`)}
                         className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center space-x-2"
                       >
                         <CheckCircleIcon className="h-5 w-5" />

@@ -76,6 +76,25 @@ public class LoadServiceImpl implements LoadService {
         LoadDetails saved = loadRepository.save(load);
         return modelMapper.map(saved, LoadDetailsDto.class);
     }
+    public LoadDetailsDto acceptPickupDriver(Long id, Long driverId) {
+        LoadDetails load = loadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Load not found with ID: " + id));
+
+        load.setDriverStatus("inTransport");
+        load.setDriverId(driverId);
+        LoadDetails saved = loadRepository.save(load);
+        return modelMapper.map(saved, LoadDetailsDto.class);
+    }
+
+    public LoadDetailsDto acceptDeliveryDriver(Long id, Long driverId) {
+        LoadDetails load = loadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Load not found with ID: " + id));
+
+        load.setDriverStatus("Delivered");
+        load.setDriverId(driverId);
+        LoadDetails saved = loadRepository.save(load);
+        return modelMapper.map(saved, LoadDetailsDto.class);
+    }
 
     @Override
     @Transactional

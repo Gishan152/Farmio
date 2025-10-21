@@ -13,6 +13,8 @@ public interface LoadService {
     LoadDetailsDto updateLoad(Long id,LoadDetailsDto loadDetailsDto);
     void deleteLoad(Long id);
     LoadDetailsDto acceptLoadDriver(Long id, Long driverId);
+    LoadDetailsDto acceptPickupDriver(Long id, Long driverId);
+    LoadDetailsDto acceptDeliveryDriver(Long id, Long driverId);
     LoadDetailsDto acceptLoadBuyer(Long id);
     LoadDetailsDto acceptLoadSeller(Long id);
 }

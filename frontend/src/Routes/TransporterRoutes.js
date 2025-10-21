@@ -56,11 +56,11 @@ const transporterRoutes = {
             Component: TransporterNotifications
         },
         {
-            path : 'confirmPickup/:id',
+            path : 'confirmPickup/:id/:driverId',
             Component: ConfirmPickup
         },
         {
-            path : 'confirmDelivery/:id',
+            path : 'confirmDelivery/:id/:driverId',
             Component: ConfirmDelivery
         }
     ]
