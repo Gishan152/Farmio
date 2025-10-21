@@ -5,6 +5,7 @@ import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export default function ConfirmDelivery() {
   const { id } = useParams();
+  const { driverId } = useParams();
   const navigate = useNavigate();
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,7 @@ export default function ConfirmDelivery() {
 
     try {
         // 2. Call the general update endpoint
-        await api.put(`/api/transport/updateLoad/${id}`, updateData);
+        await api.put(`/api/acceptDeliveryDriver/${id}/${driverId}`);
 
         setSuccess(true);
         // 3. Navigate back to the assigned loads list

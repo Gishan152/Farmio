@@ -4,7 +4,8 @@ import api from "../../../API/client"; // FIX: Adjusted path depth to resolve co
 import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/24/outline'; // For loading/success icons
 
 export default function ConfirmPickup() {
-  const { id } = useParams(); // Load ID from route
+  const { id } = useParams();
+  const { driverId } = useParams();
   const navigate = useNavigate();
   // Removed photo state: const [photo, setPhoto] = useState(null);
   const [note, setNote] = useState('');
@@ -18,22 +19,20 @@ export default function ConfirmPickup() {
     setError(null);
     setSuccess(false);
 
-    // 1. Build the payload for the LoadDetailsDto update
     const updateData = {
-        // These fields are sent to the backend's LoadController -> updateLoad
         driverPickupConfirmed: true,
-        status: 'in_transit', 
+        status: 'in_transport', 
         driverPickupNote: note,
     };
 
     try {
         // 2. Call the general update endpoint
-        await api.put(`/api/transport/updateLoad/${id}`, updateData);
+        await api.put(`/api/transport/acceptPickupDriver/${id}/${driverId}`);
 
         setSuccess(true);
         // 3. Navigate back to the assigned loads list
         setTimeout(() => {
-            navigate('/transporter/assignedLoads');
+            navigate('/transporter/assignedLoads/all');
         }, 1500);
 
     } catch (err) {

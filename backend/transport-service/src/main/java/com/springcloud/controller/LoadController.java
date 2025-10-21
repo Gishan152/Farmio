@@ -56,6 +56,20 @@ public class LoadController {
         return ResponseEntity.ok(updated);
     }
 
+    @PutMapping("/acceptPickupDriver/{id}/{driverId}")
+    public ResponseEntity<LoadDetailsDto> acceptPickupDriver(@PathVariable Long id,
+                                                     @PathVariable Long driverId) {
+        LoadDetailsDto updated = loadService.acceptLoadDriver(id, driverId);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/acceptDeliveryDriver/{id}/{driverId}")
+    public ResponseEntity<LoadDetailsDto> acceptDeliveryDriver(@PathVariable Long id,
+                                                     @PathVariable Long driverId) {
+        LoadDetailsDto updated = loadService.acceptLoadDriver(id, driverId);
+        return ResponseEntity.ok(updated);
+    }
+
     @PutMapping("/acceptLoadBuyer/{id}")
     public ResponseEntity<LoadDetailsDto> acceptLoadBuyer(@PathVariable Long id) {
         LoadDetailsDto updated = loadService.acceptLoadBuyer(id);

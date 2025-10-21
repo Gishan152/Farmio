@@ -93,7 +93,7 @@ export default function AvailableLoads() {
       // Remove the accepted load from the list
       setLoads(prevLoads => prevLoads.filter(load => load.id !== loadId));
       
-      alert("Load accepted successfully!");
+      // alert("Load accepted successfully!");
 
     } catch (error) {
       console.error("Failed to accept load:", error);
