@@ -17,6 +17,136 @@ import {
 } from '../../../Utils/cropUtils';
 import paymentService from '../../../API/paymentService';
 
+// Mock Data for Sri Lanka context - Small system with 20 users
+const MOCK_CROPS = [
+  {
+    id: 1,
+    type: 'Bell Pepper',
+    imageUrl: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=100',
+    category: 'vegetables'
+  },
+  {
+    id: 2,
+    type: 'Tomatoes',
+    imageUrl: 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=100',
+    category: 'vegetables'
+  },
+  {
+    id: 3,
+    type: 'Wheat',
+    imageUrl: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=100',
+    category: 'grains'
+  },
+  {
+    id: 4,
+    type: 'Rice',
+    imageUrl: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=100',
+    category: 'grains'
+  },
+  {
+    id: 5,
+    type: 'Coconut',
+    imageUrl: 'https://images.unsplash.com/photo-1589606663923-283bbd309229?w=100',
+    category: 'fruits'
+  }
+];
+
+const MOCK_ORDERS = [
+  {
+    id: 1,
+    orderDate: new Date(2025, 9, 18).toISOString(),
+    total: 3750,
+    status: 'DELIVERED',
+    orderItems: [
+      { cropId: 1, quantity: 10, pricePerUnit: 250 },
+      { cropId: 2, quantity: 5, pricePerUnit: 150 }
+    ]
+  },
+  {
+    id: 2,
+    orderDate: new Date(2025, 9, 19).toISOString(),
+    total: 5400,
+    status: 'IN_TRANSPORT',
+    orderItems: [
+      { cropId: 3, quantity: 15, pricePerUnit: 180 },
+      { cropId: 4, quantity: 6, pricePerUnit: 300 }
+    ]
+  },
+  {
+    id: 3,
+    orderDate: new Date(2025, 9, 20).toISOString(),
+    total: 4500,
+    status: 'PROCESSING',
+    orderItems: [
+      { cropId: 5, quantity: 30, pricePerUnit: 150 }
+    ]
+  },
+  {
+    id: 4,
+    orderDate: new Date(2025, 9, 21).toISOString(),
+    total: 2700,
+    status: 'AWAITING_PICKUP',
+    orderItems: [
+      { cropId: 3, quantity: 15, pricePerUnit: 180 }
+    ]
+  },
+  {
+    id: 5,
+    orderDate: new Date(2025, 8, 25).toISOString(),
+    total: 3900,
+    status: 'DELIVERED',
+    orderItems: [
+      { cropId: 4, quantity: 13, pricePerUnit: 300 }
+    ]
+  }
+];
+
+const MOCK_PAYMENTS = [
+  {
+    id: 'PAY-001',
+    amount: 3750,
+    status: 'COMPLETED',
+    createdAt: new Date(2025, 9, 18).toISOString(),
+    orderId: 1
+  },
+  {
+    id: 'PAY-002',
+    amount: 5400,
+    status: 'PENDING',
+    createdAt: new Date(2025, 9, 19).toISOString(),
+    orderId: 2
+  },
+  {
+    id: 'PAY-003',
+    amount: 4500,
+    status: 'PENDING',
+    createdAt: new Date(2025, 9, 20).toISOString(),
+    orderId: 3
+  },
+  {
+    id: 'PAY-004',
+    amount: 2700,
+    status: 'COMPLETED',
+    createdAt: new Date(2025, 9, 21).toISOString(),
+    orderId: 4
+  },
+  {
+    id: 'PAY-005',
+    amount: 3900,
+    status: 'COMPLETED',
+    createdAt: new Date(2025, 8, 25).toISOString(),
+    orderId: 5
+  }
+];
+
+const MOCK_REGIONS = [
+  { region: 'Western Province', revenue: 'Rs. 7,500', percentage: '36%', growth: '+25%' },
+  { region: 'Central Province', revenue: 'Rs. 5,400', percentage: '26%', growth: '+20%' },
+  { region: 'Southern Province', revenue: 'Rs. 4,500', percentage: '22%', growth: '+33%' },
+  { region: 'Eastern Province', revenue: 'Rs. 2,700', percentage: '13%', growth: '+15%' },
+  { region: 'Northern Province', revenue: 'Rs. 650', percentage: '3%', growth: '+50%' }
+];
+
 // Icons
 const MoneyIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -50,9 +180,11 @@ const DownloadIcon = () => (
 
 // Helper functions for data processing
 const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('en-ZA', {
+  return new Intl.NumberFormat('en-LK', {
     style: 'currency',
-    currency: 'ZAR'
+    currency: 'LKR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   }).format(amount);
 };
 
@@ -149,15 +281,11 @@ const SalesAnalytics = () => {
     totalRevenue: 'R0.00',
     totalOrders: '0',
     averageOrderValue: 'R0.00',
-    conversionRate: '0%',
     yearlyGrowth: '+0%'
   });
   const [chartData, setChartData] = useState({
     labels: [],
-    datasets: {
-      revenue: [],
-      orders: []
-    }
+    datasets: []
   });
   const [topSellingProducts, setTopSellingProducts] = useState([]);
   const [salesByRegion, setSalesByRegion] = useState([]);
@@ -181,22 +309,34 @@ const SalesAnalytics = () => {
       
       // Fetch all required data in parallel
       const [ordersData, cropsData, paymentsData] = await Promise.all([
-        fetchAllOrders(),
-        fetchAllCrops(),
-        paymentService.getAllPayments().catch(() => []) // Graceful fallback if payments fail
+        fetchAllOrders().catch(() => []),
+        fetchAllCrops().catch(() => []),
+        paymentService.getAllPayments().catch(() => [])
       ]);
 
-      setOrders(ordersData);
-      setCrops(cropsData);
-      setPayments(paymentsData);
+      // Use mock data if real data is empty or unavailable
+      const finalOrders = ordersData.length > 0 ? ordersData : MOCK_ORDERS;
+      const finalCrops = cropsData.length > 0 ? cropsData : MOCK_CROPS;
+      const finalPayments = paymentsData.length > 0 ? paymentsData : MOCK_PAYMENTS;
+
+      setOrders(finalOrders);
+      setCrops(finalCrops);
+      setPayments(finalPayments);
+      setSalesByRegion(MOCK_REGIONS); // Always use mock regions for Sri Lanka context
       
       // Process and set computed data
-      processSalesData(ordersData, paymentsData);
-      setTopSellingProducts(getTopSellingProducts(ordersData, cropsData));
+      processSalesData(finalOrders, finalPayments);
+      setTopSellingProducts(getTopSellingProducts(finalOrders, finalCrops));
       
     } catch (err) {
       console.error('Error loading sales data:', err);
-      setError('Failed to load sales data. Please try again.');
+      // Use mock data on error
+      setOrders(MOCK_ORDERS);
+      setCrops(MOCK_CROPS);
+      setPayments(MOCK_PAYMENTS);
+      setSalesByRegion(MOCK_REGIONS);
+      processSalesData(MOCK_ORDERS, MOCK_PAYMENTS);
+      setTopSellingProducts(getTopSellingProducts(MOCK_ORDERS, MOCK_CROPS));
     } finally {
       setIsLoading(false);
     }
@@ -214,17 +354,13 @@ const SalesAnalytics = () => {
     // Calculate average order value
     const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-    // Calculate conversion rate (simplified - would need more complex logic)
-    const conversionRate = totalOrders > 0 ? ((totalOrders / (totalOrders + 100)) * 100) : 0;
-
     // Calculate growth (simplified - would need historical data)
-    const yearlyGrowth = totalOrders > 0 ? '+18.5%' : '+0%';
+    const yearlyGrowth = totalOrders > 0 ? '+25%' : '+0%';
 
     setSalesData({
       totalRevenue: formatCurrency(totalRevenue),
       totalOrders: totalOrders.toLocaleString(),
       averageOrderValue: formatCurrency(averageOrderValue),
-      conversionRate: `${conversionRate.toFixed(1)}%`,
       yearlyGrowth: yearlyGrowth
     });
   };
@@ -287,10 +423,11 @@ const SalesAnalytics = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Region</label>
                     <select className="w-full border border-gray-300 rounded-md px-3 py-2">
                       <option>All Regions</option>
-                      <option>Western Cape</option>
-                      <option>Gauteng</option>
-                      <option>KwaZulu-Natal</option>
-                      <option>Eastern Cape</option>
+                      <option>Western Province</option>
+                      <option>Central Province</option>
+                      <option>Southern Province</option>
+                      <option>Northern Province</option>
+                      <option>Eastern Province</option>
                     </select>
                   </div>
                   <div className="mb-4">
@@ -362,7 +499,7 @@ const SalesAnalytics = () => {
         )}
         
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <StatCard 
             title="Total Revenue" 
             value={salesData.totalRevenue} 
@@ -378,7 +515,7 @@ const SalesAnalytics = () => {
             value={salesData.totalOrders} 
             icon={<ChartIcon />} 
             trend="up" 
-            trendValue="+12.3%" 
+            trendValue="+67%" 
             trendLabel="vs previous period"
             color="bg-blue-100 text-blue-800"
             isLoading={isLoading}
@@ -388,19 +525,9 @@ const SalesAnalytics = () => {
             value={salesData.averageOrderValue} 
             icon={<MoneyIcon />} 
             trend="up" 
-            trendValue="+5.7%" 
+            trendValue="+15%" 
             trendLabel="vs previous period"
             color="bg-purple-100 text-purple-800"
-            isLoading={isLoading}
-          />
-          <StatCard 
-            title="Conversion Rate" 
-            value={salesData.conversionRate} 
-            icon={<ChartIcon />} 
-            trend="up" 
-            trendValue="+2.1%" 
-            trendLabel="vs previous period"
-            color="bg-yellow-100 text-yellow-800"
             isLoading={isLoading}
           />
           <StatCard 
@@ -408,7 +535,7 @@ const SalesAnalytics = () => {
             value={salesData.yearlyGrowth} 
             icon={<ChartIcon />} 
             trend="up" 
-            trendValue="+3.4%" 
+            trendValue="+10%" 
             trendLabel="vs previous year"
             color="bg-red-100 text-red-800"
             isLoading={isLoading}
@@ -502,6 +629,11 @@ const SalesAnalytics = () => {
           <Card>
             <div className="p-4">
               <h2 className="text-lg font-semibold text-dashboard-text-primary mb-4">Sales by Region</h2>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-farmio"></div>
+                </div>
+              ) : salesByRegion.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full">
                   <thead>
@@ -524,6 +656,11 @@ const SalesAnalytics = () => {
                   </tbody>
                 </table>
               </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-sm text-gray-500">No regional sales data available</p>
+                </div>
+              )}
             </div>
           </Card>
         </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import DashboardLayout from '../../../components/layout/DashboardLayout';
 import Card from '../../../components/ui/Card';
 import StatCard from '../../../components/ui/StatCard';
+import Chart from '../../../components/ui/Chart';
 
 // Icons
 const UserIcon = () => (
@@ -41,58 +42,73 @@ const DownloadIcon = () => (
 );
 
 
-// Move static data outside the component to avoid new reference on every render
+// Mock data for Sri Lankan agricultural platform - Small system with 20 users
 const activityData = {
-  totalActiveUsers: '8,452',
-  newUsers: '1,245',
-  avgSessionTime: '8m 32s',
-  retentionRate: '68.5%',
-  bounceRate: '32.4%'
+  totalActiveUsers: '20',
+  newUsers: '5',
+  avgSessionTime: '7m 15s',
+  retentionRate: '75.0%',
+  bounceRate: '25.0%'
 };
+
 const activeUsersData = {
   month: {
     labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
     datasets: {
-      activeUsers: [7850, 8125, 8290, 8452],
-      newUsers: [320, 295, 310, 320]
+      activeUsers: [15, 17, 18, 20],
+      newUsers: [1, 2, 1, 1]
     }
   },
   quarter: {
-    labels: ['Jan', 'Feb', 'Mar'],
+    labels: ['Aug', 'Sep', 'Oct'],
     datasets: {
-      activeUsers: [7450, 7820, 8452],
-      newUsers: [850, 915, 1245]
+      activeUsers: [12, 16, 20],
+      newUsers: [3, 4, 5]
     }
   },
   year: {
     labels: ['Q1', 'Q2', 'Q3', 'Q4'],
     datasets: {
-      activeUsers: [6850, 7250, 7895, 8452],
-      newUsers: [2450, 2180, 2320, 2780]
+      activeUsers: [8, 12, 17, 20],
+      newUsers: [5, 4, 5, 6]
     }
   }
 };
+
 const userTypesData = [
-  { type: 'Farmers', count: '2,854', percentage: '33.8%', active: '78.5%', newUsers: '345' },
-  { type: 'Buyers', count: '3,125', percentage: '37.0%', active: '82.3%', newUsers: '520' },
-  { type: 'Warehouse Owners', count: '845', percentage: '10.0%', active: '74.8%', newUsers: '126' },
-  { type: 'Transport Providers', count: '956', percentage: '11.3%', active: '68.2%', newUsers: '152' },
-  { type: 'Waste Mgmt. Agents', count: '672', percentage: '7.9%', active: '71.4%', newUsers: '102' }
+  { type: 'Farmers', count: '8', percentage: '40%', active: '87.5%', newUsers: '2' },
+  { type: 'Buyers', count: '6', percentage: '30%', active: '83.3%', newUsers: '2' },
+  { type: 'Warehouse Owners', count: '2', percentage: '10%', active: '100%', newUsers: '0' },
+  { type: 'Transport Providers', count: '3', percentage: '15%', active: '66.7%', newUsers: '1' },
+  { type: 'Waste Mgmt. Agents', count: '1', percentage: '5%', active: '100%', newUsers: '0' }
 ];
+
 const topFeaturesUsed = [
-  { feature: 'Product Search', usageCount: '45,680', userPercentage: '85.2%', trend: '+12.5%' },
-  { feature: 'Order Placement', usageCount: '28,945', userPercentage: '72.8%', trend: '+8.3%' },
-  { feature: 'Storage Booking', usageCount: '18,540', userPercentage: '54.6%', trend: '+15.7%' },
-  { feature: 'Transport Scheduling', usageCount: '12,835', userPercentage: '42.3%', trend: '+6.2%' },
-  { feature: 'Waste Collection Request', usageCount: '9,745', userPercentage: '32.8%', trend: '+9.8%' }
+  { feature: 'Crop Browsing', usageCount: '142', userPercentage: '85%', trend: '+15%' },
+  { feature: 'Order Placement', usageCount: '48', userPercentage: '60%', trend: '+20%' },
+  { feature: 'Price Inquiry', usageCount: '67', userPercentage: '70%', trend: '+10%' },
+  { feature: 'Storage Booking', usageCount: '18', userPercentage: '30%', trend: '+50%' },
+  { feature: 'Waste Collection Request', usageCount: '12', userPercentage: '25%', trend: '+33%' }
 ];
+
 const userJourney = [
-  { step: 'Registration', completionRate: '100%', avgTime: '2m 15s', dropOff: '0%' },
-  { step: 'Profile Completion', completionRate: '82.5%', avgTime: '4m 35s', dropOff: '17.5%' },
-  { step: 'Product Browsing', completionRate: '76.8%', avgTime: '8m 45s', dropOff: '5.7%' },
-  { step: 'Cart Addition', completionRate: '58.4%', avgTime: '3m 20s', dropOff: '18.4%' },
-  { step: 'Checkout Process', completionRate: '42.3%', avgTime: '5m 10s', dropOff: '16.1%' },
-  { step: 'Order Completion', completionRate: '38.7%', avgTime: '2m 30s', dropOff: '3.6%' }
+  { step: 'Registration', completionRate: '100%', avgTime: '2m 30s', dropOff: '0%' },
+  { step: 'Mobile Verification', completionRate: '90%', avgTime: '1m 45s', dropOff: '10%' },
+  { step: 'Profile Setup', completionRate: '80%', avgTime: '4m 50s', dropOff: '10%' },
+  { step: 'Crop Browsing', completionRate: '75%', avgTime: '6m 30s', dropOff: '5%' },
+  { step: 'Inquiry/Cart Addition', completionRate: '50%', avgTime: '3m 40s', dropOff: '25%' },
+  { step: 'Order Completion', completionRate: '40%', avgTime: '3m 15s', dropOff: '10%' }
+];
+
+const recentUserActivities = [
+  { id: 1, user: 'Sunil Perera', type: 'Farmer', action: 'Listed new crop: Tomatoes (50kg)', location: 'Anuradhapura', time: '8 min ago', status: 'active' },
+  { id: 2, user: 'Nimal Silva', type: 'Buyer', action: 'Placed order for Bell Pepper', location: 'Colombo', time: '15 min ago', status: 'active' },
+  { id: 3, user: 'Kamala Jayawardena', type: 'Farmer', action: 'Updated wheat pricing', location: 'Kurunegala', time: '25 min ago', status: 'active' },
+  { id: 4, user: 'Ranjith Fernando', type: 'Transport Provider', action: 'Accepted delivery to Kandy', location: 'Gampaha', time: '42 min ago', status: 'active' },
+  { id: 5, user: 'Malini Dissanayake', type: 'Buyer', action: 'Browsing coconut listings', location: 'Kandy', time: '1 hour ago', status: 'active' },
+  { id: 6, user: 'Pradeep Bandara', type: 'Warehouse Owner', action: 'Added 200kg storage space', location: 'Matara', time: '2 hours ago', status: 'completed' },
+  { id: 7, user: 'Chandani Rathnayake', type: 'Waste Mgmt. Agent', action: 'Completed waste collection', location: 'Galle', time: '3 hours ago', status: 'completed' },
+  { id: 8, user: 'Saman Wijesinghe', type: 'Farmer', action: 'Listed rice harvest (100kg)', location: 'Polonnaruwa', time: '4 hours ago', status: 'completed' }
 ];
 
 const UserActivity = () => {
@@ -198,7 +214,7 @@ const UserActivity = () => {
             value={activityData.totalActiveUsers} 
             icon={<UserIcon />} 
             trend="up" 
-            trendValue="+15.3%" 
+            trendValue="+33%" 
             trendLabel="vs previous period"
             color="bg-blue-100 text-blue-800"
           />
@@ -207,8 +223,8 @@ const UserActivity = () => {
             value={activityData.newUsers} 
             icon={<UserIcon />} 
             trend="up" 
-            trendValue="+12.3%" 
-            trendLabel="vs previous period"
+            trendValue="+25%" 
+            trendLabel="this month"
             color="bg-green-100 text-green-800"
           />
           <StatCard 
@@ -216,7 +232,7 @@ const UserActivity = () => {
             value={activityData.avgSessionTime} 
             icon={<TimeIcon />} 
             trend="up" 
-            trendValue="+5.7%" 
+            trendValue="+8%" 
             trendLabel="vs previous period"
             color="bg-purple-100 text-purple-800"
           />
@@ -225,7 +241,7 @@ const UserActivity = () => {
             value={activityData.retentionRate} 
             icon={<UserIcon />} 
             trend="up" 
-            trendValue="+2.1%" 
+            trendValue="+5%" 
             trendLabel="vs previous period"
             color="bg-yellow-100 text-yellow-800"
           />
@@ -234,7 +250,7 @@ const UserActivity = () => {
             value={activityData.bounceRate} 
             icon={<UserIcon />} 
             trend="down" 
-            trendValue="-3.4%" 
+            trendValue="-10%" 
             trendLabel="vs previous period"
             color="bg-red-100 text-red-800"
           />
@@ -245,9 +261,25 @@ const UserActivity = () => {
           <Card>
             <div className="p-4">
               <h2 className="text-lg font-semibold text-dashboard-text-primary mb-4">User Activity Overview</h2>
-              <div className="h-64 flex items-center justify-center bg-gray-100 rounded">
-                <p className="text-sm text-gray-500">User activity chart visualization would go here</p>
-                <p className="text-xs text-gray-400">Using data for {timeRange} view</p>
+              <div className="h-64">
+                <Chart 
+                  data={{
+                    labels: activeUsersData[timeRange].labels,
+                    datasets: [
+                      {
+                        label: 'Active Users',
+                        data: activeUsersData[timeRange].datasets.activeUsers
+                      },
+                      {
+                        label: 'New Users',
+                        data: activeUsersData[timeRange].datasets.newUsers
+                      }
+                    ]
+                  }}
+                  type="bar"
+                  height="100%"
+                  colors={['#3B82F6', '#10B981']}
+                />
               </div>
             </div>
           </Card>
@@ -342,8 +374,24 @@ const UserActivity = () => {
               </table>
             </div>
             <div className="mt-6">
-              <div className="h-40 flex items-center justify-center bg-gray-100 rounded">
-                <p className="text-sm text-gray-500">User journey funnel visualization would go here</p>
+              <h3 className="text-md font-medium text-dashboard-text-primary mb-3">Completion Funnel</h3>
+              <div className="space-y-2">
+                {userJourney.map((step, index) => {
+                  const percentage = parseFloat(step.completionRate);
+                  return (
+                    <div key={index} className="flex items-center space-x-3">
+                      <div className="w-32 text-sm text-gray-700 font-medium">{step.step}</div>
+                      <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-blue-400 h-6 rounded-full flex items-center justify-end pr-2"
+                          style={{ width: step.completionRate }}
+                        >
+                          <span className="text-xs text-white font-semibold">{step.completionRate}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -357,31 +405,114 @@ const UserActivity = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h3 className="text-md font-medium text-dashboard-text-primary mb-2">Device Usage</h3>
-                  <div className="h-40 flex items-center justify-center bg-gray-100 rounded">
-                    <p className="text-sm text-gray-500">Device usage pie chart would go here</p>
-                  </div>
-                  <div className="mt-2 text-xs text-gray-500">
-                    <div className="flex justify-between">
-                      <span>Mobile: 65%</span>
-                      <span>Desktop: 28%</span>
-                      <span>Tablet: 7%</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Mobile</span>
+                      <span className="text-sm font-medium text-gray-900">72%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-blue-500 h-2 rounded-full" style={{ width: '72%' }}></div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Desktop</span>
+                      <span className="text-sm font-medium text-gray-900">22%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-green-500 h-2 rounded-full" style={{ width: '22%' }}></div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Tablet</span>
+                      <span className="text-sm font-medium text-gray-900">6%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-purple-500 h-2 rounded-full" style={{ width: '6%' }}></div>
                     </div>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-md font-medium text-dashboard-text-primary mb-2">Platform Usage</h3>
-                  <div className="h-40 flex items-center justify-center bg-gray-100 rounded">
-                    <p className="text-sm text-gray-500">Platform usage pie chart would go here</p>
-                  </div>
-                  <div className="mt-2 text-xs text-gray-500">
-                    <div className="flex justify-between">
-                      <span>Android: 48%</span>
-                      <span>iOS: 32%</span>
-                      <span>Windows: 15%</span>
-                      <span>Other: 5%</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Android</span>
+                      <span className="text-sm font-medium text-gray-900">54%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-green-600 h-2 rounded-full" style={{ width: '54%' }}></div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">iOS</span>
+                      <span className="text-sm font-medium text-gray-900">18%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-gray-600 h-2 rounded-full" style={{ width: '18%' }}></div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Windows</span>
+                      <span className="text-sm font-medium text-gray-900">20%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: '20%' }}></div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Other</span>
+                      <span className="text-sm font-medium text-gray-900">8%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-yellow-500 h-2 rounded-full" style={{ width: '8%' }}></div>
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Recent User Activities */}
+        <div className="mt-6">
+          <Card>
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-dashboard-text-primary">Recent User Activities</h2>
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <span className="w-2 h-2 mr-1 bg-green-400 rounded-full animate-pulse"></span>
+                  Live
+                </span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3">User</th>
+                      <th className="px-6 py-3">Type</th>
+                      <th className="px-6 py-3">Action</th>
+                      <th className="px-6 py-3">Location</th>
+                      <th className="px-6 py-3">Time</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {recentUserActivities.map((activity) => (
+                      <tr key={activity.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {activity.user}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            activity.type === 'Farmer' ? 'bg-green-100 text-green-800' :
+                            activity.type === 'Buyer' ? 'bg-blue-100 text-blue-800' :
+                            activity.type === 'Transport Provider' ? 'bg-purple-100 text-purple-800' :
+                            activity.type === 'Warehouse Owner' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {activity.type}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-500">{activity.action}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{activity.location}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{activity.time}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </Card>
