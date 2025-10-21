@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/transport")
-@CrossOrigin(origins = "*") // allow frontend to access the API (you can restrict later)
+// @CrossOrigin(origins = "*") // allow frontend to access the API (you can restrict later)
 public class LoadController {
 
     @Autowired
@@ -53,6 +53,32 @@ public class LoadController {
     public ResponseEntity<LoadDetailsDto> acceptLoadDriver(@PathVariable Long id,
                                                      @PathVariable Long driverId) {
         LoadDetailsDto updated = loadService.acceptLoadDriver(id, driverId);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/acceptPickupDriver/{id}/{driverId}")
+    public ResponseEntity<LoadDetailsDto> acceptPickupDriver(@PathVariable Long id,
+                                                     @PathVariable Long driverId) {
+        LoadDetailsDto updated = loadService.acceptLoadDriver(id, driverId);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/acceptDeliveryDriver/{id}/{driverId}")
+    public ResponseEntity<LoadDetailsDto> acceptDeliveryDriver(@PathVariable Long id,
+                                                     @PathVariable Long driverId) {
+        LoadDetailsDto updated = loadService.acceptLoadDriver(id, driverId);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/acceptLoadBuyer/{id}")
+    public ResponseEntity<LoadDetailsDto> acceptLoadBuyer(@PathVariable Long id) {
+        LoadDetailsDto updated = loadService.acceptLoadBuyer(id);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/acceptLoadSeller/{id}")
+    public ResponseEntity<LoadDetailsDto> acceptLoadSeller(@PathVariable Long id) {
+        LoadDetailsDto updated = loadService.acceptLoadSeller(id);
         return ResponseEntity.ok(updated);
     }
 }

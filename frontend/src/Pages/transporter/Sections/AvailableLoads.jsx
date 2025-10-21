@@ -28,25 +28,38 @@ import {useUserContext} from '../../../Contexts/UserContext'
 
 export async function AvailableLoadsLoader() {
   try {
-    // Fetch all loads assigned to the current driver
+    // Fetch all loads - filter for available/pending loads
     const response = await api.get("/api/transport/getAllLoads");
+    console.log("Raw API Response:", response.data);
 
-    const loads = response.data.filter(load => load.status?.toLowerCase() === "pending");
-    const API_BASE_URL = import.meta.env.VITE_API_GATEWAY_URL;
+    // Filter for loads that are pending and not yet assigned to a driver
+    const loads = response.data.filter(load => 
+      load.driverStatus?.toLowerCase() === "pending" && !load.driverId
+    );
+    console.log("Filtered Loads (pending & unassigned):", loads);
 
     // Transform data into frontend-friendly structure
-    return loads.map((load) => ({
+    const transformedLoads = loads.map((load) => ({
       id: load.id,
+      loadId: load.loadId,
       from: load.fromLocation,
       to: load.toLocation,
-      weight: load.weight,
-      payment: load.payment,
+      weight: `${load.weight} kg`,
+      payment: `Rs. ${load.payment?.toLocaleString()}`,
       pickupTime: load.pickupTime,
-      estimatedDelivery: load.estimatedDeliveryTime,
+      estimatedDelivery: load.estimatedDelivery,
       product: load.product,
+      seller: load.seller,
+      buyer: load.buyer,
+      driverStatus: load.driverStatus,
+      buyerStatus: load.buyerStatus,
+      sellerStatus: load.sellerStatus,
     }));
+    
+    console.log("Transformed Loads for Display:", transformedLoads);
+    return transformedLoads;
   } catch (error) {
-    console.error("Failed to fetch assigned loads:", error);
+    console.error("Failed to fetch available loads:", error);
     return [];
   }
 }
@@ -55,10 +68,12 @@ export default function AvailableLoads() {
   
   const [loads, setLoads] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const { user } = useUserContext();
 
   useEffect(() => {
     const fetchLoads = async () => {
       const data = await AvailableLoadsLoader();
+      console.log("Available Loads Set to State:", data);
       setLoads(data);
     };
     fetchLoads();
@@ -66,21 +81,32 @@ export default function AvailableLoads() {
 
   const handleAccept = async(loadId) => {
     try {
-      const { user } = useUserContext(); 
       const driverId = user?.id;
+      
+      if (!driverId) {
+        alert("Driver ID not found. Please log in again.");
+        return;
+      }
 
-    await api.put(`/api/transport/acceptLoadDriver/${loadId}/${driverId}`);
+      await api.put(`/api/transport/acceptLoadDriver/${loadId}/${driverId}`);
 
-    setLoads(prevLoads => prevLoads.filter(load => load.id !== loadId));
+      // Remove the accepted load from the list
+      setLoads(prevLoads => prevLoads.filter(load => load.id !== loadId));
+      
+      // alert("Load accepted successfully!");
 
-  } catch (error) {
-    console.error("Failed to accept load:", error);
-    alert("Failed to accept load. Please try again.");
-  }
-};
+    } catch (error) {
+      console.error("Failed to accept load:", error);
+      alert("Failed to accept load. Please try again.");
+    }
+  };
 
   const filteredLoads = loads.filter(load =>
-    !searchTerm || load.id.toLowerCase().includes(searchTerm.toLowerCase())
+    !searchTerm || 
+    load.loadId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    load.from?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    load.to?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    load.product?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -140,42 +166,69 @@ export default function AvailableLoads() {
                         <TruckIcon className="h-6 w-6 text-gray-600" />
                       </div>
                       <div>
-                        <h2 className="text-lg font-bold text-gray-800">{load.id}</h2>
+                        <h2 className="text-lg font-bold text-gray-800">{load.loadId}</h2>
                         <p className="text-sm text-gray-600">Available for Transport</p>
                       </div>
                     </div>
-                    <div className="text-xl font-bold">
-                      {load.payment}
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-green-600">
+                        {load.payment}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {load.weight}
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Load Details */}
                 <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     
                     {/* Route */}
                     <div className="space-y-2">
                       <h3 className="text-sm font-medium text-gray-500">Route</h3>
-                      <div className="flex items-center space-x-2">
-                        <MapPinIcon className="h-5 w-5 text-red-500" />
-                        <span className="font-medium">{load.from}</span>
-                        <span className="text-gray-400">→</span>
-                        <MapPinIcon className="h-5 w-5 text-green-500" />
-                        <span className="font-medium">{load.to}</span>
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <MapPinIcon className="h-4 w-4 text-green-500" />
+                          <span className="font-medium text-sm">{load.from}</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-gray-400 ml-4">↓</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <MapPinIcon className="h-4 w-4 text-red-500" />
+                          <span className="font-medium text-sm">{load.to}</span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Weight */}
+                    {/* Product & Parties */}
                     <div className="space-y-2">
-                      <h3 className="text-sm font-medium text-gray-500">Weight</h3>
-                      <p className="font-medium">{load.weight}</p>
+                      <h3 className="text-sm font-medium text-gray-500">Product Details</h3>
+                      <p className="font-medium">{load.product}</p>
+                      <div className="text-xs text-gray-500 space-y-1 mt-2">
+                        <p><span className="font-medium">Seller:</span> {load.seller}</p>
+                        <p><span className="font-medium">Buyer:</span> {load.buyer}</p>
+                      </div>
                     </div>
 
-                    {/* Product */}
+                    {/* Status */}
                     <div className="space-y-2">
-                      <h3 className="text-sm font-medium text-gray-500">Product</h3>
-                      <p className="font-medium">{load.product}</p>
+                      <h3 className="text-sm font-medium text-gray-500">Status</h3>
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                            {load.driverStatus}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          Seller: <span className="font-medium">{load.sellerStatus}</span>
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Buyer: <span className="font-medium">{load.buyerStatus}</span>
+                        </p>
+                      </div>
                     </div>
 
                     {/* Schedule */}
@@ -183,18 +236,24 @@ export default function AvailableLoads() {
                       <h3 className="text-sm font-medium text-gray-500">Schedule</h3>
                       <div className="space-y-1">
                         <p className="text-sm">
-                          <span className="font-medium">Pickup:</span> {new Date(load.pickupTime).toLocaleString([], {
+                          <span className="font-medium">Pickup:</span>
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {new Date(load.pickupTime).toLocaleString([], {
                             year: 'numeric',
-                            month: 'numeric',
+                            month: 'short',
                             day: 'numeric',
                             hour: '2-digit',
                             minute: '2-digit'
                           })}
                         </p>
-                        <p className="text-sm">
-                          <span className="font-medium">Delivery:</span> {new Date(load.estimatedDelivery).toLocaleString([], {
+                        <p className="text-sm mt-2">
+                          <span className="font-medium">Delivery:</span>
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {new Date(load.estimatedDelivery).toLocaleString([], {
                             year: 'numeric',
-                            month: 'numeric',
+                            month: 'short',
                             day: 'numeric',
                             hour: '2-digit',
                             minute: '2-digit'

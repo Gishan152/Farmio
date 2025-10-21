@@ -143,9 +143,9 @@ const transportService = {
     }
   },
 
-  deleteVehicle: async (id) => {
+  deleteVehicle: async (vehicleId) => {
     try {
-      await api.delete(`/api/transport/deleteVehicle/${id}`);
+      await api.delete(`/api/transport/deleteVehicle/${vehicleId}`);
     }catch (error) {
       console.error('Error deleting vehicle:', error?.response || error.message);
     }

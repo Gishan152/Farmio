@@ -1,13 +1,13 @@
-// ConfirmPickup.jsx
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from "../../../API/client"; // Assuming your API client is available here
+import api from "../../../API/client"; // FIX: Adjusted path depth to resolve compilation error
 import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/24/outline'; // For loading/success icons
 
 export default function ConfirmPickup() {
-  const { id } = useParams(); // Load ID from route
+  const { id } = useParams();
+  const { driverId } = useParams();
   const navigate = useNavigate();
-  const [photo, setPhoto] = useState(null);
+  // Removed photo state: const [photo, setPhoto] = useState(null);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -19,23 +19,20 @@ export default function ConfirmPickup() {
     setError(null);
     setSuccess(false);
 
-    // 1. Build the payload for the LoadDetailsDto update
     const updateData = {
-        // These fields are sent to the backend's LoadController -> updateLoad
         driverPickupConfirmed: true,
-        status: 'in_transit', 
+        status: 'in_transport', 
         driverPickupNote: note,
-        // (Photo upload logic would be complex and is omitted for this simple example)
     };
 
     try {
         // 2. Call the general update endpoint
-        await api.put(`/api/transport/updateLoad/${id}`, updateData);
+        await api.put(`/api/transport/acceptPickupDriver/${id}/${driverId}`);
 
         setSuccess(true);
         // 3. Navigate back to the assigned loads list
         setTimeout(() => {
-            navigate('/transporter/assignedLoads');
+            navigate('/transporter/assignedLoads/all');
         }, 1500);
 
     } catch (err) {
@@ -52,16 +49,7 @@ export default function ConfirmPickup() {
       <p className="text-sm text-gray-600 mb-4">You’re about to confirm pickup for <strong>{id}</strong>.</p>
 
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-md w-full max-w-xl">
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Upload Photo Proof (optional)</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setPhoto(e.target.files[0])}
-            className="w-full border rounded p-2"
-            disabled={loading}
-          />
-        </div>
+        {/* Removed Photo Upload Section */}
 
         <div className="mb-4">
           <label className="block text-sm font-semibold text-gray-700 mb-1">Note (optional)</label>

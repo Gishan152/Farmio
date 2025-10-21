@@ -16,8 +16,8 @@ public class LoadDetailsDto {
     private String loadId;
     private String fromLocation;
     private String toLocation;
-    private String from;
-    private String to;
+    private String seller;
+    private String buyer;
     private Double weight;
     private Double payment;
     private String product;
