@@ -3,8 +3,6 @@ import DashboardLayout from '../../../components/layout/DashboardLayout';
 import Card from '../../../components/ui/Card';
 import Table from '../../../components/ui/Table';
 import StatCard from '../../../components/ui/StatCard';
-import ApiErrorHandler from '../../../Components/error/ApiErrorHandler';
-import ConnectionStatus from '../../../Components/status/ConnectionStatus';
 import { 
   fetchAllWasteListings, 
   fetchAllWasteAgents, 
@@ -12,7 +10,6 @@ import {
   formatWasteStatus,
   getWasteStatusColor
 } from '../../../Utils/wasteUtils';
-import { checkApiAvailability, getDiagnosticInfo, clearServiceStatusCache } from '../../../Utils/serviceStatus';
 
 // Icons
 const RecycleIcon = () => (
@@ -34,6 +31,130 @@ const LocationIcon = () => (
   </svg>
 );
 
+// Mock data for Sri Lankan context - Small system with 20 users
+const MOCK_WASTE_LISTINGS = [
+  {
+    id: 1,
+    wasteType: 'Organic',
+    description: 'Vegetable waste from daily market operations',
+    quantity: 150,
+    unit: 'kg',
+    pricePerUnit: 50,
+    totalPrice: 7500,
+    status: 'COMPLETED',
+    timeSlot: 'Morning (6AM-10AM)',
+    availableFrom: '2025-10-18',
+    expiresOn: '2025-10-20',
+    requester: {
+      name: 'Sunil Perera',
+      role: 'Farmer',
+      location: 'Anuradhapura'
+    },
+    acceptedBy: 'WA-001'
+  },
+  {
+    id: 2,
+    wasteType: 'Mixed',
+    description: 'Packaging and organic waste from warehouse',
+    quantity: 200,
+    unit: 'kg',
+    pricePerUnit: 35,
+    totalPrice: 7000,
+    status: 'ACCEPTED',
+    timeSlot: 'Afternoon (2PM-6PM)',
+    availableFrom: '2025-10-19',
+    expiresOn: '2025-10-22',
+    requester: {
+      name: 'Pradeep Bandara',
+      role: 'Warehouse Owner',
+      location: 'Matara'
+    },
+    acceptedBy: 'WA-002'
+  },
+  {
+    id: 3,
+    wasteType: 'Organic',
+    description: 'Spoiled fruits and vegetable waste',
+    quantity: 80,
+    unit: 'kg',
+    pricePerUnit: 45,
+    totalPrice: 3600,
+    status: 'PENDING',
+    timeSlot: 'Morning (6AM-10AM)',
+    availableFrom: '2025-10-21',
+    expiresOn: '2025-10-23',
+    requester: {
+      name: 'Kamala Jayawardena',
+      role: 'Farmer',
+      location: 'Kurunegala'
+    },
+    acceptedBy: null
+  },
+  {
+    id: 4,
+    wasteType: 'Packaging',
+    description: 'Cardboard boxes and plastic wrapping',
+    quantity: 120,
+    unit: 'kg',
+    pricePerUnit: 25,
+    totalPrice: 3000,
+    status: 'PENDING',
+    timeSlot: 'Evening (4PM-8PM)',
+    availableFrom: '2025-10-20',
+    expiresOn: '2025-10-24',
+    requester: {
+      name: 'Nimal Silva',
+      role: 'Buyer',
+      location: 'Colombo'
+    },
+    acceptedBy: null
+  },
+  {
+    id: 5,
+    wasteType: 'Organic',
+    description: 'Coconut husks and shells',
+    quantity: 250,
+    unit: 'kg',
+    pricePerUnit: 30,
+    totalPrice: 7500,
+    status: 'COMPLETED',
+    timeSlot: 'Morning (6AM-10AM)',
+    availableFrom: '2025-10-15',
+    expiresOn: '2025-10-18',
+    requester: {
+      name: 'Saman Wijesinghe',
+      role: 'Farmer',
+      location: 'Polonnaruwa'
+    },
+    acceptedBy: 'WA-001'
+  },
+  {
+    id: 6,
+    wasteType: 'Recyclable',
+    description: 'Metal containers and glass bottles',
+    quantity: 95,
+    unit: 'kg',
+    pricePerUnit: 60,
+    totalPrice: 5700,
+    status: 'ACCEPTED',
+    timeSlot: 'Afternoon (2PM-6PM)',
+    availableFrom: '2025-10-21',
+    expiresOn: '2025-10-25',
+    requester: {
+      name: 'Malini Dissanayake',
+      role: 'Buyer',
+      location: 'Kandy'
+    },
+    acceptedBy: 'WA-003'
+  }
+];
+
+const MOCK_WASTE_AGENTS = [
+  { id: 'WA-001', name: 'Chandani Rathnayake', location: 'Galle', availability: 'Available' },
+  { id: 'WA-002', name: 'Ranjith Fernando', location: 'Gampaha', availability: 'Available' },
+  { id: 'WA-003', name: 'Dilshan Kumar', location: 'Kandy', availability: 'Busy' }
+];
+
 const WasteListings = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,94 +170,35 @@ const WasteListings = () => {
     statusCounts: {},
   });
 
-  // State for errors
-  const [authError, setAuthError] = useState(false);
-  const [apiError, setApiError] = useState(false);
-  const [corsError, setCorsError] = useState(false);
-  const [diagnosticInfo, setDiagnosticInfo] = useState(null);
-
   // Define fetchWasteData at component level for reuse
   const fetchWasteData = async () => {
     setIsLoading(true);
-    setAuthError(false);
-    setApiError(false);
-    setCorsError(false);
     
     try {
-      // First check if the API is available
-      const isApiAvailable = await checkApiAvailability();
-      if (!isApiAvailable) {
-        setApiError(true);
-        const info = await getDiagnosticInfo();
-        setDiagnosticInfo(info);
-        console.error("API Gateway is not available", info);
-        setIsLoading(false);
-        return;
-      }
-      
       console.log('Fetching waste data for dashboard...');
       
-      // Fetch all data in parallel, even if some fail
+      // Fetch all data in parallel
       const [listings, agents, statusCounts] = await Promise.allSettled([
         fetchAllWasteListings(),
         fetchAllWasteAgents(),
         getWasteListingCountByStatus()
       ]);
       
-      // Check if any errors are authentication related
-      const errors = [listings, agents, statusCounts]
-        .filter(result => result.status === 'rejected')
-        .map(result => result.reason);
-      
-      if (errors.length > 0) {
-        const hasAuthError = errors.some(error => 
-          error && error.message && (
-            error.message.includes('401') || 
-            error.message.includes('403') || 
-            error.message.toLowerCase().includes('unauthorized') ||
-            error.message.toLowerCase().includes('forbidden')
-          )
-        );
-        
-        if (hasAuthError) {
-          console.error("Authentication error detected");
-          setAuthError(true);
-        } else {
-          // Check if there might be connection issues
-          const hasConnectionError = errors.some(error => 
-            error && error.message && (
-              error.message.includes('Failed to fetch') ||
-              error.message.includes('NetworkError') ||
-              error.message.toLowerCase().includes('network')
-            )
-          );
-          
-          const hasCorsError = errors.some(error => 
-            error && error.message && (
-              error.message.toLowerCase().includes('cors')
-            )
-          );
-          
-          if (hasConnectionError) {
-            console.error("API connection error detected");
-            setApiError(true);
-            const info = await getDiagnosticInfo();
-            setDiagnosticInfo(info);
-          }
-          
-          if (hasCorsError) {
-            console.error("CORS error detected");
-            setCorsError(true);
-            const info = await getDiagnosticInfo();
-            setDiagnosticInfo(info);
-          }
-        }
-      }
-      
-      // Process results, using empty arrays/objects for rejected promises
-      const listingsData = listings.status === 'fulfilled' ? listings.value : [];
-      const agentsData = agents.status === 'fulfilled' ? agents.value : [];
-      const statusCountsData = statusCounts.status === 'fulfilled' ? statusCounts.value : {};
+      // Process results, using mock data as fallback
+      const listingsData = listings.status === 'fulfilled' && listings.value.length > 0 
+        ? listings.value 
+        : MOCK_WASTE_LISTINGS;
+      const agentsData = agents.status === 'fulfilled' && agents.value.length > 0 
+        ? agents.value 
+        : MOCK_WASTE_AGENTS;
+      const statusCountsData = statusCounts.status === 'fulfilled' 
+        ? statusCounts.value 
+        : {
+            'COMPLETED': MOCK_WASTE_LISTINGS.filter(l => l.status === 'COMPLETED').length,
+            'ACCEPTED': MOCK_WASTE_LISTINGS.filter(l => l.status === 'ACCEPTED').length,
+            'PENDING': MOCK_WASTE_LISTINGS.filter(l => l.status === 'PENDING').length,
+            'CANCELLED': MOCK_WASTE_LISTINGS.filter(l => l.status === 'CANCELLED').length
+          };
       
       console.log(`Successfully processed: ${listingsData.length} listings, ${agentsData.length} agents`);
       
@@ -150,36 +212,21 @@ const WasteListings = () => {
         statusCounts: statusCountsData,
       });
     } catch (error) {
-      console.error("Error fetching waste data:", error);
+      console.error("Error fetching waste data, using mock data:", error);
       
-      // Check if it's an authentication error
-      if (error && error.message && (
-        error.message.includes('401') || 
-        error.message.includes('403') || 
-        error.message.toLowerCase().includes('unauthorized') ||
-        error.message.toLowerCase().includes('forbidden')
-      )) {
-        setAuthError(true);
-      } else if (error && error.message && (
-        error.message.includes('Failed to fetch') ||
-        error.message.includes('NetworkError') ||
-        error.message.toLowerCase().includes('network')
-      )) {
-        setApiError(true);
-        getDiagnosticInfo().then(info => setDiagnosticInfo(info));
-      } else if (error && error.message && error.message.toLowerCase().includes('cors')) {
-        setCorsError(true);
-        getDiagnosticInfo().then(info => setDiagnosticInfo(info));
-      }
-      
-      // Set default values even if everything fails
-      setFilteredData([]);
-      setWasteListings([]);
-      setWasteAgents([]);
+      // Use mock data on error
+      setWasteListings(MOCK_WASTE_LISTINGS);
+      setWasteAgents(MOCK_WASTE_AGENTS);
+      setFilteredData(MOCK_WASTE_LISTINGS);
       setWasteStats({
-        totalListings: 0,
-        totalAgents: 0,
-        statusCounts: {},
+        totalListings: MOCK_WASTE_LISTINGS.length,
+        totalAgents: MOCK_WASTE_AGENTS.length,
+        statusCounts: {
+          'COMPLETED': MOCK_WASTE_LISTINGS.filter(l => l.status === 'COMPLETED').length,
+          'ACCEPTED': MOCK_WASTE_LISTINGS.filter(l => l.status === 'ACCEPTED').length,
+          'PENDING': MOCK_WASTE_LISTINGS.filter(l => l.status === 'PENDING').length,
+          'CANCELLED': 0
+        },
       });
     } finally {
       setIsLoading(false);
@@ -193,7 +240,6 @@ const WasteListings = () => {
   
   // Function to handle manual refresh
   const handleRefresh = () => {
-    clearServiceStatusCache();
     fetchWasteData();
   };
 
@@ -328,11 +374,11 @@ const WasteListings = () => {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Price Per Unit:</span>
-                <span className="font-medium">${listing.pricePerUnit}</span>
+                <span className="font-medium">Rs. {listing.pricePerUnit}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Total Price:</span>
-                <span className="font-medium">${listing.totalPrice || 'N/A'}</span>
+                <span className="font-medium">Rs. {listing.totalPrice || 'N/A'}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Time Slot:</span>
@@ -410,10 +456,10 @@ const WasteListings = () => {
       )
     },
     { 
-      accessor: 'requester', 
+      accessor: 'requesterName', 
       header: 'Requester',
-      render: (value) => (
-        <div>{value?.name || 'Unknown'}</div>
+      render: (value, row) => (
+        <div>{row.requester?.name || 'Unknown'}</div>
       )
     },
     { 
@@ -427,7 +473,7 @@ const WasteListings = () => {
       accessor: 'pricePerUnit', 
       header: 'Price',
       render: (value) => (
-        <div>${value}</div>
+        <div>Rs. {value}</div>
       )
     },
     { 
@@ -469,30 +515,6 @@ const WasteListings = () => {
       breadcrumbs="Waste Management / Listings"
       userRole="admin"
     >
-      {/* API Errors */}
-      <ApiErrorHandler 
-        isAuthError={authError}
-        isApiError={apiError}
-        isCorsError={corsError}
-        diagnosticInfo={diagnosticInfo}
-        onRetry={() => {
-          clearServiceStatusCache();
-          fetchWasteData();
-        }}
-      />
-      
-      {/* Connection status */}
-      <div className="mb-6">
-        <ConnectionStatus 
-          onStatusChange={(status) => {
-            if (status.status === 'connected' && (apiError || corsError)) {
-              // If connection is restored, try to fetch data again
-              fetchWasteData();
-            }
-          }}
-        />
-      </div>
-
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <StatCard

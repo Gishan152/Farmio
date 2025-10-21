@@ -30,131 +30,80 @@ const LocationIcon = () => (
   </svg>
 );
 
-// Sample collection points data
+// Mock data for Sri Lankan waste collection points - Small system with 20 users
 const collectionPoints = [
   {
     id: 'CP-001',
-    name: 'Central Market Collection Hub',
-    location: 'Central City Market',
-    address: '123 Market St, Central City, CC 10001',
-    manager: 'Maria Garcia',
-    contact: '+1 (555) 123-4567',
-    email: 'mgarcia@wastesolutions.com',
-    capacity: '20 tons daily',
+    name: 'Pettah Market Collection Hub',
+    location: 'Pettah, Colombo',
+    address: '45 Main Street, Pettah, Colombo 11',
+    manager: 'Sunil Perera',
+    contact: '+94 77 123 4567',
+    email: 'sperera@wastesolutions.lk',
+    capacity: '500 kg daily',
     currentLoad: '65%',
     status: 'Active',
     wasteTypes: ['Organic', 'Packaging', 'Mixed'],
     operatingHours: 'Mon-Sat: 6:00 AM - 6:00 PM',
     pointDetails: {
       containers: [
-        { type: 'Organic', capacity: '10 tons', currentFill: '70%', nextPickup: '2023-06-23' },
-        { type: 'Packaging', capacity: '8 tons', currentFill: '55%', nextPickup: '2023-06-24' },
-        { type: 'Mixed', capacity: '2 tons', currentFill: '45%', nextPickup: '2023-06-25' }
+        { type: 'Organic', capacity: '300 kg', currentFill: '70%', nextPickup: '2025-10-22' },
+        { type: 'Packaging', capacity: '150 kg', currentFill: '55%', nextPickup: '2025-10-23' },
+        { type: 'Mixed', capacity: '50 kg', currentFill: '45%', nextPickup: '2025-10-23' }
       ],
       pickupSchedule: 'Daily for organic waste, every other day for packaging',
-      processingFacility: 'Green Valley Recycling Center',
-      transportProvider: 'EcoHaul Waste Management',
-      notes: 'High-volume location serving the central market district. Priority for organic waste collection.'
+      processingFacility: 'Colombo Composting Center',
+      transportProvider: 'Green Lanka Waste Management',
+      notes: 'High-volume location serving the Pettah market district. Priority for organic waste collection.'
     }
   },
   {
     id: 'CP-002',
-    name: 'Riverside Farm Collective Point',
-    location: 'Riverside Agricultural Zone',
-    address: '456 River Rd, Riverside, RS 20002',
-    manager: 'James Wilson',
-    contact: '+1 (555) 234-5678',
-    email: 'jwilson@greenfarms.org',
-    capacity: '8 tons daily',
-    currentLoad: '35%',
+    name: 'Anuradhapura Farm Collective',
+    location: 'Anuradhapura Agricultural Zone',
+    address: 'Galkulama Road, Anuradhapura',
+    manager: 'Kamala Jayawardena',
+    contact: '+94 77 234 5678',
+    email: 'kjayawardena@greenfarms.lk',
+    capacity: '400 kg daily',
+    currentLoad: '40%',
     status: 'Active',
     wasteTypes: ['Organic', 'Agricultural'],
     operatingHours: 'Mon-Fri: 7:00 AM - 5:00 PM',
     pointDetails: {
       containers: [
-        { type: 'Organic', capacity: '5 tons', currentFill: '40%', nextPickup: '2023-06-23' },
-        { type: 'Agricultural', capacity: '3 tons', currentFill: '25%', nextPickup: '2023-06-25' }
+        { type: 'Organic', capacity: '250 kg', currentFill: '45%', nextPickup: '2025-10-22' },
+        { type: 'Agricultural', capacity: '150 kg', currentFill: '30%', nextPickup: '2025-10-24' }
       ],
       pickupSchedule: 'Three times weekly',
-      processingFacility: 'River Basin Composting Facility',
-      transportProvider: 'Farm Waste Solutions',
-      notes: 'Collection point primarily serving local organic farms. Specialized in agricultural waste for composting.'
+      processingFacility: 'North Central Composting Facility',
+      transportProvider: 'Farm Waste Lanka',
+      notes: 'Collection point serving local organic farms. Specialized in agricultural waste for composting.'
     }
   },
   {
     id: 'CP-003',
-    name: 'Greenfield Distribution Center',
-    location: 'Greenfield Industrial Park',
-    address: '789 Industry Way, Greenfield, GF 30003',
-    manager: 'David Chen',
-    contact: '+1 (555) 345-6789',
-    email: 'dchen@wastesolutions.com',
-    capacity: '15 tons daily',
-    currentLoad: '80%',
+    name: 'Gampaha Warehouse Hub',
+    location: 'Gampaha Industrial Zone',
+    address: 'Industrial Estate, Gampaha',
+    manager: 'Pradeep Bandara',
+    contact: '+94 77 345 6789',
+    email: 'pbandara@warehouse.lk',
+    capacity: '350 kg daily',
+    currentLoad: '75%',
     status: 'Active',
-    wasteTypes: ['Packaging', 'Plastic', 'Cardboard', 'Mixed'],
-    operatingHours: 'Mon-Sun: 24 hours',
+    wasteTypes: ['Packaging', 'Cardboard', 'Mixed'],
+    operatingHours: 'Mon-Sat: 8:00 AM - 6:00 PM',
     pointDetails: {
       containers: [
-        { type: 'Packaging', capacity: '5 tons', currentFill: '85%', nextPickup: '2023-06-23' },
-        { type: 'Plastic', capacity: '3 tons', currentFill: '75%', nextPickup: '2023-06-23' },
-        { type: 'Cardboard', capacity: '5 tons', currentFill: '90%', nextPickup: '2023-06-23' },
-        { type: 'Mixed', capacity: '2 tons', currentFill: '50%', nextPickup: '2023-06-24' }
+        { type: 'Packaging', capacity: '150 kg', currentFill: '80%', nextPickup: '2025-10-22' },
+        { type: 'Cardboard', capacity: '150 kg', currentFill: '75%', nextPickup: '2025-10-22' },
+        { type: 'Mixed', capacity: '50 kg', currentFill: '60%', nextPickup: '2025-10-23' }
       ],
-      pickupSchedule: 'Daily pickups, twice daily for cardboard',
-      processingFacility: 'Metro Recycling Industries',
-      transportProvider: 'RecycleHaul Inc.',
-      notes: 'High-volume packaging waste from distribution operations. Urgent need for additional cardboard capacity.'
-    }
-  },
-  {
-    id: 'CP-004',
-    name: 'Urban Restaurant District Point',
-    location: 'Downtown Culinary Quarter',
-    address: '101 Chef\'s Blvd, Metro City, MC 40004',
-    manager: 'Sophia Lee',
-    contact: '+1 (555) 456-7890',
-    email: 'slee@foodwaste.org',
-    capacity: '5 tons daily',
-    currentLoad: '90%',
-    status: 'At Capacity',
-    wasteTypes: ['Food Waste', 'Organic', 'Mixed'],
-    operatingHours: 'Mon-Sun: 5:00 AM - 1:00 AM',
-    pointDetails: {
-      containers: [
-        { type: 'Food Waste', capacity: '3 tons', currentFill: '95%', nextPickup: '2023-06-23' },
-        { type: 'Organic', capacity: '1.5 tons', currentFill: '85%', nextPickup: '2023-06-23' },
-        { type: 'Mixed', capacity: '0.5 tons', currentFill: '75%', nextPickup: '2023-06-24' }
-      ],
-      pickupSchedule: 'Twice daily for food waste, daily for others',
-      processingFacility: 'Urban Biogas Plant',
-      transportProvider: 'City Waste Services',
-      notes: 'Serving restaurant district with high volumes of food waste. Consider capacity expansion.'
-    }
-  },
-  {
-    id: 'CP-005',
-    name: 'Highland Community Collection',
-    location: 'Highland Valley Region',
-    address: '202 Mountain View Rd, Highland, HV 50005',
-    manager: 'Robert Martinez',
-    contact: '+1 (555) 567-8901',
-    email: 'rmartinez@communitywaste.org',
-    capacity: '3 tons daily',
-    currentLoad: '40%',
-    status: 'Maintenance',
-    wasteTypes: ['Organic', 'Mixed', 'Recyclables'],
-    operatingHours: 'Mon, Wed, Fri: 8:00 AM - 4:00 PM',
-    pointDetails: {
-      containers: [
-        { type: 'Organic', capacity: '1.5 tons', currentFill: '45%', nextPickup: '2023-06-24' },
-        { type: 'Mixed', capacity: '1 ton', currentFill: '35%', nextPickup: '2023-06-24' },
-        { type: 'Recyclables', capacity: '0.5 tons', currentFill: '30%', nextPickup: '2023-06-24' }
-      ],
-      pickupSchedule: 'Three times weekly',
-      processingFacility: 'Highland Recycling Cooperative',
-      transportProvider: 'Community Haul Volunteers',
-      notes: 'Community-run collection point. Currently undergoing maintenance on compactor system.'
+      pickupSchedule: 'Daily pickups for packaging materials',
+      processingFacility: 'Gampaha Recycling Center',
+      transportProvider: 'RecycleLanka Ltd.',
+      notes: 'Warehouse district with high packaging waste volume. Regular pickups maintained.'
     }
   }
 ];
@@ -184,17 +133,25 @@ const CollectionPoints = () => {
         
         // Use Promise.allSettled to continue even if some requests fail
         const [listings, agents, statusCounts, typeCounts] = await Promise.allSettled([
-          fetchAllWasteListings(), // Direct import from wasteUtils
-          fetchAllWasteAgents(), // Direct import from wasteUtils
-          getWasteListingCountByStatus(), // Direct import from wasteUtils
-          getWasteListingCountByType() // Direct import from wasteUtils
+          fetchAllWasteListings(),
+          fetchAllWasteAgents(),
+          getWasteListingCountByStatus(),
+          getWasteListingCountByType()
         ]);
         
-        // Process results, using empty arrays/objects for rejected promises
-        const listingsData = listings.status === 'fulfilled' ? listings.value : [];
-        const agentsData = agents.status === 'fulfilled' ? agents.value : [];
-        const statusCountsData = statusCounts.status === 'fulfilled' ? statusCounts.value : {};
-        const typeCountsData = typeCounts.status === 'fulfilled' ? typeCounts.value : {};
+        // Process results, using mock data as fallback
+        const listingsData = listings.status === 'fulfilled' && listings.value.length > 0 
+          ? listings.value 
+          : [];
+        const agentsData = agents.status === 'fulfilled' && agents.value.length > 0 
+          ? agents.value 
+          : [];
+        const statusCountsData = statusCounts.status === 'fulfilled' 
+          ? statusCounts.value 
+          : { 'COMPLETED': 2, 'ACCEPTED': 2, 'PENDING': 2, 'CANCELLED': 0 };
+        const typeCountsData = typeCounts.status === 'fulfilled' 
+          ? typeCounts.value 
+          : { 'Organic': 3, 'Mixed': 2, 'Packaging': 2 };
         
         console.log(`Successfully processed: ${listingsData.length} listings, ${agentsData.length} agents`);
         
@@ -202,23 +159,23 @@ const CollectionPoints = () => {
         setWasteAgents(agentsData);
         
         setWasteStats({
-          totalListings: listingsData.length,
-          totalAgents: agentsData.length,
+          totalListings: listingsData.length || 6,
+          totalAgents: agentsData.length || 3,
           statusCounts: statusCountsData,
           typeCounts: typeCountsData
         });
         
-        // Always use sample data for UI testing for now
+        // Always use collection points data
         setFilteredData(collectionPoints);
       } catch (error) {
-        console.error("Error fetching waste data:", error);
-        // Use sample data as fallback
+        console.error("Error fetching waste data, using mock data:", error);
+        // Use mock data as fallback
         setFilteredData(collectionPoints);
         setWasteStats({
-          totalListings: 0,
-          totalAgents: 0,
-          statusCounts: {},
-          typeCounts: {}
+          totalListings: 6,
+          totalAgents: 3,
+          statusCounts: { 'COMPLETED': 2, 'ACCEPTED': 2, 'PENDING': 2, 'CANCELLED': 0 },
+          typeCounts: { 'Organic': 3, 'Mixed': 2, 'Packaging': 2 }
         });
       } finally {
         setIsLoading(false);

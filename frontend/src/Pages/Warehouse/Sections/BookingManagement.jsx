@@ -202,6 +202,7 @@ export default function BookingManagement() {
     
     // UI states
     const [loading, setLoading] = useState(false);
+    const [usingMock, setUsingMock] = useState(false);
     const [notification, setNotification] = useState(null);
     const [activeTab, setActiveTab] = useState('requests'); // 'requests', 'active', 'earlyRetrieval', 'extension', 'completed'
     const [viewMode, setViewMode] = useState('requests'); // 'requests' or 'bookings'
@@ -220,6 +221,47 @@ export default function BookingManagement() {
         setTimeout(() => setNotification(null), 4000);
     }, []);
 
+    // Helpers to normalize and categorize local sample data
+    const normalizeBooking = (b) => ({
+        id: b.id,
+        farmerId: b.farmerId,
+        farmerName: b.farmerName,
+        farmerPhone: b.farmerPhone,
+        farmerEmail: b.farmerEmail,
+        produce: b.produce || b.productType || 'General',
+        cropType: b.cropType || b.productType || 'Standard',
+        quantity: typeof b.quantity !== 'undefined' ? b.quantity : (b.quantityKg || 0),
+        duration: b.duration,
+        slotId: b.slotId,
+        warehouseName: b.warehouseName,
+        warehouseId: b.warehouseId || 'WH-DEMO-001',
+        status: b.status,
+        requestDate: b.requestDate,
+        startDate: b.startDate,
+        endDate: b.endDate,
+        pricePerKg: b.pricePerKg,
+        totalAmount: b.totalAmount,
+        hasEarlyRetrieval: b.hasEarlyRetrieval,
+        earlyRetrievalRequest: b.earlyRetrievalRequest
+    });
+
+    const categorizeSampleBookings = () => {
+        const normalized = sampleBookings.map(normalizeBooking);
+        const isActiveStatus = (s) => (
+            [
+                'ACTIVE','IN_PROGRESS','ONGOING','STORAGE_IN_USE','PAID',
+                'PAYMENT_COMPLETED','APPROVED','CONFIRMED','PAYMENT_IN_ESCROW'
+            ].includes((s || '').toString().toUpperCase())
+        );
+        const isCompletedStatus = (s) => (
+            ['COMPLETED','FINISHED','DONE','RELEASED'].includes((s || '').toString().toUpperCase())
+        );
+        return {
+            active: normalized.filter(b => isActiveStatus(b.status)),
+            completed: normalized.filter(b => isCompletedStatus(b.status))
+        };
+    };
+
     const loadBookings = useCallback(async () => {
         setLoading(true);
         try {
@@ -231,6 +273,13 @@ export default function BookingManagement() {
             
             // Categorize bookings
             const allBookings = response.data || [];
+            if (!Array.isArray(allBookings) || allBookings.length === 0) {
+                const categorized = categorizeSampleBookings();
+                setBookings(categorized);
+                setUsingMock(true);
+                showNotification('Showing demo bookings (no data from API)', 'warning');
+                return;
+            }
             
             // Filter active bookings (those that have been paid for and are currently active)
             const activeBookings = allBookings.filter(booking => 
@@ -247,13 +296,13 @@ export default function BookingManagement() {
                 active: activeBookings,
                 completed: completedBookings
             });
+            setUsingMock(false);
         } catch (error) {
             console.error('Error loading bookings:', error);
             // Fallback to sample data if API fails
-            setBookings({
-                active: sampleBookings.filter(b => b.status === 'approved'),
-                completed: sampleBookings.filter(b => b.status !== 'approved' && b.status !== 'pending' && b.status !== 'rejected')
-            });
+            const categorized = categorizeSampleBookings();
+            setBookings(categorized);
+            setUsingMock(true);
             showNotification('Using sample data - API connection failed', 'warning');
         } finally {
             setLoading(false);
@@ -263,17 +312,22 @@ export default function BookingManagement() {
     // Use the sample booking requests defined above
 
     const loadBookingRequests = useCallback(async () => {
-        if (selectedWarehouse === 'all') return;
-        
         setLoading(true);
         try {
-            const response = await slotsAPI.getBookingRequests(selectedWarehouse, 'SENT');
-            if (response.data && response.data.length > 0) {
-                setBookingRequests(response.data);
-            } else {
-                // Use sample data if no data is returned
-                console.log('No booking requests found, using sample data');
+            if (selectedWarehouse === 'all') {
                 setBookingRequests(sampleBookingRequests);
+                setUsingMock(true);
+            } else {
+                const response = await slotsAPI.getBookingRequests(selectedWarehouse, 'SENT');
+                if (response.data && response.data.length > 0) {
+                    setBookingRequests(response.data);
+                    setUsingMock(false);
+                } else {
+                    // Use sample data if no data is returned
+                    console.log('No booking requests found, using sample data');
+                    setBookingRequests(sampleBookingRequests);
+                    setUsingMock(true);
+                }
             }
             
             // Also load early retrieval and extension requests
@@ -296,6 +350,8 @@ export default function BookingManagement() {
             console.error('Error loading booking requests:', error);
             // Fallback to sample data if API fails
             setBookingRequests(sampleBookingRequests);
+            setUsingMock(true);
+            showNotification('Showing demo requests - API connection failed', 'warning');
             
             // Sample early retrieval requests
             setEarlyRetrievalRequests([
@@ -332,17 +388,24 @@ export default function BookingManagement() {
         }
     }, [selectedWarehouse]);
 
+    // Initial load on mount only
     useEffect(() => {
         loadWarehouses();
         loadBookings();
         loadBookingRequests();
-    }, [loadWarehouses, loadBookings, loadBookingRequests]);
+        // We intentionally avoid adding function references as dependencies to prevent
+        // re-invocation loops when their identities change across renders.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Load bookings when filters change
+    // Reload when filters/search/warehouse selection change
     useEffect(() => {
         loadBookings();
         loadBookingRequests();
-    }, [selectedWarehouse, filterStatus, searchTerm, loadBookings, loadBookingRequests]);
+        // Keep dependencies limited to primitives to avoid function identity loops
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedWarehouse, filterStatus, searchTerm]);
 
     const handleApproveBooking = async (bookingId) => {
         try {
@@ -534,7 +597,7 @@ export default function BookingManagement() {
                             <p className="text-gray-600 mt-1">Manage booking requests and approved bookings</p>
                             
                             {/* View Mode Toggle */}
-                            <div className="flex mt-4 space-x-2">
+                            {/* <div className="flex mt-4 space-x-2">
                                 <button
                                     onClick={() => setViewMode('requests')}
                                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center ${
@@ -543,7 +606,7 @@ export default function BookingManagement() {
                                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                                 >
-                                    <span className="mr-2">📋</span> Booking Requests (0)
+                                    <span className="mr-2">📋</span> Booking Requests ({bookingRequests.length})
                                 </button>
                                 <button
                                     onClick={() => setViewMode('bookings')}
@@ -553,9 +616,9 @@ export default function BookingManagement() {
                                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                                 >
-                                    <span className="mr-2">✅</span> Approved Bookings (0)
+                                    <span className="mr-2">✅</span> Approved Bookings ({bookings.active ? bookings.active.length : 0})
                                 </button>
-                            </div>
+                            </div> */}
                         </div>
                         <div className="flex items-center space-x-4">
                             {/* Warehouse Filter */}

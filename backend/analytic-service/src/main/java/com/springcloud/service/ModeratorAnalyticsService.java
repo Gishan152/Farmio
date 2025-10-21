@@ -24,11 +24,8 @@ public class ModeratorAnalyticsService {
      */
     public List<ModeratorDTO> fetchAllModerators() {
         try {
-            // Convert the regular auth URL to the moderator URL
-            String moderatorUrl = authServiceUrl.replace("/user/all-dto", "/admin/moderators/all-dto");
-            
-            ResponseEntity<ModeratorDTO[]> response = restTemplate.getForEntity(
-                    moderatorUrl, 
+        ResponseEntity<ModeratorDTO[]> response = restTemplate.getForEntity(
+            authServiceUrl,
                     ModeratorDTO[].class
             );
             

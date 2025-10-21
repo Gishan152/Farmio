@@ -13,6 +13,93 @@ import {
   formatRouteDate
 } from '../../../Utils/routeUtils';
 
+// Local mock data to use as a fallback when API calls fail or return empty
+const MOCK_ROUTES = [
+  {
+    id: 'TR-1001',
+    startingLocation: 'Colombo',
+    destination: 'Kandy',
+    distance: 115.4,
+    estimatedTime: 180,
+    routeDate: '2024-06-15',
+    transportProvider: 'Green Mile Transports',
+    status: 'Active',
+    frequency: 'Daily',
+    popularProducts: ['Vegetables', 'Fruits'],
+    mapLink: 'https://maps.google.com'
+  },
+  {
+    id: 'TR-1002',
+    startingLocation: 'Galle',
+    destination: 'Colombo',
+    distance: 126.2,
+    estimatedTime: 150,
+    routeDate: '2024-06-16',
+    transportProvider: 'Fast Track Logistics',
+    status: 'Active',
+    frequency: 'Mon-Wed-Fri',
+    popularProducts: ['Seafood', 'Spices'],
+    mapLink: 'https://maps.google.com'
+  },
+  {
+    id: 'TR-1003',
+    startingLocation: 'Jaffna',
+    destination: 'Anuradhapura',
+    distance: 196.8,
+    estimatedTime: 300,
+    routeDate: '2024-06-17',
+    transportProvider: 'Rural Routes Delivery',
+    status: 'Inactive',
+    frequency: 'Twice Weekly',
+    popularProducts: ['Onions', 'Potatoes']
+  },
+  {
+    id: 'TR-1004',
+    startingLocation: 'Kurunegala',
+    destination: 'Colombo',
+    distance: 94.3,
+    estimatedTime: 120,
+    routeDate: '2024-06-18',
+    transportProvider: 'Swift Stream Logistics',
+    status: 'Active',
+    frequency: 'Daily',
+    popularProducts: ['Dairy', 'Eggs']
+  },
+  {
+    id: 'TR-1005',
+    startingLocation: 'Nuwara Eliya',
+    destination: 'Colombo',
+    distance: 170.1,
+    estimatedTime: 260,
+    routeDate: '2024-06-19',
+    transportProvider: 'Cool Chain Logistics',
+    status: 'Active',
+    frequency: 'Seasonal (Summer)',
+    popularProducts: ['Tea', 'Flowers']
+  },
+  {
+    id: 'TR-1006',
+    startingLocation: 'Matara',
+    destination: 'Galle',
+    distance: 44.8,
+    estimatedTime: 60,
+    routeDate: '2024-06-20',
+    transportProvider: 'Green Mile Transports',
+    status: 'Inactive',
+    frequency: 'Twice Weekly',
+    popularProducts: ['Fisheries']
+  }
+];
+
+// Helpers to compute stats locally when using mock data
+const computeTotalDistance = (items = []) =>
+  items.reduce((sum, r) => sum + (Number(r.distance) || 0), 0);
+
+const computeAverageDistance = (items = []) => {
+  const total = computeTotalDistance(items);
+  return items.length ? total / items.length : 0;
+};
+
 // Icons
 const TruckIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -42,6 +129,7 @@ const TransportRoutes = () => {
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [expandedRouteId, setExpandedRouteId] = useState(null);
   const [error, setError] = useState(null);
+  const [usingMock, setUsingMock] = useState(false);
   const [stats, setStats] = useState({
     totalRoutes: 0,
     totalDistance: 0,
@@ -54,29 +142,51 @@ const TransportRoutes = () => {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         // Fetch routes and stats in parallel
         const [routesData, totalDist, avgDist] = await Promise.all([
           fetchAllRoutes(),
           getTotalDistance(),
           getAverageDistance()
         ]);
-        
+
         console.log('📍 Routes loaded:', routesData);
-        
-        setRoutes(routesData || []);
-        setFilteredData(routesData || []);
-        setStats({
-          totalRoutes: routesData?.length || 0,
-          totalDistance: totalDist || 0,
-          averageDistance: avgDist || 0
-        });
-        
+
+        const hasRealData = Array.isArray(routesData) && routesData.length > 0;
+
+        if (hasRealData) {
+          setUsingMock(false);
+          setRoutes(routesData);
+          setFilteredData(routesData);
+          setStats({
+            totalRoutes: routesData.length,
+            totalDistance: totalDist || computeTotalDistance(routesData),
+            averageDistance: avgDist || computeAverageDistance(routesData)
+          });
+        } else {
+          // Fallback to mock data when no routes or API unavailable
+          setUsingMock(true);
+          setError('Live route service is unavailable. Showing demo data.');
+          setRoutes(MOCK_ROUTES);
+          setFilteredData(MOCK_ROUTES);
+          setStats({
+            totalRoutes: MOCK_ROUTES.length,
+            totalDistance: computeTotalDistance(MOCK_ROUTES),
+            averageDistance: computeAverageDistance(MOCK_ROUTES)
+          });
+        }
       } catch (error) {
         console.error('Error loading routes:', error);
-        setError('Failed to load routes. Please try again.');
-        setRoutes([]);
-        setFilteredData([]);
+        // On thrown error, also fallback to mocks
+        setUsingMock(true);
+        setError('Failed to load routes from the server. Showing demo data.');
+        setRoutes(MOCK_ROUTES);
+        setFilteredData(MOCK_ROUTES);
+        setStats({
+          totalRoutes: MOCK_ROUTES.length,
+          totalDistance: computeTotalDistance(MOCK_ROUTES),
+          averageDistance: computeAverageDistance(MOCK_ROUTES)
+        });
       } finally {
         setIsLoading(false);
       }
@@ -317,10 +427,10 @@ const TransportRoutes = () => {
       breadcrumbs="Logistics / Transport Routes"
       userRole="admin"
     >
-      {/* Error Display */}
+      {/* Error/Info Display */}
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800 text-sm">{error}</p>
+        <div className={`mb-4 p-4 rounded-lg border ${usingMock ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200'}`}>
+          <p className={`${usingMock ? 'text-yellow-800' : 'text-red-800'} text-sm`}>{error}</p>
         </div>
       )}
 

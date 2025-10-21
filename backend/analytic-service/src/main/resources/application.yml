@@ -43,29 +43,29 @@ management:
 
 auth:
   service:
-    url: http://localhost:8085/api/user/all # This is the endpoint that returns UserDTO[]
+    url: http://auth-service/api/user/all-dto # Endpoint returning UserDTO[] via Eureka name
 
 order:
   service:
-    url: http://localhost:8086/api/order/admin/all # This is the endpoint that returns Order[]
+    url: http://order-service/api/order/admin/all # Endpoint returning Order[] via Eureka name
 
 warehouse:
   service:
-    url: http://localhost:8090/api/warehouse/admin/all # This is the endpoint that returns Warehouse[]
+    url: http://warehouse-service/api/warehouse/admin/all # Endpoint returning Warehouse[] via Eureka name
 
 crop-listing:
   service:
-    url: http://localhost:8087/api/products/admin/all # This is the endpoint that returns Product[]
+    url: http://crop-listing-service/api/products/admin/all # Endpoint returning Product[] via Eureka name
 
 waste:
   service:
     url:
-      listings: http://waste-service:8095/waste-listings # This is the endpoint that returns WasteListingDTO[]
-      agents: http://waste-service:8095/waste-agents # This is the endpoint that returns WasteAgentDTO[]
+      listings: http://waste-service/waste-listings # Endpoint via Eureka name
+      agents: http://waste-service/waste-agents # Endpoint via Eureka name
 
 transport:
   service:
-    url: http://localhost:8089/api/routes # This is the endpoint that returns Route[]
+    url: http://transport-service/api/routes # Endpoint via Eureka name
 
 eureka:
   client:
